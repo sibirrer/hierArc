@@ -9,7 +9,8 @@ class DsDdsConstraints(object):
 
     def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error, sigma_v,
                  sigma_v_error, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
-                 kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None):
+                 kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
+                 hernquist_approx=True):
         """
 
         :param z_lens: lens redshift
@@ -28,6 +29,7 @@ class DsDdsConstraints(object):
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
+        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         """
         kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
         self._sigma_v, self._sigma_v_error = sigma_v, sigma_v_error
@@ -37,12 +39,10 @@ class DsDdsConstraints(object):
         self._td_cosmo = TDCosmography(z_lens, z_source, kwargs_model, cosmo_fiducial=None,
                                  lens_model_kinematics_bool=None, light_model_kinematics_bool=None)
         self._td_cosmo.kinematic_observation_settings(kwargs_aperture, kwargs_seeing)
-        if kwargs_lens_light is None:
+        if kwargs_lens_light is None and anisotropy_model == 'OsipkovMerritt':
             analytic_kinematics = True
-            hernquist_approx = True
         else:
             analytic_kinematics = False
-            hernquist_approx = False
         self._td_cosmo.kinematics_modeling_settings(anisotropy_model, kwargs_numerics_galkin,
                                                     analytic_kinematics=analytic_kinematics,
                                                     Hernquist_approx=hernquist_approx, MGE_light=MGE_light,
@@ -84,7 +84,11 @@ class DsDdsConstraints(object):
             theta_E_draw, gamma_draw, r_eff_draw = self.draw_lens
             sigma_v_draw = self.draw_vel_disp(num=1)
         kwargs_lens = [{'theta_E': theta_E_draw, 'gamma': gamma_draw, 'center_x': 0, 'center_y': 0}]
-        J = self._td_cosmo.velocity_dispersion_dimension_less(kwargs_lens=kwargs_lens, kwargs_lens_light=self._kwargs_lens_light,
+        if self._kwargs_lens_light is None:
+            kwargs_light = [{'Rs': r_eff_draw * 0.551, 'amp': 1.}]
+        else:
+            kwargs_light = self._kwargs_lens_light
+        J = self._td_cosmo.velocity_dispersion_dimension_less(kwargs_lens=kwargs_lens, kwargs_lens_light=kwargs_light,
                                                         kwargs_anisotropy=kwargs_anisotropy, r_eff=r_eff_draw,
                                                         theta_E=theta_E_draw, gamma=gamma_draw)
         ds_dds = self._td_cosmo.Ds_Dds_from_kinematics(sigma_v_draw, J, kappa_s=0, kappa_ds=0)

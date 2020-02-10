@@ -90,7 +90,7 @@ class HierarchicalCosmography(object):
         ddt_ = ddt * lambda_mst  # the actual posteriors needed to be corrected by Ddt_true = Ddt_mst / (1-kappa_ext)
         # this line can be changed in case the physical 3-d approximation of the chosen profile does scale differently with the kinematics
         sigma_v2_scaling = lambda_mst
-        dd_ = dd * sigma_v2_scaling / lambda_mst  # the kinematics constrain Dd/Dds and thus the constraints on Dd needs to devide out the change in Ddt
+        dd_ = dd * sigma_v2_scaling / lambda_mst  # the kinematics constrain Dd/Dds and thus the constraints on Dd is not affected by lambda
         return ddt_, dd_
 
     def _displace_anisotropy(self, ddt, dd, anisotropy_param):
@@ -100,6 +100,8 @@ class HierarchicalCosmography(object):
         :param dd: angular diameter distance to the deflector
         :param anisotropy_param: anisotropy parameter that changes the predicted Ds/Dds from the kinematic by:
         Ds/Dds(aniso_param) = f(aniso_param) * Ds/Dds(initial)
+        which is equivalent as
+        sigma_v**2(aniso_param) = f(aniso_param)**(-1) * sigma_v**2(initial)
 
         :return: inverse predicted offset in Ds/Dds by the anisotropy model deviating from the original sample
         """
