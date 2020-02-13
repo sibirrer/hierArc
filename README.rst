@@ -13,6 +13,9 @@ hierArc
         :target: https://hierarc.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat
+        :target: http://www.astropy.org
+        :alt: Powered by Astropy Badge
 
 
 
@@ -31,3 +34,4 @@ Features
 Credits
 -------
 
+Simon Birrer & the TDCOSMO team
