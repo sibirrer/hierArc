@@ -2,6 +2,7 @@ __author__ = 'sibirrer'
 
 from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
 from hierarc.Likelihood.hierarchical_cosmography import HierarchicalCosmography
+from hierarc.Util import likelihood_util
 
 
 class LensLikelihood(HierarchicalCosmography):
@@ -26,10 +27,14 @@ class LensLikelihood(HierarchicalCosmography):
         self._z_source = z_source
         super(LensLikelihood, self).__init__(z_lens=z_lens, z_source=z_source, ani_param_array=ani_param_array,
                                              ani_scaling_array=ani_scaling_array)
-        if likelihood_type == 'TDKin':
-            self._lens_type = TDKinLikelihood(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'Kin':
-            self._lens_type = KinLikelihood(z_lens, z_source, **kwargs_likelihood)
+        if likelihood_type == 'TDKinKDE':
+            self._lens_type = TDKinLikelihoodKDE(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'KinGaussian':
+            self._lens_type = KinLikelihoodGaussian(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'TDKinSkewLogNorm':
+            self._lens_type = TDKinLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'TDSkewLogNorm':
+            self._lens_type = TDLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
         else:
             raise ValueError('likelihood_type %s not supported!' % likelihood_type)
 
@@ -60,7 +65,7 @@ class LensLikelihood(HierarchicalCosmography):
         return self._lens_type.log_likelihood(ddt_, dd_)
 
 
-class TDKinLikelihood(object):
+class TDKinLikelihoodKDE(object):
     """
     class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
     """
@@ -86,7 +91,71 @@ class TDKinLikelihood(object):
         return self._kde_likelihood.logLikelihood(dd, ddt)[0]
 
 
-class KinLikelihood(object):
+class TDKinLikelihoodSklogn(object):
+    """
+    class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
+    with a provided skewed log normal function for both Ddt and Dd
+    The two distributions are asssumed independant and can be combined.
+    """
+    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, mu_dd, lam_dd, sigma_dd, explim=100):
+        """
+
+        :param z_lens: lens redshift
+        :param z_source: source redshift
+        :param mu_ddt:
+        :param lam_ddt:
+        :param sigma_ddt:
+        :param mu_dd:
+        :param lam_dd:
+        :param sigma_dd:
+        :param explim: exponent limit for evaluating the likelihood
+        """
+        self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
+        self._mu_dd, self._lam_dd, self._sigma_dd = mu_dd, lam_dd, sigma_dd
+        self._explim = explim
+
+    def log_likelihood(self, ddt, dd):
+        """
+
+        :param ddt: time-delay distance
+        :param dd: angular diameter distance to the deflector
+        :return: log likelihood given the single lens analysis
+        """
+        logl_ddt = likelihood_util.sklogn_likelihood(ddt, self._mu_ddt, self._lam_ddt, self._sigma_ddt, explim=self._explim)
+        logl_dd = likelihood_util.sklogn_likelihood(dd, self._mu_dd, self._lam_dd, self._sigma_dd, explim=self._explim)
+        return logl_ddt + logl_dd
+
+
+class TDLikelihoodSklogn(object):
+    """
+    class for evaluating Ddt from a lens with time delays without kinematics measurement
+    with a provided skewed log normal function for Ddt.
+    """
+
+    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, explim=100):
+        """
+
+        :param z_lens: lens redshift
+        :param z_source: source redshift
+        :param mu_ddt:
+        :param lam_ddt:
+        :param sigma_ddt:
+        :param explim: exponent limit for evaluating the likelihood
+        """
+        self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
+        self._explim = explim
+
+    def log_likelihood(self, ddt, dd):
+        """
+
+        :param ddt: time-delay distance
+        :param dd: angular diameter distance to the deflector
+        :return: log likelihood given the single lens analysis
+        """
+        return likelihood_util.sklogn_likelihood(ddt, self._mu_ddt, self._lam_ddt, self._sigma_ddt, explim=self._explim)
+
+
+class KinLikelihoodGaussian(object):
     """
     class to handle cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays.
     Thus Ddt is not constraint but the kinematics can constrain Ds/Dds

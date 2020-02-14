@@ -35,7 +35,7 @@ class TestMCMCSampling(object):
         kwargs_sigma_start = {'h0': 5}
         kwargs_lower = {'h0': 10}
         kwargs_upper = {'h0': 200}
-        kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKin',
+        kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
                              'D_d_sample': self.D_d_samples, 'D_delta_t_sample': self.D_dt_samples,
                              'kde_type': 'scipy_gaussian', 'bandwidth': 1}]
         cosmology = 'FLCDM'

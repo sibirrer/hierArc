@@ -26,7 +26,7 @@ class TestCosmoLikelihood(object):
         self.D_dt_samples = np.random.normal(self.D_dt_true, self.sigma_Ddt, num_samples)
         self.D_d_samples = np.random.normal(self.Dd_true, self.sigma_Dd, num_samples)
 
-        self.kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKin',
+        self.kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
                                   'D_d_sample': self.D_d_samples, 'D_delta_t_sample': self.D_dt_samples,
                                   'kde_type': 'scipy_gaussian', 'bandwidth': 1}]
 
