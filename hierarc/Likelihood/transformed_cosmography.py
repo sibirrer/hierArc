@@ -2,7 +2,7 @@ __author__ = 'sibirrer'
 from scipy.interpolate import interp1d
 
 
-class HierarchicalCosmography(object):
+class TransformedCosmography(object):
     """
     class to manage hierarchical hyper-parameter that impact the cosmographic posterior interpretation of individual
     lenses.
@@ -44,7 +44,8 @@ class HierarchicalCosmography(object):
         ddt_, dd_ = self._displace_anisotropy(ddt_, dd_, anisotropy_param=aniso_param)
         return ddt_, dd_
 
-    def _displace_ppn(self, ddt, dd, gamma_ppn=1):
+    @staticmethod
+    def _displace_ppn(ddt, dd, gamma_ppn=1):
         """
         post-Newtonian parameter sampling. The deflection terms remain the same as those are measured by lensing.
         The dynamical term changes and affects the kinematic prediction and thus dd
@@ -57,7 +58,8 @@ class HierarchicalCosmography(object):
         dd_ = dd * (1 + gamma_ppn) / 2.
         return ddt, dd_
 
-    def _displace_kappa_ext(self, ddt, dd, kappa_ext=0):
+    @staticmethod
+    def _displace_kappa_ext(ddt, dd, kappa_ext=0):
         """
         assumes an additional mass-sheet of kappa_ext is present at the lens LOS (effectively mimicing an overall
         selection bias in the lenses that is not visible in the individual LOS analyses of the lenses.
@@ -72,7 +74,8 @@ class HierarchicalCosmography(object):
         ddt_ = ddt / (1. - kappa_ext)
         return ddt_, dd
 
-    def _displace_lambda_mst(self, ddt, dd, lambda_mst=1):
+    @staticmethod
+    def _displace_lambda_mst(ddt, dd, lambda_mst=1):
         """
         approximate internal mass-sheet transform on top of the assumed profiles inferred in the analysis of the
         individual lenses. The effect is to first order the same as for a pure mass sheet as a kappa_ext term.

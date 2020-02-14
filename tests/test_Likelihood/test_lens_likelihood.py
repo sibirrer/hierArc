@@ -4,7 +4,7 @@ import numpy.testing as npt
 import unittest
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
-from hierarc.Likelihood.lens_likelihood import LensLikelihood
+from hierarc.Likelihood.lens_likelihood import LensLikelihoodBase
 from astropy.cosmology import FlatLambdaCDM
 
 
@@ -49,7 +49,7 @@ class TestRaise(unittest.TestCase):
     def test_raise(self):
 
         with self.assertRaises(ValueError):
-            LensLikelihood(z_lens=0.5, z_source=2, likelihood_type='BAD')
+            LensLikelihoodBase(z_lens=0.5, z_source=2, likelihood_type='BAD')
 
 
 if __name__ == '__main__':

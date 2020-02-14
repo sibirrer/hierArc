@@ -1,5 +1,5 @@
 
-from hierarc.Likelihood.lens_likelihood import LensLikelihood
+from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 
 
 class LensSampleLikelihood(object):
