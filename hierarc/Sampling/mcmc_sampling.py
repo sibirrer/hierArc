@@ -47,7 +47,8 @@ class MCMCSampler(object):
         p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
         sampler.run_mcmc(p0, n_burn+n_run, progress=True)
         flat_samples = sampler.get_chain(discard=n_burn, thin=1, flat=True)
-        return flat_samples
+        log_prob = sampler.get_log_prob(discard=n_burn, thin=1, flat=True)
+        return flat_samples, log_prob
 
     def param_names(self, latex_style=False):
         """
