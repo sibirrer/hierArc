@@ -40,8 +40,9 @@ class TestMCMCSampling(object):
                              'kde_type': 'scipy_gaussian', 'bandwidth': 1}]
         cosmology = 'FLCDM'
         mcmc_sampler = MCMCSampler(kwargs_lens_list, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed, ppn_sampling=False)
-        samples = mcmc_sampler.mcmc_emcee(n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start)
+        samples, log_prob = mcmc_sampler.mcmc_emcee(n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start)
         assert len(samples) == n_walkers*n_run
+        assert len(log_prob) == n_walkers*n_run
 
         name_list = mcmc_sampler.param_names(latex_style=False)
         assert len(name_list) == 1
