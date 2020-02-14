@@ -74,9 +74,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
                 lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
                 kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
                 if aniso_param is not None:
-                    aniso_param_draw = likelihood_util.get_truncated_normal(mean=aniso_param, sd=aniso_param_sigma,
-                                                                        low=self._ani_param_min,
-                                                                        upp=self._ani_param_max)
+                    aniso_param_draw = self.draw_anisotropy(aniso_param, aniso_param_sigma)
                 else:
                     aniso_param_draw = aniso_param
                 ddt_, dd_ = self._displace_prediction(ddt, dd, gamma_ppn=gamma_ppn,
@@ -88,3 +86,16 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
                 if np.isfinite(exp_logl):
                     likelihood += exp_logl
             return np.log(likelihood)
+
+    def draw_anisotropy(self, aniso_param, aniso_param_sigma):
+        """
+        draw Gaussian distribution and re-sample if outside bounds
+
+        :param aniso_param: mean of the distribution
+        :param aniso_param_sigma: std of the distribution
+        :return: random draw from the distribution
+        """
+        draw = np.random.normal(aniso_param, aniso_param_sigma)
+        if draw < self._ani_param_min or draw > self._ani_param_max:
+            draw = self.draw_anisotropy(aniso_param, aniso_param_sigma)
+        return draw

@@ -3,7 +3,7 @@ import numpy as np
 from scipy.stats import truncnorm
 
 
-def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
+def get_truncated_normal(mean=0, sd=1, low=0, upp=10, size=1):
     """
 
     :param mean: mean of normal distribution
@@ -13,7 +13,7 @@ def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
     :return: float, draw of distribution
     """
     return truncnorm(
-        (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
+        (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd).rvs(size)
 
 
 def sklogn_likelihood(x, mu, lam, sigma, explim=100):
