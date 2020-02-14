@@ -1,5 +1,19 @@
 import math
 import numpy as np
+from scipy.stats import truncnorm
+
+
+def get_truncated_normal(mean=0, sd=1, low=0, upp=10):
+    """
+
+    :param mean: mean of normal distribution
+    :param sd: standard deviation
+    :param low: lower bound
+    :param upp: upper bound
+    :return: float, draw of distribution
+    """
+    return truncnorm(
+        (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd)
 
 
 def sklogn_likelihood(x, mu, lam, sigma, explim=100):

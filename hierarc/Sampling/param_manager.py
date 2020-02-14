@@ -88,12 +88,22 @@ class CosmoParam(object):
                     list.append(r'$\lambda_{\rm mst}$')
                 else:
                     list.append('lambda_mst')
+            if 'lambda_mst_sigma' not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r'$\sigma(\lambda_{\rm mst})$')
+                else:
+                    list.append('lambda_mst_sigma')
         if self._anisotropy_sampling is True:
             if 'aniso_param' not in self._kwargs_fixed:
                 if latex_style is True:
                     list.append(r'$a_{\rm ani}$')
                 else:
                     list.append('aniso_param')
+            if 'aniso_param_sigma' not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r'$\sigma(a_{\rm ani})$')
+                else:
+                    list.append('aniso_param_sigma')
         return list
 
     def args2kwargs(self, args):
@@ -150,11 +160,21 @@ class CosmoParam(object):
             else:
                 kwargs['lambda_mst'] = args[i]
                 i += 1
+            if 'lambda_mst_sigma' in self._kwargs_fixed:
+                kwargs['lambda_mst_sigma'] = self._kwargs_fixed['lambda_mst_sigma']
+            else:
+                kwargs['lambda_mst_sigma'] = args[i]
+                i += 1
         if self._anisotropy_sampling is True:
             if 'aniso_param' in self._kwargs_fixed:
                 kwargs['aniso_param'] = self._kwargs_fixed['aniso_param']
             else:
                 kwargs['aniso_param'] = args[i]
+                i += 1
+            if 'aniso_param_sigma' in self._kwargs_fixed:
+                kwargs['aniso_param_sigma'] = self._kwargs_fixed['aniso_param_sigma']
+            else:
+                kwargs['aniso_param_sigma'] = args[i]
                 i += 1
         return kwargs
 
@@ -187,9 +207,13 @@ class CosmoParam(object):
         if self._lambda_mst_sampling is True:
             if 'lambda_mst' not in self._kwargs_fixed:
                 args.append(kwargs['lambda_mst'])
+            if 'lambda_mst_sigma' not in self._kwargs_fixed:
+                args.append(kwargs['lambda_mst_sigma'])
         if self._anisotropy_sampling is True:
             if 'aniso_param' not in self._kwargs_fixed:
                 args.append(kwargs['aniso_param'])
+            if 'aniso_param_sigma' not in self._kwargs_fixed:
+                args.append(kwargs['aniso_param_sigma'])
         return args
 
     def cosmo(self, kwargs):

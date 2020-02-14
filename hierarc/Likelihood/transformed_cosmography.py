@@ -1,5 +1,6 @@
 __author__ = 'sibirrer'
 from scipy.interpolate import interp1d
+import numpy as np
 
 
 class TransformedCosmography(object):
@@ -19,8 +20,11 @@ class TransformedCosmography(object):
         """
         self._z_lens = z_lens
         self._z_source = z_source
+
         if ani_param_array is not None and ani_param_array is not None:
             self._f_ani = interp1d(ani_param_array, ani_scaling_array, kind='cubic')
+            self._ani_param_min = np.min(ani_param_array)
+            self._ani_param_max = np.max(ani_param_array)
 
     def _displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, aniso_param=None):
         """
