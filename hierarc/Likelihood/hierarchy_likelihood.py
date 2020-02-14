@@ -86,5 +86,5 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
                 logl = self._lens_type.log_likelihood(ddt_, dd_)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl):
-                    likelihood += np.exp(logl)
+                    likelihood += exp_logl
             return np.log(likelihood)
