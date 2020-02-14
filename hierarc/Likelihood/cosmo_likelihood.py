@@ -57,10 +57,7 @@ class CosmoLikelihood(object):
             if 1.0 - om - ok <= 0:
                 return -np.inf
         cosmo = self.param.cosmo(kwargs)
-        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, gamma_ppn=kwargs.get('gamma_ppn', 1),
-                                                         kappa_ext=kwargs.get('kappa_ext', 0),
-                                                         lambda_mst=kwargs.get('lambda_mst', 1),
-                                                         aniso_param=kwargs.get('aniso_param', None))
+        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, **kwargs)
         if self._prior_add is True:
             logL += self._custom_prior(kwargs)
         return logL

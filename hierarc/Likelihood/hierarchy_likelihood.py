@@ -64,7 +64,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         aniso_param = kwargs.get('aniso_param', None)  # stellar anisotropy parameter mean
         aniso_param_sigma =kwargs.get('aniso_param_sigma', 0)
 
-        if kappa_ext_sigma == 0 or lambda_mst_sigma == 0 or aniso_param_sigma == 0:  # sharp distributions
+        if kappa_ext_sigma == 0 and lambda_mst_sigma == 0 and aniso_param_sigma == 0:  # sharp distributions
             ddt_, dd_ = self._displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                   kappa_ext=kappa_ext, aniso_param=aniso_param)
             return self._lens_type.log_likelihood(ddt_, dd_)
@@ -73,13 +73,18 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
             for i in range(self._num_distribution_draws):
                 lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
                 kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
-                aniso_param_draw = likelihood_util.get_truncated_normal(mean=aniso_param, sd=aniso_param_sigma,
+                if aniso_param is not None:
+                    aniso_param_draw = likelihood_util.get_truncated_normal(mean=aniso_param, sd=aniso_param_sigma,
                                                                         low=self._ani_param_min,
                                                                         upp=self._ani_param_max)
+                else:
+                    aniso_param_draw = aniso_param
                 ddt_, dd_ = self._displace_prediction(ddt, dd, gamma_ppn=gamma_ppn,
                                                       lambda_mst=lambda_mst_draw,
                                                       kappa_ext=kappa_ext_draw,
                                                       aniso_param=aniso_param_draw)
                 logl = self._lens_type.log_likelihood(ddt_, dd_)
-                likelihood += np.exp(logl)
+                exp_logl = np.exp(logl)
+                if np.isfinite(exp_logl):
+                    likelihood += np.exp(logl)
             return np.log(likelihood)

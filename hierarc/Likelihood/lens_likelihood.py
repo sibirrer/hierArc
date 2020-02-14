@@ -21,9 +21,9 @@ class LensLikelihoodBase(object):
         self._name = name
         self._z_lens = z_lens
         self._z_source = z_source
-        if likelihood_type == 'TDKinKDE':
+        if likelihood_type in ['TDKinKDE', 'TDKin']:
             self._lens_type = TDKinLikelihoodKDE(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'KinGaussian':
+        elif likelihood_type in ['KinGaussian', 'Kin']:
             self._lens_type = KinLikelihoodGaussian(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'TDKinSkewLogNorm':
             self._lens_type = TDKinLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
