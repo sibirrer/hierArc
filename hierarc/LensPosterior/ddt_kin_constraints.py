@@ -65,7 +65,10 @@ class DdtKinConstraints(DsDdsConstraints):
         dd_mean = self._ddt_mean / ds_dds_mean / (1 + self._z_lens)
         dd_sigma2 = self._ddt_sigma**2 * (1 / ds_dds_mean / (1 + self._z_lens))**2 + ds_dds_sigma**2 * (self._ddt_mean / (1 + self._z_lens) / ds_dds_mean**2)
         # subtract the component in the uncertainty in ddt that does not impact the uncertainty on dd
-        dd_sigma = np.sqrt(dd_sigma2 - (self._kappa_ext_sigma * dd_mean)**2)
+        kappa_ext_sigma2 = (self._kappa_ext_sigma * dd_mean)**2
+        if dd_sigma2 < kappa_ext_sigma2:
+            raise ValueError('Expected error on dd when propagating Ddt error is smaller than the induced error on Ddt')
+        dd_sigma = np.sqrt(dd_sigma2 - kappa_ext_sigma2)
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'TDKinGaussian',
                              'ddt_mean': self._ddt_mean, 'ddt_sigma': self._ddt_sigma,
