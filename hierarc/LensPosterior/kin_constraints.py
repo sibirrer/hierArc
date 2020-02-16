@@ -31,6 +31,7 @@ class DsDdsConstraints(object):
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         """
+        self._z_lens, self._z_source = z_lens, z_source
         kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
         self._sigma_v, self._sigma_v_error = sigma_v, sigma_v_error
         self._theta_E, self._theta_E_error = theta_E, theta_E_error
@@ -128,7 +129,7 @@ class DsDdsConstraints(object):
                 ds_dds_list.append(ds_dds)
         return np.array(ds_dds_list)
 
-    def hierarchy_configuration(self, num_sample_model=20, num_kin_measurements=50):
+    def kin_constraints(self, num_sample_model=20, num_kin_measurements=50):
         """
         routine to configure the likelihood to be used in the hierarchical sampling. In particular, a default
         configuration is set to compute the Gaussian approximation of Ds/Dds by sampling the posterior and the estimate
@@ -139,7 +140,7 @@ class DsDdsConstraints(object):
         kinematic component J()
         :param num_kin_measurements: number of draws from the velocity dispersion measurements to simple sample the
         posterior in Ds/Dds. The total number of posteriors is num_sample_model x num_kin_measurements
-        :return: keyword arguments
+        :return:
         """
         # here we set the default anisotropy model values and the range to be probed
         if self._anisotropy_model == 'OsipkovMerritt':
@@ -172,9 +173,26 @@ class DsDdsConstraints(object):
             ds_dds_ani = self.ds_dds_realization(kwargs_anisotropy, no_error=True)
             ani_scaling_array.append(ds_dds_ani / ds_dds_ani_0)
         ani_scaling_array = np.array(ani_scaling_array)
+        return ds_dds_mean, ds_dds_sigma, ani_param_array, ani_scaling_array
 
+    def hierarchy_configuration(self, num_sample_model=20, num_kin_measurements=50):
+        """
+        routine to configure the likelihood to be used in the hierarchical sampling. In particular, a default
+        configuration is set to compute the Gaussian approximation of Ds/Dds by sampling the posterior and the estimate
+        of the variance of the sample. The anisotropy scaling is then performed. Different anisotropy models are
+        supported.
+
+        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
+        kinematic component J()
+        :param num_kin_measurements: number of draws from the velocity dispersion measurements to simple sample the
+        posterior in Ds/Dds. The total number of posteriors is num_sample_model x num_kin_measurements
+        :return: keyword arguments
+        """
+
+        ds_dds_mean, ds_dds_sigma, ani_param_array, ani_scaling_array = self.kin_constraints(num_sample_model,
+                                                                                             num_kin_measurements)
         # configuration keyword arguments for the hierarchical sampling
-        kwargs_likelihood = {'z_lens': self._td_cosmo._z_lens, 'z_source': self._td_cosmo._z_source,
+        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'KinGaussian',
                              'ds_dds_mean': ds_dds_mean,  'ds_dds_sigma': ds_dds_sigma,
                              'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array}
         return kwargs_likelihood

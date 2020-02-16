@@ -26,4 +26,5 @@ class LensSampleLikelihood(object):
         logL = 0
         for lens in self._lens_list:
             logL += lens.lens_log_likelihood(cosmo=cosmo, **kwargs)
+            print(logL, 'test logl')
         return logL
