@@ -95,6 +95,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         :param aniso_param_sigma: std of the distribution
         :return: random draw from the distribution
         """
+        if aniso_param < self._ani_param_min or aniso_param > self._ani_param_max:
+            raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
         draw = np.random.normal(aniso_param, aniso_param_sigma)
         if draw < self._ani_param_min or draw > self._ani_param_max:
             draw = self.draw_anisotropy(aniso_param, aniso_param_sigma)
