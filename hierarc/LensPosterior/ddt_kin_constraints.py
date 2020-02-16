@@ -63,7 +63,7 @@ class DdtKinConstraints(DsDdsConstraints):
         ds_dds_mean /= (1 - self._kappa_ext_mean)  # perform the mean correction of the Ds/Dds constraints when the Ddt posteriors are corrected
         # Gaussian error propagation of ddt and ds_dds uncertainties into dd uncertainties
         dd_mean = self._ddt_mean / ds_dds_mean / (1 + self._z_lens)
-        dd_sigma2 = self._ddt_sigma**2 * (1 / ds_dds_mean / (1 + self._z_lens))**2 + ds_dds_sigma**2 * (self._ddt_mean / (1 + self._z_lens) / ds_dds_mean**2)
+        dd_sigma2 = self.dd_error_propagatoin(self._ddt_sigma, ds_dds_sigma, self._ddt_mean, ds_dds_mean, self._z_lens)
         # subtract the component in the uncertainty in ddt that does not impact the uncertainty on dd
         kappa_ext_sigma2 = (self._kappa_ext_sigma * dd_mean)**2
         if dd_sigma2 < kappa_ext_sigma2:
@@ -75,3 +75,18 @@ class DdtKinConstraints(DsDdsConstraints):
                              'dd_mean': dd_mean,  'dd_sigma': dd_sigma,
                              'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array}
         return kwargs_likelihood
+
+    @staticmethod
+    def dd_error_propagatoin(ddt_sigma, ds_dds_sigma, ddt_mean, ds_dds_mean, z_lens):
+        """
+        propagates error in Ddt and Ds/Dds into error in Dd
+
+        :param ddt_sigma: ddt error
+        :param ds_dds_sigma: Ds/Dds error
+        :param ddt_mean: Ddt mean
+        :param ds_dds_mean: Ds/Dds mean
+        :return: error in Dd
+        """
+        dd_sigma2 = ddt_sigma ** 2 * (1 / ds_dds_mean / (1 + z_lens)) ** 2 + ds_dds_sigma ** 2 * (
+                ddt_mean / (1 + z_lens) / ds_dds_mean ** 2)**2
+        return dd_sigma2

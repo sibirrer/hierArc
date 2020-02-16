@@ -1,5 +1,6 @@
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
 from hierarc.Sampling.param_manager import CosmoParam
+from hierarc.Likelihood.cosmo_interp import CosmoInterp
 import numpy as np
 
 
@@ -9,7 +10,8 @@ class CosmoLikelihood(object):
     """
 
     def __init__(self, kwargs_lens_list, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed, ppn_sampling=False,
-                 lambda_mst_sampling=False, anisotropy_sampling=False, custom_prior=None):
+                 lambda_mst_sampling=False, anisotropy_sampling=False, custom_prior=None, interpolate_cosmo=True,
+                 num_redshift_interp=100):
         """
 
         :param kwargs_lens_list: keyword argument list specifying the arguments of the LensLikelihood class
@@ -23,6 +25,8 @@ class CosmoLikelihood(object):
         kinematic prediction
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
+        :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
+        :param num_redshift_interp: int, number of redshift interpolation steps
         """
         self._cosmology = cosmology
         self._kwargs_lens_list = kwargs_lens_list
@@ -34,6 +38,13 @@ class CosmoLikelihood(object):
         if custom_prior is not None:
             self._prior_add = True
         self._custom_prior = custom_prior
+        self._interpolate_cosmo = interpolate_cosmo
+        self._num_redshift_interp = num_redshift_interp
+        z_max = 0
+        for kwargs_lens in kwargs_lens_list:
+            if kwargs_lens['z_source'] > z_max:
+                z_max = kwargs_lens['z_source']
+        self._z_max = z_max
 
     def likelihood(self, args):
         """
@@ -57,6 +68,8 @@ class CosmoLikelihood(object):
             if 1.0 - om - ok <= 0:
                 return -np.inf
         cosmo = self.param.cosmo(kwargs)
+        if self._interpolate_cosmo is True:
+            cosmo = CosmoInterp(cosmo=cosmo, z_stop=self._z_max, num_interp=self._num_redshift_interp)
         logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, **kwargs)
         if self._prior_add is True:
             logL += self._custom_prior(kwargs)
