@@ -178,7 +178,6 @@ class CosmoInterp(object):
             ang_dist[i+1] = copy.deepcopy(running_dist)
         return interp1d(z_steps, ang_dist)
 
-
     def _integral_comoving_distance_z1z2(self, z1, z2):
         """ Comoving line-of-sight distance in Mpc between objects at
         redshifts z1 and z2.

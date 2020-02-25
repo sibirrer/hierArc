@@ -71,9 +71,12 @@ class DsDdsConstraints(object):
         """
         if no_error is True:
             return self._theta_E, self._gamma, self._r_eff
-        theta_E_draw = np.random.normal(loc=self._theta_E, scale=self._theta_E_error)
+        theta_E_draw = np.maximum(np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0)
         gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
-        r_eff_draw = np.random.normal(loc=self._r_eff, scale=self._r_eff_error)
+        gamma_draw = np.maximum(gamma_draw, 1.5)
+        gamma_draw = np.minimum(gamma_draw, 2.5)
+        r_eff_draw = np.maximum(np.random.normal(loc=self._r_eff, scale=self._r_eff_error), 0.001)
+
         return theta_E_draw, gamma_draw, r_eff_draw
 
     def ds_dds_realization(self, kwargs_anisotropy, no_error=False):
