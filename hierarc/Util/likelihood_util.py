@@ -3,6 +3,33 @@ import numpy as np
 from scipy.stats import truncnorm
 
 
+def log_likelihood_cov(data, model, cov_error):
+    """
+    log likelihood of the data given a model
+
+    :param data: data vector
+    :param model: model vector
+    :param cov_error: covariance matrix
+    :return: log likelihood
+    """
+    delta = data - model
+    return -delta.dot(cov_error.dot(delta)) / 2.
+
+
+def cov_error_create(error_independent, error_covariant):
+    """
+    generates an error covariance matrix from a set of independent uncertainties combined with a fully covariant term
+
+    :param error_independent: array of Gaussian 1-sigma uncertainties
+    :param error_covariant: float, shared covariant error among all data points. So if all data points are off by
+    1-sigma, then the log likelihood is 1-sigma
+    :return: error covariance matrix
+    """
+    n = len(error_independent)
+    cov_error = 1./(np.diag(error_independent**2) + np.ones((n, n)) * error_covariant**2 * n**2)
+    return cov_error
+
+
 def get_truncated_normal(mean=0, sd=1, low=0, upp=10, size=1):
     """
 
