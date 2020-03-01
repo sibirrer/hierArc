@@ -1,0 +1,36 @@
+import numpy as np
+
+
+class ImageModelPosterior(object):
+    """
+    class to manage lens and light model posteriors inferred from imaging data
+    """
+    def __init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error):
+        """
+
+        :param theta_E: Einstein radius (in arc seconds)
+        :param theta_E_error: 1-sigma error on Einstein radius
+        :param gamma: power-law slope (2 = isothermal) estimated from imaging data
+        :param gamma_error: 1-sigma uncertainty on power-law slope
+        :param r_eff: half-light radius of the deflector (arc seconds)
+        :param r_eff_error: uncertainty on half-light radius
+        """
+        self._theta_E, self._theta_E_error = theta_E, theta_E_error
+        self._gamma, self._gamma_error = gamma, gamma_error
+        self._r_eff, self._r_eff_error = r_eff, r_eff_error
+
+    def draw_lens(self, no_error=False):
+        """
+
+        :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :return: theta_E, gamma, r_eff
+        """
+        if no_error is True:
+            return self._theta_E, self._gamma, self._r_eff
+        theta_E_draw = np.maximum(np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0)
+        gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
+        gamma_draw = np.maximum(gamma_draw, 1.5)
+        gamma_draw = np.minimum(gamma_draw, 2.5)
+        r_eff_draw = np.maximum(np.random.normal(loc=self._r_eff, scale=self._r_eff_error), 0.001)
+
+        return theta_E_draw, gamma_draw, r_eff_draw

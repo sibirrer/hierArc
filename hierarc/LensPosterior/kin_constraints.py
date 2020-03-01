@@ -1,8 +1,9 @@
 import numpy as np
 from lenstronomy.Analysis.td_cosmography import TDCosmography
+from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
 
 
-class DsDdsConstraints(object):
+class DsDdsConstraints(ImageModelPosterior):
     """
     class for sampling Ds/Dds posteriors from imaging data and kinematic constraints
     """
@@ -34,9 +35,6 @@ class DsDdsConstraints(object):
         self._z_lens, self._z_source = z_lens, z_source
         kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
         self._sigma_v, self._sigma_v_error = sigma_v, sigma_v_error
-        self._theta_E, self._theta_E_error = theta_E, theta_E_error
-        self._r_eff, self._r_eff_error = r_eff, r_eff_error
-        self._gamma, self._gamma_error = gamma, gamma_error
         self._td_cosmo = TDCosmography(z_lens, z_source, kwargs_model, cosmo_fiducial=None,
                                  lens_model_kinematics_bool=None, light_model_kinematics_bool=None)
         self._td_cosmo.kinematic_observation_settings(kwargs_aperture, kwargs_seeing)
@@ -50,6 +48,7 @@ class DsDdsConstraints(object):
                                                     MGE_mass=False, kwargs_mge_light=kwargs_mge_light)
         self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
+        ImageModelPosterior.__init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error)
 
     def draw_vel_disp(self, num=1, no_error=False):
         """
@@ -62,22 +61,6 @@ class DsDdsConstraints(object):
         if no_error is True:
             return self._sigma_v
         return np.random.normal(loc=self._sigma_v, scale=self._sigma_v_error, size=num)
-
-    def draw_lens(self, no_error=False):
-        """
-
-        :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
-        :return: theta_E, gamma, r_eff
-        """
-        if no_error is True:
-            return self._theta_E, self._gamma, self._r_eff
-        theta_E_draw = np.maximum(np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0)
-        gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
-        gamma_draw = np.maximum(gamma_draw, 1.5)
-        gamma_draw = np.minimum(gamma_draw, 2.5)
-        r_eff_draw = np.maximum(np.random.normal(loc=self._r_eff, scale=self._r_eff_error), 0.001)
-
-        return theta_E_draw, gamma_draw, r_eff_draw
 
     def ds_dds_realization(self, kwargs_anisotropy, no_error=False):
         """
