@@ -1,9 +1,10 @@
 import numpy as np
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
+from hierarc.LensPosterior.base_config import BaseLensConfig
 
 
-class DsDdsConstraints(ImageModelPosterior):
+class DsDdsConstraints(ImageModelPosterior, BaseLensConfig):
     """
     class for sampling Ds/Dds posteriors from imaging data and kinematic constraints
     """
@@ -32,7 +33,6 @@ class DsDdsConstraints(ImageModelPosterior):
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         """
-        self._z_lens, self._z_source = z_lens, z_source
         kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
         self._sigma_v, self._sigma_v_error = sigma_v, sigma_v_error
         self._td_cosmo = TDCosmography(z_lens, z_source, kwargs_model, cosmo_fiducial=None,
@@ -47,8 +47,9 @@ class DsDdsConstraints(ImageModelPosterior):
                                                     Hernquist_approx=hernquist_approx, MGE_light=MGE_light,
                                                     MGE_mass=False, kwargs_mge_light=kwargs_mge_light)
         self._kwargs_lens_light = kwargs_lens_light
-        self._anisotropy_model = anisotropy_model
+
         ImageModelPosterior.__init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error)
+        BaseLensConfig.__init__(self, z_lens, z_source, anisotropy_model=anisotropy_model, r_eff=r_eff)
 
     def draw_vel_disp(self, num=1, no_error=False):
         """
@@ -128,38 +129,22 @@ class DsDdsConstraints(ImageModelPosterior):
         posterior in Ds/Dds. The total number of posteriors is num_sample_model x num_kin_measurements
         :return:
         """
-        # here we set the default anisotropy model values and the range to be probed
-        if self._anisotropy_model == 'OsipkovMerritt':
-            ani_param_array = np.linspace(0.1, 5, 20)  # used for r_ani OsipkovMerritt anisotropy discription
-            a_ani_0 = 1
-            r_ani = a_ani_0 * self._r_eff
-            kwargs_anisotropy_0 = {'r_ani': r_ani}
-        else:
-            ani_param_array = np.linspace(0, 1, 10)  # used for constant anisotropy description
-            a_ani_0 = 0.1
-            kwargs_anisotropy_0 = {'beta': a_ani_0}
 
         # here we simple sampling the default anisotropy configuration and compute the mean and std of the sample
-        ds_dds_sample = self.ds_dds_sample(kwargs_anisotropy=kwargs_anisotropy_0, num_sample_model=num_sample_model,
+        ds_dds_sample = self.ds_dds_sample(kwargs_anisotropy=self.kwargs_anisotropy_base, num_sample_model=num_sample_model,
                                            num_kin_measurements=num_kin_measurements)
         ds_dds_mean = np.mean(ds_dds_sample)
         ds_dds_sigma = np.std(ds_dds_sample)
 
         # here we loop through the possible anisotropy configuration within the model parameterization
-        ds_dds_ani_0 = self.ds_dds_realization(kwargs_anisotropy_0, no_error=True)
+        ds_dds_ani_0 = self.ds_dds_realization(self.kwargs_anisotropy_base, no_error=True)
         ani_scaling_array = []
-        for a_ani in ani_param_array:
-            if self._anisotropy_model == 'OsipkovMerritt':
-                r_ani = a_ani * self._r_eff
-                kwargs_anisotropy = {'r_ani': r_ani}
-            elif self._anisotropy_model == 'const':
-                kwargs_anisotropy = {'beta': a_ani}
-            else:
-                raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
+        for a_ani in self.ani_param_array:
+            kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
             ds_dds_ani = self.ds_dds_realization(kwargs_anisotropy, no_error=True)
             ani_scaling_array.append(ds_dds_ani / ds_dds_ani_0)
         ani_scaling_array = np.array(ani_scaling_array)
-        return ds_dds_mean, ds_dds_sigma, ani_param_array, ani_scaling_array
+        return ds_dds_mean, ds_dds_sigma, self.ani_param_array, ani_scaling_array
 
     def hierarchy_configuration(self, num_sample_model=20, num_kin_measurements=50):
         """
