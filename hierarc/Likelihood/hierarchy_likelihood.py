@@ -1,6 +1,5 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.lens_likelihood import LensLikelihoodBase
-from hierarc.Util import likelihood_util
 import numpy as np
 
 
@@ -9,7 +8,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
     master class containing the likelihood definitions of different analysis
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', ani_param_array=None,
-                 ani_scaling_array=None, num_distribution_draws=20, **kwargs_likelihood):
+                 num_distribution_draws=20, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -22,11 +21,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
-        TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source, ani_param_array=ani_param_array,
-                                             ani_scaling_array=ani_scaling_array)
+        TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
         LensLikelihoodBase.__init__(self, z_lens=z_lens, z_source=z_source, likelihood_type=likelihood_type, name=name,
-                                    **kwargs_likelihood)
+                                    ani_param_array=ani_param_array, **kwargs_likelihood)
         self._num_distribution_draws = num_distribution_draws
+        if ani_param_array is not None:
+            self._ani_param_min = np.min(ani_param_array)
+            self._ani_param_max = np.max(ani_param_array)
 
     def lens_log_likelihood(self, cosmo, **kwargs):
         """
@@ -66,8 +67,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
 
         if kappa_ext_sigma == 0 and lambda_mst_sigma == 0 and aniso_param_sigma == 0:  # sharp distributions
             ddt_, dd_ = self._displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
-                                                  kappa_ext=kappa_ext, aniso_param=aniso_param)
-            return self._lens_type.log_likelihood(ddt_, dd_)
+                                                  kappa_ext=kappa_ext)
+            lnlog = self._lens_type.log_likelihood(ddt_, dd_, a_ani=aniso_param)
+            return lnlog
         else:
             likelihood = 0
             for i in range(self._num_distribution_draws):
@@ -79,9 +81,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
                     aniso_param_draw = aniso_param
                 ddt_, dd_ = self._displace_prediction(ddt, dd, gamma_ppn=gamma_ppn,
                                                       lambda_mst=lambda_mst_draw,
-                                                      kappa_ext=kappa_ext_draw,
-                                                      aniso_param=aniso_param_draw)
-                logl = self._lens_type.log_likelihood(ddt_, dd_)
+                                                      kappa_ext=kappa_ext_draw)
+                logl = self._lens_type.log_likelihood(ddt_, dd_, a_ani=aniso_param_draw)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl):
                     likelihood += exp_logl

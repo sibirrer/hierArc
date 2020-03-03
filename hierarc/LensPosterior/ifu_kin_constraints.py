@@ -74,14 +74,16 @@ class IFUKin(BaseLensConfig):
 
         :return: keyword arguments
         """
-        j_kin_matrix = np.zeros((num_sample_model, len(self._sigma_v)))  # matrix that contains the sampled J() distribution
+        num_data = len(self._sigma_v)
+        j_kin_matrix = np.zeros((num_sample_model, num_data))  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
             j_kin = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=False)
             j_kin_matrix[i, :] = j_kin
-        cov_j = np.cov(j_kin_matrix)
+
+        cov_j = np.cov(np.sqrt(j_kin_matrix.T))
         j_mean_list = np.mean(j_kin_matrix, axis=0)
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
-        ani_scaling_array_list = [[] for i in range(len(self._sigma_v))]
+        ani_scaling_array_list = [[] for i in range(num_data)]
         for a_ani in self.ani_param_array:
             kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
             j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
@@ -90,11 +92,11 @@ class IFUKin(BaseLensConfig):
 
         error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
         error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(self._sigma_v_error_independent ** 2)
-
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
+                             'sigma_v_measurement': self._sigma_v,
                              'j_mean_list': j_mean_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j': cov_j, 'ani_param_array': self.ani_param_array,
+                             'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,
                              'ani_scaling_array_list': ani_scaling_array_list}
         return kwargs_likelihood
 

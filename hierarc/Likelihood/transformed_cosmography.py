@@ -1,6 +1,4 @@
 __author__ = 'sibirrer'
-from scipy.interpolate import interp1d
-import numpy as np
 
 
 class TransformedCosmography(object):
@@ -9,7 +7,7 @@ class TransformedCosmography(object):
     lenses.
     """
 
-    def __init__(self, z_lens, z_source, ani_param_array=None, ani_scaling_array=None):
+    def __init__(self, z_lens, z_source):
         """
 
         :param z_lens: lens redshift
@@ -21,12 +19,7 @@ class TransformedCosmography(object):
         self._z_lens = z_lens
         self._z_source = z_source
 
-        if ani_param_array is not None and ani_param_array is not None:
-            self._f_ani = interp1d(ani_param_array, ani_scaling_array, kind='cubic')
-            self._ani_param_min = np.min(ani_param_array)
-            self._ani_param_max = np.max(ani_param_array)
-
-    def _displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, aniso_param=None):
+    def _displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0):
         """
         here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         displace the predicted angular diameter distances in the opposite direction
@@ -45,7 +38,6 @@ class TransformedCosmography(object):
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
         ddt_, dd_ = self._displace_kappa_ext(ddt_, dd_, kappa_ext=kappa_ext)
         ddt_, dd_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst)
-        ddt_, dd_ = self._displace_anisotropy(ddt_, dd_, anisotropy_param=aniso_param)
         return ddt_, dd_
 
     @staticmethod
@@ -99,22 +91,3 @@ class TransformedCosmography(object):
         sigma_v2_scaling = lambda_mst
         dd_ = dd * sigma_v2_scaling / lambda_mst  # the kinematics constrain Dd/Dds and thus the constraints on Dd is not affected by lambda
         return ddt_, dd_
-
-    def _displace_anisotropy(self, ddt, dd, anisotropy_param):
-        """
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param anisotropy_param: anisotropy parameter that changes the predicted Ds/Dds from the kinematic by:
-        Ds/Dds(aniso_param) = f(aniso_param) * Ds/Dds(initial)
-        which is equivalent as
-        sigma_v**2(aniso_param) = f(aniso_param)**(-1) * sigma_v**2(initial)
-
-        :return: inverse predicted offset in Ds/Dds by the anisotropy model deviating from the original sample
-        """
-
-        if anisotropy_param is None or not hasattr(self, '_f_ani'):
-            dd_ = dd
-        else:
-            dd_ = dd * self._f_ani(anisotropy_param)
-        return ddt, dd_

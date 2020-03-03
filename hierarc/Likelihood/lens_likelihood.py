@@ -2,6 +2,8 @@ __author__ = 'sibirrer'
 
 from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
 from hierarc.Util import likelihood_util
+from hierarc.Likelihood.anisotropy_scaling import AnisotropyScaling
+from hierarc.Likelihood.LensLikelihood.ifu_kin_likelihood import IFUKinCov
 import numpy as np
 from scipy import interpolate
 
@@ -33,15 +35,18 @@ class LensLikelihoodBase(object):
             self._lens_type = TDKinLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'TDSkewLogNorm':
             self._lens_type = TDLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'IFUKinCov':
+            self._lens_type = IFUKinCov(z_lens, z_source, **kwargs_likelihood)
         else:
             raise ValueError('likelihood_type %s not supported!' % likelihood_type)
 
 
-class TDKinGaussian(object):
+class TDKinGaussian(AnisotropyScaling):
     """
     class for joint kinematics and time delay likelihood assuming that they are independent and Gaussian
     """
-    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, dd_mean, dd_sigma):
+    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, dd_mean, dd_sigma, ani_param_array=None,
+                 ani_scaling_array=None):
         """
 
         :param z_lens: lens redshift
@@ -54,23 +59,25 @@ class TDKinGaussian(object):
         self._dd_mean = dd_mean
         self._dd_sigma2 = dd_sigma ** 2
         self._tdLikelihood = TDLikelihoodGaussian(z_lens, z_source, ddt_mean=ddt_mean, ddt_sigma=ddt_sigma)
+        AnisotropyScaling.__init__(self, ani_param_array=ani_param_array, ani_scaling_array=ani_scaling_array)
 
-    def log_likelihood(self, ddt, dd):
+    def log_likelihood(self, ddt, dd, a_ani=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :return: log likelihood given the single lens analysis
         """
-        return self._tdLikelihood.log_likelihood(ddt, dd) - (dd - self._dd_mean) ** 2 / self._dd_sigma2 / 2
+        dd_ = dd * self.ani_scaling(a_ani)
+        return self._tdLikelihood.log_likelihood(ddt, dd_) - (dd_ - self._dd_mean) ** 2 / self._dd_sigma2 / 2
 
 
-class TDKinLikelihoodKDE(object):
+class TDKinLikelihoodKDE(AnisotropyScaling):
     """
     class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
     """
     def __init__(self, z_lens, z_source, D_d_sample, D_delta_t_sample, kde_type='scipy_gaussian', bandwidth=1,
-                 interpol=False, num_interp_grid=100):
+                 interpol=False, num_interp_grid=100, ani_param_array=None, ani_scaling_array=None):
         """
 
         :param z_lens: lens redshift
@@ -93,26 +100,29 @@ class TDKinLikelihoodKDE(object):
                     z[j, i] = self._kde_likelihood.logLikelihood(dd, ddt)[0]
             self._interp_log_likelihood = interpolate.interp2d(dd_grid, ddt_grid, z, kind='cubic')
         self._interpol = interpol
+        AnisotropyScaling.__init__(self, ani_param_array=ani_param_array, ani_scaling_array=ani_scaling_array)
 
-    def log_likelihood(self, ddt, dd):
+    def log_likelihood(self, ddt, dd, a_ani=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :return: log likelihood given the single lens analysis
         """
+        dd_ = dd * self.ani_scaling(a_ani)
         if self._interpol is True:
-            return self._interp_log_likelihood(dd, ddt)[0]
-        return self._kde_likelihood.logLikelihood(dd, ddt)[0]
+            return self._interp_log_likelihood(dd_, ddt)[0]
+        return self._kde_likelihood.logLikelihood(dd_, ddt)[0]
 
 
-class TDKinLikelihoodSklogn(object):
+class TDKinLikelihoodSklogn(AnisotropyScaling):
     """
     class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
     with a provided skewed log normal function for both Ddt and Dd
     The two distributions are asssumed independant and can be combined.
     """
-    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, mu_dd, lam_dd, sigma_dd, explim=100):
+    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, mu_dd, lam_dd, sigma_dd, explim=100,
+                 ani_param_array=None, ani_scaling_array=None):
         """
 
         :param z_lens: lens redshift
@@ -128,16 +138,18 @@ class TDKinLikelihoodSklogn(object):
         self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
         self._mu_dd, self._lam_dd, self._sigma_dd = mu_dd, lam_dd, sigma_dd
         self._explim = explim
+        AnisotropyScaling.__init__(self, ani_param_array=ani_param_array, ani_scaling_array=ani_scaling_array)
 
-    def log_likelihood(self, ddt, dd):
+    def log_likelihood(self, ddt, dd, a_ani=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :return: log likelihood given the single lens analysis
         """
+        dd_ = dd * self.ani_scaling(a_ani)
         logl_ddt = likelihood_util.sklogn_likelihood(ddt, self._mu_ddt, self._lam_ddt, self._sigma_ddt, explim=self._explim)
-        logl_dd = likelihood_util.sklogn_likelihood(dd, self._mu_dd, self._lam_dd, self._sigma_dd, explim=self._explim)
+        logl_dd = likelihood_util.sklogn_likelihood(dd_, self._mu_dd, self._lam_dd, self._sigma_dd, explim=self._explim)
         return logl_ddt + logl_dd
 
 
@@ -147,7 +159,8 @@ class TDLikelihoodSklogn(object):
     with a provided skewed log normal function for Ddt.
     """
 
-    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, explim=100):
+    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, explim=100, ani_param_array=None,
+                 ani_scaling_array=None):
         """
 
         :param z_lens: lens redshift
@@ -160,7 +173,7 @@ class TDLikelihoodSklogn(object):
         self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
         self._explim = explim
 
-    def log_likelihood(self, ddt, dd):
+    def log_likelihood(self, ddt, dd=None, a_ani=None):
         """
 
         :param ddt: time-delay distance
@@ -177,7 +190,7 @@ class TDLikelihoodGaussian(object):
 
     The current version includes a Gaussian in Ds/Dds but can be extended.
     """
-    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma):
+    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, ani_param_array=None, ani_scaling_array=None):
         """
 
         :param z_lens: lens redshift
@@ -189,7 +202,7 @@ class TDLikelihoodGaussian(object):
         self._ddt_mean = ddt_mean
         self._ddt_sigma2 = ddt_sigma ** 2
 
-    def log_likelihood(self, ddt, dd=None):
+    def log_likelihood(self, ddt, dd=None, a_ani=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
@@ -200,14 +213,14 @@ class TDLikelihoodGaussian(object):
         return - (ddt - self._ddt_mean) ** 2 / self._ddt_sigma2 / 2
 
 
-class KinLikelihoodGaussian(object):
+class KinLikelihoodGaussian(AnisotropyScaling):
     """
     class to handle cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays.
     Thus Ddt is not constraint but the kinematics can constrain Ds/Dds
 
     The current version includes a Gaussian in Ds/Dds but can be extended.
     """
-    def __init__(self, z_lens, z_source, ds_dds_mean, ds_dds_sigma):
+    def __init__(self, z_lens, z_source, ds_dds_mean, ds_dds_sigma, ani_param_array=None, ani_scaling_array=None):
         """
 
         :param z_lens: lens redshift
@@ -218,8 +231,9 @@ class KinLikelihoodGaussian(object):
         self._z_lens = z_lens
         self._ds_dds_mean = ds_dds_mean
         self._ds_dds_sigma2 = ds_dds_sigma ** 2
+        AnisotropyScaling.__init__(self, ani_param_array=ani_param_array, ani_scaling_array=ani_scaling_array)
 
-    def log_likelihood(self, ddt, dd):
+    def log_likelihood(self, ddt, dd, a_ani=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
@@ -228,4 +242,5 @@ class KinLikelihoodGaussian(object):
         :return: log likelihood given the single lens analysis
         """
         ds_dds = ddt / dd / (1 + self._z_lens)
-        return - (ds_dds - self._ds_dds_mean) ** 2 / self._ds_dds_sigma2 / 2
+        ds_dds_ = ds_dds / self.ani_scaling(a_ani)
+        return - (ds_dds_ - self._ds_dds_mean) ** 2 / self._ds_dds_sigma2 / 2
