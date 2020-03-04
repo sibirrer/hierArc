@@ -40,5 +40,6 @@ class IFUKinCov(AnisotropyScalingIFU):
         scaling_ifu = self.ani_scaling(a_ani)
         sigma_v_predict = np.sqrt(ds_dds * scaling_ifu * self._j_mean_list) * const.c / 1000
         delta = self._sigma_v_measured - sigma_v_predict
-        cov_error = np.linalg.inv(self._error_cov_measurement + self._error_cov_j_sqrt * ds_dds * scaling_ifu * (const.c / 1000)**2)
+        scaling_matix = np.outer(np.sqrt(scaling_ifu), np.sqrt(scaling_ifu))
+        cov_error = np.linalg.inv(self._error_cov_measurement + self._error_cov_j_sqrt * scaling_matix * ds_dds * (const.c / 1000)**2)
         return -delta.dot(cov_error.dot(delta)) / 2.

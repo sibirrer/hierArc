@@ -52,7 +52,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         self._anisotropy_model = anisotropy_model
 
         if self._anisotropy_model == 'OsipkovMerritt':
-            self._ani_param_array = np.linspace(0.1, 5, 20)  # used for r_ani OsipkovMerritt anisotropy description
+            self._ani_param_array = np.array([0.1, 0.2, 0.5, 1, 2, 5])  # used for r_ani OsipkovMerritt anisotropy description
         elif self._anisotropy_model == 'const':
             self._ani_param_array = np.linspace(0, 1, 10)  # used for constant anisotropy description
         else:
