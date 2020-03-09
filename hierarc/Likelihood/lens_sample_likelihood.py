@@ -16,14 +16,15 @@ class LensSampleLikelihood(object):
         for kwargs_lens in kwargs_lens_list:
             self._lens_list.append(LensLikelihood(**kwargs_lens))
 
-    def log_likelihood(self, cosmo, **kwargs):
+    def log_likelihood(self, cosmo, kwargs_lens, kwargs_kin):
         """
 
         :param cosmo: astropy.cosmology instance
-        :param kwargs: keywords of the parameters
+        :param kwargs_lens: keywords of the parameters of the lens model
+        :param kwargs_kin: keyword arguments of the kinematic model
         :return: log likelihood of the combined lenses
         """
         logL = 0
         for lens in self._lens_list:
-            logL += lens.lens_log_likelihood(cosmo=cosmo, **kwargs)
+            logL += lens.lens_log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         return logL

@@ -7,25 +7,40 @@ class MCMCSampler(object):
     """
     class which executes the different sampling  methods
     """
-    def __init__(self, kwargs_lens_list, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed, ppn_sampling=False,
-                 lambda_mst_sampling=False, anisotropy_sampling=False, custom_prior=None):
+    def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
+                 lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
+                 anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
+                 cosmo_fixed=None):
         """
         initialise the classes of the chain and for parameter options
 
-        :param kwargs_lens_list: keyword argument list specifying the arguments of the LensLikelihood class
+        :param kwargs_likelihood_list: keyword argument list specifying the arguments of the LensLikelihood class
         :param cosmology: string describing cosmological model
-        :param kwargs_lower: keyword arguments with lower limits of parameters
-        :param kwargs_upper: keyword arguments with upper limits of parameters
-        :param kwargs_fixed: keyword arguments and values of fixed parameters
+        :param kwargs_bounds: keyword arguments for the bounds and fixed parameters
+        :param kwargs_bounds: keyword arguments of the lower and upper bounds and parameters that are held fixed.
+        Includes:
+        'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
+        'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
+        'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
         :param ppn_sampling:post-newtonian parameter sampling
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
+        :param lambda_mst_distribution: string, defines the distribution function of lambda_mst
+        :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
+        kinematic prediction
+        :param anisotropy_model: string, specifies the stellar anisotropy model
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
+        :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
+        :param num_redshift_interp: int, number of redshift interpolation steps
+        :param cosmo_fixed: astropy.cosmology instance to be used and held fixed throughout the sampling
 
         """
-        self.chain = CosmoLikelihood(kwargs_lens_list, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed,
-                                     ppn_sampling=ppn_sampling, lambda_mst_sampling=lambda_mst_sampling,
-                                     anisotropy_sampling=anisotropy_sampling, custom_prior=custom_prior)
+        self.chain = CosmoLikelihood(kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=ppn_sampling,
+                                     lambda_mst_sampling=lambda_mst_sampling,
+                                     lambda_mst_distribution=lambda_mst_distribution,
+                                     anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
+                                     custom_prior=custom_prior, interpolate_cosmo=interpolate_cosmo,
+                                     num_redshift_interp=num_redshift_interp, cosmo_fixed=cosmo_fixed)
         self.param = self.chain.param
 
     def mcmc_emcee(self, n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start):
@@ -42,8 +57,8 @@ class MCMCSampler(object):
 
         num_param = self.param.num_param
         sampler = emcee.EnsembleSampler(n_walkers, num_param, self.chain.likelihood, args=())
-        mean_start = self.param.kwargs2args(kwargs_mean_start)
-        sigma_start = self.param.kwargs2args(kwargs_sigma_start)
+        mean_start = self.param.kwargs2args(**kwargs_mean_start)
+        sigma_start = self.param.kwargs2args(**kwargs_sigma_start)
         p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
         sampler.run_mcmc(p0, n_burn+n_run, progress=True)
         flat_samples = sampler.get_chain(discard=n_burn, thin=1, flat=True)

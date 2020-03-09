@@ -31,7 +31,7 @@ class TestLensLikelihood(object):
         ani_param_array = np.linspace(0, 2, 10)
         ani_scaling_array = np.ones_like(ani_param_array)
         self.kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
-                                  'D_d_sample': self.D_d_samples, 'D_delta_t_sample': self.D_dt_samples,
+                                  'dd_sample': self.D_d_samples, 'ddt_sample': self.D_dt_samples,
                                   'kde_type': 'scipy_gaussian', 'bandwidth': 1},
                                  {'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'KinGaussian',
                                   'ds_dds_mean': lensCosmo.D_s/lensCosmo.D_ds, 'ds_dds_sigma': 1,
@@ -39,18 +39,22 @@ class TestLensLikelihood(object):
 
     def test_log_likelihood(self):
         lens = LensSampleLikelihood(kwargs_lens_list=self.kwargs_lens_list)
-        logl = lens.log_likelihood(self.cosmo, gamma_ppn=1, kappa_ext=0, aniso_param=1)
+        kwargs_lens = {'kappa_ext': 0, 'gamma_ppn': 1}
+        kwargs_kin = {'a_ani': 1}
+        logl = lens.log_likelihood(self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         cosmo = FlatLambdaCDM(H0=self.H0_true*0.99, Om0=self.omega_m_true, Ob0=0.05)
-        logl_sigma = lens.log_likelihood(cosmo, gamma_ppn=1, kappa_ext=0, aniso_param=1)
+        logl_sigma = lens.log_likelihood(cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         npt.assert_almost_equal(logl - logl_sigma, 0.12, decimal=2)
 
     def test_log_likelihood_interp(self):
         kwargs_lens_list = copy.deepcopy(self.kwargs_lens_list)
         kwargs_lens_list[0]['interpol'] = True
+        kwargs_lens = {'kappa_ext': 0, 'gamma_ppn': 1}
+        kwargs_kin = {'a_ani': 1}
         lens = LensSampleLikelihood(kwargs_lens_list=self.kwargs_lens_list)
-        logl = lens.log_likelihood(self.cosmo, gamma_ppn=1, kappa_ext=0, aniso_param=1)
+        logl = lens.log_likelihood(self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         cosmo = FlatLambdaCDM(H0=self.H0_true * 0.99, Om0=self.omega_m_true, Ob0=0.05)
-        logl_sigma = lens.log_likelihood(cosmo, gamma_ppn=1, kappa_ext=0, aniso_param=1)
+        logl_sigma = lens.log_likelihood(cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         npt.assert_almost_equal(logl - logl_sigma, 0.12, decimal=2)
 
 
@@ -75,7 +79,7 @@ class TestTDKinLikelihoodKDE(object):
         self.D_d_samples = np.random.normal(self.Dd_true, self.sigma_Dd, num_samples)
 
         self.kwargs_lens = {'z_lens': self.z_L, 'z_source': self.z_S,
-                                  'D_d_sample': self.D_d_samples, 'D_delta_t_sample': self.D_dt_samples,
+                                  'dd_sample': self.D_d_samples, 'ddt_sample': self.D_dt_samples,
                                   'kde_type': 'scipy_gaussian', 'bandwidth': 1}
 
     def test_log_likelihood(self):

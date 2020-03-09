@@ -3,40 +3,22 @@ from astropy.cosmology import FlatLambdaCDM, FlatwCDM, LambdaCDM, w0waCDM
 
 class CosmoParam(object):
     """
-    class for managing the parameters involved
+    manages the cosmological parameters in the sampling
     """
-    def __init__(self, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed, ppn_sampling=False,
-                 lambda_mst_sampling=False, anisotropy_sampling=False):
+    def __init__(self, cosmology, ppn_sampling=False, kwargs_fixed={}):
         """
 
         :param cosmology: string describing cosmological model
         :param ppn_sampling: post-newtonian parameter sampling
-        :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
-        :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
-        kinematic prediction
-        :param kwargs_lower: keyword arguments with lower limits of parameters
-        :param kwargs_upper: keyword arguments with upper limits of parameters
-        :param kwargs_fixed: keyword arguments and values of fixed parameters
+        :param kwargs_fixed: keyword arguments of fixed parameters during sampling
         """
         self._cosmology = cosmology
+        self._kwargs_fixed = kwargs_fixed
         self._ppn_sampling = ppn_sampling
-        self._lambda_mst_sampling = lambda_mst_sampling
-        self._anisotropy_sampling = anisotropy_sampling
         self._supported_cosmologies = ['FLCDM', "FwCDM", "w0waCDM", "oLCDM"]
         if cosmology not in self._supported_cosmologies:
-            raise ValueError('cosmology %s not supported!. Please chose among %s ' % (cosmology, self._supported_cosmologies))
-        self._kwargs_fixed = kwargs_fixed
-        self._kwargs_lower = kwargs_lower
-        self._kwargs_upper = kwargs_upper
-
-    @property
-    def num_param(self):
-        """
-        number of parameters being sampled
-
-        :return: integer
-        """
-        return len(self.param_list())
+            raise ValueError(
+                'cosmology %s not supported!. Please chose among %s ' % (cosmology, self._supported_cosmologies))
 
     def param_list(self, latex_style=False):
         """
@@ -85,37 +67,14 @@ class CosmoParam(object):
                     list.append(r'$\gamma_{\rm ppn}$')
                 else:
                     list.append('gamma_ppn')
-        if self._lambda_mst_sampling is True:
-            if 'lambda_mst' not in self._kwargs_fixed:
-                if latex_style is True:
-                    list.append(r'$\lambda_{\rm mst}$')
-                else:
-                    list.append('lambda_mst')
-            if 'lambda_mst_sigma' not in self._kwargs_fixed:
-                if latex_style is True:
-                    list.append(r'$\sigma(\lambda_{\rm mst})$')
-                else:
-                    list.append('lambda_mst_sigma')
-        if self._anisotropy_sampling is True:
-            if 'aniso_param' not in self._kwargs_fixed:
-                if latex_style is True:
-                    list.append(r'$a_{\rm ani}$')
-                else:
-                    list.append('aniso_param')
-            if 'aniso_param_sigma' not in self._kwargs_fixed:
-                if latex_style is True:
-                    list.append(r'$\sigma(a_{\rm ani})$')
-                else:
-                    list.append('aniso_param_sigma')
         return list
 
-    def args2kwargs(self, args):
+    def args2kwargs(self, args, i=0):
         """
 
         :param args: sampling argument list
         :return: keyword argument list with parameter names
         """
-        i = 0
         kwargs = {}
         if 'h0' in self._kwargs_fixed:
             kwargs['h0'] = self._kwargs_fixed['h0']
@@ -157,29 +116,7 @@ class CosmoParam(object):
             else:
                 kwargs['gamma_ppn'] = args[i]
                 i += 1
-        if self._lambda_mst_sampling is True:
-            if 'lambda_mst' in self._kwargs_fixed:
-                kwargs['lambda_mst'] = self._kwargs_fixed['lambda_mst']
-            else:
-                kwargs['lambda_mst'] = args[i]
-                i += 1
-            if 'lambda_mst_sigma' in self._kwargs_fixed:
-                kwargs['lambda_mst_sigma'] = self._kwargs_fixed['lambda_mst_sigma']
-            else:
-                kwargs['lambda_mst_sigma'] = args[i]
-                i += 1
-        if self._anisotropy_sampling is True:
-            if 'aniso_param' in self._kwargs_fixed:
-                kwargs['aniso_param'] = self._kwargs_fixed['aniso_param']
-            else:
-                kwargs['aniso_param'] = args[i]
-                i += 1
-            if 'aniso_param_sigma' in self._kwargs_fixed:
-                kwargs['aniso_param_sigma'] = self._kwargs_fixed['aniso_param_sigma']
-            else:
-                kwargs['aniso_param_sigma'] = args[i]
-                i += 1
-        return kwargs
+        return kwargs, i
 
     def kwargs2args(self, kwargs):
         """
@@ -207,22 +144,12 @@ class CosmoParam(object):
         if self._ppn_sampling is True:
             if 'gamma_ppn' not in self._kwargs_fixed:
                 args.append(kwargs['gamma_ppn'])
-        if self._lambda_mst_sampling is True:
-            if 'lambda_mst' not in self._kwargs_fixed:
-                args.append(kwargs['lambda_mst'])
-            if 'lambda_mst_sigma' not in self._kwargs_fixed:
-                args.append(kwargs['lambda_mst_sigma'])
-        if self._anisotropy_sampling is True:
-            if 'aniso_param' not in self._kwargs_fixed:
-                args.append(kwargs['aniso_param'])
-            if 'aniso_param_sigma' not in self._kwargs_fixed:
-                args.append(kwargs['aniso_param_sigma'])
         return args
 
     def cosmo(self, kwargs):
         """
 
-        :param kwargs: keyword arguments of parameters
+        :param kwargs: keyword arguments of parameters (can include others not used for the cosmology)
         :return: astropy.cosmology instance
         """
         if self._cosmology == "FLCDM":
@@ -236,13 +163,3 @@ class CosmoParam(object):
         else:
             raise ValueError("Cosmology %s is not supported" % self._cosmology)
         return cosmo
-
-    @property
-    def param_bounds(self):
-        """
-
-        :return: argument list of the hard bounds in the order of the sampling
-        """
-        lowerlimit = self.kwargs2args(self._kwargs_lower)
-        upperlimit = self.kwargs2args(self._kwargs_upper)
-        return lowerlimit, upperlimit

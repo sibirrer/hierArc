@@ -30,16 +30,21 @@ class TestMCMCSampling(object):
         n_walkers = 6
         n_run = 2
         n_burn = 2
-        kwargs_mean_start = {'h0': self.H0_true}
+        kwargs_mean_start = {'kwargs_cosmo': {'h0': self.H0_true}}
         kwargs_fixed = {'om': self.omega_m_true}
-        kwargs_sigma_start = {'h0': 5}
+        kwargs_sigma_start = {'kwargs_cosmo': {'h0': 5}}
         kwargs_lower = {'h0': 10}
         kwargs_upper = {'h0': 200}
-        kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
-                             'D_d_sample': self.D_d_samples, 'D_delta_t_sample': self.D_dt_samples,
+        kwargs_likelihood_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
+                             'dd_sample': self.D_d_samples, 'ddt_sample': self.D_dt_samples,
                              'kde_type': 'scipy_gaussian', 'bandwidth': 1}]
         cosmology = 'FLCDM'
-        mcmc_sampler = MCMCSampler(kwargs_lens_list, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed, ppn_sampling=False)
+        kwargs_bounds = {'kwargs_fixed_cosmo': kwargs_fixed, 'kwargs_lower_cosmo': kwargs_lower,
+                         'kwargs_upper_cosmo': kwargs_upper}
+        mcmc_sampler = MCMCSampler(kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
+                 lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
+                 anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
+                 cosmo_fixed=None)
         samples, log_prob = mcmc_sampler.mcmc_emcee(n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start)
         assert len(samples) == n_walkers*n_run
         assert len(log_prob) == n_walkers*n_run

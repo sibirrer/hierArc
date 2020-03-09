@@ -1,5 +1,5 @@
 __author__ = 'sibirrer'
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, RectBivariateSpline
 import numpy as np
 
 
@@ -12,11 +12,17 @@ class AnisotropyScaling(object):
         """
 
         :param ani_param_array: array of anisotropy parameter value
-        :param ani_scaling_array: array with the scalings of J() for single slit
+        :param ani_scaling_array: array with the scaling of J() for single slit
         """
         self._evalute_ani = False
         if ani_param_array is not None and ani_scaling_array is not None:
-            self._f_ani = interp1d(ani_param_array, ani_scaling_array, kind='cubic')
+            self._dim_scaling = ani_param_array.ndim
+            if self._dim_scaling == 1:
+                self._f_ani = interp1d(ani_param_array, ani_scaling_array, kind='cubic')
+            elif self._dim_scaling == 2:
+                self._f_ani = RectBivariateSpline(ani_param_array[0], ani_param_array[1], ani_scaling_array)
+            else:
+                raise ValueError('anisotropy scaling with dimension %s not supported.' % self._dim_scaling)
             self._ani_param_min = np.min(ani_param_array)
             self._ani_param_max = np.max(ani_param_array)
             self._evalute_ani = True
@@ -29,7 +35,10 @@ class AnisotropyScaling(object):
         """
         if not self._evalute_ani is True or a_ani is None:
             return 1
-        return self._f_ani(a_ani)
+        if self._dim_scaling == 1:
+            return self._f_ani(a_ani[0])
+        elif self._dim_scaling == 2:
+            return self._f_ani(a_ani[0], a_ani[1])
 
 
 class AnisotropyScalingIFU(object):

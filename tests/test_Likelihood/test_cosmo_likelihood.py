@@ -15,41 +15,55 @@ class TestCosmoLikelihood(object):
 
         self.H0_true = 70
         self.omega_m_true = 0.3
-        self.cosmo = FlatLambdaCDM(H0=self.H0_true, Om0=self.omega_m_true, Ob0=0.05)
+        self.cosmo = FlatLambdaCDM(H0=self.H0_true, Om0=self.omega_m_true, Ob0=0.0)
         lensCosmo = LensCosmo(self.z_L, self.z_S, cosmo=self.cosmo)
         self.Dd_true = lensCosmo.D_d
         self.D_dt_true = lensCosmo.D_dt
+        self.sigma_Dd = 0.9 * self.Dd_true
+        self.sigma_Ddt = 0.01 * self.D_dt_true
+        num_samples = 20000
+        self.ddt_samples = np.random.normal(self.D_dt_true, self.sigma_Ddt, num_samples)
+        self.dd_samples = np.random.normal(self.Dd_true, self.sigma_Dd, num_samples)
+        self.kwargs_likelihood_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinGaussian',
+                                        'ddt_mean': self.D_dt_true, 'ddt_sigma': self.sigma_Ddt,
+                                        'dd_mean': self.Dd_true, 'dd_sigma': self.sigma_Dd}]
 
-        self.sigma_Dd = 100
-        self.sigma_Ddt = 100
-        num_samples = 10000
-        self.D_dt_samples = np.random.normal(self.D_dt_true, self.sigma_Ddt, num_samples)
-        self.D_d_samples = np.random.normal(self.Dd_true, self.sigma_Dd, num_samples)
-
-        self.kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
-                                  'D_d_sample': self.D_d_samples, 'D_delta_t_sample': self.D_dt_samples,
-                                  'kde_type': 'scipy_gaussian', 'bandwidth': 1}]
+        #self.kwargs_likelihood_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
+        #                          'dd_sample': self.dd_samples, 'ddt_sample': self.ddt_samples,
+        #                          'kde_type': 'scipy_gaussian', 'bandwidth': 10}]
 
     def test_log_likelihood(self):
-        kwargs_lower = {'h0': 10, 'om': 0., 'ok': -0.8, 'w': -2, 'wa': -1, 'w0': -2, 'gamma_ppn': 0}
-        kwargs_upper = {'h0': 200, 'om': 1, 'ok': 0.8, 'w': 0, 'wa': 1, 'w0': 1, 'gamma_ppn': 5}
+        kwargs_lower_lens = {'gamma_ppn': 0, 'lambda_mst': 0}
+        kwargs_upper_lens = {'gamma_ppn': 2, 'lambda_mst': 2}
+        kwargs_fixed_lens = {}
+        kwargs_lower_cosmo = {'h0': 10, 'om': 0., 'ok': -0.8, 'w': -2, 'wa': -1, 'w0': -2}
+        kwargs_upper_cosmo = {'h0': 200, 'om': 1, 'ok': 0.8, 'w': 0, 'wa': 1, 'w0': 1}
         cosmology = 'oLCDM'
-        cosmoL = CosmoLikelihood(self.kwargs_lens_list, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed={}, ppn_sampling=False)
-        def custom_prior(kwargs):
+        kwargs_bounds = {'kwargs_lower_lens': kwargs_lower_lens, 'kwargs_upper_lens': kwargs_upper_lens, 'kwargs_fixed_lens': kwargs_fixed_lens,
+                         'kwargs_lower_cosmo': kwargs_lower_cosmo, 'kwargs_upper_cosmo': kwargs_upper_cosmo}
+        cosmoL = CosmoLikelihood(self.kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
+                                 lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
+                                 anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
+                                 cosmo_fixed=None)
+        def custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin):
             return -1
-        cosmoL_prior = CosmoLikelihood(self.kwargs_lens_list, cosmology, kwargs_lower, kwargs_upper, kwargs_fixed={},
-                                 ppn_sampling=False, custom_prior=custom_prior)
-        kwargs = {'h0': self.H0_true, 'om': self.omega_m_true, 'ok': 0}
-        args = cosmoL.param.kwargs2args(kwargs)
+
+        cosmoL_prior = CosmoLikelihood(self.kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
+                                       lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
+                                       anisotropy_model='OM', custom_prior=custom_prior, interpolate_cosmo=True,
+                                       num_redshift_interp=100,
+                                       cosmo_fixed=None)
+
+        kwargs_cosmo = {'h0': self.H0_true, 'om': self.omega_m_true, 'ok': 0}
+        args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
         logl = cosmoL.likelihood(args=args)
         logl_prior = cosmoL_prior.likelihood(args=args)
         npt.assert_almost_equal(logl - logl_prior, 1, decimal=8)
 
         kwargs = {'h0': self.H0_true*0.99, 'om': self.omega_m_true, 'ok': 0}
-        args = cosmoL.param.kwargs2args(kwargs)
+        args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs)
         logl_sigma = cosmoL.likelihood(args=args)
-        print(logl)
-        npt.assert_almost_equal(logl - logl_sigma, 0.12, decimal=2)
+        npt.assert_almost_equal(logl - logl_sigma, 0.5, decimal=2)
 
         kwargs = {'h0': 100, 'om': 1., 'ok': 0.1}
         args = cosmoL.param.kwargs2args(kwargs)
