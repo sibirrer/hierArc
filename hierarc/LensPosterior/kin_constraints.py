@@ -69,6 +69,7 @@ class DsDdsConstraints(BaseLensConfig):
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :param sampling_number: int, number of spectral rendering (see lenstronomy GalKin module)
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         theta_E_draw, gamma_draw, r_eff_draw = self.draw_lens(no_error=no_error)
