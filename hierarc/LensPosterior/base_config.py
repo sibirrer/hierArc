@@ -38,7 +38,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         TDCosmography.__init__(self, z_lens, z_source, kwargs_model, cosmo_fiducial=None,
                                  lens_model_kinematics_bool=None, light_model_kinematics_bool=None)
         self.kinematic_observation_settings(kwargs_aperture, kwargs_seeing)
-        if kwargs_lens_light is None and anisotropy_model == 'OsipkovMerritt':
+        if kwargs_lens_light is None and anisotropy_model == 'OM':
             analytic_kinematics = True
         else:
             analytic_kinematics = False
@@ -51,7 +51,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
 
         self._anisotropy_model = anisotropy_model
 
-        if self._anisotropy_model == 'OsipkovMerritt':
+        if self._anisotropy_model == 'OM':
             self._ani_param_array = np.array([0.1, 0.2, 0.5, 1, 2, 5])  # used for r_ani OsipkovMerritt anisotropy description
         elif self._anisotropy_model == 'const':
             self._ani_param_array = np.linspace(0, 1, 10)  # used for constant anisotropy description
@@ -64,7 +64,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
 
         :return: keyword arguments of base anisotropy model configuration
         """
-        if self._anisotropy_model == 'OsipkovMerritt':
+        if self._anisotropy_model == 'OM':
             a_ani_0 = 1
             r_ani = a_ani_0 * self._r_eff
             kwargs_anisotropy_0 = {'r_ani': r_ani}
@@ -90,11 +90,11 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         :return: list of anisotropy keyword arguments, value of anisotropy parameter list
         """
 
-        if self._anisotropy_model == 'OsipkovMerritt':
+        if self._anisotropy_model == 'OM':
             r_ani = a_ani * self._r_eff
-            kwargs_anisotropy_0 = {'r_ani': r_ani}
+            kwargs_anisotropy = {'r_ani': r_ani}
         elif self._anisotropy_model == 'const':
-            kwargs_anisotropy_0 = {'beta': a_ani}
+            kwargs_anisotropy = {'beta': a_ani}
         else:
             raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
-        return kwargs_anisotropy_0
+        return kwargs_anisotropy
