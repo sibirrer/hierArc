@@ -125,12 +125,11 @@ class DsDdsConstraints(BaseLensConfig):
 
         # here we loop through the possible anisotropy configuration within the model parameterization
         ds_dds_ani_0 = self.ds_dds_realization(self.kwargs_anisotropy_base, no_error=True)
-        ani_scaling_array = []
-        for a_ani in self.ani_param_array:
+        ani_scaling_array = np.zeros_like(self.ani_param_array)
+        for i, a_ani in enumerate(self.ani_param_array):
             kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
             ds_dds_ani = self.ds_dds_realization(kwargs_anisotropy, no_error=True)
-            ani_scaling_array.append(ds_dds_ani / ds_dds_ani_0)
-        ani_scaling_array = np.array(ani_scaling_array)
+            ani_scaling_array[i] = ds_dds_ani / ds_dds_ani_0
         return ds_dds_mean, ds_dds_sigma, self.ani_param_array, ani_scaling_array
 
     def hierarchy_configuration(self, num_sample_model=20, num_kin_measurements=50):
