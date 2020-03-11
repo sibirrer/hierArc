@@ -20,8 +20,8 @@ class TestLensLikelihood(object):
         self.omega_m_true = 0.3
         self.cosmo = FlatLambdaCDM(H0=self.H0_true, Om0=self.omega_m_true, Ob0=0.05)
         lensCosmo = LensCosmo(self.z_L, self.z_S, cosmo=self.cosmo)
-        self.Dd_true = lensCosmo.D_d
-        self.D_dt_true = lensCosmo.D_dt
+        self.Dd_true = lensCosmo.dd
+        self.D_dt_true = lensCosmo.ddt
 
         self.sigma_Dd = 100
         self.sigma_Ddt = 100
@@ -34,7 +34,7 @@ class TestLensLikelihood(object):
                                   'dd_sample': self.D_d_samples, 'ddt_sample': self.D_dt_samples,
                                   'kde_type': 'scipy_gaussian', 'bandwidth': 1},
                                  {'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'KinGaussian',
-                                  'ds_dds_mean': lensCosmo.D_s/lensCosmo.D_ds, 'ds_dds_sigma': 1,
+                                  'ds_dds_mean': lensCosmo.ds/lensCosmo.dds, 'ds_dds_sigma': 1,
                                   'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array}]
 
     def test_log_likelihood(self):
@@ -69,8 +69,8 @@ class TestTDKinLikelihoodKDE(object):
         self.omega_m_true = 0.3
         self.cosmo = FlatLambdaCDM(H0=self.H0_true, Om0=self.omega_m_true, Ob0=0.05)
         lensCosmo = LensCosmo(self.z_L, self.z_S, cosmo=self.cosmo)
-        self.Dd_true = lensCosmo.D_d
-        self.D_dt_true = lensCosmo.D_dt
+        self.Dd_true = lensCosmo.dd
+        self.D_dt_true = lensCosmo.ddt
 
         self.sigma_Dd = 100
         self.sigma_Ddt = 500

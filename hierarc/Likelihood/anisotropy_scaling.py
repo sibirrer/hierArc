@@ -23,22 +23,24 @@ class AnisotropyScaling(object):
                 self._f_ani = RectBivariateSpline(ani_param_array[0], ani_param_array[1], ani_scaling_array)
             else:
                 raise ValueError('anisotropy scaling with dimension %s not supported.' % self._dim_scaling)
-            self._ani_param_min = np.min(ani_param_array)
-            self._ani_param_max = np.max(ani_param_array)
+            self._ani_param_min = np.min(ani_param_array, axis=0)
+            self._ani_param_max = np.max(ani_param_array, axis=0)
+            if self._dim_scaling > 1:
+                assert len(self._ani_param_min) == self._dim_scaling
             self._evalute_ani = True
 
-    def ani_scaling(self, a_ani):
+    def ani_scaling(self, aniso_param_array):
         """
 
-        :param a_ani: anisotropy parameter
+        :param aniso_param_array: anisotropy parameter array
         :return: scaling J(a_ani) for single slit
         """
-        if not self._evalute_ani is True or a_ani is None:
+        if not self._evalute_ani is True or aniso_param_array is None:
             return 1
         if self._dim_scaling == 1:
-            return self._f_ani(a_ani[0])
+            return self._f_ani(aniso_param_array[0])
         elif self._dim_scaling == 2:
-            return self._f_ani(a_ani[0], a_ani[1])
+            return self._f_ani(aniso_param_array[0], aniso_param_array[1])
 
 
 class AnisotropyScalingIFU(object):

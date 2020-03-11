@@ -17,8 +17,8 @@ class TestMCMCSampling(object):
         self.omega_m_true = 0.3
         self.cosmo = FlatLambdaCDM(H0=self.H0_true, Om0=self.omega_m_true, Ob0=0.05)
         lensCosmo = LensCosmo(self.z_L, self.z_S, cosmo=self.cosmo)
-        self.Dd_true = lensCosmo.D_d
-        self.D_dt_true = lensCosmo.D_dt
+        self.Dd_true = lensCosmo.dd
+        self.D_dt_true = lensCosmo.ddt
 
         self.sigma_Dd = 100
         self.sigma_Ddt = 100

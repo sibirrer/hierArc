@@ -94,7 +94,7 @@ class IFUKin(BaseLensConfig):
         error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(self._sigma_v_error_independent ** 2)
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
-                             'sigma_v_measurement': self._sigma_v,
+                             'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
                              'j_mean_list': j_mean_list,  'error_cov_measurement': error_cov_measurement,
                              'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,
                              'ani_scaling_array_list': ani_scaling_array_list}
