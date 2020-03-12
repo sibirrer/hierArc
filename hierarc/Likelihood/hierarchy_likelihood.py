@@ -8,7 +8,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
     master class containing the likelihood definitions of different analysis
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE', ani_param_array=None,
-                 num_distribution_draws=20, **kwargs_likelihood):
+                 num_distribution_draws=50, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -30,7 +30,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
                 self._dim_scaling = len(ani_param_array)
             else:
                 self._dim_scaling = 1
-           # self._dim_scaling = ani_param_array.ndim
             if self._dim_scaling == 1:
                 self._ani_param_min = np.min(ani_param_array)
                 self._ani_param_max = np.max(ani_param_array)
@@ -148,6 +147,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
             beta_inf_draw = np.random.normal(beta_inf, beta_inf_sigma)
             if a_ani_draw < self._ani_param_min[0] or a_ani_draw > self._ani_param_max[0] or beta_inf_draw < self._ani_param_min[1] or beta_inf_draw > self._ani_param_max[1]:
                 return self.draw_anisotropy(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma)
-            return np.array([a_ani_draw, beta_inf_draw])
+            return np.array([beta_inf_draw, a_ani_draw])
         return None
 

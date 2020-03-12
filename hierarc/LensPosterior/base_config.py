@@ -38,10 +38,10 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         TDCosmography.__init__(self, z_lens, z_source, kwargs_model, cosmo_fiducial=None,
                                  lens_model_kinematics_bool=None, light_model_kinematics_bool=None)
         self.kinematic_observation_settings(kwargs_aperture, kwargs_seeing)
-        if kwargs_lens_light is None and anisotropy_model == 'OM':
-            analytic_kinematics = True
-        else:
-            analytic_kinematics = False
+        #if kwargs_lens_light is None and anisotropy_model == 'OM':
+        #    analytic_kinematics = True
+        #else:
+        analytic_kinematics = False
         self.kinematics_modeling_settings(anisotropy_model, kwargs_numerics_galkin,
                                           analytic_kinematics=analytic_kinematics,
                                           Hernquist_approx=hernquist_approx, MGE_light=MGE_light, MGE_mass=False,
@@ -55,7 +55,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         if self._anisotropy_model == 'OM':
             self._ani_param_array = np.array([0.1, 0.2, 0.5, 1, 2, 5])  # used for r_ani OsipkovMerritt anisotropy description
         elif self._anisotropy_model == 'GOM':
-            self._ani_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5]), np.array([0, 0.5, 1])]
+            self._ani_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5]), np.array([0, 0.5, 0.8, 1])]
         elif self._anisotropy_model == 'const':
             self._ani_param_array = np.linspace(0, 1, 10)  # used for constant anisotropy description
         else:

@@ -22,7 +22,7 @@ class AnisotropyScaling(object):
                 self._dim_scaling = 1
            # self._dim_scaling = ani_param_array.ndim
             if self._dim_scaling == 1:
-                self._f_ani = interp1d(ani_param_array, ani_scaling_array, kind='cubic')
+                self._f_ani = interp1d(ani_param_array, ani_scaling_array, kind='linear')
                 #self._ani_param_min = np.min(ani_param_array)
                 #self._ani_param_max = np.max(ani_param_array)
             elif self._dim_scaling == 2:
@@ -60,23 +60,26 @@ class AnisotropyScalingIFU(object):
         """
         self._evalute_ani = False
         if ani_param_array is not None and ani_scaling_array_list is not None:
+            self._evalute_ani = True
+            self._anisotropy_scaling_list = []
             self._f_ani_list = []
             for ani_scaling_array in ani_scaling_array_list:
-                self._f_ani_list.append(interp1d(ani_param_array, ani_scaling_array, kind='cubic'))
-            self._ani_param_min = np.min(ani_param_array)
-            self._ani_param_max = np.max(ani_param_array)
-            self._evalute_ani = True
+                self._anisotropy_scaling_list.append(AnisotropyScaling(ani_param_array=ani_param_array,
+                                                                       ani_scaling_array=ani_scaling_array))
+                #self._f_ani_list.append(interp1d(ani_param_array, ani_scaling_array, kind='cubic'))
+            #self._ani_param_min = np.min(ani_param_array)
+            #self._ani_param_max = np.max(ani_param_array)
 
-    def ani_scaling(self, a_ani):
+    def ani_scaling(self, aniso_param_array):
         """
 
-        :param a_ani: anisotropy parameter
+        :param aniso_param_array: anisotropy parameter array
         :return: scaling J(a_ani) for the IFU's
         """
-        if not self._evalute_ani is True or a_ani is None:
+        if not self._evalute_ani is True or aniso_param_array is None:
             return 1
         scaling_list = []
-        for f_ani in self._f_ani_list:
-            scaling = f_ani(a_ani)
+        for scaling_class in self._anisotropy_scaling_list:
+            scaling = scaling_class.ani_scaling(aniso_param_array)
             scaling_list.append(scaling)
         return np.array(scaling_list)

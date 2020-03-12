@@ -9,7 +9,7 @@ class IFUKin(BaseLensConfig):
     def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error, sigma_v,
                  sigma_v_error_independent, sigma_v_error_covariant, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True):
+                 hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000):
         """
 
         :param z_lens: lens redshift
@@ -39,7 +39,9 @@ class IFUKin(BaseLensConfig):
                                 sigma_v, sigma_v_error_independent, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
                                 anisotropy_model, kwargs_lens_light=kwargs_lens_light,
                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
-                                kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx)
+                                kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
+                                sampling_number=sampling_number, num_psf_sampling=num_psf_sampling,
+                                num_kin_sampling=num_kin_sampling)
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):
         """
@@ -81,12 +83,23 @@ class IFUKin(BaseLensConfig):
         cov_j = np.cov(np.sqrt(j_kin_matrix.T))
         j_mean_list = np.mean(j_kin_matrix, axis=0)
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
-        ani_scaling_array_list = [[] for i in range(num_data)]
-        for a_ani in self.ani_param_array:
-            kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
-            j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
-            for i, j_kin in enumerate(j_kin_ani):
-                ani_scaling_array_list[i].append(j_kin/j_ani_0[i])
+        print(j_mean_list, j_ani_0, 'test mean vs no error')
+
+        if self._anisotropy_model == 'GOM':
+            ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for i in range(num_data)]
+            for i, a_ani in enumerate(self.ani_param_array[0]):
+                for j, beta_inf in enumerate(self.ani_param_array[1]):
+                    kwargs_anisotropy = self.anisotropy_kwargs(a_ani=a_ani, beta_inf=beta_inf)
+                    j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
+                    for k, j_kin in enumerate(j_kin_ani):
+                        ani_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
+        else:
+            ani_scaling_array_list = [[] for i in range(num_data)]
+            for a_ani in self.ani_param_array:
+                kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
+                j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
+                for i, j_kin in enumerate(j_kin_ani):
+                    ani_scaling_array_list[i].append(j_kin / j_ani_0[i])
 
         error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
         error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(self._sigma_v_error_independent ** 2)

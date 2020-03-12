@@ -28,7 +28,7 @@ class IFUKinCov(AnisotropyScalingIFU):
         self._error_cov_j_sqrt = error_cov_j_sqrt
         AnisotropyScalingIFU.__init__(self, ani_param_array=ani_param_array, ani_scaling_array_list=ani_scaling_array_list)
 
-    def log_likelihood(self, ddt, dd, a_ani):
+    def log_likelihood(self, ddt, dd, aniso_param_array=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
@@ -37,7 +37,7 @@ class IFUKinCov(AnisotropyScalingIFU):
         :return: log likelihood given the single lens analysis
         """
         ds_dds = ddt / dd / (1 + self._z_lens)
-        scaling_ifu = self.ani_scaling(a_ani)
+        scaling_ifu = self.ani_scaling(aniso_param_array)
         sigma_v_predict = np.sqrt(ds_dds * scaling_ifu * self._j_mean_list) * const.c / 1000
         delta = self._sigma_v_measured - sigma_v_predict
         scaling_matix = np.outer(np.sqrt(scaling_ifu), np.sqrt(scaling_ifu))

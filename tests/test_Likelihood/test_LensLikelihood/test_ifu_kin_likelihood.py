@@ -25,9 +25,9 @@ class TestIFUKinLikelihood(object):
         error_cov_j_sqrt = np.diag(np.zeros_like(sigma_v_measurement))
         ifu_likelihood = IFUKinCov(z_lens, z_source, sigma_v_measurement, j_mean_list, error_cov_measurement,
                                    error_cov_j_sqrt, ani_param_array=None, ani_scaling_array_list=None)
-        logl = ifu_likelihood.log_likelihood(ddt, dd, a_ani=None)
+        logl = ifu_likelihood.log_likelihood(ddt, dd, aniso_param_array=None)
         npt.assert_almost_equal(logl, 0, decimal=5)
-        logl = ifu_likelihood.log_likelihood(ddt*0.9**2, dd, a_ani=None)
+        logl = ifu_likelihood.log_likelihood(ddt*0.9**2, dd, aniso_param_array=None)
         npt.assert_almost_equal(logl, -num_ifu/2, decimal=5)
 
 
