@@ -11,7 +11,8 @@ class DdtKinConstraints(DsDdsConstraints):
     def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error, sigma_v,
                  sigma_v_error, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True, kappa_ext=0, kappa_ext_sigma=0):
+                 hernquist_approx=True, kappa_ext=0, kappa_ext_sigma=0, sampling_number=1000, num_psf_sampling=100,
+                 num_kin_sampling=1000):
         """
 
         :param z_lens: lens redshift
@@ -43,7 +44,9 @@ class DdtKinConstraints(DsDdsConstraints):
                                                 kwargs_numerics_galkin, anisotropy_model,
                                                 kwargs_lens_light=kwargs_lens_light,
                                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
-                                                kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx)
+                                                kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
+                                                sampling_number=sampling_number, num_psf_sampling=num_psf_sampling,
+                                                num_kin_sampling=num_kin_sampling)
 
     def hierarchy_configuration(self, num_sample_model=20, num_kin_measurements=50):
         """
@@ -73,7 +76,8 @@ class DdtKinConstraints(DsDdsConstraints):
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'TDKinGaussian',
                              'ddt_mean': self._ddt_mean, 'ddt_sigma': self._ddt_sigma,
                              'dd_mean': dd_mean,  'dd_sigma': dd_sigma,
-                             'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array}
+                             'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array,
+                             'anisotropy_model': self._anisotropy_model}
         return kwargs_likelihood
 
     @staticmethod

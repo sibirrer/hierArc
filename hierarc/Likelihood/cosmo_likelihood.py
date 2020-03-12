@@ -11,8 +11,8 @@ class CosmoLikelihood(object):
 
     def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
-                 anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
-                 cosmo_fixed=None):
+                 anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
+                 num_redshift_interp=100, cosmo_fixed=None):
         """
 
         :param kwargs_likelihood_list: keyword argument list specifying the arguments of the LensLikelihood class
@@ -28,6 +28,7 @@ class CosmoLikelihood(object):
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_model: string, specifies the stellar anisotropy model
+        :param anisotropy_distribution: string, distribution of the anisotropy parameters
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
@@ -40,6 +41,7 @@ class CosmoLikelihood(object):
         self.param = ParamManager(cosmology, ppn_sampling=ppn_sampling, lambda_mst_sampling=lambda_mst_sampling,
                                   lambda_mst_distribution=lambda_mst_distribution,
                                   anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
+                                  anisotropy_distribution=anisotropy_distribution,
                                   **kwargs_bounds)
         self._lower_limit, self._upper_limit = self.param.param_bounds
         self._prior_add = False

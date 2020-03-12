@@ -10,7 +10,7 @@ class DsDdsConstraints(BaseLensConfig):
     def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error, sigma_v,
                  sigma_v_error, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True):
+                 hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000):
         """
 
         :param z_lens: lens redshift
@@ -35,7 +35,9 @@ class DsDdsConstraints(BaseLensConfig):
                                 sigma_v, sigma_v_error, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
                                 anisotropy_model, kwargs_lens_light=kwargs_lens_light,
                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
-                                kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx)
+                                kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
+                                sampling_number=sampling_number, num_psf_sampling=num_psf_sampling,
+                                num_kin_sampling=num_kin_sampling)
 
     def draw_vel_disp(self, num=1, no_error=False):
         """
@@ -63,13 +65,12 @@ class DsDdsConstraints(BaseLensConfig):
         ds_dds = self.ds_dds_from_kinematics(sigma_v_draw, j_kin, kappa_s=0, kappa_ds=0)
         return ds_dds
 
-    def j_kin_draw(self, kwargs_anisotropy, no_error=False, sampling_number=1000):
+    def j_kin_draw(self, kwargs_anisotropy, no_error=False):
         """
         one simple sampling realization of the dimensionless kinematics of the model
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
-        :param sampling_number: int, number of spectral rendering (see lenstronomy GalKin module)
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         theta_E_draw, gamma_draw, r_eff_draw = self.draw_lens(no_error=no_error)
@@ -80,8 +81,7 @@ class DsDdsConstraints(BaseLensConfig):
             kwargs_light = self._kwargs_lens_light
         j_kin = self.velocity_dispersion_dimension_less(kwargs_lens=kwargs_lens, kwargs_lens_light=kwargs_light,
                                                         kwargs_anisotropy=kwargs_anisotropy, r_eff=r_eff_draw,
-                                                        theta_E=theta_E_draw, gamma=gamma_draw,
-                                                        sampling_number=sampling_number)
+                                                        theta_E=theta_E_draw, gamma=gamma_draw)
         return j_kin
 
     def ds_dds_sample(self, kwargs_anisotropy, num_sample_model=20, num_kin_measurements=50):
@@ -125,11 +125,19 @@ class DsDdsConstraints(BaseLensConfig):
 
         # here we loop through the possible anisotropy configuration within the model parameterization
         ds_dds_ani_0 = self.ds_dds_realization(self.kwargs_anisotropy_base, no_error=True)
-        ani_scaling_array = np.zeros_like(self.ani_param_array)
-        for i, a_ani in enumerate(self.ani_param_array):
-            kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
-            ds_dds_ani = self.ds_dds_realization(kwargs_anisotropy, no_error=True)
-            ani_scaling_array[i] = ds_dds_ani / ds_dds_ani_0
+        if self._anisotropy_model == 'GOM':
+            ani_scaling_array = np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1])))
+            for i, a_ani in enumerate(self.ani_param_array[0]):
+                for j, beta_inf in enumerate(self.ani_param_array[1]):
+                    kwargs_anisotropy = self.anisotropy_kwargs(a_ani=a_ani, beta_inf=beta_inf)
+                    ds_dds_ani = self.ds_dds_realization(kwargs_anisotropy, no_error=True)
+                    ani_scaling_array[i, j] = ds_dds_ani / ds_dds_ani_0
+        else:
+            ani_scaling_array = np.zeros_like(self.ani_param_array)
+            for i, a_ani in enumerate(self.ani_param_array):
+                kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
+                ds_dds_ani = self.ds_dds_realization(kwargs_anisotropy, no_error=True)
+                ani_scaling_array[i] = ds_dds_ani / ds_dds_ani_0
         return ds_dds_mean, ds_dds_sigma, self.ani_param_array, ani_scaling_array
 
     def hierarchy_configuration(self, num_sample_model=20, num_kin_measurements=50):
@@ -151,5 +159,6 @@ class DsDdsConstraints(BaseLensConfig):
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'KinGaussian',
                              'ds_dds_mean': ds_dds_mean,  'ds_dds_sigma': ds_dds_sigma,
-                             'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array}
+                             'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array,
+                             'anisotropy_model': self._anisotropy_model}
         return kwargs_likelihood

@@ -71,7 +71,8 @@ class TDKinGaussian(AnisotropyScaling):
         :return: log likelihood given the single lens analysis
         """
         dd_ = dd * self.ani_scaling(aniso_param_array)
-        return self._tdLikelihood.log_likelihood(ddt, dd_) - (dd_ - self._dd_mean) ** 2 / self._dd_sigma2 / 2
+        lnlikelihood = self._tdLikelihood.log_likelihood(ddt, dd_) - (dd_ - self._dd_mean) ** 2 / self._dd_sigma2 / 2
+        return lnlikelihood
 
 
 class TDKinLikelihoodKDE(AnisotropyScaling):

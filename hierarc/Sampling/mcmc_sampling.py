@@ -9,7 +9,7 @@ class MCMCSampler(object):
     """
     def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
-                 anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
+                 anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
                  cosmo_fixed=None):
         """
         initialise the classes of the chain and for parameter options
@@ -28,6 +28,7 @@ class MCMCSampler(object):
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_model: string, specifies the stellar anisotropy model
+        :param anisotropy_distribution: string, distribution of the anisotropy parameters
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
@@ -39,6 +40,7 @@ class MCMCSampler(object):
                                      lambda_mst_sampling=lambda_mst_sampling,
                                      lambda_mst_distribution=lambda_mst_distribution,
                                      anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
+                                     anisotropy_distribution=anisotropy_distribution,
                                      custom_prior=custom_prior, interpolate_cosmo=interpolate_cosmo,
                                      num_redshift_interp=num_redshift_interp, cosmo_fixed=cosmo_fixed)
         self.param = self.chain.param

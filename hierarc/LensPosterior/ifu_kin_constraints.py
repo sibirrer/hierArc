@@ -41,7 +41,7 @@ class IFUKin(BaseLensConfig):
                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
                                 kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx)
 
-    def j_kin_draw(self, kwargs_anisotropy, no_error=False, num_kin_sampling=1000, num_psf_sampling=100):
+    def j_kin_draw(self, kwargs_anisotropy, no_error=False):
         """
         one simple sampling realization of the dimensionless kinematics of the model
 
@@ -57,9 +57,7 @@ class IFUKin(BaseLensConfig):
             kwargs_light = self._kwargs_lens_light
         j_kin = self.velocity_dispersion_map_dimension_less(kwargs_lens=kwargs_lens, kwargs_lens_light=kwargs_light,
                                                             kwargs_anisotropy=kwargs_anisotropy, r_eff=r_eff_draw,
-                                                            theta_E=theta_E_draw, gamma=gamma_draw,
-                                                            num_psf_sampling=num_psf_sampling,
-                                                            num_kin_sampling=num_kin_sampling)
+                                                            theta_E=theta_E_draw, gamma=gamma_draw)
         return j_kin
 
     def hierarchy_configuration(self, num_sample_model=20):
