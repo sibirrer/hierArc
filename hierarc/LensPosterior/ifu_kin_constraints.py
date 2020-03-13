@@ -83,7 +83,6 @@ class IFUKin(BaseLensConfig):
         cov_j = np.cov(np.sqrt(j_kin_matrix.T))
         j_mean_list = np.mean(j_kin_matrix, axis=0)
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
-        print(j_mean_list, j_ani_0, 'test mean vs no error')
 
         if self._anisotropy_model == 'GOM':
             ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for i in range(num_data)]
