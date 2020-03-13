@@ -147,6 +147,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
             beta_inf_draw = np.random.normal(beta_inf, beta_inf_sigma)
             if a_ani_draw < self._ani_param_min[0] or a_ani_draw > self._ani_param_max[0] or beta_inf_draw < self._ani_param_min[1] or beta_inf_draw > self._ani_param_max[1]:
                 return self.draw_anisotropy(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma)
-            return np.array([beta_inf_draw, a_ani_draw])
+            return np.array([a_ani_draw, beta_inf_draw])
         return None
 
