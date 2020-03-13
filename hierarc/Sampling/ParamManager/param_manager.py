@@ -7,8 +7,10 @@ class ParamManager(object):
     """
     class for managing the parameters involved
     """
-    def __init__(self, cosmology, ppn_sampling=False, lambda_mst_sampling=False, lambda_mst_distribution='delta',
-                 anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE', kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
+    def __init__(self, cosmology, ppn_sampling=False, lambda_mst_sampling=False, lambda_mst_distribution='NONE',
+                 anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
+                 kappa_ext_sampling=False, kappa_ext_distribution='NONE',
+                 kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
                  kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={}):
         """
@@ -25,7 +27,10 @@ class ParamManager(object):
                                    distribution_function=anisotropy_distribution, kwargs_fixed=kwargs_fixed_kin)
         self._cosmo_param = CosmoParam(cosmology=cosmology, ppn_sampling=ppn_sampling, kwargs_fixed=kwargs_fixed_cosmo)
         self._lens_param = LensParam(lambda_mst_sampling=lambda_mst_sampling,
-                                     lambda_mst_distribution=lambda_mst_distribution, kwargs_fixed=kwargs_fixed_lens)
+                                     lambda_mst_distribution=lambda_mst_distribution,
+                                     kappa_ext_sampling=kappa_ext_sampling,
+                                     kappa_ext_distribution=kappa_ext_distribution,
+                                     kwargs_fixed=kwargs_fixed_lens)
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = kwargs_upper_cosmo, kwargs_lower_cosmo
         self._kwargs_upper_lens, self._kwargs_lower_lens = kwargs_upper_lens, kwargs_lower_lens
         self._kwargs_upper_kin, self._kwargs_lower_kin = kwargs_upper_kin, kwargs_lower_kin
