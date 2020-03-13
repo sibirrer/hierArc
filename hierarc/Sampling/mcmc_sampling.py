@@ -9,6 +9,7 @@ class MCMCSampler(object):
     """
     def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
+                 kappa_ext_sampling=False, kappa_ext_distribution='NONE',
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
                  cosmo_fixed=None):
         """
@@ -25,6 +26,8 @@ class MCMCSampler(object):
         :param ppn_sampling:post-newtonian parameter sampling
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
         :param lambda_mst_distribution: string, defines the distribution function of lambda_mst
+        :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
+        :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_model: string, specifies the stellar anisotropy model
@@ -39,6 +42,7 @@ class MCMCSampler(object):
         self.chain = CosmoLikelihood(kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=ppn_sampling,
                                      lambda_mst_sampling=lambda_mst_sampling,
                                      lambda_mst_distribution=lambda_mst_distribution,
+                                     kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
                                      anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
                                      anisotropy_distribution=anisotropy_distribution,
                                      custom_prior=custom_prior, interpolate_cosmo=interpolate_cosmo,
