@@ -8,7 +8,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
     master class containing the likelihood definitions of different analysis
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE', ani_param_array=None,
-                 num_distribution_draws=50, **kwargs_likelihood):
+                 num_distribution_draws=50, kappa_ext_bias=False, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -18,6 +18,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         :param ani_param_array: array of anisotropy parameter values for which the kinematics are predicted
         :param ani_scaling_array: velocity dispersion sigma**2 scaling of anisotropy parameter relative to default prediction
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged over
+        :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
+        If False, the likelihood needs to incorporate the individual selection function with sufficient accuracy.
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -25,6 +27,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         LensLikelihoodBase.__init__(self, z_lens=z_lens, z_source=z_source, likelihood_type=likelihood_type, name=name,
                                     anisotropy_model=anisotropy_model, ani_param_array=ani_param_array, **kwargs_likelihood)
         self._num_distribution_draws = num_distribution_draws
+        self._kappa_ext_bias = kappa_ext_bias
         if ani_param_array is not None:
             if isinstance(ani_param_array, list):
                 self._dim_scaling = len(ani_param_array)
@@ -110,8 +113,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
             return True
         return False
 
-    @staticmethod
-    def draw_lens(lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1):
+    def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1):
         """
 
         :param lambda_mst: MST transform
@@ -122,7 +124,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         :return: draw from the distributions
         """
         lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
-        kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
+        if self._kappa_ext_bias is True:
+            kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
+        else:
+            kappa_ext_draw = 0
         return lambda_mst_draw, kappa_ext_draw, gamma_ppn
 
     def draw_anisotropy(self, a_ani=None, a_ani_sigma=0, beta_inf=None, beta_inf_sigma=0):
