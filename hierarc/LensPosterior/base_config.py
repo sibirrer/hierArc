@@ -36,11 +36,9 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
         self._sigma_v, self._sigma_v_error_independent = sigma_v, sigma_v_error
         TDCosmography.__init__(self, z_lens, z_source, kwargs_model, cosmo_fiducial=None,
-                                 lens_model_kinematics_bool=None, light_model_kinematics_bool=None)
-        self.kinematic_observation_settings(kwargs_aperture, kwargs_seeing)
-        #if kwargs_lens_light is None and anisotropy_model == 'OM':
-        #    analytic_kinematics = True
-        #else:
+                                 lens_model_kinematics_bool=None, light_model_kinematics_bool=None,
+                               kwargs_seeing=kwargs_seeing, kwargs_aperture=kwargs_aperture)
+
         analytic_kinematics = False
         self.kinematics_modeling_settings(anisotropy_model, kwargs_numerics_galkin,
                                           analytic_kinematics=analytic_kinematics,

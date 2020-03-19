@@ -67,7 +67,7 @@ class TransformedCosmography(object):
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
         :return: ddt_, dd_
         """
-        ddt_ = ddt / (1. - kappa_ext)
+        ddt_ = ddt * (1. - kappa_ext)
         return ddt_, dd
 
     @staticmethod
