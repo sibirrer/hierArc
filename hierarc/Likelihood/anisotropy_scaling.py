@@ -20,15 +20,10 @@ class AnisotropyScaling(object):
                 self._dim_scaling = len(ani_param_array)
             else:
                 self._dim_scaling = 1
-           # self._dim_scaling = ani_param_array.ndim
             if self._dim_scaling == 1:
                 self._f_ani = interp1d(ani_param_array, ani_scaling_array, kind='linear')
-                #self._ani_param_min = np.min(ani_param_array)
-                #self._ani_param_max = np.max(ani_param_array)
             elif self._dim_scaling == 2:
                 self._f_ani = interp2d(ani_param_array[0], ani_param_array[1], ani_scaling_array.T)
-                #self._ani_param_min = [min(ani_param_array[0]), min(ani_param_array[1])]
-                #self._ani_param_max = [max(ani_param_array[0]), max(ani_param_array[1])]
             else:
                 raise ValueError('anisotropy scaling with dimension %s not supported.' % self._dim_scaling)
             self._evalute_ani = True

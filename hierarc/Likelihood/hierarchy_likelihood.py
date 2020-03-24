@@ -54,11 +54,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         # here we compute the unperturbed angular diameter distances of the lens system given the cosmology
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
-        dd = cosmo.angular_diameter_distance(z=self._z_lens).value
-        ds = cosmo.angular_diameter_distance(z=self._z_source).value
-        dds = cosmo.angular_diameter_distance_z1z2(z1=self._z_lens, z2=self._z_source).value
-        ddt = (1. + self._z_lens) * dd * ds / dds
-
+        ddt, dd = self.angular_diameter_distances(cosmo)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
         return self.hyper_param_likelihood(ddt, dd, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
@@ -76,8 +72,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
 
         if self.check_dist(kwargs_lens, kwargs_kin):  # sharp distributions
             lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
-            ddt_, dd_ = self._displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
-                                                  kappa_ext=kappa_ext)
+            ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+                                                 kappa_ext=kappa_ext)
             aniso_param_array = self.draw_anisotropy(**kwargs_kin)
             lnlog = self._lens_type.log_likelihood(ddt_, dd_, aniso_param_array=aniso_param_array)
             return lnlog
@@ -86,14 +82,26 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
             for i in range(self._num_distribution_draws):
                 lambda_mst_draw, kappa_ext_draw, gamma_ppn = self.draw_lens(**kwargs_lens)
                 aniso_param_draw = self.draw_anisotropy(**kwargs_kin)
-                ddt_, dd_ = self._displace_prediction(ddt, dd, gamma_ppn=gamma_ppn,
-                                                      lambda_mst=lambda_mst_draw,
-                                                      kappa_ext=kappa_ext_draw)
+                ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn,
+                                                     lambda_mst=lambda_mst_draw,
+                                                     kappa_ext=kappa_ext_draw)
                 logl = self._lens_type.log_likelihood(ddt_, dd_, aniso_param_array=aniso_param_draw)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl):
                     likelihood += exp_logl
             return np.log(likelihood)
+
+    def angular_diameter_distances(self, cosmo):
+        """
+
+        :param cosmo: astropy.comsmology instance (or equivalent with interpolation
+        :return: ddt, dd in units Mpc
+        """
+        dd = cosmo.angular_diameter_distance(z=self._z_lens).value
+        ds = cosmo.angular_diameter_distance(z=self._z_source).value
+        dds = cosmo.angular_diameter_distance_z1z2(z1=self._z_lens, z2=self._z_source).value
+        ddt = (1. + self._z_lens) * dd * ds / dds
+        return ddt, dd
 
     @staticmethod
     def check_dist(kwargs_lens, kwargs_kin):

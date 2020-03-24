@@ -26,6 +26,7 @@ class LensLikelihoodBase(object):
         self._z_lens = z_lens
         self._z_source = z_source
         self._anisotropy_model = anisotropy_model
+        self.likelihood_type = likelihood_type
         if likelihood_type in ['TDKinKDE']:
             self._lens_type = TDKinLikelihoodKDE(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'TDKinGaussian':

@@ -19,7 +19,7 @@ class TransformedCosmography(object):
         self._z_lens = z_lens
         self._z_source = z_source
 
-    def _displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0):
+    def displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0):
         """
         here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         displace the predicted angular diameter distances in the opposite direction

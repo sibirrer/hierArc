@@ -82,6 +82,19 @@ class CosmoLikelihood(object):
             # make sure that Omega_DE is not negative...
             if 1.0 - om - ok <= 0:
                 return -np.inf
+        cosmo = self.cosmo_instance(kwargs_cosmo)
+        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
+
+        if self._prior_add is True:
+            logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin)
+        return logL
+
+    def cosmo_instance(self, kwargs_cosmo):
+        """
+
+        :param kwargs_cosmo: cosmology parameter keyword argument list
+        :return: astropy.cosmology (or equivalent interpolation scheme class)
+        """
         if self._cosmo_fixed is None:
             cosmo = self.param.cosmo(kwargs_cosmo)
             if self._interpolate_cosmo is True:
@@ -93,8 +106,4 @@ class CosmoLikelihood(object):
                 cosmo = self._cosmo_fixed_interp
             else:
                 cosmo = self._cosmo_fixed
-        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
-
-        if self._prior_add is True:
-            logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin)
-        return logL
+        return cosmo
