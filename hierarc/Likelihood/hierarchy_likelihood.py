@@ -1,13 +1,15 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.lens_likelihood import LensLikelihoodBase
+from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
 import numpy as np
 
 
-class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
+class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScalingIFU):
     """
     master class containing the likelihood definitions of different analysis
     """
-    def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE', ani_param_array=None,
+    def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
+                 ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
                  num_distribution_draws=50, kappa_ext_bias=False, **kwargs_likelihood):
         """
 
@@ -17,6 +19,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         :param likelihood_type: string to specify the likelihood type
         :param ani_param_array: array of anisotropy parameter values for which the kinematics are predicted
         :param ani_scaling_array: velocity dispersion sigma**2 scaling of anisotropy parameter relative to default prediction
+        :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
         If False, the likelihood needs to incorporate the individual selection function with sufficient accuracy.
@@ -24,23 +27,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         see individual classes for their use
         """
         TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
+        if ani_scaling_array_list is None and ani_scaling_array is not None:
+            ani_scaling_array_list = [ani_scaling_array]
+        AnisotropyScalingIFU.__init__(self, anisotropy_model=anisotropy_model, ani_param_array=ani_param_array,
+                                      ani_scaling_array_list=ani_scaling_array_list)
         LensLikelihoodBase.__init__(self, z_lens=z_lens, z_source=z_source, likelihood_type=likelihood_type, name=name,
-                                    anisotropy_model=anisotropy_model, ani_param_array=ani_param_array, **kwargs_likelihood)
+                                    **kwargs_likelihood)
         self._num_distribution_draws = num_distribution_draws
         self._kappa_ext_bias = kappa_ext_bias
-        if ani_param_array is not None:
-            if isinstance(ani_param_array, list):
-                self._dim_scaling = len(ani_param_array)
-            else:
-                self._dim_scaling = 1
-            if self._dim_scaling == 1:
-                self._ani_param_min = np.min(ani_param_array)
-                self._ani_param_max = np.max(ani_param_array)
-            elif self._dim_scaling == 2:
-                self._ani_param_min = [min(ani_param_array[0]), min(ani_param_array[1])]
-                self._ani_param_max = [max(ani_param_array[0]), max(ani_param_array[1])]
-            else:
-                raise ValueError('anisotropy scaling with dimension %s not supported.' % self._dim_scaling)
 
     def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None):
         """
@@ -75,17 +69,19 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
             ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                  kappa_ext=kappa_ext)
             aniso_param_array = self.draw_anisotropy(**kwargs_kin)
-            lnlog = self._lens_type.log_likelihood(ddt_, dd_, aniso_param_array=aniso_param_array)
+            aniso_scaling = self.ani_scaling(aniso_param_array)
+            lnlog = self._lens_type.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling)
             return lnlog
         else:
             likelihood = 0
             for i in range(self._num_distribution_draws):
                 lambda_mst_draw, kappa_ext_draw, gamma_ppn = self.draw_lens(**kwargs_lens)
                 aniso_param_draw = self.draw_anisotropy(**kwargs_kin)
+                aniso_scaling = self.ani_scaling(aniso_param_draw)
                 ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn,
                                                      lambda_mst=lambda_mst_draw,
                                                      kappa_ext=kappa_ext_draw)
-                logl = self._lens_type.log_likelihood(ddt_, dd_, aniso_param_array=aniso_param_draw)
+                logl = self._lens_type.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl):
                     likelihood += exp_logl
@@ -137,29 +133,3 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase):
         else:
             kappa_ext_draw = 0
         return lambda_mst_draw, kappa_ext_draw, gamma_ppn
-
-    def draw_anisotropy(self, a_ani=None, a_ani_sigma=0, beta_inf=None, beta_inf_sigma=0):
-        """
-        draw Gaussian distribution and re-sample if outside bounds
-
-        :param a_ani: mean of the distribution
-        :param a_ani_sigma: std of the distribution
-        :return: random draw from the distribution
-        """
-        if self._anisotropy_model in ['OM']:
-            if a_ani < self._ani_param_min or a_ani > self._ani_param_max:
-                raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
-            a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
-            if a_ani_draw < self._ani_param_min or a_ani_draw > self._ani_param_max:
-                return self.draw_anisotropy(a_ani, a_ani_sigma)
-            return np.array([a_ani_draw])
-        elif self._anisotropy_model in ['GOM']:
-            if a_ani < self._ani_param_min[0] or a_ani > self._ani_param_max[0] or beta_inf < self._ani_param_min[1] or beta_inf > self._ani_param_max[1]:
-                raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
-            a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
-            beta_inf_draw = np.random.normal(beta_inf, beta_inf_sigma)
-            if a_ani_draw < self._ani_param_min[0] or a_ani_draw > self._ani_param_max[0] or beta_inf_draw < self._ani_param_min[1] or beta_inf_draw > self._ani_param_max[1]:
-                return self.draw_anisotropy(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma)
-            return np.array([a_ani_draw, beta_inf_draw])
-        return None
-
