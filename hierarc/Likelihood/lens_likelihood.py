@@ -11,7 +11,7 @@ class LensLikelihoodBase(object):
     """
     master class containing the likelihood definitions of different analysis
     """
-    def __init__(self, z_lens, z_source, likelihood_type='TDKin', name='name', **kwargs_likelihood):
+    def __init__(self, z_lens, z_source, likelihood_type, name='name', **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -25,7 +25,9 @@ class LensLikelihoodBase(object):
         self._z_lens = z_lens
         self._z_source = z_source
         self.likelihood_type = likelihood_type
-        if likelihood_type in ['TDKinKDE']:
+        if likelihood_type in ['TDGaussian']:
+            self._lens_type = TDLikelihoodGaussian(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type in ['TDKinKDE']:
             self._lens_type = TDKinLikelihoodKDE(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'TDKinGaussian':
             self._lens_type = TDKinGaussian(z_lens, z_source, **kwargs_likelihood)
