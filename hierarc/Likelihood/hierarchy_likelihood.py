@@ -128,6 +128,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :return: draw from the distributions
         """
         lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
+        #while lambda_mst_draw < 0.8 or lambda_mst_draw > 1.2:
+        lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
         if self._kappa_ext_bias is True:
             kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
         else:
