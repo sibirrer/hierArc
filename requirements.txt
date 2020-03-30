@@ -1,4 +1,5 @@
 numpy>=1.13
-astropy>=2.0
-lenstronomy>=1.3.0
+astropy>=3.0
+lenstronomy>=1.4.0
 scipy
+emcee

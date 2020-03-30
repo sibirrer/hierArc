@@ -66,8 +66,8 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	rm -f docs/hierarc.rst
 	rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ hierarc
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	MAKE -C docs clean
+	MAKE -C docs html
 	$(BROWSER) docs/_build/html/index.html
 
 servedocs: docs ## compile the docs watching for changes
