@@ -10,11 +10,11 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = ['numpy>=1.13', 'scipy>=0.14.0']
 
-setup_requirements = ['pytest-runner', ]
+setup_requirements = ['pytest-runner']
 
-test_requirements = ['pytest>=3', 'numpy>=1.13', 'scipy>=0.14.0']
+test_requirements = ['pytest>=3', ]
 
 setup(
     author="Simon Birrer",
