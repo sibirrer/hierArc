@@ -9,7 +9,7 @@ hierArc
 .. image:: https://img.shields.io/travis/sibirrer/hierarc.svg
         :target: https://travis-ci.com/sibirrer/hierarc
 
-.. image:: https://coveralls.io/repos/github/sibirrer/lenstronomy/badge.svg?branch=master
+.. image:: https://coveralls.io/repos/github/sibirrer/hierarc/badge.svg?branch=master
         :target: https://coveralls.io/github/sibirrer/hierarc?branch=master
 
 .. image:: https://readthedocs.org/projects/hierarc/badge/?version=latest
