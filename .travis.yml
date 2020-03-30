@@ -25,7 +25,7 @@ before_script: # configure a headless display to test plot generation
 # command to run tests
 script:
   #- py.test
-  - coverage run --source lenstronomy setup.py test
+  - coverage run --source hierarc setup.py test
 
 after_success:
     coveralls
