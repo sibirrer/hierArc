@@ -1,7 +1,6 @@
 __author__ = 'sibirrer'
 from lenstronomy.Util import constants as const
 import numpy as np
-from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
 
 
 class IFUKinCov(object):
@@ -17,8 +16,6 @@ class IFUKinCov(object):
         :param j_mean_list: numpy array of the predicted dimensionless dispersion on the IFU's
         :param error_cov_measurement: covariance matrix of the measured velocity dispersions in the IFU's
         :param error_cov_j_sqrt: covariance matrix of sqrt(J) of the model predicted dimensionless dispersion on the JFU's
-        :param ani_param_array:
-        :param ani_scaling_array_list:
         """
         self._z_lens = z_lens
         self._j_mean_list = j_mean_list
@@ -39,8 +36,28 @@ class IFUKinCov(object):
             scaling_ifu = 1
         else:
             scaling_ifu = aniso_scaling
-        sigma_v_predict = np.sqrt(ds_dds * scaling_ifu * self._j_mean_list) * const.c / 1000
+        sigma_v_predict = self.sigma_v_model(ds_dds, scaling_ifu)
         delta = self._sigma_v_measured - sigma_v_predict
-        scaling_matix = np.outer(np.sqrt(scaling_ifu), np.sqrt(scaling_ifu))
-        cov_error = np.linalg.inv(self._error_cov_measurement + self._error_cov_j_sqrt * scaling_matix * ds_dds * (const.c / 1000)**2)
+        cov_error = np.linalg.inv(self._error_cov_measurement + self.cov_error_model(ds_dds, scaling_ifu))
         return -delta.dot(cov_error.dot(delta)) / 2.
+
+    def sigma_v_model(self, ds_dds, aniso_scaling=1):
+        """
+        model predicted velocity dispersion for the iFU's
+
+        :param ds_dds: Ds/Dds
+        :param aniso_scaling: scaling of the anisotropy affecting sigma_v^2
+        :return: array of predicted velocity dispersions
+        """
+        sigma_v_predict = np.sqrt(ds_dds * aniso_scaling * self._j_mean_list) * const.c / 1000
+        return sigma_v_predict
+
+    def cov_error_model(self, ds_dds, aniso_scaling=1):
+        """
+
+        :param ds_dds: Ds/Dds
+        :param aniso_scaling: scaling of the anisotropy affecting sigma_v^2
+        :return: covariance matrix of the error in the predicted model (from mass model uncertainties)
+        """
+        scaling_matix = np.outer(np.sqrt(aniso_scaling), np.sqrt(aniso_scaling))
+        return self._error_cov_j_sqrt * scaling_matix * ds_dds * (const.c / 1000)**2

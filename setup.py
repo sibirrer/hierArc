@@ -14,7 +14,7 @@ requirements = [ ]
 
 setup_requirements = ['pytest-runner', ]
 
-test_requirements = ['pytest>=3', ]
+test_requirements = ['pytest>=3', 'numpy>=1.13', 'scipy>=0.14.0']
 
 setup(
     author="Simon Birrer",
