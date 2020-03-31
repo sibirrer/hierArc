@@ -10,4 +10,5 @@ Development Lead
 Contributors
 ------------
 
-None yet. Why not be the first?
+* Ji Won Park `jiwoncpark <https://github.com/jiwoncpark/>`_
+* Aymeric Galan `aymgal <https://github.com/aymgal/>`_
