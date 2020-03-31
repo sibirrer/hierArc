@@ -37,4 +37,4 @@ Features
 Credits
 -------
 
-Simon Birrer & contributors
+Simon Birrer & the TDCOSMO team
