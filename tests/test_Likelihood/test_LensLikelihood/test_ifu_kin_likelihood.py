@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import numpy.testing as npt
 import unittest
-from hierarc.Likelihood.LensLikelihood.ifu_kin_likelihood import IFUKinCov
+from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
 from lenstronomy.Util import  constants as const
 
 
@@ -23,8 +23,8 @@ class TestIFUKinLikelihood(object):
         sigma_v_sigma = sigma_v_measurement/10.
         error_cov_measurement = np.diag(sigma_v_sigma ** 2)
         error_cov_j_sqrt = np.diag(np.zeros_like(sigma_v_measurement))
-        ifu_likelihood = IFUKinCov(z_lens, z_source, sigma_v_measurement, j_mean_list, error_cov_measurement,
-                                   error_cov_j_sqrt)
+        ifu_likelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_mean_list, error_cov_measurement,
+                                       error_cov_j_sqrt)
         logl = ifu_likelihood.log_likelihood(ddt, dd, aniso_scaling=None)
         npt.assert_almost_equal(logl, 0, decimal=5)
         logl = ifu_likelihood.log_likelihood(ddt*0.9**2, dd, aniso_scaling=None)

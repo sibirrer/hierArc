@@ -10,7 +10,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
-                 num_distribution_draws=50, kappa_ext_bias=False, **kwargs_likelihood):
+                 num_distribution_draws=50, kappa_ext_bias=False, draw_kappa=None, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -23,6 +23,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
         If False, the likelihood needs to incorporate the individual selection function with sufficient accuracy.
+        :param draw_kappa: definition to draw from the PDF of the external convergence distribution (optional)
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -35,6 +36,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                                     **kwargs_likelihood)
         self._num_distribution_draws = num_distribution_draws
         self._kappa_ext_bias = kappa_ext_bias
+        self._draw_kappa = draw_kappa
 
     def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None):
         """
@@ -99,8 +101,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         ddt = (1. + self._z_lens) * dd * ds / dds
         return ddt, dd
 
-    @staticmethod
-    def check_dist(kwargs_lens, kwargs_kin):
+    def check_dist(self, kwargs_lens, kwargs_kin):
         """
         checks if the provided keyword arguments describe a distribution function of hyper parameters or are single
         values
@@ -114,7 +115,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         a_ani_sigma = kwargs_kin.get('a_ani_sigma', 0)
         beta_inf_sigma = kwargs_kin.get('beta_inf_sigma', 0)
         if a_ani_sigma == 0 and lambda_mst_sigma == 0 and kappa_ext_sigma == 0 and beta_inf_sigma == 0:
-            return True
+            if self._draw_kappa is None:
+                return True
         return False
 
     def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1):
@@ -128,9 +130,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :return: draw from the distributions
         """
         lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
-        #while lambda_mst_draw < 0.8 or lambda_mst_draw > 1.2:
-        lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
-        if self._kappa_ext_bias is True:
+        if self._draw_kappa is not None:
+            kappa_ext_draw = self._draw_kappa(1)
+        elif self._kappa_ext_bias is True:
             kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
         else:
             kappa_ext_draw = 0

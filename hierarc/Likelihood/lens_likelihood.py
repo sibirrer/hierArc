@@ -2,7 +2,7 @@ __author__ = 'sibirrer'
 
 from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
 from hierarc.Util import likelihood_util
-from hierarc.Likelihood.LensLikelihood.ifu_kin_likelihood import IFUKinCov
+from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
 import numpy as np
 from scipy import interpolate
 
@@ -40,7 +40,7 @@ class LensLikelihoodBase(object):
         elif likelihood_type == 'TDSkewLogNorm':
             self._lens_type = TDLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'IFUKinCov':
-            self._lens_type = IFUKinCov(z_lens, z_source, **kwargs_likelihood)
+            self._lens_type = KinLikelihood(z_lens, z_source, **kwargs_likelihood)
         else:
             raise ValueError('likelihood_type %s not supported!' % likelihood_type)
 
@@ -123,6 +123,7 @@ class TDKinLikelihoodKDE(object):
         if self._interpol is True:
             return self._interp_log_likelihood(dd_, ddt)[0]
         return self._kde_likelihood.logLikelihood(dd_, ddt)[0]
+
 
 class TDKinLikelihoodSklogn(object):
     """
@@ -252,6 +253,7 @@ class TDLikelihoodLogNorm(object):
         :return: log likelihood given the single lens analysis
         """
         return -0.5*(np.log(ddt) - self._ddt_mu)**2/self._ddt_sigma2 - np.log(ddt) - 0.5*np.log(self._ddt_sigma2)
+
 
 class KinLikelihoodGaussian(object):
     """
