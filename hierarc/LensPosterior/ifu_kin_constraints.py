@@ -9,7 +9,8 @@ class IFUKin(BaseLensConfig):
     def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error, sigma_v,
                  sigma_v_error_independent, sigma_v_error_covariant, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000):
+                 hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000,
+                 multi_observations=False):
         """
 
         :param z_lens: lens redshift
@@ -30,6 +31,8 @@ class IFUKin(BaseLensConfig):
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
+        :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
+         observations
         """
         self._sigma_v, self._sigma_v_error_independent, self._sigma_v_error_covariant = sigma_v, sigma_v_error_independent, sigma_v_error_covariant
 
@@ -41,7 +44,7 @@ class IFUKin(BaseLensConfig):
                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
                                 kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
                                 sampling_number=sampling_number, num_psf_sampling=num_psf_sampling,
-                                num_kin_sampling=num_kin_sampling)
+                                num_kin_sampling=num_kin_sampling, multi_observations=multi_observations)
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):
         """
@@ -74,6 +77,23 @@ class IFUKin(BaseLensConfig):
 
         :return: keyword arguments
         """
+
+        j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list = self.model_marginalization(num_sample_model)
+        # configuration keyword arguments for the hierarchical sampling
+        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
+                             'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
+                             'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
+                             'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,
+                             'ani_scaling_array_list': ani_scaling_array_list}
+        return kwargs_likelihood
+
+    def model_marginalization(self, num_sample_model=20):
+        """
+
+        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
+        kinematic component J()
+        :return:
+        """
         num_data = len(self._sigma_v)
         j_kin_matrix = np.zeros((num_sample_model, num_data))  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
@@ -81,11 +101,12 @@ class IFUKin(BaseLensConfig):
             j_kin_matrix[i, :] = j_kin
 
         cov_j = np.cov(np.sqrt(j_kin_matrix.T))
-        j_mean_list = np.mean(j_kin_matrix, axis=0)
+        j_model_list = np.mean(j_kin_matrix, axis=0)
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
 
         if self._anisotropy_model == 'GOM':
-            ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for i in range(num_data)]
+            ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for i in
+                                      range(num_data)]
             for i, a_ani in enumerate(self.ani_param_array[0]):
                 for j, beta_inf in enumerate(self.ani_param_array[1]):
                     kwargs_anisotropy = self.anisotropy_kwargs(a_ani=a_ani, beta_inf=beta_inf)
@@ -101,14 +122,8 @@ class IFUKin(BaseLensConfig):
                     ani_scaling_array_list[i].append(j_kin / j_ani_0[i])
 
         error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
-        error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(self._sigma_v_error_independent ** 2)
-        # configuration keyword arguments for the hierarchical sampling
-        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
-                             'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
-                             'j_mean_list': j_mean_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,
-                             'ani_scaling_array_list': ani_scaling_array_list}
-        return kwargs_likelihood
-
+        error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(
+            self._sigma_v_error_independent ** 2)
+        return j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list
 
 # compute covariance matrix in J_0 calculation in the bins

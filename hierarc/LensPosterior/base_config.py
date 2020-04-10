@@ -11,7 +11,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
     def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error, sigma_v,
                  sigma_v_error, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000):
+                 hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000,
+                 multi_observations=False):
         """
 
         :param z_lens: lens redshift
@@ -28,6 +29,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
         :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
+         observations
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
@@ -37,7 +40,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
         self._sigma_v, self._sigma_v_error_independent = sigma_v, sigma_v_error
         TDCosmography.__init__(self, z_lens, z_source, kwargs_model, cosmo_fiducial=None,
                                  lens_model_kinematics_bool=None, light_model_kinematics_bool=None,
-                               kwargs_seeing=kwargs_seeing, kwargs_aperture=kwargs_aperture)
+                               kwargs_seeing=kwargs_seeing, kwargs_aperture=kwargs_aperture,
+                               multi_observations=multi_observations)
 
         analytic_kinematics = False
         self.kinematics_modeling_settings(anisotropy_model, kwargs_numerics_galkin,
