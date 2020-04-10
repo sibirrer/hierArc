@@ -3,7 +3,7 @@ import pytest
 import numpy.testing as npt
 import unittest
 from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
-from lenstronomy.Util import  constants as const
+from lenstronomy.Util import constants as const
 
 
 class TestIFUKinLikelihood(object):

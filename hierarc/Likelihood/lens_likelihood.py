@@ -225,6 +225,7 @@ class TDLikelihoodGaussian(object):
         """
         return - (ddt - self._ddt_mean) ** 2 / self._ddt_sigma2 / 2
 
+
 class TDLikelihoodLogNorm(object):
     """
     The cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays, where the form of the likelihood is a lognormal distribution.

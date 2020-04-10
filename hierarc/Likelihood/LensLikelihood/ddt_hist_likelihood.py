@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import gaussian_kde
 
 
-class DdtHist(object):
+class DdtHistLikelihood(object):
     """
     Evaluates the likelihood of a time-delay distance ddt (in Mpc) against the model predictions, using a
          loglikelihood sampled from a Kernel Density Estimator. the KDE is constructed using a binned version of the
@@ -12,24 +12,21 @@ class DdtHist(object):
     original source: https://github.com/shsuyu/H0LiCOW-public/blob/master/H0_inference_code/lensutils.py
     credits to Martin Millon, Aymeric Galan
     """
-    def __init__(self, z_lens, z_source, ddt_samples, kde_kernel=None, weights=None, bandwidth=20, nbins_hist=200):
+    def __init__(self, z_lens, z_source, ddt_samples, kde_kernel=None, ddt_weights=None, bandwidth=20, nbins_hist=200):
         """
 
         :param z_lens: lens redshift
         :param z_source: source redshift
         :param ddt_samples: numpy array of Ddt values
-        :param weights: optional weights for the samples in Ddt
+        :param ddt_weights: optional weights for the samples in Ddt
         :param kde_kernel: string of KDE kernel type
         :param bandwidth: bandwith of kernel
         :param nbins_hist: number of bins in the histogram
         """
 
-        hist = np.histogram(ddt_samples, bins=nbins_hist, weights=weights)
+        hist = np.histogram(ddt_samples, bins=nbins_hist, weights=ddt_weights)
         vals = hist[0]
         bins = [(h + hist[1][i + 1]) / 2.0 for i, h in enumerate(hist[1][:-1])]
-        #import matplotlib.pyplot as plt
-        #plt.plot(bins, vals)
-        #plt.show()
 
         # ignore potential zero weights, sklearn does not like them
         kde_bins = [b for v, b in zip(vals, bins) if v > 0]
@@ -41,7 +38,7 @@ class DdtHist(object):
 
         #self._kde = KernelDensity(kernel=kde_kernel, bandwidth=bandwidth).fit(kde_bins, y=kde_weights)
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None):
+    def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
