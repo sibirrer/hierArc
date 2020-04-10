@@ -69,7 +69,7 @@ class DdtKinConstraints(IFUKin):
         # subtract the component in the uncertainty in ddt that does not impact the uncertainty on dd
         j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list = self.model_marginalization(num_sample_model=num_sample_model)
         # configuration keyword arguments for the hierarchical sampling
-        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'TDKinUncorrelated',
+        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtHistKin',
                              'ddt_sample': self._ddt_sample,'sigma_v_measurement': self._sigma_v,
                              'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
