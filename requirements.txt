@@ -1,5 +1,7 @@
 numpy>=1.13
 astropy>=3.0
-lenstronomy>=1.4.0
+#lenstronomy>=1.4.0
 scipy
 emcee
+mpmath
+-e git://github.com/sibirrer/lenstronomy.git@master#egg=lenstronomy
