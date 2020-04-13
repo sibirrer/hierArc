@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
+from lenstronomy.Util import constants as const
 
 
 class GoodnessOfFit(object):
@@ -44,6 +45,12 @@ class GoodnessOfFit(object):
         dd_data_list = []
         dd_sigma_list = []
 
+        sigma_v_name_list = []
+        sigma_v_measurement_list = []
+        sigma_v_measurement_error_list = []
+        sigma_v_model_list = []
+        sigma_v_model_error_list = []
+
         for i, kwargs_likelihood in enumerate(self._kwargs_likelihood_list):
             name = kwargs_likelihood['name']
             likelihood = self._sample_likelihood._lens_list[i]
@@ -69,7 +76,21 @@ class GoodnessOfFit(object):
                 ds_dds_sigma_list.append(kwargs_likelihood['ds_dds_sigma'])
                 ds_dds_name_list.append(name)
             elif likelihood.likelihood_type == 'IFUKinCov':
-                pass
+                dd_ = dd_ * likelihood.ani_scaling(aniso_param_array)[0]
+                ds_dds =ddt_ / dd_ / (1 + likelihood._z_lens)
+
+                j_model = kwargs_likelihood['j_model'][0]
+                J_error = kwargs_likelihood['error_cov_j_sqrt']
+                sigma_v = kwargs_likelihood['sigma_v_measurement'][0]
+                sigma_v_sigma = np.sqrt(kwargs_likelihood['error_cov_measurement'][0, 0])
+                sigma_v_predict = np.sqrt(j_model) * const.c * np.sqrt(ds_dds) / 1000
+                #sigma_v_sigma_tot = np.sqrt(sigma_v_sigma ** 2 + const.c ** 2 * ds_dds * J_error / 1000 ** 2)
+                sigma_v_sigma_model = np.sqrt(const.c ** 2 * ds_dds * J_error / 1000 ** 2)
+                sigma_v_name_list.append(name)
+                sigma_v_measurement_list.append(sigma_v)
+                sigma_v_measurement_error_list.append(sigma_v_sigma)
+                sigma_v_model_list.append(sigma_v_predict)
+                sigma_v_model_error_list.append(sigma_v_sigma_model)
 
         f, axes = plt.subplots(1, 3, figsize=(12, 4))
         axes[0].errorbar(np.arange(len(ddt_name_list)), ddt_data_list, yerr=ddt_sigma_list, xerr=None, fmt='o', ecolor=None, elinewidth=None,
@@ -78,7 +99,7 @@ class GoodnessOfFit(object):
         axes[0].plot(np.arange(len(ddt_name_list)), ddt_model_list, 'ok')
         axes[0].set_xticks(ticks=np.arange(len(ddt_name_list)))
         axes[0].set_xticklabels(labels=ddt_name_list, rotation='vertical')
-        axes[0].set_ylabel(r'$D_{\Delta t}$')
+        axes[0].set_ylabel(r'$D_{\Delta t}$ [Mpc]', fontsize=15)
 
         axes[1].errorbar(np.arange(len(dd_name_list)), dd_data_list, yerr=dd_sigma_list, xerr=None, fmt='o',
                          ecolor=None, elinewidth=None,
@@ -87,16 +108,30 @@ class GoodnessOfFit(object):
         axes[1].plot(np.arange(len(dd_name_list)), dd_model_list, 'ok')
         axes[1].set_xticks(ticks=np.arange(len(dd_name_list)))
         axes[1].set_xticklabels(labels=dd_name_list, rotation='vertical')
-        axes[1].set_ylabel(r'$D_{\rm d}$')
+        axes[1].set_ylabel(r'$D_{\rm d}$ [Mpc]', fontsize=15)
 
-        axes[2].errorbar(np.arange(len(ds_dds_name_list)), ds_dds_data_list, yerr=ds_dds_sigma_list, xerr=None, fmt='o',
+        axes[2].errorbar(np.arange(len(sigma_v_name_list)), sigma_v_measurement_list,
+                         yerr=sigma_v_measurement_error_list, xerr=None, fmt='o',
                          ecolor=None, elinewidth=None,
                          capsize=None, barsabove=False, lolims=False, uplims=False,
-                         xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None)
+                         xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
+        axes[2].errorbar(np.arange(len(sigma_v_name_list)), sigma_v_model_list,
+                         yerr=sigma_v_model_error_list, xerr=None, fmt='o',
+                         ecolor=None, elinewidth=None, label='prediction')
         axes[2].plot(np.arange(len(ds_dds_name_list)), ds_dds_model_list, 'ok')
-        axes[2].set_xticks(ticks=np.arange(len(ds_dds_name_list)))
-        axes[2].set_xticklabels(labels=ds_dds_name_list, rotation='vertical')
-        axes[2].set_ylabel(r'$D_{\rm s}/D_{\rm ds}$')
+        axes[2].set_xticks(ticks=np.arange(len(sigma_v_name_list)))
+        axes[2].set_xticklabels(labels=sigma_v_name_list, rotation='vertical')
+        axes[2].set_ylabel(r'$\sigma^{\rm P}$ [km/s]', fontsize=15)
+        axes[2].legend()
+
+        #axes[3].errorbar(np.arange(len(ds_dds_name_list)), ds_dds_data_list, yerr=ds_dds_sigma_list, xerr=None, fmt='o',
+        #                 ecolor=None, elinewidth=None,
+        #                 capsize=None, barsabove=False, lolims=False, uplims=False,
+        #                 xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None)
+        #axes[3].plot(np.arange(len(ds_dds_name_list)), ds_dds_model_list, 'ok')
+        #axes[3].set_xticks(ticks=np.arange(len(ds_dds_name_list)))
+        #axes[3].set_xticklabels(labels=ds_dds_name_list, rotation='vertical')
+        #axes[3].set_ylabel(r'$D_{\rm s}/D_{\rm ds}$', fontize=15)
 
         # separate panel for
         # IFU fit

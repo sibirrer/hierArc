@@ -34,12 +34,14 @@ class IFUKin(BaseLensConfig):
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
         """
-        self._sigma_v, self._sigma_v_error_independent, self._sigma_v_error_covariant = sigma_v, sigma_v_error_independent, sigma_v_error_covariant
+        self._sigma_v = np.array(sigma_v)
+        self._sigma_v_error_independent = np.array(sigma_v_error_independent)
+        self._sigma_v_error_covariant = sigma_v_error_covariant
 
         self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
         BaseLensConfig.__init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
-                                sigma_v, sigma_v_error_independent, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
+                                self._sigma_v, self._sigma_v_error_independent, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
                                 anisotropy_model, kwargs_lens_light=kwargs_lens_light,
                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
                                 kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
