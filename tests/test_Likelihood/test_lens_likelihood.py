@@ -9,6 +9,7 @@ from hierarc.Likelihood.lens_likelihood import LensLikelihoodBase, TDKinLikeliho
 from astropy.cosmology import FlatLambdaCDM
 from scipy.stats import lognorm
 
+
 class TestLensLikelihood(object):
 
     def setup(self):

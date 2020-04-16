@@ -10,7 +10,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
-                 num_distribution_draws=50, kappa_ext_bias=False, draw_kappa=None, **kwargs_likelihood):
+                 num_distribution_draws=50, kappa_ext_bias=False, draw_kappa=None, mst_ifu=False, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -24,6 +24,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
         If False, the likelihood needs to incorporate the individual selection function with sufficient accuracy.
         :param draw_kappa: definition to draw from the PDF of the external convergence distribution (optional)
+        :param mst_ifu: bool, if True replaces the lambda_mst parameter by the lambda_ifu parameter (and distribution)
+         in sampling this lens.
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -37,6 +39,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         self._num_distribution_draws = num_distribution_draws
         self._kappa_ext_bias = kappa_ext_bias
         self._draw_kappa = draw_kappa
+        self._mst_ifu = mst_ifu
 
     def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None):
         """
@@ -119,7 +122,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                 return True
         return False
 
-    def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1):
+    def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1, lambda_ifu=1,
+                  lambda_ifu_sigma=0):
         """
 
         :param lambda_mst: MST transform
@@ -129,7 +133,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param gamma_ppn: Post-Newtonian parameter
         :return: draw from the distributions
         """
-        lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
+        if self._mst_ifu is True:
+            lambda_mst_draw = np.random.normal(lambda_ifu, lambda_ifu_sigma)
+        else:
+            lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
         if self._draw_kappa is not None:
             kappa_ext_draw = self._draw_kappa(1)
         elif self._kappa_ext_bias is True:
