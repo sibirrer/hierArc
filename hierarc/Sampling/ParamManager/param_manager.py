@@ -9,7 +9,8 @@ class ParamManager(object):
     """
     def __init__(self, cosmology, ppn_sampling=False, lambda_mst_sampling=False, lambda_mst_distribution='NONE',
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
-                 kappa_ext_sampling=False, kappa_ext_distribution='NONE',
+                 kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
+                 lambda_ifu_distribution='NONE',
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
                  kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={}):
@@ -19,6 +20,9 @@ class ParamManager(object):
         :param ppn_sampling: post-newtonian parameter sampling
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
         :param lambda_mst_distribution: string, distribution function of the MST transform
+        :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
+        independently
+        :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
@@ -28,6 +32,8 @@ class ParamManager(object):
         self._cosmo_param = CosmoParam(cosmology=cosmology, ppn_sampling=ppn_sampling, kwargs_fixed=kwargs_fixed_cosmo)
         self._lens_param = LensParam(lambda_mst_sampling=lambda_mst_sampling,
                                      lambda_mst_distribution=lambda_mst_distribution,
+                                     lambda_ifu_sampling=lambda_ifu_sampling,
+                                     lambda_ifu_distribution=lambda_ifu_distribution,
                                      kappa_ext_sampling=kappa_ext_sampling,
                                      kappa_ext_distribution=kappa_ext_distribution,
                                      kwargs_fixed=kwargs_fixed_lens)
