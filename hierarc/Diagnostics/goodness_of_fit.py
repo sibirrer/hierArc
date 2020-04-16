@@ -27,7 +27,8 @@ class GoodnessOfFit(object):
         :param kwargs_kin: kinematics model keyword arguments
         :return: fig, axes of matplotlib instance
         """
-
+        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
+        print(logL, 'log likelihood')
         # list of values for 'KinGaussian' likelihood
         ds_dds_model_list = []
         ds_dds_name_list = []
@@ -76,11 +77,10 @@ class GoodnessOfFit(object):
                 ds_dds_sigma_list.append(kwargs_likelihood['ds_dds_sigma'])
                 ds_dds_name_list.append(name)
             elif likelihood.likelihood_type == 'IFUKinCov':
-                dd_ = dd_ * likelihood.ani_scaling(aniso_param_array)[0]
-                ds_dds =ddt_ / dd_ / (1 + likelihood._z_lens)
-
-                j_model = kwargs_likelihood['j_model'][0]
-                J_error = kwargs_likelihood['error_cov_j_sqrt']
+                dd_ = dd_# * likelihood.ani_scaling(aniso_param_array)[0]
+                ds_dds = ddt_ / dd_ / (1 + likelihood._z_lens)
+                j_model = kwargs_likelihood['j_model'][0] * likelihood.ani_scaling(aniso_param_array)[0]
+                J_error = np.atleast_2d(kwargs_likelihood['error_cov_j_sqrt'])[0, 0]
                 sigma_v = kwargs_likelihood['sigma_v_measurement'][0]
                 sigma_v_sigma = np.sqrt(kwargs_likelihood['error_cov_measurement'][0, 0])
                 sigma_v_predict = np.sqrt(j_model) * const.c * np.sqrt(ds_dds) / 1000
