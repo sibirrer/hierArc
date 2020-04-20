@@ -32,7 +32,7 @@ class TestDdtHistKinHist(object):
                                              error_cov_j_sqrt)
         self._ddt_kin_likelihood = DdtHistKinLikelihood(z_lens, z_source, ddt_samples, ddt_weights, sigma_v_measurement,
                                                         j_model, error_cov_measurement, error_cov_j_sqrt,
-                                                        kde_kernel=None, bandwidth=20, nbins_hist=400)
+                                                        kde_kernel='gaussian', bandwidth=20, nbins_hist=400)
 
     def test_log_likelihood(self):
 

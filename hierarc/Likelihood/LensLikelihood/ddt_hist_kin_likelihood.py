@@ -1,5 +1,5 @@
 from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
-from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistLikelihood
+from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistKDELikelihood
 
 
 class DdtHistKinLikelihood(object):
@@ -24,8 +24,8 @@ class DdtHistKinLikelihood(object):
         :param error_cov_measurement: covariance matrix of the measured velocity dispersions in the IFU's
         :param error_cov_j_sqrt: covariance matrix of sqrt(J) of the model predicted dimensionless dispersion on the JFU's
         """
-        self._tdLikelihood = DdtHistLikelihood(z_lens, z_source, ddt_samples, ddt_weights=ddt_weights,
-                                               kde_kernel=kde_kernel, bandwidth=bandwidth, nbins_hist=nbins_hist)
+        self._tdLikelihood = DdtHistKDELikelihood(z_lens, z_source, ddt_samples, ddt_weights=ddt_weights,
+                                                  kde_kernel=kde_kernel, bandwidth=bandwidth, nbins_hist=nbins_hist)
         self._kinlikelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_model, error_cov_measurement,
                                             error_cov_j_sqrt)
 
