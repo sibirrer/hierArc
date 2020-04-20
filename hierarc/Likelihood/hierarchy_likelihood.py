@@ -1,6 +1,7 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.lens_likelihood import LensLikelihoodBase
 from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
+from hierarc.Util.distribution_util import PDFSampling
 import numpy as np
 
 
@@ -10,7 +11,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
-                 num_distribution_draws=50, kappa_ext_bias=False, draw_kappa=None, mst_ifu=False, **kwargs_likelihood):
+                 num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -23,7 +24,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
         If False, the likelihood needs to incorporate the individual selection function with sufficient accuracy.
-        :param draw_kappa: definition to draw from the PDF of the external convergence distribution (optional)
+        :param kappa_pdf: array of probability density function of the external convergence distribution
+         binned according to kappa_bin_edges
+        :param kappa_bin_edges: array of length (len(kappa_pdf)+1), bin edges of the kappa PDF
         :param mst_ifu: bool, if True replaces the lambda_mst parameter by the lambda_ifu parameter (and distribution)
          in sampling this lens.
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
@@ -36,10 +39,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                                       ani_scaling_array_list=ani_scaling_array_list)
         LensLikelihoodBase.__init__(self, z_lens=z_lens, z_source=z_source, likelihood_type=likelihood_type, name=name,
                                     **kwargs_likelihood)
-        self._num_distribution_draws = num_distribution_draws
+        self._num_distribution_draws = int(num_distribution_draws)
         self._kappa_ext_bias = kappa_ext_bias
-        self._draw_kappa = draw_kappa
         self._mst_ifu = mst_ifu
+        if kappa_pdf is not None and kappa_bin_edges is not None:
+            self._kappa_dist = PDFSampling(bin_edges=kappa_bin_edges, pdf_array=kappa_pdf)
+            self._draw_kappa = True
+        else:
+            self._draw_kappa = False
 
     def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None):
         """
@@ -88,8 +95,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                                                      kappa_ext=kappa_ext_draw)
                 logl = self._lens_type.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling)
                 exp_logl = np.exp(logl)
-                if np.isfinite(exp_logl):
+                if np.isfinite(exp_logl) and exp_logl > 0:
                     likelihood += exp_logl
+            if likelihood <= 0:
+                return -np.inf
             return np.log(likelihood)
 
     def angular_diameter_distances(self, cosmo):
@@ -118,7 +127,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         a_ani_sigma = kwargs_kin.get('a_ani_sigma', 0)
         beta_inf_sigma = kwargs_kin.get('beta_inf_sigma', 0)
         if a_ani_sigma == 0 and lambda_mst_sigma == 0 and kappa_ext_sigma == 0 and beta_inf_sigma == 0:
-            if self._draw_kappa is None:
+            if self._draw_kappa is False:
                 return True
         return False
 
@@ -137,8 +146,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             lambda_mst_draw = np.random.normal(lambda_ifu, lambda_ifu_sigma)
         else:
             lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
-        if self._draw_kappa is not None:
-            kappa_ext_draw = self._draw_kappa(1)
+        if self._draw_kappa is True:
+            kappa_ext_draw = self._kappa_dist.draw_one
         elif self._kappa_ext_bias is True:
             kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
         else:

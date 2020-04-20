@@ -22,6 +22,10 @@ class TestDdtHist(object):
         logl_sigma = self._ddthist.log_likelihood(ddt=self._ddt * (1 + 2* self._sigma), dd=None)
         npt.assert_almost_equal(logl_sigma - logl_max, -2**2 / 2., decimal=0)
 
+        logl_sigma = self._ddthist.log_likelihood(ddt=self._ddt*10, dd=None)
+        npt.assert_almost_equal(logl_sigma, -np.inf, decimal=0)
+        assert np.exp(logl_sigma) == 0
+
 
 class TestDdtHistKDELikelihood(object):
     def setup(self):

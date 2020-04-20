@@ -12,9 +12,6 @@ class TransformedCosmography(object):
 
         :param z_lens: lens redshift
         :param z_source: source redshift
-        :param ani_param_array: array of anisotropy parameter values for which the kinematics are predicted
-        :param ani_scaling_array: velocity dispersion sigma**2 scaling of anisotropy parameter relative to default prediction
-
         """
         self._z_lens = z_lens
         self._z_source = z_source
@@ -32,11 +29,9 @@ class TransformedCosmography(object):
         lambda_mst=1 corresponds to the input model
         :param gamma_ppn: post-newtonian gravity parameter (=1 is GR)
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
-        :param aniso_param: global stellar anisotropy parameter
         :return: ddt_, dd_
         """
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
-        #ddt_, dd_ = self._displace_kappa_ext(ddt_, dd_, kappa_ext=kappa_ext)
         ddt_, dd_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext)
         return ddt_, dd_
 

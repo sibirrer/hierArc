@@ -31,7 +31,7 @@ class KinLikelihood(object):
         :param dd: angular diameter distance to the deflector
         :return: log likelihood given the single lens analysis
         """
-        ds_dds = ddt / dd / (1 + self._z_lens)
+        ds_dds = np.maximum(ddt / dd / (1 + self._z_lens), 0)
         if aniso_scaling is None:
             scaling_ifu = 1
         else:
