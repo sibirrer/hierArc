@@ -31,7 +31,7 @@ class CosmoParam(object):
             if latex_style is True:
                 list.append(r'$H_0$')
             else:
-                list.append('H_0')
+                list.append('h0')
         if self._cosmology in ['FLCDM', "FwCDM", "w0waCDM", "oLCDM"]:
             if 'om' not in self._kwargs_fixed:
                 if latex_style is True:
