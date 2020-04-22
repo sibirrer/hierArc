@@ -30,6 +30,8 @@ class GoodnessOfFit(object):
         """
         logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
         print(logL, 'log likelihood')
+        num_data = self._sample_likelihood.num_data()
+        print(-logL * 2 / num_data, 'reducded chi2')
 
         # list of values for 'TDKinGaussian' likelihood
         ddt_model_list = []
@@ -47,7 +49,9 @@ class GoodnessOfFit(object):
             name = kwargs_likelihood['name']
             likelihood = self._sample_likelihood._lens_list[i]
             ddt, dd = likelihood.angular_diameter_distances(cosmo)
-            ddt_, dd_ = likelihood.displace_prediction(ddt, dd, **kwargs_lens)
+            ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
+                                                       lambda_mst=kwargs_lens.get('lambda_mst'),
+                                                       gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
             aniso_param_array = likelihood.draw_anisotropy(**kwargs_kin)
             if likelihood.likelihood_type == 'TDKinGaussian':
                 ddt_model_list.append(ddt_)
@@ -86,7 +90,7 @@ class GoodnessOfFit(object):
                 sigma_v_model_list.append(sigma_v_predict)
                 sigma_v_model_error_list.append(sigma_v_sigma_model)
 
-        f, axes = plt.subplots(1, 2, figsize=(12, 4), gridspec_kw={'width_ratios': [1, 3]})
+        f, axes = plt.subplots(1, 2, figsize=(12, 4), gridspec_kw={'width_ratios': [len(ddt_name_list), len(sigma_v_name_list)]})
         axes[0].errorbar(np.arange(len(ddt_name_list)), ddt_data_list, yerr=ddt_sigma_list, xerr=None, fmt='o', ecolor=None, elinewidth=None,
                      capsize=None, barsabove=False, lolims=False, uplims=False,
                      xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None)
@@ -108,18 +112,6 @@ class GoodnessOfFit(object):
         axes[1].set_xticklabels(labels=sigma_v_name_list, rotation='vertical')
         axes[1].set_ylabel(r'$\sigma^{\rm P}$ [km/s]', fontsize=15)
         axes[1].legend()
-
-        #axes[3].errorbar(np.arange(len(ds_dds_name_list)), ds_dds_data_list, yerr=ds_dds_sigma_list, xerr=None, fmt='o',
-        #                 ecolor=None, elinewidth=None,
-        #                 capsize=None, barsabove=False, lolims=False, uplims=False,
-        #                 xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None)
-        #axes[3].plot(np.arange(len(ds_dds_name_list)), ds_dds_model_list, 'ok')
-        #axes[3].set_xticks(ticks=np.arange(len(ds_dds_name_list)))
-        #axes[3].set_xticklabels(labels=ds_dds_name_list, rotation='vertical')
-        #axes[3].set_ylabel(r'$D_{\rm s}/D_{\rm ds}$', fontize=15)
-
-        # separate panel for
-        # IFU fit
         return f, axes
 
     def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, show_legend=True):

@@ -22,6 +22,7 @@ class KinLikelihood(object):
         self._sigma_v_measured = sigma_v_measurement
         self._error_cov_measurement = error_cov_measurement
         self._error_cov_j_sqrt = error_cov_j_sqrt
+        self.num_data = len(j_model)
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
         """

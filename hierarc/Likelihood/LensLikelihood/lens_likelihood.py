@@ -50,6 +50,14 @@ class LensLikelihoodBase(object):
         else:
             raise ValueError('likelihood_type %s not supported!' % likelihood_type)
 
+    def num_data(self):
+        """
+        number of data points across the lens sample
+
+        :return: integer
+        """
+        return self._lens_type.num_data
+
 
 class TDKinGaussian(object):
     """
@@ -68,6 +76,7 @@ class TDKinGaussian(object):
         self._dd_mean = dd_mean
         self._dd_sigma2 = dd_sigma ** 2
         self._tdLikelihood = TDLikelihoodGaussian(z_lens, z_source, ddt_mean=ddt_mean, ddt_sigma=ddt_sigma)
+        self.num_data = 2
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
         """
@@ -113,6 +122,7 @@ class TDKinLikelihoodKDE(object):
                     z[j, i] = self._kde_likelihood.logLikelihood(dd, ddt)[0]
             self._interp_log_likelihood = interpolate.interp2d(dd_grid, ddt_grid, z, kind='cubic')
         self._interpol = interpol
+        self.num_data = 2
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
         """
@@ -153,6 +163,7 @@ class TDKinLikelihoodSklogn(object):
         self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
         self._mu_dd, self._lam_dd, self._sigma_dd = mu_dd, lam_dd, sigma_dd
         self._explim = explim
+        self.num_data = 2
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
         """
@@ -189,6 +200,7 @@ class TDLikelihoodSklogn(object):
         """
         self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
         self._explim = explim
+        self.num_data = 1
 
     def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
         """
@@ -219,6 +231,7 @@ class TDLikelihoodGaussian(object):
         self._z_lens = z_lens
         self._ddt_mean = ddt_mean
         self._ddt_sigma2 = ddt_sigma ** 2
+        self.num_data = 1
 
     def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
         """

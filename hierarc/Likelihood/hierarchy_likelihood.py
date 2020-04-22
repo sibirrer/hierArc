@@ -1,5 +1,5 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
-from hierarc.Likelihood.lens_likelihood import LensLikelihoodBase
+from hierarc.Likelihood.LensLikelihood.lens_likelihood import LensLikelihoodBase
 from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
 from hierarc.Util.distribution_util import PDFSampling
 import numpy as np
@@ -99,7 +99,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                     likelihood += exp_logl
             if likelihood <= 0:
                 return -np.inf
-            return np.log(likelihood)
+            return np.log(likelihood/self._num_distribution_draws)
 
     def angular_diameter_distances(self, cosmo):
         """

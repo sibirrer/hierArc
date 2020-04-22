@@ -28,3 +28,14 @@ class LensSampleLikelihood(object):
         for lens in self._lens_list:
             logL += lens.lens_log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         return logL
+
+    def num_data(self):
+        """
+        number of data points across the lens sample
+
+        :return: integer
+        """
+        num = 0
+        for lens in self._lens_list:
+            num += lens.num_data()
+        return num

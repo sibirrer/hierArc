@@ -5,7 +5,7 @@ import unittest
 import copy
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
-from hierarc.Likelihood.lens_likelihood import LensLikelihoodBase, TDKinLikelihoodKDE
+from hierarc.Likelihood.LensLikelihood.lens_likelihood import LensLikelihoodBase, TDKinLikelihoodKDE
 from astropy.cosmology import FlatLambdaCDM
 from scipy.stats import lognorm
 
@@ -114,6 +114,7 @@ class TestTDLikelihoodLogNorm(object):
         ll = self.ll_object.log_likelihood(self.ddt_grid)
         scipy_ll = self.scipy_lognorm.logpdf(self.ddt_grid) # with the constant term included
         npt.assert_almost_equal(ll, scipy_ll + 0.5*np.log(2*np.pi), decimal=7)
+
 
 class TestRaise(unittest.TestCase):
 

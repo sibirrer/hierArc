@@ -28,6 +28,7 @@ class DdtHistKinLikelihood(object):
                                                   kde_kernel=kde_kernel, bandwidth=bandwidth, nbins_hist=nbins_hist)
         self._kinlikelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_model, error_cov_measurement,
                                             error_cov_j_sqrt)
+        self.num_data = self._tdLikelihood.num_data + self._kinlikelihood.num_data
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
         """
