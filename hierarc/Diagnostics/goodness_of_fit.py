@@ -44,7 +44,7 @@ class GoodnessOfFit(object):
             likelihood = self._sample_likelihood._lens_list[i]
             ddt, dd = likelihood.angular_diameter_distances(cosmo)
             ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
-                                                       lambda_mst=kwargs_lens.get('lambda_mst'),
+                                                       lambda_mst=kwargs_lens.get('lambda_mst', 1),
                                                        gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
             if likelihood.likelihood_type in ['TDKinGaussian', 'DdtGaussKin']:
                 ddt_model_list.append(ddt_)
@@ -104,7 +104,7 @@ class GoodnessOfFit(object):
             likelihood = self._sample_likelihood._lens_list[i]
             ddt, dd = likelihood.angular_diameter_distances(cosmo)
             ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
-                                                       lambda_mst=kwargs_lens.get('lambda_mst'),
+                                                       lambda_mst=kwargs_lens.get('lambda_mst', 1),
                                                        gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
             aniso_param_array = likelihood.draw_anisotropy(**kwargs_kin)
 
