@@ -28,7 +28,7 @@ class KinLikelihood(object):
         self.num_data = len(j_model)
         self._normalized = normalized
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None):
+    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, sigma_v_pert=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
@@ -43,7 +43,7 @@ class KinLikelihood(object):
         else:
             scaling_ifu = aniso_scaling
         sigma_v_predict = self.sigma_v_model(ds_dds, scaling_ifu)
-        delta = self._sigma_v_measured - sigma_v_predict
+        delta = self.sigma_v_measured(sigma_v_pert) - sigma_v_predict
         cov_error = self.cov_error_measurement(sigma_v_sys_error) + self.cov_error_model(ds_dds, scaling_ifu)
         cov_error_inv = np.linalg.inv(cov_error)
         lnlikelihood = -delta.dot(cov_error_inv.dot(delta)) / 2.
@@ -51,6 +51,17 @@ class KinLikelihood(object):
             sign_det, lndet = np.linalg.slogdet(cov_error)
             lnlikelihood -= 1 / 2. * (self.num_data * np.log(2 * np.pi) + lndet)
         return lnlikelihood
+
+    def sigma_v_measured(self, sigma_v_pert=None):
+        """
+
+        :param sigma_v_pert: relative error in the measurement
+        :return: corrected measured velocity dispersion
+        """
+        if sigma_v_pert is None:
+            return self._sigma_v_measured
+        else:
+            return self._sigma_v_measured * (1 + sigma_v_pert)
 
     def sigma_v_model(self, ds_dds, aniso_scaling=1):
         """
