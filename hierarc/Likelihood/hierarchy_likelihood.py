@@ -11,7 +11,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
-                 num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False, **kwargs_likelihood):
+                 num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
+                 **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -74,7 +75,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :return: log likelihood given the single lens analysis for the given hyper parameter
         """
-        #a_ani = kwargs_kin.get('a_ani', None)  # stellar anisotropy parameter mean
+        sigma_v_sys_error = kwargs_kin.pop('sigma_v_sys_error', None)
 
         if self.check_dist(kwargs_lens, kwargs_kin):  # sharp distributions
             lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
@@ -82,7 +83,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                                                  kappa_ext=kappa_ext)
             aniso_param_array = self.draw_anisotropy(**kwargs_kin)
             aniso_scaling = self.ani_scaling(aniso_param_array)
-            lnlog = self._lens_type.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling)
+            lnlog = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error)
             return lnlog
         else:
             likelihood = 0
@@ -93,7 +94,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                 ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn,
                                                      lambda_mst=lambda_mst_draw,
                                                      kappa_ext=kappa_ext_draw)
-                logl = self._lens_type.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling)
+                logl = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl) and exp_logl > 0:
                     likelihood += exp_logl
@@ -104,7 +105,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     def angular_diameter_distances(self, cosmo):
         """
 
-        :param cosmo: astropy.comsmology instance (or equivalent with interpolation
+        :param cosmo: astropy.cosmology instance (or equivalent with interpolation
         :return: ddt, dd in units Mpc
         """
         dd = cosmo.angular_diameter_distance(z=self._z_lens).value

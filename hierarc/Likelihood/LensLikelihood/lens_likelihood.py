@@ -2,9 +2,10 @@ __author__ = 'sibirrer'
 
 from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
 from hierarc.Util import likelihood_util
-from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
-from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistLikelihood
-from hierarc.Likelihood.LensLikelihood.ddt_hist_kin_likelihood import DdtHistKinLikelihood
+
+
+
+
 import numpy as np
 from scipy import interpolate
 
@@ -42,11 +43,17 @@ class LensLikelihoodBase(object):
         elif likelihood_type == 'TDSkewLogNorm':
             self._lens_type = TDLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'IFUKinCov':
+            from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
             self._lens_type = KinLikelihood(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'DdtHist':
+            from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistLikelihood
             self._lens_type = DdtHistLikelihood(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'DdtHistKin':
+            from hierarc.Likelihood.LensLikelihood.ddt_hist_kin_likelihood import DdtHistKinLikelihood
             self._lens_type = DdtHistKinLikelihood(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'DdtGaussKin':
+            from hierarc.Likelihood.LensLikelihood.ddt_gauss_kin_likelihood import DdtGaussKinLikelihood
+            self._lens_type = DdtGaussKinLikelihood(z_lens, z_source, **kwargs_likelihood)
         else:
             raise ValueError('likelihood_type %s not supported!' % likelihood_type)
 
@@ -57,6 +64,25 @@ class LensLikelihoodBase(object):
         :return: integer
         """
         return self._lens_type.num_data
+
+    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None):
+        """
+
+        :param ddt:
+        :param dd:
+        :param aniso_scaling:
+        :param sigma_v_sys_error:
+        :return:
+        """
+        if self.likelihood_type in ['TDGaussian', 'TDLogNorm', 'TDKinSkewLogNorm', 'DdtHist']:
+            return self._lens_type.log_likelihood(ddt, dd)
+        elif self.likelihood_type in ['TDKinKDE', 'TDKinGaussian', 'KinGaussian']:
+            return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling)
+        elif self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
+            return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling,
+                                                  sigma_v_sys_error=sigma_v_sys_error)
+        else:
+            raise ValueError('likelihood type %s not fully supported.' % self.likelihood_type)
 
 
 class TDKinGaussian(object):

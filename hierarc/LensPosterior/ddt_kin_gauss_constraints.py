@@ -1,13 +1,13 @@
 from hierarc.LensPosterior.ifu_kin_constraints import IFUKin
 
 
-class DdtKinConstraints(IFUKin):
+class DdtGaussKinConstraints(IFUKin):
     """
     class for sampling Ds/Dds posteriors from imaging data and kinematic constraints with additional constraints on the
     time-delay distance Ddt
     """
 
-    def __init__(self, z_lens, z_source, ddt_samples, ddt_weights, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
+    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
                  sigma_v, sigma_v_error_independent, sigma_v_error_covariant, kwargs_aperture, kwargs_seeing,
                  kwargs_numerics_galkin, anisotropy_model,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
@@ -17,9 +17,8 @@ class DdtKinConstraints(IFUKin):
 
         :param z_lens: lens redshift
         :param z_source: source redshift
-        :param ddt_samples: numpy array with a sample reflecting the likelihood density in Ddt given imaging data and
-         time delays.
-        :param ddt_weights: None or lenght of ddt_samples, weights of individual ddt_samples
+        :param ddt_mean: mean of time-delay distance likelihood
+        :param ddt_sigma: 1-sigma Gaussian uncertainty on the time-delay distance likelihood
         :param sigma_v: numpy array of IFU velocity dispersion of the main deflector in km/s
         :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity dispersion of the IFU observation independent of each other
         :param sigma_v_error_covariant: covariant error in the measured kinematics shared among all IFU measurements
@@ -41,9 +40,9 @@ class DdtKinConstraints(IFUKin):
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
         """
-        self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
+        self._ddt_mean, self._ddt_sigma = ddt_mean, ddt_sigma
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
-        super(DdtKinConstraints, self).__init__(z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff,
+        super(DdtGaussKinConstraints, self).__init__(z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff,
                                                 r_eff_error, sigma_v, sigma_v_error_independent,
                                                 sigma_v_error_covariant, kwargs_aperture, kwargs_seeing,
                                                 kwargs_numerics_galkin, anisotropy_model,
@@ -68,8 +67,8 @@ class DdtKinConstraints(IFUKin):
         # subtract the component in the uncertainty in ddt that does not impact the uncertainty on dd
         j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list = self.model_marginalization(num_sample_model=num_sample_model)
         # configuration keyword arguments for the hierarchical sampling
-        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtHistKin',
-                             'ddt_sample': self._ddt_sample, 'ddt_weights': self._ddt_weights,
+        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtGaussKin',
+                             'ddt_mean': self._ddt_mean, 'ddt_sigma': self._ddt_sigma,
                              'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
                              'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,

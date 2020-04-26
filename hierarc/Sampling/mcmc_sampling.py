@@ -1,5 +1,5 @@
 import emcee
-from hierarc.Likelihood.cosmo_likelihood import CosmoLikelihood
+from hierarc.Likelihood.likelihood import CosmoLikelihood
 from lenstronomy.Util import sampling_util
 
 
@@ -10,7 +10,7 @@ class MCMCSampler(object):
     def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE',
-                 lambda_ifu_sampling=False, lambda_ifu_distribution='NONE',
+                 lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
                  cosmo_fixed=None):
         """
@@ -36,6 +36,10 @@ class MCMCSampler(object):
         kinematic prediction
         :param anisotropy_model: string, specifies the stellar anisotropy model
         :param anisotropy_distribution: string, distribution of the anisotropy parameters
+        :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
+         measurement
+        :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
+         measurement
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
@@ -48,6 +52,7 @@ class MCMCSampler(object):
                                      lambda_mst_distribution=lambda_mst_distribution,
                                      lambda_ifu_sampling=lambda_ifu_sampling,
                                      lambda_ifu_distribution=lambda_ifu_distribution,
+                                     sigma_v_systematics=sigma_v_systematics,
                                      kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
                                      anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
                                      anisotropy_distribution=anisotropy_distribution,

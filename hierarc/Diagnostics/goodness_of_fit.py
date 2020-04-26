@@ -18,7 +18,7 @@ class GoodnessOfFit(object):
         self._kwargs_likelihood_list = kwargs_likelihood_list
         self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list)
 
-    def plot_fit(self, cosmo, kwargs_lens, kwargs_kin):
+    def plot_ddt_fit(self, cosmo, kwargs_lens, kwargs_kin):
         """
         plots the prediction and the uncorrelated error bars on the individual lenses
         currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
@@ -39,12 +39,6 @@ class GoodnessOfFit(object):
         ddt_data_list = []
         ddt_sigma_list = []
 
-        sigma_v_name_list = []
-        sigma_v_measurement_list = []
-        sigma_v_measurement_error_list = []
-        sigma_v_model_list = []
-        sigma_v_model_error_list = []
-
         for i, kwargs_likelihood in enumerate(self._kwargs_likelihood_list):
             name = kwargs_likelihood['name']
             likelihood = self._sample_likelihood._lens_list[i]
@@ -52,8 +46,7 @@ class GoodnessOfFit(object):
             ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
                                                        lambda_mst=kwargs_lens.get('lambda_mst'),
                                                        gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
-            aniso_param_array = likelihood.draw_anisotropy(**kwargs_kin)
-            if likelihood.likelihood_type == 'TDKinGaussian':
+            if likelihood.likelihood_type in ['TDKinGaussian', 'DdtGaussKin']:
                 ddt_model_list.append(ddt_)
                 ddt_name_list.append(name)
                 ddt_data_list.append(kwargs_likelihood['ddt_mean'])
@@ -75,7 +68,47 @@ class GoodnessOfFit(object):
                 ddt_sigma = np.sqrt((ddt_sigma/ddt_mean)**2 + kappa_sigma**2) * ddt_mean
                 ddt_data_list.append(ddt_mean)
                 ddt_sigma_list.append(ddt_sigma)
-            if likelihood.likelihood_type in ['IFUKinCov', 'DdtHistKin']:
+
+        f, ax = plt.subplots(1, 1, figsize=(len(ddt_name_list), 4))
+        ax.errorbar(np.arange(len(ddt_name_list)), ddt_data_list, yerr=ddt_sigma_list, xerr=None, fmt='o', ecolor=None, elinewidth=None,
+                     capsize=None, barsabove=False, lolims=False, uplims=False,
+                     xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None)
+        ax.plot(np.arange(len(ddt_name_list)), ddt_model_list, 'ok')
+        ax.set_xticks(ticks=np.arange(len(ddt_name_list)))
+        ax.set_xticklabels(labels=ddt_name_list, rotation='vertical')
+        ax.set_ylabel(r'$D_{\Delta t}$ [Mpc]', fontsize=15)
+        return f, ax
+
+    def plot_kin_fit(self, cosmo, kwargs_lens, kwargs_kin):
+        """
+        plots the prediction and the uncorrelated error bars on the individual lenses
+        currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
+
+        :param cosmo: astropy.cosmology instance
+        :param kwargs_lens: lens model parameter keyword arguments
+        :param kwargs_kin: kinematics model keyword arguments
+        :return: fig, axes of matplotlib instance
+        """
+        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
+        print(logL, 'log likelihood')
+
+
+        sigma_v_name_list = []
+        sigma_v_measurement_list = []
+        sigma_v_measurement_error_list = []
+        sigma_v_model_list = []
+        sigma_v_model_error_list = []
+
+        for i, kwargs_likelihood in enumerate(self._kwargs_likelihood_list):
+            name = kwargs_likelihood['name']
+            likelihood = self._sample_likelihood._lens_list[i]
+            ddt, dd = likelihood.angular_diameter_distances(cosmo)
+            ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
+                                                       lambda_mst=kwargs_lens.get('lambda_mst'),
+                                                       gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
+            aniso_param_array = likelihood.draw_anisotropy(**kwargs_kin)
+
+            if likelihood.likelihood_type in ['IFUKinCov', 'DdtHistKin', 'DdtGaussKin']:
                 ds_dds = ddt_ / dd_ / (1 + likelihood._z_lens)
                 j_model = kwargs_likelihood['j_model'][0] * likelihood.ani_scaling(aniso_param_array)[0]
                 J_error = np.atleast_2d(kwargs_likelihood['error_cov_j_sqrt'])[0, 0]
@@ -90,29 +123,20 @@ class GoodnessOfFit(object):
                 sigma_v_model_list.append(sigma_v_predict)
                 sigma_v_model_error_list.append(sigma_v_sigma_model)
 
-        f, axes = plt.subplots(1, 2, figsize=(12, 4), gridspec_kw={'width_ratios': [len(ddt_name_list), len(sigma_v_name_list)]})
-        axes[0].errorbar(np.arange(len(ddt_name_list)), ddt_data_list, yerr=ddt_sigma_list, xerr=None, fmt='o', ecolor=None, elinewidth=None,
-                     capsize=None, barsabove=False, lolims=False, uplims=False,
-                     xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None)
-        axes[0].plot(np.arange(len(ddt_name_list)), ddt_model_list, 'ok')
-        axes[0].set_xticks(ticks=np.arange(len(ddt_name_list)))
-        axes[0].set_xticklabels(labels=ddt_name_list, rotation='vertical')
-        axes[0].set_ylabel(r'$D_{\Delta t}$ [Mpc]', fontsize=15)
-
-
-        axes[1].errorbar(np.arange(len(sigma_v_name_list)), sigma_v_measurement_list,
+        f, ax = plt.subplots(1, 1, figsize=(int(len(sigma_v_name_list)/2), 4))
+        ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_measurement_list,
                          yerr=sigma_v_measurement_error_list, xerr=None, fmt='o',
                          ecolor=None, elinewidth=None,
                          capsize=None, barsabove=False, lolims=False, uplims=False,
                          xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
-        axes[1].errorbar(np.arange(len(sigma_v_name_list)), sigma_v_model_list,
+        ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_model_list,
                          yerr=sigma_v_model_error_list, xerr=None, fmt='o',
                          ecolor=None, elinewidth=None, label='prediction')
-        axes[1].set_xticks(ticks=np.arange(len(sigma_v_name_list)))
-        axes[1].set_xticklabels(labels=sigma_v_name_list, rotation='vertical')
-        axes[1].set_ylabel(r'$\sigma^{\rm P}$ [km/s]', fontsize=15)
-        axes[1].legend()
-        return f, axes
+        ax.set_xticks(ticks=np.arange(len(sigma_v_name_list)))
+        ax.set_xticklabels(labels=sigma_v_name_list, rotation='vertical')
+        ax.set_ylabel(r'$\sigma^{\rm P}$ [km/s]', fontsize=15)
+        ax.legend()
+        return f, ax
 
     def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, show_legend=True):
         """

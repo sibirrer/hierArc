@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import numpy.testing as npt
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
-from hierarc.Likelihood.cosmo_likelihood import CosmoLikelihood
+from hierarc.Likelihood.likelihood import CosmoLikelihood
 from astropy.cosmology import FlatLambdaCDM
 
 

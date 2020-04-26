@@ -10,7 +10,7 @@ class ParamManager(object):
     def __init__(self, cosmology, ppn_sampling=False, lambda_mst_sampling=False, lambda_mst_distribution='NONE',
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
-                 lambda_ifu_distribution='NONE',
+                 lambda_ifu_distribution='NONE', sigma_v_systematics=False,
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
                  kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={}):
@@ -26,9 +26,12 @@ class ParamManager(object):
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
+        :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
+         measurement
         """
         self._kin_param = KinParam(anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
-                                   distribution_function=anisotropy_distribution, kwargs_fixed=kwargs_fixed_kin)
+                                   distribution_function=anisotropy_distribution,
+                                   sigma_v_systematics=sigma_v_systematics, kwargs_fixed=kwargs_fixed_kin)
         self._cosmo_param = CosmoParam(cosmology=cosmology, ppn_sampling=ppn_sampling, kwargs_fixed=kwargs_fixed_cosmo)
         self._lens_param = LensParam(lambda_mst_sampling=lambda_mst_sampling,
                                      lambda_mst_distribution=lambda_mst_distribution,

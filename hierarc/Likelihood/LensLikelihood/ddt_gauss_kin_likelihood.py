@@ -1,31 +1,27 @@
 from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
-from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistKDELikelihood
+from hierarc.Likelihood.LensLikelihood.lens_likelihood import TDLikelihoodGaussian
 
 
-class DdtHistKinLikelihood(object):
+class DdtGaussKinLikelihood(object):
 
     """
     class for joint kinematics and time delay likelihood assuming that they are independent
     Uses KinLikelihood and DdtHistLikelihood combined
     """
-    def __init__(self, z_lens, z_source, ddt_samples, ddt_weights, sigma_v_measurement, j_model, error_cov_measurement,
-                 error_cov_j_sqrt, kde_kernel=None, bandwidth=20, nbins_hist=200):
+    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, sigma_v_measurement, j_model, error_cov_measurement,
+                 error_cov_j_sqrt):
         """
 
         :param z_lens: lens redshift
         :param z_source: source redshift
-        :param ddt_samples: numpy array of Ddt values
-        :param ddt_weights: optional weights for the samples in Ddt
-        :param kde_kernel: string of KDE kernel type
-        :param bandwidth: bandwith of kernel
-        :param nbins_hist: number of bins in the histogram
+        :param ddt_mean: mean Ddt [Mpc] of time-delay and lens model likelihood
+        :param ddt_sigma: 1-sigma uncertainty in Ddt
         :param sigma_v_measurement: numpy array, velocity dispersion measured
         :param j_model: numpy array of the predicted dimensionless dispersion on the IFU's
         :param error_cov_measurement: covariance matrix of the measured velocity dispersions in the IFU's
         :param error_cov_j_sqrt: covariance matrix of sqrt(J) of the model predicted dimensionless dispersion on the JFU's
         """
-        self._tdLikelihood = DdtHistKDELikelihood(z_lens, z_source, ddt_samples, ddt_weights=ddt_weights,
-                                                  kde_kernel=kde_kernel, bandwidth=bandwidth, nbins_hist=nbins_hist)
+        self._tdLikelihood = TDLikelihoodGaussian(z_lens, z_source, ddt_mean=ddt_mean, ddt_sigma=ddt_sigma)
         self._kinlikelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_model, error_cov_measurement,
                                             error_cov_j_sqrt)
         self.num_data = self._tdLikelihood.num_data + self._kinlikelihood.num_data
