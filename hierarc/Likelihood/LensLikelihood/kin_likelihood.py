@@ -11,8 +11,8 @@ class KinLikelihood(object):
                  normalized=True):
         """
 
-        :param z_lens:
-        :param z_source:
+        :param z_lens: lens redshift
+        :param z_source: source redshift
         :param sigma_v_measurement: numpy array, velocity dispersion measured
         :param j_model: numpy array of the predicted dimensionless dispersion on the IFU's
         :param error_cov_measurement: covariance matrix of the measured velocity dispersions in the IFU's

@@ -2,10 +2,6 @@ __author__ = 'sibirrer'
 
 from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
 from hierarc.Util import likelihood_util
-
-
-
-
 import numpy as np
 from scipy import interpolate
 
