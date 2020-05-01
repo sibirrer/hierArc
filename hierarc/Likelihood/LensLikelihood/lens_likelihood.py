@@ -1,7 +1,6 @@
 __author__ = 'sibirrer'
 
 from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
-from hierarc.Util import likelihood_util
 import numpy as np
 from scipy import interpolate
 
@@ -34,10 +33,6 @@ class LensLikelihoodBase(object):
             self._lens_type = KinLikelihoodGaussian(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'TDLogNorm':
             self._lens_type = TDLikelihoodLogNorm(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'TDKinSkewLogNorm':
-            self._lens_type = TDKinLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'TDSkewLogNorm':
-            self._lens_type = TDLikelihoodSklogn(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'IFUKinCov':
             from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
             self._lens_type = KinLikelihood(z_lens, z_source, **kwargs_likelihood)
@@ -161,78 +156,6 @@ class TDKinLikelihoodKDE(object):
         if self._interpol is True:
             return self._interp_log_likelihood(dd_, ddt)[0]
         return self._kde_likelihood.logLikelihood(dd_, ddt)[0]
-
-
-class TDKinLikelihoodSklogn(object):
-    """
-    class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
-    with a provided skewed log normal function for both Ddt and Dd
-    The two distributions are asssumed independant and can be combined.
-    """
-    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, mu_dd, lam_dd, sigma_dd, explim=100):
-        """
-
-        :param z_lens: lens redshift
-        :param z_source: source redshift
-        :param mu_ddt:
-        :param lam_ddt:
-        :param sigma_ddt:
-        :param mu_dd:
-        :param lam_dd:
-        :param sigma_dd:
-        :param explim: exponent limit for evaluating the likelihood
-        """
-        self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
-        self._mu_dd, self._lam_dd, self._sigma_dd = mu_dd, lam_dd, sigma_dd
-        self._explim = explim
-        self.num_data = 2
-
-    def log_likelihood(self, ddt, dd, aniso_scaling=None):
-        """
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
-        :return: log likelihood given the single lens analysis
-        """
-        if aniso_scaling is not None:
-            dd_ = dd * aniso_scaling[0]
-        else:
-            dd_ = dd
-        logl_ddt = likelihood_util.sklogn_likelihood(ddt, self._mu_ddt, self._lam_ddt, self._sigma_ddt, explim=self._explim)
-        logl_dd = likelihood_util.sklogn_likelihood(dd_, self._mu_dd, self._lam_dd, self._sigma_dd, explim=self._explim)
-        return logl_ddt + logl_dd
-
-
-class TDLikelihoodSklogn(object):
-    """
-    class for evaluating Ddt from a lens with time delays without kinematics measurement
-    with a provided skewed log normal function for Ddt.
-    """
-
-    def __init__(self, z_lens, z_source, mu_ddt, lam_ddt, sigma_ddt, explim=100):
-        """
-
-        :param z_lens: lens redshift
-        :param z_source: source redshift
-        :param mu_ddt:
-        :param lam_ddt:
-        :param sigma_ddt:
-        :param explim: exponent limit for evaluating the likelihood
-        """
-        self._mu_ddt, self._lam_ddt, self._sigma_ddt = mu_ddt, lam_ddt, sigma_ddt
-        self._explim = explim
-        self.num_data = 1
-
-    def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
-        """
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
-        :return: log likelihood given the single lens analysis
-        """
-        return likelihood_util.sklogn_likelihood(ddt, self._mu_ddt, self._lam_ddt, self._sigma_ddt, explim=self._explim)
 
 
 class TDLikelihoodGaussian(object):
