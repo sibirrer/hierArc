@@ -22,7 +22,7 @@ before_script: # configure a headless display to test plot generation
 - "export DISPLAY=:99.0"
 #- "sh -e /etc/init.d/xvfb start"
 - sleep 3 # give xvfb some time to start
-# command to run tests
+# command to run test
 script:
   #- py.test
   - coverage run --source hierarc setup.py test
