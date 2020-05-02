@@ -45,7 +45,7 @@ class TestIFUKinLikelihood(object):
         error_cov_measurement = np.diag(sigma_v_sigma ** 2)
         error_cov_j_sqrt = np.diag(np.zeros_like(sigma_v_measurement))
         ifu_likelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_mean_list, error_cov_measurement,
-                                       error_cov_j_sqrt, normalized=False)
+                                       error_cov_j_sqrt, normalized=False, sigma_sys_error_include=True)
         logl = ifu_likelihood.log_likelihood(ddt * (1 - np.sqrt(0.1**2)) ** 2, dd, aniso_scaling=1, sigma_v_sys_error=0.1)
         npt.assert_almost_equal(logl, -1/2., decimal=5)
 
@@ -63,7 +63,7 @@ class TestIFUKinLikelihood(object):
         error_cov_j_sqrt = np.diag((np.sqrt(j_mean_list) / 100)**2)
         print(error_cov_j_sqrt, 'cov_j_sqrt')
         ifu_likelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_mean_list, error_cov_measurement,
-                                       error_cov_j_sqrt, normalized=True)
+                                       error_cov_j_sqrt, normalized=True, sigma_sys_error_include=True)
         logl = ifu_likelihood.log_likelihood(ddt, dd, aniso_scaling=1)
         aniso_scaling = 0.8
         logl_ani = ifu_likelihood.log_likelihood(ddt, dd*aniso_scaling, aniso_scaling=aniso_scaling)

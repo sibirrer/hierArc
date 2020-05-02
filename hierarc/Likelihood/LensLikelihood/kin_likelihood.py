@@ -8,7 +8,7 @@ class KinLikelihood(object):
     likelihood to deal with IFU kinematics constraints with covariances in both the model and measured velocity dispersion
     """
     def __init__(self, z_lens, z_source, sigma_v_measurement, j_model, error_cov_measurement, error_cov_j_sqrt,
-                 normalized=True):
+                 normalized=True, sigma_sys_error_include=False):
         """
 
         :param z_lens: lens redshift
@@ -19,6 +19,8 @@ class KinLikelihood(object):
         :param error_cov_j_sqrt: covariance matrix of sqrt(J) of the model predicted dimensionless dispersion on the IFU's
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
+        :param sigma_sys_error_include: bool, if True will include a systematic error in the velocity dispersion
+         measurement (if sampled from), otherwise this sampled value is ignored.
         """
         self._z_lens = z_lens
         self._j_model = j_model
@@ -27,6 +29,7 @@ class KinLikelihood(object):
         self._error_cov_j_sqrt = error_cov_j_sqrt
         self.num_data = len(j_model)
         self._normalized = normalized
+        self._sigma_sys_error_include = sigma_sys_error_include
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, sigma_v_pert=None):
         """
@@ -90,7 +93,8 @@ class KinLikelihood(object):
         :param sigma_v_sys_error: float (optional) added error on the velocity dispersion measurement in quadrature
         :return: error covariance matrix of the velocity dispersion measurements
         """
-        if sigma_v_sys_error is None:
-            return self._error_cov_measurement
+        if self._sigma_sys_error_include and sigma_v_sys_error is not None:
+            return self._error_cov_measurement + np.outer(self._sigma_v_measured * sigma_v_sys_error,
+                                                          self._sigma_v_measured * sigma_v_sys_error)
         else:
-            return self._error_cov_measurement + np.outer(self._sigma_v_measured * sigma_v_sys_error, self._sigma_v_measured * sigma_v_sys_error)
+            return self._error_cov_measurement
