@@ -1,7 +1,7 @@
-from hierarc.LensPosterior.ifu_kin_constraints import IFUKin
+from hierarc.LensPosterior.kin_constraints import KinConstraints
 
 
-class DdtGaussKinConstraints(IFUKin):
+class DdtGaussKinConstraints(KinConstraints):
     """
     class for sampling Ds/Dds posteriors from imaging data and kinematic constraints with additional constraints on the
     time-delay distance Ddt
