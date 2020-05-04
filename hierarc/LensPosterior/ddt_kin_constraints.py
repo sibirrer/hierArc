@@ -69,7 +69,7 @@ class DdtKinConstraints(KinConstraints):
         j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list = self.model_marginalization(num_sample_model=num_sample_model)
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtHistKin',
-                             'ddt_sample': self._ddt_sample, 'ddt_weights': self._ddt_weights,
+                             'ddt_samples': self._ddt_sample, 'ddt_weights': self._ddt_weights,
                              'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
                              'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,

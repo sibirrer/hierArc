@@ -102,14 +102,14 @@ class AnisotropyScalingIFU(object):
         if self._anisotropy_model in ['OM']:
             if a_ani < self._ani_param_min or a_ani > self._ani_param_max:
                 raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
-            a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
+            a_ani_draw = np.random.normal(a_ani, a_ani_sigma*a_ani)
             if a_ani_draw < self._ani_param_min or a_ani_draw > self._ani_param_max:
                 return self.draw_anisotropy(a_ani, a_ani_sigma)
             return np.array([a_ani_draw])
         elif self._anisotropy_model in ['GOM']:
             if a_ani < self._ani_param_min[0] or a_ani > self._ani_param_max[0] or beta_inf < self._ani_param_min[1] or beta_inf > self._ani_param_max[1]:
                 raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
-            a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
+            a_ani_draw = np.random.normal(a_ani, a_ani_sigma*a_ani)
             beta_inf_draw = np.random.normal(beta_inf, beta_inf_sigma)
             if a_ani_draw < self._ani_param_min[0] or a_ani_draw > self._ani_param_max[0] or beta_inf_draw < self._ani_param_min[1] or beta_inf_draw > self._ani_param_max[1]:
                 return self.draw_anisotropy(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma)
