@@ -35,13 +35,13 @@ class LensParam(object):
         if self._lambda_mst_sampling is True:
             if 'lambda_mst' not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\lambda_{\rm mst}$')
+                    list.append(r'$\lambda_{\rm int}$')
                 else:
                     list.append('lambda_mst')
             if self._lambda_mst_distribution == 'GAUSSIAN':
                 if 'lambda_mst_sigma' not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$\sigma(\lambda_{\rm mst})$')
+                        list.append(r'$\sigma(\lambda_{\rm int})$')
                     else:
                         list.append('lambda_mst_sigma')
         if self._lambda_ifu_sampling is True:
