@@ -45,7 +45,7 @@ def binned_velocity(velocity_map, weight_map, flux_map, fiber_scale, r_bins):
     radial_pos, velocity, error_weight, flux = _2d_t0_1d(velocity_map, weight_map, flux_map, fiber_scale)
     r_in = r_bins[0]
     v2_r = []
-    error_weight_v2 = error_weight / (2 * velocity)  # error on v^2 based on error on v, 1/sigma^2(v^2) = 1/sigma^2(v) / (2 * v)
+    error_weight_v2 = error_weight / (2 * np.abs(velocity))  # error on v^2 based on error on v, 1/sigma^2(v^2) = 1/sigma^2(v) / (2 * v)
     weight_r = []
     for i, r_out in enumerate(r_bins[1:]):
         index = np.where((radial_pos >= r_in) & (radial_pos < r_out))
@@ -102,7 +102,7 @@ def _2d_t0_1d(value_map, weight_map, flux_map, fiber_scale):
         for j in range(ny):
             r = np.sqrt((i - center_x) ** 2 + (j - center_y) ** 2) * fiber_scale
             disp = value_map[i, j]
-            if np.isfinite(disp):  # and disp < 800:
+            if np.isfinite(disp) and np.isfinite(weight_map[i, j]):  # and disp < 800:
                 r_list.append(r)
                 disp_list.append(disp)
                 weight_list.append(weight_map[i, j])
