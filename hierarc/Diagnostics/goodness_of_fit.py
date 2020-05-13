@@ -72,11 +72,12 @@ class GoodnessOfFit(object):
         f, ax = plt.subplots(1, 1, figsize=(len(ddt_name_list), 4))
         ax.errorbar(np.arange(len(ddt_name_list)), ddt_data_list, yerr=ddt_sigma_list, xerr=None, fmt='o', ecolor=None, elinewidth=None,
                      capsize=None, barsabove=False, lolims=False, uplims=False,
-                     xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None)
-        ax.plot(np.arange(len(ddt_name_list)), ddt_model_list, 'ok')
+                     xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
+        ax.plot(np.arange(len(ddt_name_list)), ddt_model_list, 'ok', label='prediction')
         ax.set_xticks(ticks=np.arange(len(ddt_name_list)))
         ax.set_xticklabels(labels=ddt_name_list, rotation='vertical')
         ax.set_ylabel(r'$D_{\Delta t}$ [Mpc]', fontsize=15)
+        ax.legend()
         return f, ax
 
     def plot_kin_fit(self, cosmo, kwargs_lens, kwargs_kin):
