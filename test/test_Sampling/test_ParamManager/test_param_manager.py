@@ -63,11 +63,6 @@ class TestParamManager(object):
 
     def test_cosmo(self):
         kwargs_cosmo = {'h0': 70, 'om': 0.3, 'ok': 0., 'w': -1, 'wa': -0, 'w0': -0, 'gamma_ppn': 1}
-        kwargs_lens = {'lambda_mst': 1, 'lambda_mst_sigma': 0}
-        kwargs_kin = {'a_ani': 1, 'a_ani_sigma': 0.3}
-
-        kwargs = {'h0': 70, 'om': 0.3, 'ok': 0., 'w': -1, 'wa': -0, 'w0': -0, 'gamma_ppn': 1, 'lambda_mst': 1,
-                  'lambda_mst_sigma': 0, 'aniso_param': 1, 'aniso_param_sigma': 0.3}
         for param in self.param_list:
             cosmo = param.cosmo(kwargs_cosmo)
             assert hasattr(cosmo, 'H0')
@@ -89,16 +84,6 @@ class TestRaise(unittest.TestCase):
                  anisotropy_sampling=False, anisotropy_model='OM', kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
                  kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={})
-
-        #with self.assertRaises(ValueError):
-        #    param = ParamManager(cosmology='FLCDM', ppn_sampling=True, lambda_mst_sampling=False,
-        #                 lambda_mst_distribution='delta',
-        #                 anisotropy_sampling=False, anisotropy_model='OM', kwargs_lower_cosmo=None,
-        #                 kwargs_upper_cosmo=None,
-        #                 kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
-        #                 kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={})
-        #    param._cosmology = 'wrong'
-        #    param.cosmo(kwargs_cosmo={})
 
 
 if __name__ == '__main__':

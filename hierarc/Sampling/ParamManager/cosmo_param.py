@@ -15,7 +15,7 @@ class CosmoParam(object):
         self._cosmology = cosmology
         self._kwargs_fixed = kwargs_fixed
         self._ppn_sampling = ppn_sampling
-        self._supported_cosmologies = ['FLCDM', "FwCDM", "w0waCDM", "oLCDM"]
+        self._supported_cosmologies = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]
         if cosmology not in self._supported_cosmologies:
             raise ValueError(
                 'cosmology %s not supported!. Please chose among %s ' % (cosmology, self._supported_cosmologies))
@@ -32,7 +32,7 @@ class CosmoParam(object):
                 list.append(r'$H_0$')
             else:
                 list.append('h0')
-        if self._cosmology in ['FLCDM', "FwCDM", "w0waCDM", "oLCDM"]:
+        if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
             if 'om' not in self._kwargs_fixed:
                 if latex_style is True:
                     list.append(r'$\Omega_{\rm m}$')
@@ -81,7 +81,7 @@ class CosmoParam(object):
         else:
             kwargs['h0'] = args[i]
             i += 1
-        if self._cosmology in ['FLCDM', "FwCDM", "w0waCDM", "oLCDM"]:
+        if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
             if 'om' in self._kwargs_fixed:
                 kwargs['om'] = self._kwargs_fixed['om']
             else:
@@ -127,7 +127,7 @@ class CosmoParam(object):
         args = []
         if 'h0' not in self._kwargs_fixed:
             args.append(kwargs['h0'])
-        if self._cosmology in ['FLCDM', "FwCDM", "w0waCDM", "oLCDM"]:
+        if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
             if 'om' not in self._kwargs_fixed:
                 args.append(kwargs['om'])
         if self._cosmology in ["FwCDM"]:

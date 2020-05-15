@@ -22,10 +22,20 @@ class TestLensParam(object):
         param_list = self._param.param_list(latex_style=True)
         assert len(param_list) == 6
 
+        param_list = self._param_fixed.param_list(latex_style=False)
+        assert len(param_list) == 0
+        param_list = self._param_fixed.param_list(latex_style=True)
+        assert len(param_list) == 0
+
     def test_args2kwargs(self):
         kwargs = {'lambda_mst': 1.1, 'lambda_mst_sigma': 0.1, 'lambda_ifu': 1.1, 'lambda_ifu_sigma': 0.2,
                         'kappa_ext': 0.01, 'kappa_ext_sigma': 0.03}
         args = self._param.kwargs2args(kwargs)
         kwargs_new, i = self._param.args2kwargs(args, i=0)
         args_new = self._param.kwargs2args(kwargs_new)
+        npt.assert_almost_equal(args_new, args)
+
+        args = self._param_fixed.kwargs2args(kwargs)
+        kwargs_new, i = self._param_fixed.args2kwargs(args, i=0)
+        args_new = self._param_fixed.kwargs2args(kwargs_new)
         npt.assert_almost_equal(args_new, args)
