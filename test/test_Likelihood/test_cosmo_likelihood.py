@@ -24,7 +24,7 @@ class TestCosmoLikelihood(object):
         num_samples = 20000
         self.ddt_samples = np.random.normal(self.D_dt_true, self.sigma_Ddt, num_samples)
         self.dd_samples = np.random.normal(self.Dd_true, self.sigma_Dd, num_samples)
-        self.kwargs_likelihood_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinGaussian',
+        self.kwargs_likelihood_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'DdtDdGaussian',
                                         'ddt_mean': self.D_dt_true, 'ddt_sigma': self.sigma_Ddt,
                                         'dd_mean': self.Dd_true, 'dd_sigma': self.sigma_Dd}]
 

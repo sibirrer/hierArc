@@ -1,9 +1,5 @@
 __author__ = 'sibirrer'
 
-from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
-import numpy as np
-from scipy import interpolate
-
 
 class LensLikelihoodBase(object):
     """
@@ -23,16 +19,21 @@ class LensLikelihoodBase(object):
         self._z_lens = z_lens
         self._z_source = z_source
         self.likelihood_type = likelihood_type
-        if likelihood_type in ['TDGaussian']:
-            self._lens_type = TDLikelihoodGaussian(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type in ['TDKinKDE']:
-            self._lens_type = TDKinLikelihoodKDE(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'TDKinGaussian':
-            self._lens_type = TDKinGaussian(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type in ['KinGaussian']:
-            self._lens_type = KinLikelihoodGaussian(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'TDLogNorm':
-            self._lens_type = TDLikelihoodLogNorm(z_lens, z_source, **kwargs_likelihood)
+        if likelihood_type in ['DdtGaussian']:
+            from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import DdtGaussianLikelihood
+            self._lens_type = DdtGaussianLikelihood(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type in ['DdtDdKDE']:
+            from hierarc.Likelihood.LensLikelihood.ddt_dd_kde_likelihood import DdtDdKDELikelihood
+            self._lens_type = DdtDdKDELikelihood(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'DdtDdGaussian':
+            from hierarc.Likelihood.LensLikelihood.ddt_dd_gauss_likelihood import DdtDdGaussian
+            self._lens_type = DdtDdGaussian(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type in ['DsDdsGaussian']:
+            from hierarc.Likelihood.LensLikelihood.ds_dds_gauss_likelihood import DsDdsGaussianLikelihood
+            self._lens_type = DsDdsGaussianLikelihood(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'DdtLogNorm':
+            from hierarc.Likelihood.LensLikelihood.ddt_lognorm_likelihood import DdtLogNormLikelihood
+            self._lens_type = DdtLogNormLikelihood(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'IFUKinCov':
             from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
             self._lens_type = KinLikelihood(z_lens, z_source, **kwargs_likelihood)
@@ -59,199 +60,20 @@ class LensLikelihoodBase(object):
     def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None):
         """
 
-        :param ddt:
-        :param dd:
-        :param aniso_scaling:
-        :param sigma_v_sys_error:
-        :return:
+        :param ddt: time-delay distance [physical Mpc]
+        :param dd: angular diameter distance to the lens [physical Mpc]
+        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+         dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
+         anisotropy model used to derive the prediction and covariance matrix in the init of this class.
+        :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
+        :return: natural logarithm of the likelihood of the data given the model
         """
-        if self.likelihood_type in ['TDGaussian', 'TDLogNorm', 'TDKinSkewLogNorm', 'DdtHist']:
+        if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist']:
             return self._lens_type.log_likelihood(ddt, dd)
-        elif self.likelihood_type in ['TDKinKDE', 'TDKinGaussian', 'KinGaussian']:
+        elif self.likelihood_type in ['DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian']:
             return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling)
         elif self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
             return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling,
                                                   sigma_v_sys_error=sigma_v_sys_error)
         else:
             raise ValueError('likelihood type %s not fully supported.' % self.likelihood_type)
-
-
-class TDKinGaussian(object):
-    """
-    class for joint kinematics and time delay likelihood assuming that they are independent and Gaussian
-    """
-    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, dd_mean, dd_sigma):
-        """
-
-        :param z_lens: lens redshift
-        :param z_source: source redshift
-        :param ddt_mean: mean of Ddt distance
-        :param ddt_sigma: 1-sigma uncertainty in the Ddt distance
-        :param dd_mean: mean of Dd distance ratio
-        :param dd_sigma: 1-sigma uncertainty in the Dd distance
-        """
-        self._dd_mean = dd_mean
-        self._dd_sigma2 = dd_sigma ** 2
-        self._tdLikelihood = TDLikelihoodGaussian(z_lens, z_source, ddt_mean=ddt_mean, ddt_sigma=ddt_sigma)
-        self.num_data = 2
-
-    def log_likelihood(self, ddt, dd, aniso_scaling=None):
-        """
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
-        :return: log likelihood given the single lens analysis
-        """
-        if aniso_scaling is not None:
-            dd_ = dd * aniso_scaling[0]
-        else:
-            dd_ = dd
-        lnlikelihood = self._tdLikelihood.log_likelihood(ddt, dd_) - (dd_ - self._dd_mean) ** 2 / self._dd_sigma2 / 2
-        return lnlikelihood
-
-
-class TDKinLikelihoodKDE(object):
-    """
-    class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
-    """
-    def __init__(self, z_lens, z_source, dd_sample, ddt_sample, kde_type='scipy_gaussian', bandwidth=1,
-                 interpol=False, num_interp_grid=100):
-        """
-
-        :param z_lens: lens redshift
-        :param z_source: source redshift
-        :param dd_sample: angular diameter to the lens posteriors (in physical Mpc)
-        :param ddt_sample: time-delay distance posteriors (in physical Mpc)
-        :param kde_type: kernel density estimator type (see KDELikelihood class)
-        :param bandwidth: width of kernel (in same units as the angular diameter quantities)
-        :param interpol: bool, if True pre-computes an interpolation likelihood in 2d on a grid
-        :param num_interp_grid: int, number of interpolations per axis
-        """
-        self._kde_likelihood = KDELikelihood(dd_sample, ddt_sample, kde_type=kde_type, bandwidth=bandwidth)
-
-        if interpol is True:
-            dd_grid = np.linspace(start=max(np.min(dd_sample), 0), stop=min(np.max(dd_sample), 10000), num=num_interp_grid)
-            ddt_grid = np.linspace(np.min(ddt_sample), np.max(ddt_sample), num=num_interp_grid)
-            z = np.zeros((num_interp_grid, num_interp_grid))
-            for i, dd in enumerate(dd_grid):
-                for j, ddt in enumerate(ddt_grid):
-                    z[j, i] = self._kde_likelihood.logLikelihood(dd, ddt)[0]
-            self._interp_log_likelihood = interpolate.interp2d(dd_grid, ddt_grid, z, kind='cubic')
-        self._interpol = interpol
-        self.num_data = 2
-
-    def log_likelihood(self, ddt, dd, aniso_scaling=None):
-        """
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
-        :return: log likelihood given the single lens analysis
-        """
-        if aniso_scaling is not None:
-            dd_ = dd * aniso_scaling[0]
-        else:
-            dd_ = dd
-        if self._interpol is True:
-            return self._interp_log_likelihood(dd_, ddt)[0]
-        return self._kde_likelihood.logLikelihood(dd_, ddt)[0]
-
-
-class TDLikelihoodGaussian(object):
-    """
-    class to handle cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays.
-    Thus Ddt is not constrained but the kinematics can constrain Ds/Dds
-
-    The current version includes a Gaussian in Ds/Dds but can be extended.
-    """
-    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma):
-        """
-
-        :param z_lens: lens redshift
-        :param z_source: source redshift
-        :param ddt_mean: mean of Ddt distance
-        :param ddt_sigma: 1-sigma uncertainty in the Ddt distance
-        """
-        self._z_lens = z_lens
-        self._ddt_mean = ddt_mean
-        self._ddt_sigma2 = ddt_sigma ** 2
-        self.num_data = 1
-
-    def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
-        """
-        Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
-        :return: log likelihood given the single lens analysis
-        """
-        return - (ddt - self._ddt_mean) ** 2 / self._ddt_sigma2 / 2
-
-
-class TDLikelihoodLogNorm(object):
-    """
-    The cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays, where the form of the likelihood is a lognormal distribution.
-    Thus Ddt is not constrained but the kinematics can constrain Ds/Dds
-
-    The current version includes a Gaussian in Ds/Dds but can be extended.
-    """
-    def __init__(self, z_lens, z_source, ddt_mu, ddt_sigma):
-        """
-        :param z_lens: lens redshift
-        :param z_source: source redshift
-        :param ddt_mean: mean of log(Ddt distance)
-        :param ddt_sigma: 1-sigma uncertainty in the log(Ddt distance)
-        """
-        self._z_lens = z_lens
-        self._ddt_mu = ddt_mu
-        self._ddt_sigma2 = ddt_sigma ** 2
-
-    def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
-        """
-        Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
-        :return: log likelihood given the single lens analysis
-        """
-        return -0.5*(np.log(ddt) - self._ddt_mu)**2/self._ddt_sigma2 - np.log(ddt) - 0.5*np.log(self._ddt_sigma2)
-
-
-class KinLikelihoodGaussian(object):
-    """
-    class to handle cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays.
-    Thus Ddt is not constrained but the kinematics can constrain Ds/Dds
-
-    The current version includes a Gaussian in Ds/Dds but can be extended.
-    """
-    def __init__(self, z_lens, z_source, ds_dds_mean, ds_dds_sigma):
-        """
-
-        :param z_lens: lens redshift
-        :param z_source: source redshift
-        :param ds_dds_mean: mean of Ds/Dds distance ratio
-        :param ds_dds_sigma: 1-sigma uncertainty in the Ds/Dds distance ratio
-        """
-        self._z_lens = z_lens
-        self._ds_dds_mean = ds_dds_mean
-        self._ds_dds_sigma2 = ds_dds_sigma ** 2
-
-    def log_likelihood(self, ddt, dd, aniso_scaling=None):
-        """
-        Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
-
-        :param ddt: time-delay distance
-        :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
-        :return: log likelihood given the single lens analysis
-        """
-        ds_dds = ddt / dd / (1 + self._z_lens)
-        if aniso_scaling is not None:
-            scaling = aniso_scaling[0]
-        else:
-            scaling = 1
-        ds_dds_ = ds_dds / scaling
-        return - (ds_dds_ - self._ds_dds_mean) ** 2 / self._ds_dds_sigma2 / 2

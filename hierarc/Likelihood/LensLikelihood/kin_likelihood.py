@@ -37,6 +37,9 @@ class KinLikelihood(object):
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
+        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+         dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
+         anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :param sigma_v_sys_error: float (optional) added error on the velocity dispersion measurement in quadrature
         :param sigma_v_sys_offset: float (optional) for a fractional systematic offset in the kinematic measurement
          such that sigma_v = sigma_v_measured * (1 + sigma_v_sys_offset)

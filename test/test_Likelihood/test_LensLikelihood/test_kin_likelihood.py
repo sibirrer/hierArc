@@ -6,7 +6,7 @@ from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
 from lenstronomy.Util import constants as const
 
 
-class TestIFUKinLikelihood(object):
+class TestKinLikelihood(object):
 
     def setup(self):
         np.random.seed(seed=41)

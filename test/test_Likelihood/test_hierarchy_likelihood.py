@@ -20,20 +20,19 @@ class TestLensLikelihood(object):
         ani_scaling_array = ani_param_array
 
         kwargs_likelihood = {'ddt_mean': ddt, 'ddt_sigma': ddt/20, 'dd_mean': dd, 'dd_sigma': dd/10}
-        self.likelihood = LensLikelihood(z_lens, z_source, name='name', likelihood_type='TDKinGaussian',
+        self.likelihood = LensLikelihood(z_lens, z_source, name='name', likelihood_type='DdtDdGaussian',
                                     anisotropy_model='OM', ani_param_array=ani_param_array, ani_scaling_array_list=None,
                                     ani_scaling_array=ani_scaling_array, num_distribution_draws=200, kappa_ext_bias=True,
                                     kappa_pdf=None, kappa_bin_edges=None, mst_ifu=True, **kwargs_likelihood)
 
         kappa_posterior = np.random.normal(loc=0, scale=0.03, size=100000)
         kappa_pdf, kappa_bin_edges = np.histogram(kappa_posterior, density=True)
-        self.likelihood_kappa_ext = LensLikelihood(z_lens, z_source, name='name', likelihood_type='TDKinGaussian',
+        self.likelihood_kappa_ext = LensLikelihood(z_lens, z_source, name='name', likelihood_type='DdtDdGaussian',
                                          anisotropy_model='OM', ani_param_array=ani_param_array,
                                          ani_scaling_array_list=None,
                                          ani_scaling_array=ani_scaling_array, num_distribution_draws=200,
                                          kappa_ext_bias=True,
                                          kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges, mst_ifu=False, **kwargs_likelihood)
-
 
     def test_lens_log_likelihood(self):
         np.random.seed(42)
