@@ -23,7 +23,7 @@ class TestCosmoInterp(object):
     def test_angular_diameter_distance(self):
         z = 1.
         da = self.cosmo.angular_diameter_distance(z=[z])
-        da_interp = self.cosmo_interp.angular_diameter_distance(z=z)
+        da_interp = self.cosmo_interp.angular_diameter_distance(z=[z])
         npt.assert_almost_equal(da_interp/da, 1, decimal=3)
         assert da.unit == da_interp.unit
 

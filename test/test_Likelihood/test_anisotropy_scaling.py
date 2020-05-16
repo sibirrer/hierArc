@@ -54,10 +54,14 @@ class TestAnisotropyScalingIFU(object):
         beta_inf = 1.5
         param_draw = self.scaling.draw_anisotropy(a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0)
         assert param_draw[0] == a_ani
+        for i in range(100):
+            param_draw = self.scaling.draw_anisotropy(a_ani=1, a_ani_sigma=1, beta_inf=beta_inf, beta_inf_sigma=1)
 
         param_draw = self.scaling_2d.draw_anisotropy(a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0)
         assert param_draw[0] == a_ani
         assert param_draw[1] == beta_inf
+        for i in range(100):
+            param_draw = self.scaling_2d.draw_anisotropy(a_ani=1, a_ani_sigma=1, beta_inf=beta_inf, beta_inf_sigma=1)
 
         scaling = AnisotropyScalingIFU(anisotropy_model='NONE')
         param_draw = scaling.draw_anisotropy(a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0)
