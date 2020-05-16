@@ -1,5 +1,6 @@
 from hierarc.Sampling.ParamManager.kin_param import KinParam
 import numpy.testing as npt
+import pytest
 
 
 class TestKinParam(object):
@@ -25,8 +26,7 @@ class TestKinParam(object):
         assert len(param_list) == 0
 
     def test_args2kwargs(self):
-        kwargs = {'a_ani': 1, 'a_ani_sigma': 0.1, 'beta_inf': 1., 'beta_inf_sigma': 0.2,
-                        'sigma_v_sys_error': 0.05}
+        kwargs = {'a_ani': 1, 'a_ani_sigma': 0.1, 'beta_inf': 1., 'beta_inf_sigma': 0.2, 'sigma_v_sys_error': 0.05}
         args = self._param.kwargs2args(kwargs)
         kwargs_new, i = self._param.args2kwargs(args, i=0)
         args_new = self._param.kwargs2args(kwargs_new)
@@ -36,3 +36,7 @@ class TestKinParam(object):
         kwargs_new, i = self._param_fixed.args2kwargs(args, i=0)
         args_new = self._param_fixed.kwargs2args(kwargs_new)
         npt.assert_almost_equal(args_new, args)
+
+
+if __name__ == '__main__':
+    pytest.main()

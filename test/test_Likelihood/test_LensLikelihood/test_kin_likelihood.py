@@ -77,7 +77,7 @@ class TestIFUKinLikelihood(object):
         num_sample = 10000
         for i in range(num_sample):
             sigma_v_pert = np.random.normal(loc=0, scale=sigma_v_sys_error)
-            logl_i = ifu_likelihood.log_likelihood(ddt, dd, aniso_scaling=1, sigma_v_pert=sigma_v_pert)
+            logl_i = ifu_likelihood.log_likelihood(ddt, dd, aniso_scaling=1, sigma_v_sys_offset=sigma_v_pert)
             l_sum += np.exp(logl_i)
         logl_average = np.log(l_sum/num_sample)
         npt.assert_almost_equal(logl, logl_average, decimal=1)
