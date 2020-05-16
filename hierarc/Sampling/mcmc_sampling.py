@@ -1,5 +1,5 @@
 import emcee
-from hierarc.Likelihood.likelihood import CosmoLikelihood
+from hierarc.Likelihood.cosmo_likelihood import CosmoLikelihood
 from lenstronomy.Util import sampling_util
 
 
