@@ -10,7 +10,7 @@ class TestKinParam(object):
 
         kwargs_fixed = {'a_ani': 1, 'a_ani_sigma': 0.1, 'beta_inf': 1., 'beta_inf_sigma': 0.2,
                         'sigma_v_sys_error': 0.05}
-        self._param_fixed = KinParam(anisotropy_sampling=False, anisotropy_model='GM', distribution_function='GAUSSIAN',
+        self._param_fixed = KinParam(anisotropy_sampling=False, anisotropy_model='GOM', distribution_function='GAUSSIAN',
                                      sigma_v_systematics=True, kwargs_fixed=kwargs_fixed)
 
     def test_param_list(self):

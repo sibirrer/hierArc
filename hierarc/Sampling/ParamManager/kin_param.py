@@ -14,6 +14,7 @@ class KinParam(object):
          measurement
         :param kwargs_fixed: keyword arguments of the fixed parameters
         """
+        assert anisotropy_model in ['NONE', 'GOM', 'OM']
         self._anisotropy_sampling = anisotropy_sampling
         self._anisotropy_model = anisotropy_model
         self._distribution_function = distribution_function
