@@ -30,7 +30,5 @@ class TestCosmoInterp(object):
         assert delta_a.unit == delta_a_interp.unit
 
 
-
-
 if __name__ == '__main__':
     pytest.main()

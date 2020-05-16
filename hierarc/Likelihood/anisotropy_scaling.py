@@ -50,12 +50,13 @@ class AnisotropyScalingIFU(object):
     def __init__(self, anisotropy_model='NONE', ani_param_array=None, ani_scaling_array_list=None):
         """
 
-        :param ani_param_array: array of anisotropy parameter value
+        :param anisotropy_model: string, either 'NONE', 'OM' or 'GOM'
+        :param ani_param_array: array of anisotropy parameter value (1d for 'OM' model, 2d for 'GOM' model)
         :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
         """
         self._anisotropy_model = anisotropy_model
         self._evalute_ani = False
-        if ani_param_array is not None and ani_scaling_array_list is not None:
+        if ani_param_array is not None and ani_scaling_array_list is not None and self._anisotropy_model is not 'NONE':
             self._evalute_ani = True
             self._anisotropy_scaling_list = []
             self._f_ani_list = []
@@ -63,19 +64,19 @@ class AnisotropyScalingIFU(object):
                 self._anisotropy_scaling_list.append(AnisotropyScalingSingleAperture(ani_param_array=ani_param_array,
                                                                                      ani_scaling_array=ani_scaling_array))
 
-        if ani_param_array is not None:
             if isinstance(ani_param_array, list):
                 self._dim_scaling = len(ani_param_array)
             else:
                 self._dim_scaling = 1
-            if self._dim_scaling == 1:
+            if self._dim_scaling == 1 and anisotropy_model == 'OM':
                 self._ani_param_min = np.min(ani_param_array)
                 self._ani_param_max = np.max(ani_param_array)
-            elif self._dim_scaling == 2:
+            elif self._dim_scaling == 2 and anisotropy_model == 'GOM':
                 self._ani_param_min = [min(ani_param_array[0]), min(ani_param_array[1])]
                 self._ani_param_max = [max(ani_param_array[0]), max(ani_param_array[1])]
             else:
-                raise ValueError('anisotropy scaling with dimension %s not supported.' % self._dim_scaling)
+                raise ValueError('anisotropy scaling with dimension %s does not match anisotropy model %s'
+                                 % (self._dim_scaling, self._anisotropy_model))
 
     def ani_scaling(self, aniso_param_array):
         """
@@ -97,6 +98,8 @@ class AnisotropyScalingIFU(object):
 
         :param a_ani: mean of the distribution
         :param a_ani_sigma: std of the distribution
+        :param beta_inf: anisotropy at infinity (relevant for GOM model)
+        :param beta_inf_sigma: std of beta_inf distribution
         :return: random draw from the distribution
         """
         if self._anisotropy_model in ['OM']:
