@@ -98,6 +98,7 @@ class TestTDKinLikelihoodKDE(object):
         logl_interp = tdkin_interp.log_likelihood(ddt=self.D_dt_true + 100000, dd=self.Dd_true+100000)
         #assert logl_interp == -np.inf
 
+
 class TestTDLikelihoodLogNorm(object):
 
     def setup(self):
