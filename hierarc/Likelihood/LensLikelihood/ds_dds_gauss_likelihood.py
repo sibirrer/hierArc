@@ -16,6 +16,7 @@ class DsDdsGaussianLikelihood(object):
         self._z_lens = z_lens
         self._ds_dds_mean = ds_dds_mean
         self._ds_dds_sigma2 = ds_dds_sigma ** 2
+        self.num_data = 1
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
         """
