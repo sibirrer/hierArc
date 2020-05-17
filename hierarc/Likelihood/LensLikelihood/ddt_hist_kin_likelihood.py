@@ -8,8 +8,9 @@ class DdtHistKinLikelihood(object):
     class for joint kinematics and time delay likelihood assuming that they are independent
     Uses KinLikelihood and DdtHistLikelihood combined
     """
-    def __init__(self, z_lens, z_source, ddt_samples, ddt_weights, sigma_v_measurement, j_model, error_cov_measurement,
-                 error_cov_j_sqrt, kde_kernel=None, bandwidth=20, nbins_hist=200, sigma_sys_error_include=False):
+    def __init__(self, z_lens, z_source, ddt_samples, sigma_v_measurement, j_model, error_cov_measurement,
+                 error_cov_j_sqrt, ddt_weights=None, kde_kernel='gaussian', bandwidth=20, nbins_hist=200,
+                 sigma_sys_error_include=False):
         """
 
         :param z_lens: lens redshift

@@ -28,7 +28,7 @@ class TestDdtDdKDELikelihood(object):
         self.D_d_samples = np.random.normal(self.Dd_true, self.sigma_Dd, num_samples)
 
         self.kwargs_lens = {'z_lens': self.z_L, 'z_source': self.z_S,
-                                  'dd_sample': self.D_d_samples, 'ddt_sample': self.D_dt_samples,
+                                  'dd_samples': self.D_d_samples, 'ddt_samples': self.D_dt_samples,
                                   'kde_type': 'scipy_gaussian', 'bandwidth': 1}
 
     def test_log_likelihood(self):

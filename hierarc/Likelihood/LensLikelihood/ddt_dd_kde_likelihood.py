@@ -7,24 +7,24 @@ class DdtDdKDELikelihood(object):
     """
     class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
     """
-    def __init__(self, z_lens, z_source, dd_sample, ddt_sample, kde_type='scipy_gaussian', bandwidth=1,
+    def __init__(self, z_lens, z_source, dd_samples, ddt_samples, kde_type='scipy_gaussian', bandwidth=1,
                  interpol=False, num_interp_grid=100):
         """
 
         :param z_lens: lens redshift
         :param z_source: source redshift
-        :param dd_sample: angular diameter to the lens posteriors (in physical Mpc)
-        :param ddt_sample: time-delay distance posteriors (in physical Mpc)
+        :param dd_samples: angular diameter to the lens posteriors (in physical Mpc)
+        :param ddt_samples: time-delay distance posteriors (in physical Mpc)
         :param kde_type: kernel density estimator type (see KDELikelihood class)
         :param bandwidth: width of kernel (in same units as the angular diameter quantities)
         :param interpol: bool, if True pre-computes an interpolation likelihood in 2d on a grid
         :param num_interp_grid: int, number of interpolations per axis
         """
-        self._kde_likelihood = KDELikelihood(dd_sample, ddt_sample, kde_type=kde_type, bandwidth=bandwidth)
+        self._kde_likelihood = KDELikelihood(dd_samples, ddt_samples, kde_type=kde_type, bandwidth=bandwidth)
 
         if interpol is True:
-            dd_grid = np.linspace(start=max(np.min(dd_sample), 0), stop=min(np.max(dd_sample), 10000), num=num_interp_grid)
-            ddt_grid = np.linspace(np.min(ddt_sample), np.max(ddt_sample), num=num_interp_grid)
+            dd_grid = np.linspace(start=max(np.min(dd_samples), 0), stop=min(np.max(dd_samples), 10000), num=num_interp_grid)
+            ddt_grid = np.linspace(np.min(ddt_samples), np.max(ddt_samples), num=num_interp_grid)
             z = np.zeros((num_interp_grid, num_interp_grid))
             for i, dd in enumerate(dd_grid):
                 for j, ddt in enumerate(ddt_grid):

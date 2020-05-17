@@ -1,5 +1,8 @@
 __author__ = 'sibirrer'
 
+LIKELIHOOD_TYPES = ['DdtGaussian', 'DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian', 'DdtLogNorm', 'IFUKinCov', 'DdtHist',
+                    'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin']
+
 
 class LensLikelihoodBase(object):
     """
@@ -50,7 +53,7 @@ class LensLikelihoodBase(object):
             from hierarc.Likelihood.LensLikelihood.ddt_gauss_kin_likelihood import DdtGaussKinLikelihood
             self._lens_type = DdtGaussKinLikelihood(z_lens, z_source, **kwargs_likelihood)
         else:
-            raise ValueError('likelihood_type %s not supported!' % likelihood_type)
+            raise ValueError('likelihood_type %s not supported! Supported are %s.' % (likelihood_type, LIKELIHOOD_TYPES))
 
     def num_data(self):
         """

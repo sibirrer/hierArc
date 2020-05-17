@@ -36,7 +36,7 @@ class TestMCMCSampling(object):
         kwargs_lower = {'h0': 10}
         kwargs_upper = {'h0': 200}
         kwargs_likelihood_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'DdtDdKDE',
-                             'dd_sample': self.D_d_samples, 'ddt_sample': self.D_dt_samples,
+                             'dd_samples': self.D_d_samples, 'ddt_samples': self.D_dt_samples,
                              'kde_type': 'scipy_gaussian', 'bandwidth': 1}]
         cosmology = 'FLCDM'
         kwargs_bounds = {'kwargs_fixed_cosmo': kwargs_fixed, 'kwargs_lower_cosmo': kwargs_lower,

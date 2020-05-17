@@ -30,7 +30,7 @@ class TestLensLikelihood(object):
         ani_param_array = np.linspace(0, 2, 10)
         ani_scaling_array = np.ones_like(ani_param_array)
         self.kwargs_lens_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'DdtDdKDE',
-                                  'dd_sample': self.D_d_samples, 'ddt_sample': self.D_dt_samples,
+                                  'dd_samples': self.D_d_samples, 'ddt_samples': self.D_dt_samples,
                                   'kde_type': 'scipy_gaussian', 'bandwidth': 1},
                                  {'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'DsDdsGaussian',
                                   'ds_dds_mean': lensCosmo.ds/lensCosmo.dds, 'ds_dds_sigma': 1,

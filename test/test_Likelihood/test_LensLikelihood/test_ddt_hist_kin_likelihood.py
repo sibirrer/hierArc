@@ -30,8 +30,8 @@ class TestDdtHistKinHist(object):
         error_cov_j_sqrt = np.diag(np.zeros_like(sigma_v_measurement))
         self._kin_likelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_model, error_cov_measurement,
                                              error_cov_j_sqrt)
-        self._ddt_kin_likelihood = DdtHistKinLikelihood(z_lens, z_source, ddt_samples, ddt_weights, sigma_v_measurement,
-                                                        j_model, error_cov_measurement, error_cov_j_sqrt,
+        self._ddt_kin_likelihood = DdtHistKinLikelihood(z_lens, z_source, ddt_samples, sigma_v_measurement,
+                                                        j_model, error_cov_measurement, error_cov_j_sqrt, ddt_weights=ddt_weights,
                                                         kde_kernel='gaussian', bandwidth=20, nbins_hist=400)
 
     def test_log_likelihood(self):

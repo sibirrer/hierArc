@@ -23,7 +23,7 @@ class KinLikelihood(object):
          measurement (if sampled from), otherwise this sampled value is ignored.
         """
         self._z_lens = z_lens
-        self._j_model = j_model
+        self._j_model = np.array(j_model)
         self._sigma_v_measured = sigma_v_measurement
         self._error_cov_measurement = error_cov_measurement
         self._error_cov_j_sqrt = error_cov_j_sqrt

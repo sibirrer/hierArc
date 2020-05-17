@@ -39,10 +39,9 @@ class DdtHistLikelihood(object):
         self._kde = gaussian_kde(dataset=kde_bins, weights=kde_weights[:])
         self.num_data = 1
         self._sigma = np.std(ddt_samples)
+        self._norm_factor = 0
         if normalized is False:
             self._norm_factor = np.log(1. / self._sigma / np.sqrt(2*np.pi))
-        else:
-            self._norm_factor = 0
 
     def log_likelihood(self, ddt, dd=None):
         """
@@ -65,7 +64,7 @@ class DdtHistKDELikelihood(object):
     original source: https://github.com/shsuyu/H0LiCOW-public/blob/master/H0_inference_code/lensutils.py
     credits to Martin Millon, Aymeric Galan
     """
-    def __init__(self, z_lens, z_source, ddt_samples, kde_kernel=None, ddt_weights=None, bandwidth=20, nbins_hist=200,
+    def __init__(self, z_lens, z_source, ddt_samples, kde_kernel='gaussian', ddt_weights=None, bandwidth=20, nbins_hist=200,
                  normalized=False):
         """
 
@@ -91,10 +90,9 @@ class DdtHistKDELikelihood(object):
         self._score = kde.score
         self.num_data = 1
         self._sigma = np.std(ddt_samples)
+        self._norm_factor = 0
         if normalized is False:
             self._norm_factor = np.log(1. / self._sigma / np.sqrt(2*np.pi))
-        else:
-            self._norm_factor = 0
 
     def log_likelihood(self, ddt, dd=None):
         """
