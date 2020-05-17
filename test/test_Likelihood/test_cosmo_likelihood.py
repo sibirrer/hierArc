@@ -98,13 +98,22 @@ class TestCosmoLikelihood(object):
                                  interpolate_cosmo=True,
                                  num_redshift_interp=100, cosmo_fixed=cosmo_astropy)
         kwargs_cosmo_wrong = {'h0': 10, 'om': .3, 'ok': 0}
+        cosmo_fixed_interp = cosmoL.cosmo_instance(kwargs_cosmo_wrong)
+
+        cosmoL = CosmoLikelihood(self.kwargs_likelihood_list, self.cosmology, self.kwargs_bounds,
+                                 interpolate_cosmo=False,
+                                 num_redshift_interp=100, cosmo_fixed=cosmo_astropy)
+        kwargs_cosmo_wrong = {'h0': 10, 'om': .3, 'ok': 0}
         cosmo_fixed = cosmoL.cosmo_instance(kwargs_cosmo_wrong)
+
         z = 1
         dd_astropy = cosmo_astropy.angular_diameter_distance(z=z).value
         dd_interp = cosmo_interp.angular_diameter_distance(z=z).value
         dd_fixed = cosmo_fixed.angular_diameter_distance(z=z).value
+        dd_fixed_interp = cosmo_fixed_interp.angular_diameter_distance(z=z).value
         npt.assert_almost_equal(dd_astropy, dd_interp, decimal=1)
         npt.assert_almost_equal(dd_astropy, dd_fixed, decimal=1)
+        npt.assert_almost_equal(dd_astropy, dd_fixed_interp, decimal=1)
 
 
 if __name__ == '__main__':
