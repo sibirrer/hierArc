@@ -52,8 +52,3 @@ class TestLensLikelihood(object):
 
 if __name__ == '__main__':
     pytest.main()
-
-
-
-if __name__ == '__main__':
-    pytest.main()

@@ -29,8 +29,11 @@ class ImageModelPosterior(object):
             return self._theta_E, self._gamma, self._r_eff
         theta_E_draw = np.maximum(np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0)
         gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
-        gamma_draw = np.maximum(gamma_draw, 1.5)
-        gamma_draw = np.minimum(gamma_draw, 2.5)
+        # distributions are drawn in the range [1, 3)
+        # the power-law slope gamma=3 is divergent in mass in the center and values close close to =3 may be unstable
+        # to compute the kinematics for.
+        gamma_draw = np.maximum(gamma_draw, 1.)
+        gamma_draw = np.minimum(gamma_draw, 2.999)
+        # we make sure no negative r_eff are being sampled
         r_eff_draw = np.maximum(np.random.normal(loc=self._r_eff, scale=self._r_eff_error), 0.001)
-
         return theta_E_draw, gamma_draw, r_eff_draw
