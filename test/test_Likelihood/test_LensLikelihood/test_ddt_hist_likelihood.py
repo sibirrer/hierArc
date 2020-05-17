@@ -11,7 +11,8 @@ class TestDdtHist(object):
         ddt_samples = np.random.normal(loc=self._ddt, scale=self._sigma*self._ddt, size=1000000)
         weights = None  # np.random.uniform(low=0, high=1, size=100000)
         self._ddthist = DdtHistLikelihood(z_lens=None, z_source=None, ddt_samples=ddt_samples,
-                                          kde_kernel='gaussian', ddt_weights=weights, bandwidth=20, nbins_hist=400)
+                                          kde_kernel='gaussian', ddt_weights=weights, bandwidth=20, nbins_hist=400,
+                                          normalized=False)
 
     def test_log_likelihood(self):
 
@@ -35,16 +36,27 @@ class TestDdtHistKDELikelihood(object):
         ddt_samples = np.random.normal(loc=self._ddt, scale=self._sigma, size=1000000)
         weights = None  # np.random.uniform(low=0, high=1, size=100000)
         bandwidth = 0.1
+        self._ddthist_normed = DdtHistKDELikelihood(z_lens=None, z_source=None, ddt_samples=ddt_samples,
+                                             kde_kernel='gaussian', ddt_weights=weights, bandwidth=bandwidth,
+                                             nbins_hist=400, normalized=True)
         self._ddthist = DdtHistKDELikelihood(z_lens=None, z_source=None, ddt_samples=ddt_samples,
-                                          kde_kernel='gaussian', ddt_weights=weights, bandwidth=bandwidth, nbins_hist=400)
+                                             kde_kernel='gaussian', ddt_weights=weights, bandwidth=bandwidth,
+                                             nbins_hist=400, normalized=False)
 
     def test_log_likelihood(self):
 
+        logl_max = self._ddthist_normed.log_likelihood(ddt=self._ddt, dd=None)
+        logl_sigma = self._ddthist_normed.log_likelihood(ddt=self._ddt + self._sigma, dd=None)
+        npt.assert_almost_equal(logl_sigma - logl_max, -1 / 2., decimal=1)
+
+        logl_sigma = self._ddthist_normed.log_likelihood(ddt=self._ddt + 2 * self._sigma, dd=None)
+        npt.assert_almost_equal(logl_sigma - logl_max, -2 ** 2 / 2., decimal=0)
+
         logl_max = self._ddthist.log_likelihood(ddt=self._ddt, dd=None)
-        print(logl_max, np.log(1/self._sigma/np.sqrt(2*np.pi)))
-        npt.assert_almost_equal(logl_max, 0, decimal=1)
+        print(logl_max, np.log(1 / self._sigma / np.sqrt(2 * np.pi)))
+        npt.assert_almost_equal(logl_max, 0, decimal=2)
         logl_sigma = self._ddthist.log_likelihood(ddt=self._ddt + self._sigma, dd=None)
-        npt.assert_almost_equal(logl_sigma - logl_max, -1/2., decimal=1)
+        npt.assert_almost_equal(logl_sigma - logl_max, -1 / 2., decimal=1)
 
         logl_sigma = self._ddthist.log_likelihood(ddt=self._ddt + 2 * self._sigma, dd=None)
-        npt.assert_almost_equal(logl_sigma - logl_max, -2**2 / 2., decimal=0)
+        npt.assert_almost_equal(logl_sigma - logl_max, -2 ** 2 / 2., decimal=0)

@@ -1,5 +1,5 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
-from hierarc.Likelihood.LensLikelihood.lens_likelihood import LensLikelihoodBase
+from hierarc.Likelihood.LensLikelihood.base_lens_likelihood import LensLikelihoodBase
 from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
 from hierarc.Util.distribution_util import PDFSampling
 import numpy as np

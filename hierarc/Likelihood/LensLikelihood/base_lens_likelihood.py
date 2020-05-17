@@ -40,6 +40,9 @@ class LensLikelihoodBase(object):
         elif likelihood_type == 'DdtHist':
             from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistLikelihood
             self._lens_type = DdtHistLikelihood(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'DdtHistKDE':
+            from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistKDELikelihood
+            self._lens_type = DdtHistKDELikelihood(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'DdtHistKin':
             from hierarc.Likelihood.LensLikelihood.ddt_hist_kin_likelihood import DdtHistKinLikelihood
             self._lens_type = DdtHistKinLikelihood(z_lens, z_source, **kwargs_likelihood)
@@ -68,7 +71,7 @@ class LensLikelihoodBase(object):
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
         :return: natural logarithm of the likelihood of the data given the model
         """
-        if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist']:
+        if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist', 'DdtHistKDE']:
             return self._lens_type.log_likelihood(ddt, dd)
         elif self.likelihood_type in ['DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian']:
             return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling)

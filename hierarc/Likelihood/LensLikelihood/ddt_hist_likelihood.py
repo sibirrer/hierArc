@@ -44,7 +44,7 @@ class DdtHistLikelihood(object):
         else:
             self._norm_factor = 0
 
-    def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
+    def log_likelihood(self, ddt, dd=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
@@ -96,7 +96,7 @@ class DdtHistKDELikelihood(object):
         else:
             self._norm_factor = 0
 
-    def log_likelihood(self, ddt, dd=None, aniso_scaling=None):
+    def log_likelihood(self, ddt, dd=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
