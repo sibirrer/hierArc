@@ -31,7 +31,7 @@ class GoodnessOfFit(object):
         logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
         print(logL, 'log likelihood')
         num_data = self._sample_likelihood.num_data()
-        print(-logL * 2 / num_data, 'reducded chi2')
+        print(-logL * 2 / num_data, 'reduced chi2')
 
         ddt_model_list = []
         ddt_name_list = []
@@ -42,6 +42,7 @@ class GoodnessOfFit(object):
             name = kwargs_likelihood.get('name', 'lens ' + str(i))
             likelihood = self._sample_likelihood._lens_list[i]
             ddt, dd = likelihood.angular_diameter_distances(cosmo)
+            #TODO kappa_ext can be either as a parameter or a distribution. Currently this is inconsistent if chosen as a distribution
             ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
                                                        lambda_mst=kwargs_lens.get('lambda_mst', 1),
                                                        gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
