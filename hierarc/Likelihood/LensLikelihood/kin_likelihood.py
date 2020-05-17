@@ -23,7 +23,7 @@ class KinLikelihood(object):
          measurement (if sampled from), otherwise this sampled value is ignored.
         """
         self._z_lens = z_lens
-        self._j_model = np.array(j_model)
+        self._j_model = np.array(j_model, dtype=float)
         self._sigma_v_measured = sigma_v_measurement
         self._error_cov_measurement = error_cov_measurement
         self._error_cov_j_sqrt = error_cov_j_sqrt
@@ -80,7 +80,7 @@ class KinLikelihood(object):
         :param aniso_scaling: scaling of the anisotropy affecting sigma_v^2
         :return: array of predicted velocity dispersions
         """
-        sigma_v_predict = np.sqrt(ds_dds * aniso_scaling * self._j_model) * const.c / 1000
+        sigma_v_predict = np.sqrt(self._j_model * ds_dds * aniso_scaling) * const.c / 1000
         return sigma_v_predict
 
     def cov_error_model(self, ds_dds, scaling_ifu=1):

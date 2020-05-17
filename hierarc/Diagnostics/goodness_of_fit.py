@@ -33,25 +33,24 @@ class GoodnessOfFit(object):
         num_data = self._sample_likelihood.num_data()
         print(-logL * 2 / num_data, 'reducded chi2')
 
-        # list of values for 'TDKinGaussian' likelihood
         ddt_model_list = []
         ddt_name_list = []
         ddt_data_list = []
         ddt_sigma_list = []
 
         for i, kwargs_likelihood in enumerate(self._kwargs_likelihood_list):
-            name = kwargs_likelihood['name']
+            name = kwargs_likelihood.get('name', 'lens ' + str(i))
             likelihood = self._sample_likelihood._lens_list[i]
             ddt, dd = likelihood.angular_diameter_distances(cosmo)
             ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
                                                        lambda_mst=kwargs_lens.get('lambda_mst', 1),
                                                        gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
-            if likelihood.likelihood_type in ['TDKinGaussian', 'DdtGaussKin']:
+            if likelihood.likelihood_type in ['DdtGaussKin', 'DdtDdGaussian', 'DdtGaussKin']:
                 ddt_model_list.append(ddt_)
                 ddt_name_list.append(name)
                 ddt_data_list.append(kwargs_likelihood['ddt_mean'])
                 ddt_sigma_list.append(kwargs_likelihood['ddt_sigma'])
-            if likelihood.likelihood_type == 'DdtHistKin':
+            if likelihood.likelihood_type in ['DdtHist', 'DdtHistKin']:
                 ddt_model_list.append(ddt_)
                 ddt_name_list.append(name)
                 ddt_mean = np.mean(kwargs_likelihood['ddt_samples'])
@@ -101,7 +100,7 @@ class GoodnessOfFit(object):
         sigma_v_model_error_list = []
 
         for i, kwargs_likelihood in enumerate(self._kwargs_likelihood_list):
-            name = kwargs_likelihood['name']
+            name = kwargs_likelihood.get('name', 'lens '+str(i))
             likelihood = self._sample_likelihood._lens_list[i]
             ddt, dd = likelihood.angular_diameter_distances(cosmo)
             ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
@@ -114,7 +113,7 @@ class GoodnessOfFit(object):
                 j_model = kwargs_likelihood['j_model'][0] * likelihood.ani_scaling(aniso_param_array)[0]
                 J_error = np.atleast_2d(kwargs_likelihood['error_cov_j_sqrt'])[0, 0]
                 sigma_v = kwargs_likelihood['sigma_v_measurement'][0]
-                sigma_v_sigma = np.sqrt(kwargs_likelihood['error_cov_measurement'][0, 0])
+                sigma_v_sigma = np.sqrt(np.array(kwargs_likelihood['error_cov_measurement'])[0, 0])
                 sigma_v_predict = np.sqrt(j_model) * const.c * np.sqrt(ds_dds) / 1000
                 #sigma_v_sigma_tot = np.sqrt(sigma_v_sigma ** 2 + const.c ** 2 * ds_dds * J_error / 1000 ** 2)
                 sigma_v_sigma_model = np.sqrt(const.c ** 2 * ds_dds * J_error / 1000 ** 2)
@@ -152,7 +151,7 @@ class GoodnessOfFit(object):
         :return: figure as axes instance
         """
         kwargs_likelihood = self._kwargs_likelihood_list[lens_index]
-        name = kwargs_likelihood['name']
+        name = kwargs_likelihood.get('name', 'lens ' + str(lens_index))
         likelihood = self._sample_likelihood._lens_list[lens_index]
         if not likelihood.likelihood_type == 'IFUKinCov':
             raise ValueError('likelihood type of lens %s is %s. Must be "IFUKinCov"' %(name, likelihood.likelihood_type))

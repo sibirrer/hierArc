@@ -18,6 +18,7 @@ class DdtLogNormLikelihood(object):
         self._z_lens = z_lens
         self._ddt_mu = ddt_mu
         self._ddt_sigma2 = ddt_sigma ** 2
+        self.num_data = 1
 
     def log_likelihood(self, ddt, dd=None):
         """

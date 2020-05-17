@@ -28,6 +28,10 @@ class TestLensLikelihood(object):
                                     anisotropy_model='OM', ani_param_array=ani_param_array, ani_scaling_array_list=None,
                                     ani_scaling_array=ani_scaling_array, num_distribution_draws=200, kappa_ext_bias=False,
                                     kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False, **kwargs_likelihood)
+        self.likelihood_zero_dist = LensLikelihood(z_lens, z_source, name='name', likelihood_type='DdtDdGaussian',
+                                    anisotropy_model='OM', ani_param_array=ani_param_array, ani_scaling_array_list=None,
+                                    ani_scaling_array=ani_scaling_array, num_distribution_draws=0, kappa_ext_bias=True,
+                                    kappa_pdf=None, kappa_bin_edges=None, mst_ifu=True, **kwargs_likelihood)
 
         kappa_posterior = np.random.normal(loc=0, scale=0.03, size=100000)
         kappa_pdf, kappa_bin_edges = np.histogram(kappa_posterior, density=True)
@@ -45,6 +49,9 @@ class TestLensLikelihood(object):
         kwargs_kin = {'a_ani': 1, 'a_ani_sigma': 0.1}
         ln_likelihood = self.likelihood.lens_log_likelihood(self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         npt.assert_almost_equal(ln_likelihood, -0.5, decimal=1)
+
+        ln_likelihood_zero = self.likelihood_zero_dist.lens_log_likelihood(self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
+        assert ln_likelihood_zero == -np.inf
 
         ln_likelihood_kappa_ext = self.likelihood_kappa_ext.lens_log_likelihood(self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         npt.assert_almost_equal(ln_likelihood, ln_likelihood_kappa_ext, decimal=1)

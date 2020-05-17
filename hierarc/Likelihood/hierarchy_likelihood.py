@@ -143,6 +143,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kappa_ext: external convergence mean in distribution
         :param kappa_ext_sigma: spread in the distribution
         :param gamma_ppn: Post-Newtonian parameter
+        :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified for
+        :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of lenses specified for
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
