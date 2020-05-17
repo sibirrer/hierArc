@@ -1,9 +1,9 @@
-import numpy as np
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
+from hierarc.LensPosterior.anisotropy_config import AnisotropyConfig
 
 
-class BaseLensConfig(TDCosmography, ImageModelPosterior):
+class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
     """
     this class contains and manages the base configurations of the lens posteriors and makes sure that they
     are universally applied consistently through the different likelihood definitions
@@ -51,64 +51,4 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior):
                                           num_psf_sampling=num_psf_sampling, num_kin_sampling=num_kin_sampling)
         self._kwargs_lens_light = kwargs_lens_light
         ImageModelPosterior.__init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error)
-
-        self._anisotropy_model = anisotropy_model
-
-        if self._anisotropy_model == 'OM':
-            self._ani_param_array = np.array([0.1, 0.2, 0.5, 1, 2, 5])  # used for r_ani OsipkovMerritt anisotropy description
-        elif self._anisotropy_model == 'GOM':
-            self._ani_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5]), np.array([0, 0.5, 0.8, 1])]
-        elif self._anisotropy_model == 'const':
-            self._ani_param_array = np.linspace(0, 1, 10)  # used for constant anisotropy description
-        else:
-            raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
-
-    @property
-    def kwargs_anisotropy_base(self):
-        """
-
-        :return: keyword arguments of base anisotropy model configuration
-        """
-        if self._anisotropy_model == 'OM':
-            a_ani_0 = 1
-            r_ani = a_ani_0 * self._r_eff
-            kwargs_anisotropy_0 = {'r_ani': r_ani}
-        elif self._anisotropy_model == 'GOM':
-            a_ani_0 = 1
-            r_ani = a_ani_0 * self._r_eff
-            beta_inf_0 = 1
-            kwargs_anisotropy_0 = {'r_ani': r_ani, 'beta_inf': beta_inf_0}
-        elif self._anisotropy_model == 'const':
-            a_ani_0 = 0.1
-            kwargs_anisotropy_0 = {'beta': a_ani_0}
-        else:
-            raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
-        return kwargs_anisotropy_0
-
-    @property
-    def ani_param_array(self):
-        """
-
-        :return: numpy array of anisotropy parameter values to be explored
-        """
-        return self._ani_param_array
-
-    def anisotropy_kwargs(self, a_ani, beta_inf=None):
-        """
-
-        :param a_ani: anisotropy parameter
-        :param beta_inf: anisotropy at infinity (only used for 'GOM' model)
-        :return: list of anisotropy keyword arguments, value of anisotropy parameter list
-        """
-
-        if self._anisotropy_model == 'OM':
-            r_ani = a_ani * self._r_eff
-            kwargs_anisotropy = {'r_ani': r_ani}
-        elif self._anisotropy_model == 'GOM':
-            r_ani = a_ani * self._r_eff
-            kwargs_anisotropy = {'r_ani': r_ani, 'beta_inf': beta_inf}
-        elif self._anisotropy_model == 'const':
-            kwargs_anisotropy = {'beta': a_ani}
-        else:
-            raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
-        return kwargs_anisotropy
+        AnisotropyConfig.__init__(self, anisotropy_model, r_eff)
