@@ -49,7 +49,7 @@ class TestKinLikelihood(object):
         logl = ifu_likelihood.log_likelihood(ddt * (1 - np.sqrt(0.1**2)) ** 2, dd, aniso_scaling=1, sigma_v_sys_error=0.1)
         npt.assert_almost_equal(logl, -1/2., decimal=5)
 
-    def test_log_likikelihood_marg(self):
+    def test_log_likelihood_marg(self):
         num_ifu = 1
         z_lens = 0.5
         z_source = 2
@@ -70,7 +70,7 @@ class TestKinLikelihood(object):
         npt.assert_almost_equal(logl_ani - logl, 0, decimal=1)
 
         # here we test that a Monte Carlo marginalization of a systematic uncertainty leads to the same result as the
-        # analytical Gaussian calculatino in the covariance matrix normalization
+        # analytical Gaussian calculation in the covariance matrix normalization
         sigma_v_sys_error = 0.1
         logl = ifu_likelihood.log_likelihood(ddt, dd, aniso_scaling=1, sigma_v_sys_error=sigma_v_sys_error)
         l_sum = 0
