@@ -45,7 +45,7 @@ class TestGoodnessOfFit(object):
                                      'DdtGaussKin']
         self.ifu_index = 5
 
-        self.kwargs_likelihood_list = [{'ddt_mean': ddt, 'ddt_sigma': ddt_sigma, 'kappa_pdf': kappa_pdf, 'kappa_bin_edges': kappa_bin_edges},
+        self.kwargs_likelihood_list = [{'ddt_mean': ddt, 'ddt_sigma': ddt_sigma},
                                        {'dd_samples': dd_samples, 'ddt_samples': ddt_samples,
                                         'kde_type': 'scipy_gaussian', 'bandwidth': 1},
                                        {'ddt_mean': ddt, 'ddt_sigma': ddt_sigma, 'dd_mean': dd, 'dd_sigma': dd_sigma},
@@ -53,7 +53,7 @@ class TestGoodnessOfFit(object):
                                        {'ddt_mu': 1, 'ddt_sigma': 0.1},
                                        {'sigma_v_measurement': [1], 'j_model': [1], 'error_cov_measurement': np.array([[1]]),
                                         'error_cov_j_sqrt': [[1]]},
-                                       {'ddt_samples': ddt_samples},
+                                       {'ddt_samples': ddt_samples, 'kappa_pdf': kappa_pdf, 'kappa_bin_edges': kappa_bin_edges},
                                        {'ddt_samples': ddt_samples},
                                        {'ddt_samples': ddt_samples, 'sigma_v_measurement': [1], 'j_model': [1],
                                         'error_cov_measurement': [[1]], 'error_cov_j_sqrt': [[1]]},

@@ -54,6 +54,7 @@ class GoodnessOfFit(object):
             if likelihood.likelihood_type in ['DdtHist', 'DdtHistKin']:
                 ddt_model_list.append(ddt_)
                 ddt_name_list.append(name)
+                #TODO weights not included here
                 ddt_mean = np.mean(kwargs_likelihood['ddt_samples'])
                 ddt_sigma = np.std(kwargs_likelihood['ddt_samples'])
                 if 'kappa_pdf' in kwargs_likelihood and 'kappa_bin_edges' in kwargs_likelihood:
