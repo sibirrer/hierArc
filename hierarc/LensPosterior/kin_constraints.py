@@ -41,7 +41,7 @@ class KinConstraints(BaseLensConfig):
         self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
         BaseLensConfig.__init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
-                                self._sigma_v, self._sigma_v_error_independent, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
+                                kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
                                 anisotropy_model, kwargs_lens_light=kwargs_lens_light,
                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
                                 kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
@@ -80,7 +80,8 @@ class KinConstraints(BaseLensConfig):
         :return: keyword arguments
         """
 
-        j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list = self.model_marginalization(num_sample_model)
+        j_model_list, cov_j, error_cov_measurement = self.model_marginalization(num_sample_model)
+        ani_scaling_array_list = self.anisotropy_scaling()
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
                              'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
@@ -104,6 +105,18 @@ class KinConstraints(BaseLensConfig):
 
         cov_j = np.cov(np.sqrt(j_kin_matrix.T))
         j_model_list = np.mean(j_kin_matrix, axis=0)
+
+        error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
+        error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(
+            self._sigma_v_error_independent ** 2)
+        return j_model_list, cov_j, error_cov_measurement
+
+    def anisotropy_scaling(self):
+        """
+
+        :return: anisotropy scaling grid along the axes defined by ani_param_array
+        """
+        num_data = len(self._sigma_v)
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
 
         if self._anisotropy_model == 'GOM':
@@ -115,17 +128,13 @@ class KinConstraints(BaseLensConfig):
                     j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                     for k, j_kin in enumerate(j_kin_ani):
                         ani_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
-        else:
+        elif self._anisotropy_model == 'OM':
             ani_scaling_array_list = [[] for i in range(num_data)]
             for a_ani in self.ani_param_array:
                 kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
                 j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                 for i, j_kin in enumerate(j_kin_ani):
                     ani_scaling_array_list[i].append(j_kin / j_ani_0[i])
-
-        error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
-        error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(
-            self._sigma_v_error_independent ** 2)
-        return j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list
-
-# compute covariance matrix in J_0 calculation in the bins
+        else:
+            raise ValueError('anisotropy model %s not valid.' % self._anisotropy_model)
+        return ani_scaling_array_list

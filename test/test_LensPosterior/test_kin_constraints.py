@@ -22,7 +22,7 @@ class TestIFUKinPosterior(object):
 
 
         # compute likelihood
-        ifu_kin = KinConstraints(z_lens=0.2, z_source=1.5, theta_E=1, theta_E_error=0.01, gamma=2, gamma_error=0.02,
+        kin_constraints = KinConstraints(z_lens=0.2, z_source=1.5, theta_E=1, theta_E_error=0.01, gamma=2, gamma_error=0.02,
                                  r_eff=1, r_eff_error=0.05, sigma_v=[250],
                                  sigma_v_error_independent=[10], sigma_v_error_covariant=0, kwargs_aperture=kwargs_aperture,
                                  kwargs_seeing=kwargs_seeing, kwargs_numerics_galkin=kwargs_numerics_galkin,
@@ -30,7 +30,7 @@ class TestIFUKinPosterior(object):
                                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
                                  hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000,
                                  multi_observations=False)
-        kwargs_posterior = ifu_kin.hierarchy_configuration(num_sample_model=5)
+        kwargs_posterior = kin_constraints.hierarchy_configuration(num_sample_model=5)
 
         # test likelihood
         assert kwargs_posterior['j_model'] > 0
