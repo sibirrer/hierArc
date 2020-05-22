@@ -74,19 +74,20 @@ class KinConstraints(BaseLensConfig):
         of the variance of the sample. The anisotropy scaling is then performed. Different anisotropy models are
         supported.
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
-        kinematic component J()
+        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the
+        dimensionless kinematic component J()
 
         :return: keyword arguments
         """
 
-        j_model_list, cov_j, error_cov_measurement = self.model_marginalization(num_sample_model)
+        j_model_list, error_cov_j_sqrt = self.model_marginalization(num_sample_model)
         ani_scaling_array_list = self.anisotropy_scaling()
+        error_cov_measurement = self.error_cov_measurement
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
                              'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,
+                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.ani_param_array,
                              'ani_scaling_array_list': ani_scaling_array_list}
         return kwargs_likelihood
 
@@ -95,7 +96,7 @@ class KinConstraints(BaseLensConfig):
 
         :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
         kinematic component J()
-        :return:
+        :return: J() as array for each measurement prediction, covariance matrix in sqrt(J)
         """
         num_data = len(self._sigma_v)
         j_kin_matrix = np.zeros((num_sample_model, num_data))  # matrix that contains the sampled J() distribution
@@ -103,13 +104,21 @@ class KinConstraints(BaseLensConfig):
             j_kin = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=False)
             j_kin_matrix[i, :] = j_kin
 
-        cov_j = np.cov(np.sqrt(j_kin_matrix.T))
+        error_cov_j_sqrt = np.cov(np.sqrt(j_kin_matrix.T))
         j_model_list = np.mean(j_kin_matrix, axis=0)
+        return j_model_list, error_cov_j_sqrt
 
+    @property
+    def error_cov_measurement(self):
+        """
+        error covariance matrix
+
+        :return:
+        """
         error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
         error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(
             self._sigma_v_error_independent ** 2)
-        return j_model_list, cov_j, error_cov_measurement
+        return error_cov_measurement
 
     def anisotropy_scaling(self):
         """

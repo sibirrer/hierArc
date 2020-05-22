@@ -36,7 +36,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         self._z_lens, self._z_source = z_lens, z_source
         kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
         TDCosmography.__init__(self, z_lens, z_source, kwargs_model, cosmo_fiducial=None,
-                                 lens_model_kinematics_bool=None, light_model_kinematics_bool=None,
+                               lens_model_kinematics_bool=None, light_model_kinematics_bool=None,
                                kwargs_seeing=kwargs_seeing, kwargs_aperture=kwargs_aperture,
                                multi_observations=multi_observations)
 

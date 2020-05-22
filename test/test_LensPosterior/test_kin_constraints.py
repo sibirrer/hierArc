@@ -1,4 +1,5 @@
 from hierarc.LensPosterior.kin_constraints import KinConstraints
+from hierarc.LensPosterior.base_config import BaseLensConfig
 
 
 class TestIFUKinPosterior(object):
@@ -19,7 +20,8 @@ class TestIFUKinPosterior(object):
                                   'min_integrate': 0.001}  # lower/upper bound of numerical integrals
 
         # compute kinematics
-
+        base_config = BaseLensConfig()
+        #base_config.
 
         # compute likelihood
         kin_constraints = KinConstraints(z_lens=0.2, z_source=1.5, theta_E=1, theta_E_error=0.01, gamma=2, gamma_error=0.02,
