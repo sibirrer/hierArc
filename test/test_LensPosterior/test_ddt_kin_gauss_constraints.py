@@ -70,7 +70,7 @@ class TestDdtKinGaussConstraints(object):
         kwargs_likelihood['normalized'] = False
         ln_class = LensLikelihood(**kwargs_likelihood)
         kwargs_kin = {'a_ani': 1}
-        ln_likelihood = ln_class.lens_log_likelihood(cosmo, kwargs_lens=None, kwargs_kin=kwargs_kin)
+        ln_likelihood = ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
 

@@ -50,7 +50,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         else:
             self._draw_kappa = False
 
-    def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None):
+    def lens_log_likelihood(self, cosmo, kwargs_lens={}, kwargs_kin={}):
         """
 
         :param cosmo: astropy.cosmology instance
@@ -65,10 +65,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         ddt, dd = self.angular_diameter_distances(cosmo)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
-        if kwargs_lens is None:
-            kwargs_lens = {}
-        if kwargs_kin is None:
-            kwargs_kin = {}
         return self.hyper_param_likelihood(ddt, dd, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
 
     def hyper_param_likelihood(self, ddt, dd, kwargs_lens, kwargs_kin):

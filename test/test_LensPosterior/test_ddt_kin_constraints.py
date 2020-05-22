@@ -67,13 +67,14 @@ class TestDdtKinGaussConstraints(object):
                                          gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05, sigma_v=[sigma_v],
                                          sigma_v_error_independent=[10], sigma_v_error_covariant=0,
                                          kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
+                                            kwargs_lens_light=kwargs_lens_light,
                                          anisotropy_model=anisotropy_model, **kwargs_kin_api_settings)
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood['normalized'] = False
         ln_class = LensLikelihood(**kwargs_likelihood)
         kwargs_kin = {'a_ani': 1}
-        ln_likelihood = ln_class.lens_log_likelihood(cosmo, kwargs_lens=None, kwargs_kin=kwargs_kin)
+        ln_likelihood = ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
 
