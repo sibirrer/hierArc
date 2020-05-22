@@ -64,13 +64,14 @@ class DdtGaussKinConstraints(KinConstraints):
         kinematic component J()
         :return: keyword arguments
         """
-        # subtract the component in the uncertainty in ddt that does not impact the uncertainty on dd
-        j_model_list, cov_j, error_cov_measurement, ani_scaling_array_list = self.model_marginalization(num_sample_model=num_sample_model)
+        j_model_list, error_cov_j_sqrt = self.model_marginalization(num_sample_model)
+        ani_scaling_array_list = self.anisotropy_scaling()
+        error_cov_measurement = self.error_cov_measurement
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtGaussKin',
                              'ddt_mean': self._ddt_mean, 'ddt_sigma': self._ddt_sigma,
                              'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': cov_j, 'ani_param_array': self.ani_param_array,
+                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.ani_param_array,
                              'ani_scaling_array_list': ani_scaling_array_list}
         return kwargs_likelihood

@@ -10,7 +10,7 @@ class DdtHistKinLikelihood(object):
     """
     def __init__(self, z_lens, z_source, ddt_samples, sigma_v_measurement, j_model, error_cov_measurement,
                  error_cov_j_sqrt, ddt_weights=None, kde_kernel='gaussian', bandwidth=20, nbins_hist=200,
-                 sigma_sys_error_include=False):
+                 sigma_sys_error_include=False, normalized=True):
         """
 
         :param z_lens: lens redshift
@@ -26,11 +26,14 @@ class DdtHistKinLikelihood(object):
         :param error_cov_j_sqrt: covariance matrix of sqrt(J) of the model predicted dimensionless dispersion on the IFU's
         :param sigma_sys_error_include: bool, if True will include a systematic error in the velocity dispersion
          measurement (if sampled from), otherwise this sampled value is ignored.
+        :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
+         (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         """
         self._tdLikelihood = DdtHistKDELikelihood(z_lens, z_source, ddt_samples, ddt_weights=ddt_weights,
                                                   kde_kernel=kde_kernel, bandwidth=bandwidth, nbins_hist=nbins_hist)
         self._kinlikelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_model, error_cov_measurement,
-                                            error_cov_j_sqrt, sigma_sys_error_include=sigma_sys_error_include)
+                                            error_cov_j_sqrt, sigma_sys_error_include=sigma_sys_error_include,
+                                            normalized=normalized)
         self.num_data = self._tdLikelihood.num_data + self._kinlikelihood.num_data
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None):
