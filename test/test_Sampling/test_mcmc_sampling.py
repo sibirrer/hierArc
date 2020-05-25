@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+import emcee
+import os
 
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from hierarc.Sampling.mcmc_sampling import MCMCSampler
@@ -41,16 +43,36 @@ class TestMCMCSampling(object):
         cosmology = 'FLCDM'
         kwargs_bounds = {'kwargs_fixed_cosmo': kwargs_fixed, 'kwargs_lower_cosmo': kwargs_lower,
                          'kwargs_upper_cosmo': kwargs_upper}
+
+        path = os.getcwd()
+        backup_filename = 'test_emcee.h5'
+        try:
+            os.remove(os.path.join(path, backup_filename))  # just remove the backup file created above
+        except:
+            pass
+
+        backend = emcee.backends.HDFBackend(backup_filename)
+        kwargs_emcee = {'backend': backend}
+
         mcmc_sampler = MCMCSampler(kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
                  cosmo_fixed=None)
-        samples, log_prob = mcmc_sampler.mcmc_emcee(n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start)
+        samples, log_prob = mcmc_sampler.mcmc_emcee(n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start, **kwargs_emcee)
         assert len(samples) == n_walkers*n_run
         assert len(log_prob) == n_walkers*n_run
 
+        n_burn_2 = 0
+        n_run_2 = 2
+        samples, log_prob = mcmc_sampler.mcmc_emcee(n_walkers, n_burn_2, n_run_2, kwargs_mean_start, kwargs_sigma_start,
+                                                    continue_from_backend=True, **kwargs_emcee)
+        assert len(samples) == n_walkers * (n_run + n_run_2 + n_burn)
+        assert len(log_prob) == n_walkers * (n_run + n_run_2 + n_burn)
+
         name_list = mcmc_sampler.param_names(latex_style=False)
         assert len(name_list) == 1
+
+        os.remove(os.path.join(path,backup_filename))  # just remove the backup file created above
 
 
 if __name__ == '__main__':
