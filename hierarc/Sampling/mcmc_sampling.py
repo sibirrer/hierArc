@@ -81,7 +81,7 @@ class MCMCSampler(object):
         sigma_start = self.param.kwargs2args(**kwargs_sigma_start)
         p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
         backend = kwargs_emcee.get('backend', None)
-        if 'backend' is not None:
+        if backend is not None:
             if continue_from_backend:
                 p0 = None
             else:
