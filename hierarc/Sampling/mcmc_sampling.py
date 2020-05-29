@@ -100,5 +100,3 @@ class MCMCSampler(object):
         """
         labels = self.param.param_list(latex_style=latex_style)
         return labels
-
-import corner.corner
