@@ -53,7 +53,10 @@ class KinLikelihood(object):
         sigma_v_predict = self.sigma_v_model(ds_dds, scaling_ifu)
         delta = self.sigma_v_measured(sigma_v_sys_offset) - sigma_v_predict
         cov_error = self.cov_error_measurement(sigma_v_sys_error) + self.cov_error_model(ds_dds, scaling_ifu)
-        cov_error_inv = np.linalg.inv(cov_error)
+        try:
+            cov_error_inv = np.linalg.inv(cov_error)
+        except:
+            return -np.inf
         lnlikelihood = -delta.dot(cov_error_inv.dot(delta)) / 2.
         if self._normalized is True:
             sign_det, lndet = np.linalg.slogdet(cov_error)

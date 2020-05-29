@@ -42,7 +42,7 @@ class GoodnessOfFit(object):
             name = kwargs_likelihood.get('name', 'lens ' + str(i))
             likelihood = self._sample_likelihood._lens_list[i]
             ddt, dd = likelihood.angular_diameter_distances(cosmo)
-            #TODO kappa_ext can be either as a parameter or a distribution. Currently this is inconsistent if chosen as a distribution
+            # TODO kappa_ext can be either as a parameter or a distribution. Currently this is inconsistent if chosen as a distribution
             ddt_, dd_ = likelihood.displace_prediction(ddt, dd, kappa_ext=kwargs_lens.get('kappa_ext', 0),
                                                        lambda_mst=kwargs_lens.get('lambda_mst', 1),
                                                        gamma_ppn=kwargs_lens.get('gamma_ppn', 1))
@@ -54,7 +54,7 @@ class GoodnessOfFit(object):
             if likelihood.likelihood_type in ['DdtHist', 'DdtHistKin']:
                 ddt_model_list.append(ddt_)
                 ddt_name_list.append(name)
-                #TODO weights not included here
+                # TODO weights not included here
                 ddt_mean = np.mean(kwargs_likelihood['ddt_samples'])
                 ddt_sigma = np.std(kwargs_likelihood['ddt_samples'])
                 if 'kappa_pdf' in kwargs_likelihood and 'kappa_bin_edges' in kwargs_likelihood:
@@ -93,7 +93,6 @@ class GoodnessOfFit(object):
         """
         logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
         print(logL, 'log likelihood')
-
 
         sigma_v_name_list = []
         sigma_v_measurement_list = []
