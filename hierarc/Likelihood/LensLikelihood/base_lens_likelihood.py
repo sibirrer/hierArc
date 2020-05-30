@@ -1,5 +1,7 @@
 __author__ = 'sibirrer'
 
+import numpy as np
+
 LIKELIHOOD_TYPES = ['DdtGaussian', 'DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian', 'DdtLogNorm', 'IFUKinCov', 'DdtHist',
                     'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin']
 
@@ -83,3 +85,34 @@ class LensLikelihoodBase(object):
                                                   sigma_v_sys_error=sigma_v_sys_error)
         else:
             raise ValueError('likelihood type %s not fully supported.' % self.likelihood_type)
+
+    def ddt_measurement(self):
+        """
+
+        :return: ddt measurement median, 1-sigma (without lambda correction factor)
+        """
+        if self.likelihood_type in ['DdtGaussian', 'DdtHist', 'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin']:
+            return self._lens_type.ddt_measurement()
+        return None, None
+
+    def sigma_v_measurement(self, sigma_v_sys_error=None):
+        """
+
+
+        :return: data vector, measurement covariance matrix for velocity dispersion
+        """
+        if self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
+            return self._lens_type.sigma_v_measurement(sigma_v_sys_error=sigma_v_sys_error)
+        return None, None
+
+    def sigma_v_prediction(self, ddt, dd, aniso_scaling=None):
+        """
+
+        :param ddt: ddt in physical Mpc
+        :param dd: dd in physical Mpc
+        :param aniso_scaling: anisotropy scaling in J
+        :return: model predicted velocity dispersion (vector) and model covariance matrix thereof
+        """
+        if self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
+            return self._lens_type.sigma_v_prediction(ddt, dd, aniso_scaling)
+        return None, None

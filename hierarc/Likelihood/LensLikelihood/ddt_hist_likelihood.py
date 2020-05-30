@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from scipy.stats import gaussian_kde
 from sklearn.neighbors import KernelDensity
 
@@ -42,6 +43,9 @@ class DdtHistLikelihood(object):
         self._norm_factor = 0
         if normalized is False:
             self._norm_factor = np.log(1. / self._sigma / np.sqrt(2*np.pi))
+        self._ddt_mean = np.average(ddt_samples, weights=ddt_weights)
+        variance = np.average((ddt_samples - self._ddt_mean) ** 2, weights=ddt_weights)
+        self._ddt_sigma = math.sqrt(variance)
 
     def log_likelihood(self, ddt, dd=None):
         """
@@ -52,6 +56,13 @@ class DdtHistLikelihood(object):
         :return: log likelihood given the single lens analysis
         """
         return np.log(self._kde(ddt)) - self._norm_factor
+
+    def ddt_measurement(self):
+        """
+
+        :return: mean, 1-sigma of the ddt inference/model measurement
+        """
+        return self._ddt_mean, self._ddt_sigma
 
 
 class DdtHistKDELikelihood(object):
@@ -93,6 +104,9 @@ class DdtHistKDELikelihood(object):
         self._norm_factor = 0
         if normalized is False:
             self._norm_factor = np.log(1. / self._sigma / np.sqrt(2*np.pi))
+        self._ddt_mean = np.average(ddt_samples, weights=ddt_weights)
+        variance = np.average((ddt_samples - self._ddt_mean) ** 2, weights=ddt_weights)
+        self._ddt_sigma = math.sqrt(variance)
 
     def log_likelihood(self, ddt, dd=None):
         """
@@ -103,3 +117,10 @@ class DdtHistKDELikelihood(object):
         :return: log likelihood given the single lens analysis
         """
         return self._score(np.array(ddt).reshape(1, -1)) - self._norm_factor
+
+    def ddt_measurement(self):
+        """
+
+        :return: mean, 1-sigma of the ddt inference/model measurement
+        """
+        return self._ddt_mean, self._ddt_sigma

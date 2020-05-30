@@ -37,3 +37,10 @@ class DdtDdGaussian(object):
             dd_ = dd
         lnlikelihood = self._tdLikelihood.log_likelihood(ddt, dd_) - (dd_ - self._dd_mean) ** 2 / self._dd_sigma2 / 2
         return lnlikelihood
+
+    def ddt_measurement(self):
+        """
+
+        :return: mean, 1-sigma of the ddt inference/model measurement
+        """
+        return self._tdLikelihood.ddt_measurement()

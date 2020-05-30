@@ -33,6 +33,12 @@ class TestDdtDdGaussianLikelihood(object):
         lnlog = likelihood.log_likelihood(ddt=self.ddt_mean, dd=self.dd_mean, aniso_scaling=aniso_scaling)
         npt.assert_almost_equal(lnlog, -0.5, decimal=5)
 
+    def test_ddt_measurement(self):
+        likelihood = DdtDdGaussian(**self.kwargs_lens)
+        ddt_mean, ddt_sigma = likelihood.ddt_measurement()
+        assert ddt_mean == self.ddt_mean
+        assert ddt_sigma == self.ddt_sigma
+
 
 if __name__ == '__main__':
     pytest.main()

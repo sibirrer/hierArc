@@ -46,3 +46,34 @@ class DdtHistKinLikelihood(object):
         """
         lnlikelihood = self._tdLikelihood.log_likelihood(ddt) + self._kinlikelihood.log_likelihood(ddt, dd, aniso_scaling, sigma_v_sys_error=sigma_v_sys_error)
         return lnlikelihood
+
+    def sigma_v_prediction(self, ddt, dd, aniso_scaling=1):
+        """
+        model prediction mean velocity dispersion vector and model prediction covariance matrix
+
+        :param ddt: time-delay distance
+        :param dd: angular diameter distance to the deflector
+        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+         dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
+         anisotropy model used to derive the prediction and covariance matrix in the init of this class.
+        :return: model prediction mean velocity dispersion vector and model prediction covariance matrix
+        """
+        return self._kinlikelihood.sigma_v_prediction(ddt, dd, aniso_scaling)
+
+    def sigma_v_measurement(self, sigma_v_sys_error=None, sigma_v_sys_offset=None):
+        """
+
+        :param sigma_v_sys_error: float (optional) added error on the velocity dispersion measurement in quadrature
+        :param sigma_v_sys_offset: float (optional) for a fractional systematic offset in the kinematic measurement
+         such that sigma_v = sigma_v_measured * (1 + sigma_v_sys_offset)
+        :return: measurement mean (vector), measurement covariance matrix
+        """
+        return self._kinlikelihood.sigma_v_measurement(sigma_v_sys_error=sigma_v_sys_error,
+                                                       sigma_v_sys_offset=sigma_v_sys_offset)
+
+    def ddt_measurement(self):
+        """
+
+        :return: mean, 1-sigma of the ddt inference/model measurement
+        """
+        return self._tdLikelihood.ddt_measurement()

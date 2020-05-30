@@ -16,6 +16,7 @@ class DdtGaussianLikelihood(object):
         """
         self._z_lens = z_lens
         self._ddt_mean = ddt_mean
+        self._ddt_sigma = ddt_sigma
         self._ddt_sigma2 = ddt_sigma ** 2
         self.num_data = 1
 
@@ -27,3 +28,10 @@ class DdtGaussianLikelihood(object):
         :return: log likelihood given the single lens analysis
         """
         return - (ddt - self._ddt_mean) ** 2 / self._ddt_sigma2 / 2
+
+    def ddt_measurement(self):
+        """
+
+        :return: mean, 1-sigma of the ddt inference/model measurement
+        """
+        return self._ddt_mean, self._ddt_sigma

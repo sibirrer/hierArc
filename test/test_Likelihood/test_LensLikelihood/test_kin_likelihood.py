@@ -23,14 +23,22 @@ class TestKinLikelihood(object):
         sigma_v_sigma = sigma_v_measurement/10.
         error_cov_measurement = np.diag(sigma_v_sigma ** 2)
         error_cov_j_sqrt = np.diag(np.zeros_like(sigma_v_measurement))
-        ifu_likelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_mean_list, error_cov_measurement,
+        kin_likelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_mean_list, error_cov_measurement,
                                        error_cov_j_sqrt, normalized=False)
-        logl = ifu_likelihood.log_likelihood(ddt, dd, aniso_scaling=None)
+        logl = kin_likelihood.log_likelihood(ddt, dd, aniso_scaling=None)
         npt.assert_almost_equal(logl, 0, decimal=5)
-        logl = ifu_likelihood.log_likelihood(ddt*(0.9**2), dd, aniso_scaling=None)
+        logl = kin_likelihood.log_likelihood(ddt*(0.9**2), dd, aniso_scaling=None)
         npt.assert_almost_equal(logl, -num_ifu/2, decimal=5)
-        logl = ifu_likelihood.log_likelihood(ddt * (1 - np.sqrt(0.1**2 + 0.1**2))**2, dd, aniso_scaling=None)
+        logl = kin_likelihood.log_likelihood(ddt * (1 - np.sqrt(0.1**2 + 0.1**2))**2, dd, aniso_scaling=None)
         npt.assert_almost_equal(logl, -num_ifu, decimal=5)
+
+        sigma_v_measurement_, error_cov_measurement_ = kin_likelihood.sigma_v_measurement()
+        assert sigma_v_measurement_[0] == sigma_v_measurement[0]
+        assert error_cov_measurement_[0, 0] == error_cov_measurement[0, 0]
+
+        sigma_v_predict, error_cov_predict = kin_likelihood.sigma_v_prediction(ddt, dd, aniso_scaling=1)
+        assert sigma_v_predict[0] == sigma_v_measurement[0]
+        assert error_cov_predict[0, 0] == 0
 
     def test_error_systematic(self):
         num_ifu = 10

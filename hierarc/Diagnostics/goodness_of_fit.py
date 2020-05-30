@@ -163,7 +163,7 @@ class GoodnessOfFit(object):
         ifu_likelihood = likelihood._lens_type
         ds_dds = ddt_ / dd_ / (1 + likelihood._z_lens)
         sigma_v_model = ifu_likelihood.sigma_v_model(ds_dds, aniso_scaling=aniso_scaling)
-        cov_error_model = ifu_likelihood.cov_error_model(ds_dds, scaling_ifu=aniso_scaling)
+        cov_error_model = ifu_likelihood.cov_error_model(ds_dds, aniso_scaling=aniso_scaling)
 
         sigma_v_data = ifu_likelihood._sigma_v_measured
         cov_error_data = ifu_likelihood._error_cov_measurement

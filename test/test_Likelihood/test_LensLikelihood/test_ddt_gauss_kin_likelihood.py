@@ -35,6 +35,8 @@ class TestDdtGaussKinLikelihood(object):
         self.ddt_gauss_kin_likelihood = DdtGaussKinLikelihood(self.z_lens, self.z_source, self.ddt_mean, self.ddt_sigma,
                                                               sigma_v_measurement, j_mean_list, error_cov_measurement,
                                                               error_cov_j_sqrt, sigma_sys_error_include=False)
+        self.sigma_v_measurement = sigma_v_measurement
+        self.error_cov_measurement = error_cov_measurement
 
     def test_log_likelihood(self):
         ddt, dd = 9, 0.9
@@ -42,6 +44,21 @@ class TestDdtGaussKinLikelihood(object):
         lnlog_ddt = self.ddt_gauss_likelihood.log_likelihood(ddt, dd)
         lnlog_kin = self.kin_likelihood.log_likelihood(ddt, dd, aniso_scaling=None, sigma_v_sys_error=None)
         npt.assert_almost_equal(lnlog_tot, lnlog_ddt + lnlog_kin, decimal=5)
+
+    def test_ddt_measurement(self):
+        ddt_mean, ddt_sigma = self.ddt_gauss_kin_likelihood.ddt_measurement()
+        assert ddt_mean == self.ddt_mean
+        assert ddt_sigma == self.ddt_sigma
+
+    def test_sigma_v_measurement(self):
+
+        sigma_v_measurement_, error_cov_measurement_ = self.ddt_gauss_kin_likelihood.sigma_v_measurement()
+        assert sigma_v_measurement_[0] == self.sigma_v_measurement[0]
+        assert error_cov_measurement_[0, 0] == self.error_cov_measurement[0, 0]
+
+        sigma_v_predict, error_cov_predict = self.ddt_gauss_kin_likelihood.sigma_v_prediction(self.ddt_mean, self.dd_mean, aniso_scaling=1)
+        assert sigma_v_predict[0] == self.sigma_v_measurement[0]
+        assert error_cov_predict[0, 0] == 0
 
 
 if __name__ == '__main__':

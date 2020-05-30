@@ -1,6 +1,7 @@
 from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistLikelihood, DdtHistKDELikelihood
 import numpy as np
 import numpy.testing as npt
+import pytest
 
 
 class TestDdtHist(object):
@@ -27,6 +28,12 @@ class TestDdtHist(object):
         logl_sigma = self._ddthist.log_likelihood(ddt=self._ddt*10, dd=None)
         npt.assert_almost_equal(logl_sigma, -np.inf, decimal=0)
         assert np.exp(logl_sigma) == 0
+
+    def test_ddt_measurement(self):
+
+        ddt_mean, ddt_sigma = self._ddthist.ddt_measurement()
+        npt.assert_almost_equal(ddt_mean / self._ddt, 1, decimal=3)
+        npt.assert_almost_equal(ddt_sigma / (self._sigma * self._ddt), 1, decimal=3)
 
 
 class TestDdtHistKDELikelihood(object):
@@ -60,3 +67,13 @@ class TestDdtHistKDELikelihood(object):
 
         logl_sigma = self._ddthist.log_likelihood(ddt=self._ddt + 2 * self._sigma, dd=None)
         npt.assert_almost_equal(logl_sigma - logl_max, -2 ** 2 / 2., decimal=0)
+
+    def test_ddt_measurement(self):
+
+        ddt_mean, ddt_sigma = self._ddthist.ddt_measurement()
+        npt.assert_almost_equal(ddt_mean / self._ddt, 1, decimal=3)
+        npt.assert_almost_equal(ddt_sigma / self._sigma, 1, decimal=3)
+
+
+if __name__ == '__main__':
+    pytest.main()
