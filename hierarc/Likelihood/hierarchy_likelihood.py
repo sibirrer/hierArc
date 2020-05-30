@@ -164,3 +164,59 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         else:
             kappa_ext_draw = 0
         return lambda_mst_draw, kappa_ext_draw, gamma_ppn
+
+    def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens={}, kwargs_kin={}):
+        """
+        mean and error covariance of velocity dispersion measurement
+        mean and error covariance of velocity dispersion predictions
+
+        :param cosmo: astropy.cosmology instance
+        :param kwargs_lens: keywords of the hyper parameters of the lens model
+        :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :return: sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict
+        """
+        # if no kinematics is provided, return None's
+        if not self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
+            return None, None, None, None
+        kwargs_kin_copy = copy.deepcopy(kwargs_kin)
+        sigma_v_sys_error = kwargs_kin_copy.pop('sigma_v_sys_error', None)
+        ddt, dd = self.angular_diameter_distances(cosmo)
+        sigma_v_measurement, cov_error_measurement = self.sigma_v_measurement(sigma_v_sys_error=sigma_v_sys_error)
+        sigma_v_predict_list = []
+        sigma_v_predict_mean = np.zeros_like(sigma_v_measurement)
+        cov_error_predict = np.zeros_like(cov_error_measurement)
+        for i in range(self._num_distribution_draws):
+            lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+            ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+                                                 kappa_ext=kappa_ext)
+            aniso_param_array = self.draw_anisotropy(**kwargs_kin_copy)
+            aniso_scaling = self.ani_scaling(aniso_param_array)
+            sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(ddt_, dd_, aniso_scaling=aniso_scaling)
+            sigma_v_predict_mean += sigma_v_predict_i
+            cov_error_predict += cov_error_predict_i
+            sigma_v_predict_list.append(sigma_v_predict_i)
+
+        sigma_v_predict_mean /= self._num_distribution_draws
+        cov_error_predict /= self._num_distribution_draws
+        sigma_v_mean_std = np.std(sigma_v_predict_list, axis=0)
+        cov_error_predict += np.outer(sigma_v_mean_std, sigma_v_mean_std)
+        return sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict
+
+    def ddt_dd_model_prediction(self, cosmo, kwargs_lens={}):
+        """
+        predicts the model uncertainty corrected ddt prediction of the applied model (e.g. power-law)
+
+        :param cosmo: astropy.cosmology instance
+        :param kwargs_lens: keywords of the hyper parameters of the lens model
+        :return: ddt_model mean, ddt_model sigma, dd_model mean, dd_model sigma
+        """
+        ddt, dd = self.angular_diameter_distances(cosmo)
+        ddt_draws = []
+        dd_draws = []
+        for i in range(self._num_distribution_draws):
+            lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+            ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+                                                 kappa_ext=kappa_ext)
+            ddt_draws.append(ddt_)
+            dd_draws.append(dd_)
+        return np.mean(ddt_draws), np.std(ddt_draws), np.mean(dd_draws), np.std(dd_draws)

@@ -24,9 +24,9 @@ class KinLikelihood(object):
         """
         self._z_lens = z_lens
         self._j_model = np.array(j_model, dtype=float)
-        self._sigma_v_measured = sigma_v_measurement
-        self._error_cov_measurement = error_cov_measurement
-        self._error_cov_j_sqrt = error_cov_j_sqrt
+        self._sigma_v_measured = np.array(sigma_v_measurement, dtype=float)
+        self._error_cov_measurement = np.array(error_cov_measurement, dtype=float)
+        self._error_cov_j_sqrt = np.array(error_cov_j_sqrt, dtype=float)
         self.num_data = len(j_model)
         self._normalized = normalized
         self._sigma_sys_error_include = sigma_sys_error_include
