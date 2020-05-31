@@ -109,18 +109,18 @@ class GoodnessOfFit(object):
         ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_measurement_list,
                          yerr=sigma_v_measurement_error_list, xerr=None, fmt='o',
                          ecolor=None, elinewidth=None,
-                         capsize=None, barsabove=False, lolims=False, uplims=False,
+                         capsize=5, barsabove=False, lolims=False, uplims=False,
                          xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
         ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_model_list,
                          yerr=sigma_v_model_error_list, xerr=None, fmt='o',
-                         ecolor=None, elinewidth=None, label='prediction')
+                         ecolor=None, elinewidth=None, label='prediction', capsize=5)
         ax.set_xticks(ticks=np.arange(len(sigma_v_name_list)))
         ax.set_xticklabels(labels=sigma_v_name_list, rotation='vertical')
         ax.set_ylabel(r'$\sigma^{\rm P}$ [km/s]', fontsize=15)
         ax.legend()
         return f, ax
 
-    def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, show_legend=True):
+    def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, radial_bin_size, show_legend=True):
         """
         plot an individual IFU data goodness of fit
 
@@ -129,6 +129,7 @@ class GoodnessOfFit(object):
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
         :param lens_index: int, index in kwargs_lens to be plotted (needs to by of type 'IFUKinCov')
+        :param radial bin size in arc seconds
         :param show_legend: bool, to show legend
         :return: figure as axes instance
         """
@@ -140,13 +141,14 @@ class GoodnessOfFit(object):
         sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict = likelihood.sigma_v_measured_vs_predict(
             cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
 
-
-        ax.errorbar(np.arange(len(sigma_v_measurement)), sigma_v_measurement, yerr=np.sqrt(np.diag(cov_error_measurement)), xerr=None,
-                      fmt='o', label='data')
-        ax.errorbar(np.arange(len(sigma_v_predict_mean)), sigma_v_predict_mean, yerr=np.sqrt(np.diag(cov_error_predict)), xerr=None,
-                      fmt='o', label='model')
+        r_bins = radial_bin_size/2. + np.arange(len(sigma_v_measurement))
+        ax.errorbar(r_bins, sigma_v_measurement, yerr=np.sqrt(np.diag(cov_error_measurement)), xerr=radial_bin_size/2.,
+                      fmt='o', label='data', capsize=5)
+        ax.errorbar(r_bins, sigma_v_predict_mean, yerr=np.sqrt(np.diag(cov_error_predict)), xerr=radial_bin_size/2.,
+                      fmt='o', label='model', capsize=5)
         if show_legend is True:
             ax.legend(fontsize=20)
         ax.set_title(name, fontsize=20)
         ax.set_ylabel(r'$\sigma^{\rm P}$[km/s]', fontsize=20)
+        ax.set_xlabel('radial bin [arcsec]', fontsize=20)
         return ax

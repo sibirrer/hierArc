@@ -84,7 +84,7 @@ class TestGoodnessOfFit(object):
         kwargs_lens = {'lambda_mst': 1}
         kwargs_kin = {}
         self.goodnessofFit.plot_ifu_fit(ax, self.cosmo, kwargs_lens, kwargs_kin, lens_index=self.ifu_index,
-                                        show_legend=True)
+                                        radial_bin_size=1., show_legend=True)
         plt.close()
 
 
@@ -100,7 +100,8 @@ class TestRaise(unittest.TestCase):
             kwargs_lens = {'lambda_mst': 1}
             kwargs_kin = {}
             cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.0)
-            goodness_of_fit.plot_ifu_fit(ax, cosmo, kwargs_lens, kwargs_kin, lens_index=0, show_legend=True)
+            goodness_of_fit.plot_ifu_fit(ax, cosmo, kwargs_lens, kwargs_kin, lens_index=0, radial_bin_size=1,
+                                         show_legend=True)
             plt.close()
 
 
