@@ -96,7 +96,7 @@ class MCMCSampler(object):
 
     def param_names(self, latex_style=False):
         """
-        list of parameter names being sampled in the same order as teh sampling
+        list of parameter names being sampled in the same order as the sampling
 
         :param latex_style: bool, if True returns strings in latex symbols, else in the convention of the sampler
         :return: list of strings
