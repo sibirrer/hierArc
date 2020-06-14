@@ -10,7 +10,7 @@ class ParamManager(object):
     def __init__(self, cosmology, ppn_sampling=False, lambda_mst_sampling=False, lambda_mst_distribution='NONE',
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
-                 lambda_ifu_distribution='NONE', sigma_v_systematics=False,
+                 lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, sigma_v_systematics=False,
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
                  kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={}):
@@ -22,6 +22,8 @@ class ParamManager(object):
         :param lambda_mst_distribution: string, distribution function of the MST transform
         :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
         independently
+        :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
+         according to a predefined quantity of the lens
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
@@ -39,6 +41,7 @@ class ParamManager(object):
                                      lambda_ifu_distribution=lambda_ifu_distribution,
                                      kappa_ext_sampling=kappa_ext_sampling,
                                      kappa_ext_distribution=kappa_ext_distribution,
+                                     alpha_lambda_sampling=alpha_lambda_sampling,
                                      kwargs_fixed=kwargs_fixed_lens)
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = kwargs_upper_cosmo, kwargs_lower_cosmo
         self._kwargs_upper_lens, self._kwargs_lower_lens = kwargs_upper_lens, kwargs_lower_lens

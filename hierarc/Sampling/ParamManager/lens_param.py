@@ -4,7 +4,7 @@ class LensParam(object):
     """
     def __init__(self, lambda_mst_sampling=False, lambda_mst_distribution='NONE', kappa_ext_sampling=False,
                  kappa_ext_distribution='NONE', lambda_ifu_sampling=False, lambda_ifu_distribution='NONE',
-                 kwargs_fixed={}):
+                 alpha_lambda_sampling=False, kwargs_fixed={}):
         """
 
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
@@ -14,6 +14,8 @@ class LensParam(object):
         :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
         independently
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
+        :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
+         according to a predefined quantity of the lens
         :param kwargs_fixed: keyword arguments that are held fixed through the sampling
         """
         self._lambda_mst_sampling = lambda_mst_sampling
@@ -22,6 +24,7 @@ class LensParam(object):
         self._lambda_ifu_distribution = lambda_ifu_distribution
         self._kappa_ext_sampling = kappa_ext_sampling
         self._kappa_ext_distribution = kappa_ext_distribution
+        self._alpha_lambda_sampling = alpha_lambda_sampling
 
         self._kwargs_fixed = kwargs_fixed
 
@@ -68,6 +71,12 @@ class LensParam(object):
                         list.append(r'$\sigma(\kappa_{\rm ext})$')
                     else:
                         list.append('kappa_ext_sigma')
+        if self._alpha_lambda_sampling is True:
+            if 'alpha_lambda' not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r'$\alpha_{\lambda}$')
+                else:
+                    list.append('alpha_lambda')
         return list
 
     def args2kwargs(self, args, i=0):
@@ -113,6 +122,12 @@ class LensParam(object):
                 else:
                     kwargs['kappa_ext_sigma'] = args[i]
                     i += 1
+        if self._alpha_lambda_sampling is True:
+            if 'alpha_lambda' in self._kwargs_fixed:
+                kwargs['alpha_lambda'] = self._kwargs_fixed['alpha_lambda']
+            else:
+                kwargs['alpha_lambda'] = args[i]
+                i += 1
         return kwargs, i
 
     def kwargs2args(self, kwargs):
@@ -140,4 +155,7 @@ class LensParam(object):
             if self._kappa_ext_distribution == 'GAUSSIAN':
                 if 'kappa_ext_sigma' not in self._kwargs_fixed:
                     args.append(kwargs['kappa_ext_sigma'])
+        if self._alpha_lambda_sampling is True:
+            if 'alpha_lambda' not in self._kwargs_fixed:
+                args.append(kwargs['alpha_lambda'])
         return args

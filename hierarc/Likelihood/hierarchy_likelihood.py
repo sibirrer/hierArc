@@ -13,7 +13,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
                  num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
-                 **kwargs_likelihood):
+                 lambda_scaling_property=0, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -31,6 +31,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kappa_bin_edges: array of length (len(kappa_pdf)+1), bin edges of the kappa PDF
         :param mst_ifu: bool, if True replaces the lambda_mst parameter by the lambda_ifu parameter (and distribution)
          in sampling this lens.
+        :param lambda_scaling_property: float (optional), scaling of lambda_mst = lambda_mst_global + alpha * lambda_scaling_property
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -49,6 +50,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             self._draw_kappa = True
         else:
             self._draw_kappa = False
+        self._lambda_scaling_property = lambda_scaling_property
 
     def lens_log_likelihood(self, cosmo, kwargs_lens={}, kwargs_kin={}):
         """
@@ -141,7 +143,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return False
 
     def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1, lambda_ifu=1,
-                  lambda_ifu_sigma=0):
+                  lambda_ifu_sigma=0, alpha_lambda=0):
         """
 
         :param lambda_mst: MST transform
@@ -151,12 +153,15 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param gamma_ppn: Post-Newtonian parameter
         :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified for
         :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of lenses specified for
+        :param alpha_lambda: float, linear slope of the lambda_int scaling relation with lens quantity self._lambda_scaling_property
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
-            lambda_mst_draw = np.random.normal(lambda_ifu, lambda_ifu_sigma)
+            lambda_lens = lambda_ifu + alpha_lambda * self._lambda_scaling_property
+            lambda_mst_draw = np.random.normal(lambda_lens, lambda_ifu_sigma)
         else:
-            lambda_mst_draw = np.random.normal(lambda_mst, lambda_mst_sigma)
+            lambda_lens = lambda_mst + alpha_lambda * self._lambda_scaling_property
+            lambda_mst_draw = np.random.normal(lambda_lens, lambda_mst_sigma)
         if self._draw_kappa is True:
             kappa_ext_draw = self._kappa_dist.draw_one
         elif self._kappa_ext_bias is True:

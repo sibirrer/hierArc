@@ -11,7 +11,7 @@ class CosmoLikelihood(object):
 
     def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
-                 kappa_ext_sampling=False, kappa_ext_distribution='NONE',
+                 kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
                  num_redshift_interp=100, cosmo_fixed=None):
@@ -30,6 +30,8 @@ class CosmoLikelihood(object):
         :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
         independently
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
+        :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
+         according to a predefined quantity of the lens
         :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
         :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
@@ -51,6 +53,7 @@ class CosmoLikelihood(object):
                                   lambda_mst_distribution=lambda_mst_distribution,
                                   lambda_ifu_sampling=lambda_ifu_sampling,
                                   lambda_ifu_distribution=lambda_ifu_distribution,
+                                  alpha_lambda_sampling=alpha_lambda_sampling,
                                   sigma_v_systematics=sigma_v_systematics,
                                   kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
                                   anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
