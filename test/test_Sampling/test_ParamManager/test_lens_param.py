@@ -15,11 +15,19 @@ class TestLensParam(object):
                                 kappa_ext_distribution='GAUSSIAN', lambda_ifu_sampling=True,
                                 lambda_ifu_distribution='GAUSSIAN', alpha_lambda_sampling=True,
                                 kwargs_fixed=kwargs_fixed)
+        self._param_log_scatter = LensParam(lambda_mst_sampling=True, lambda_mst_distribution='GAUSSIAN', kappa_ext_sampling=True,
+                 kappa_ext_distribution='GAUSSIAN', lambda_ifu_sampling=True, lambda_ifu_distribution='GAUSSIAN',
+                                alpha_lambda_sampling=True, log_scatter=True, kwargs_fixed={})
 
     def test_param_list(self):
         param_list = self._param.param_list(latex_style=False)
         assert len(param_list) == 7
         param_list = self._param.param_list(latex_style=True)
+        assert len(param_list) == 7
+
+        param_list = self._param_log_scatter.param_list(latex_style=False)
+        assert len(param_list) == 7
+        param_list = self._param_log_scatter.param_list(latex_style=True)
         assert len(param_list) == 7
 
         param_list = self._param_fixed.param_list(latex_style=False)
@@ -33,6 +41,11 @@ class TestLensParam(object):
         args = self._param.kwargs2args(kwargs)
         kwargs_new, i = self._param.args2kwargs(args, i=0)
         args_new = self._param.kwargs2args(kwargs_new)
+        npt.assert_almost_equal(args_new, args)
+
+        args = self._param_log_scatter.kwargs2args(kwargs)
+        kwargs_new, i = self._param_log_scatter.args2kwargs(args, i=0)
+        args_new = self._param_log_scatter.kwargs2args(kwargs_new)
         npt.assert_almost_equal(args_new, args)
 
         args = self._param_fixed.kwargs2args(kwargs)

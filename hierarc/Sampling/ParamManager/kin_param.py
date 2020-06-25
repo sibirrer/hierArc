@@ -33,7 +33,7 @@ class KinParam(object):
             if self._anisotropy_model in ['OM', 'GOM']:
                 if 'a_ani' not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$a_{\rm ani}$')
+                        list.append(r'$\langle a_{\rm ani}\rangle$')
                     else:
                         list.append('a_ani')
                 if self._distribution_function in ['GAUSSIAN']:

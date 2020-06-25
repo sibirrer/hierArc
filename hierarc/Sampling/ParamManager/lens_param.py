@@ -1,10 +1,13 @@
+import numpy as np
+
+
 class LensParam(object):
     """
     manages the lens model covariant parameters
     """
     def __init__(self, lambda_mst_sampling=False, lambda_mst_distribution='NONE', kappa_ext_sampling=False,
                  kappa_ext_distribution='NONE', lambda_ifu_sampling=False, lambda_ifu_distribution='NONE',
-                 alpha_lambda_sampling=False, kwargs_fixed={}):
+                 alpha_lambda_sampling=False, kwargs_fixed={}, log_scatter=False):
         """
 
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
@@ -16,6 +19,7 @@ class LensParam(object):
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
          according to a predefined quantity of the lens
+        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param kwargs_fixed: keyword arguments that are held fixed through the sampling
         """
         self._lambda_mst_sampling = lambda_mst_sampling
@@ -25,6 +29,7 @@ class LensParam(object):
         self._kappa_ext_sampling = kappa_ext_sampling
         self._kappa_ext_distribution = kappa_ext_distribution
         self._alpha_lambda_sampling = alpha_lambda_sampling
+        self._log_scatter = log_scatter
 
         self._kwargs_fixed = kwargs_fixed
 
@@ -44,7 +49,10 @@ class LensParam(object):
             if self._lambda_mst_distribution == 'GAUSSIAN':
                 if 'lambda_mst_sigma' not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$\sigma(\lambda_{\rm int})$')
+                        if self._log_scatter is True:
+                            list.append(r'$\log_{10}\sigma(\lambda_{\rm int})$')
+                        else:
+                            list.append(r'$\sigma(\lambda_{\rm int})$')
                     else:
                         list.append('lambda_mst_sigma')
         if self._lambda_ifu_sampling is True:
@@ -56,7 +64,10 @@ class LensParam(object):
             if self._lambda_ifu_distribution == 'GAUSSIAN':
                 if 'lambda_ifu_sigma' not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$\sigma(\lambda_{\rm ifu})$')
+                        if self._log_scatter is True:
+                            list.append(r'$\log_{10}\sigma(\lambda_{\rm ifu})$')
+                        else:
+                            list.append(r'$\sigma(\lambda_{\rm ifu})$')
                     else:
                         list.append('lambda_ifu_sigma')
         if self._kappa_ext_sampling is True:
@@ -96,7 +107,10 @@ class LensParam(object):
                 if 'lambda_mst_sigma' in self._kwargs_fixed:
                     kwargs['lambda_mst_sigma'] = self._kwargs_fixed['lambda_mst_sigma']
                 else:
-                    kwargs['lambda_mst_sigma'] = args[i]
+                    if self._log_scatter is True:
+                        kwargs['lambda_mst_sigma'] = 10**(args[i])
+                    else:
+                        kwargs['lambda_mst_sigma'] = args[i]
                     i += 1
         if self._lambda_ifu_sampling is True:
             if 'lambda_ifu' in self._kwargs_fixed:
@@ -108,7 +122,10 @@ class LensParam(object):
                 if 'lambda_ifu_sigma' in self._kwargs_fixed:
                     kwargs['lambda_ifu_sigma'] = self._kwargs_fixed['lambda_ifu_sigma']
                 else:
-                    kwargs['lambda_ifu_sigma'] = args[i]
+                    if self._log_scatter is True:
+                        kwargs['lambda_ifu_sigma'] = 10**(args[i])
+                    else:
+                        kwargs['lambda_ifu_sigma'] = args[i]
                     i += 1
         if self._kappa_ext_sampling is True:
             if 'kappa_ext' in self._kwargs_fixed:
@@ -142,13 +159,19 @@ class LensParam(object):
                 args.append(kwargs['lambda_mst'])
             if self._lambda_mst_distribution == 'GAUSSIAN':
                 if 'lambda_mst_sigma' not in self._kwargs_fixed:
-                    args.append(kwargs['lambda_mst_sigma'])
+                    if self._log_scatter is True:
+                        args.append(np.log10(kwargs['lambda_mst_sigma']))
+                    else:
+                        args.append(kwargs['lambda_mst_sigma'])
         if self._lambda_ifu_sampling is True:
             if 'lambda_ifu' not in self._kwargs_fixed:
                 args.append(kwargs['lambda_ifu'])
             if self._lambda_ifu_distribution == 'GAUSSIAN':
                 if 'lambda_ifu_sigma' not in self._kwargs_fixed:
-                    args.append(kwargs['lambda_ifu_sigma'])
+                    if self._log_scatter is True:
+                        args.append(np.log10(kwargs['lambda_ifu_sigma']))
+                    else:
+                        args.append(kwargs['lambda_ifu_sigma'])
         if self._kappa_ext_sampling is True:
             if 'kappa_ext' not in self._kwargs_fixed:
                 args.append(kwargs['kappa_ext'])

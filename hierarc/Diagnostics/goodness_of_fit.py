@@ -16,7 +16,7 @@ class GoodnessOfFit(object):
         self._kwargs_likelihood_list = kwargs_likelihood_list
         self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list)
 
-    def plot_ddt_fit(self, cosmo, kwargs_lens, kwargs_kin):
+    def plot_ddt_fit(self, cosmo, kwargs_lens, kwargs_kin, color_measurement=None, color_prediction=None):
         """
         plots the prediction and the uncorrelated error bars on the individual lenses
         currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
@@ -24,6 +24,8 @@ class GoodnessOfFit(object):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
+        :param color_measurement: color of measurement
+        :param color_prediction: color of model prediction
         :return: fig, axes of matplotlib instance
         """
         logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
@@ -53,12 +55,15 @@ class GoodnessOfFit(object):
                 ddt_data_sigma_list.append(ddt_sigma_measurement)
 
         f, ax = plt.subplots(1, 1, figsize=(len(ddt_name_list)/1.5, 4))
-        ax.errorbar(np.arange(len(ddt_name_list)), ddt_data_mean_list, yerr=ddt_data_sigma_list, xerr=None, fmt='o', ecolor=None, elinewidth=None,
+        ax.errorbar(np.arange(len(ddt_name_list)), ddt_data_mean_list, yerr=ddt_data_sigma_list,
+                    color=color_measurement,
+                    xerr=None, fmt='o', ecolor=None, elinewidth=None,
                      capsize=None, barsabove=False, lolims=False, uplims=False,
                      xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
 
-        ax.errorbar(np.arange(len(ddt_name_list)), ddt_model_mean_list, yerr=ddt_model_sigma_list, xerr=None, fmt='o',
-                    ecolor=None, elinewidth=None,
+        ax.errorbar(np.arange(len(ddt_name_list)), ddt_model_mean_list, yerr=ddt_model_sigma_list,
+                    color=color_prediction,
+                    xerr=None, fmt='o', ecolor=None, elinewidth=None,
                     capsize=None, barsabove=False, lolims=False, uplims=False,
                     xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='prediction')
 
@@ -105,7 +110,7 @@ class GoodnessOfFit(object):
                     sigma_v_model_error_list.append(sigma_v_sigma_model)
         return sigma_v_name_list, sigma_v_measurement_list, sigma_v_measurement_error_list, sigma_v_model_list, sigma_v_model_error_list
 
-    def plot_kin_fit(self, cosmo, kwargs_lens, kwargs_kin):
+    def plot_kin_fit(self, cosmo, kwargs_lens, kwargs_kin, color_measurement=None, color_prediction=None):
         """
         plots the prediction and the uncorrelated error bars on the individual lenses
         currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
@@ -113,6 +118,8 @@ class GoodnessOfFit(object):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
+        :param color_measurement: color of measurement
+        :param color_prediction: color of model prediction
         :return: fig, axes of matplotlib instance
         """
         logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
@@ -122,10 +129,10 @@ class GoodnessOfFit(object):
         f, ax = plt.subplots(1, 1, figsize=(int(len(sigma_v_name_list)/2), 4))
         ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_measurement_list,
                          yerr=sigma_v_measurement_error_list, xerr=None, fmt='o',
-                         ecolor=None, elinewidth=None,
+                         ecolor=None, elinewidth=None, color=color_measurement,
                          capsize=5, barsabove=False, lolims=False, uplims=False,
                          xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
-        ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_model_list,
+        ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_model_list, color=color_prediction,
                          yerr=sigma_v_model_error_list, xerr=None, fmt='o',
                          ecolor=None, elinewidth=None, label='prediction', capsize=5)
         ax.set_xticks(ticks=np.arange(len(sigma_v_name_list)))
@@ -134,7 +141,8 @@ class GoodnessOfFit(object):
         ax.legend()
         return f, ax
 
-    def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, radial_bin_size, show_legend=True):
+    def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, radial_bin_size, show_legend=True,
+                     color_measurement=None, color_prediction=None):
         """
         plot an individual IFU data goodness of fit
 
@@ -143,8 +151,10 @@ class GoodnessOfFit(object):
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
         :param lens_index: int, index in kwargs_lens to be plotted (needs to by of type 'IFUKinCov')
-        :param radial bin size in arc seconds
+        :param radial_bin_size: radial bin size in arc seconds
         :param show_legend: bool, to show legend
+        :param color_measurement: color of measurement
+        :param color_prediction: color of model prediction
         :return: figure as axes instance
         """
         kwargs_likelihood = self._kwargs_likelihood_list[lens_index]
@@ -157,9 +167,9 @@ class GoodnessOfFit(object):
 
         r_bins = radial_bin_size/2. + np.arange(len(sigma_v_measurement))
         ax.errorbar(r_bins, sigma_v_measurement, yerr=np.sqrt(np.diag(cov_error_measurement)), xerr=radial_bin_size/2.,
-                      fmt='o', label='data', capsize=5)
+                      fmt='o', label='data', capsize=5, color=color_measurement)
         ax.errorbar(r_bins, sigma_v_predict_mean, yerr=np.sqrt(np.diag(cov_error_predict)), xerr=radial_bin_size/2.,
-                      fmt='o', label='model', capsize=5)
+                      fmt='o', label='model', capsize=5, color=color_prediction)
         if show_legend is True:
             ax.legend(fontsize=20)
         ax.set_title(name, fontsize=20)
