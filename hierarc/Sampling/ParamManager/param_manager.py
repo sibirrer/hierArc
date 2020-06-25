@@ -11,6 +11,7 @@ class ParamManager(object):
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
                  lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, sigma_v_systematics=False,
+                 log_scatter=False,
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
                  kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={}):
@@ -30,9 +31,10 @@ class ParamManager(object):
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
+        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         """
         self._kin_param = KinParam(anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
-                                   distribution_function=anisotropy_distribution,
+                                   distribution_function=anisotropy_distribution, log_scatter=log_scatter,
                                    sigma_v_systematics=sigma_v_systematics, kwargs_fixed=kwargs_fixed_kin)
         self._cosmo_param = CosmoParam(cosmology=cosmology, ppn_sampling=ppn_sampling, kwargs_fixed=kwargs_fixed_cosmo)
         self._lens_param = LensParam(lambda_mst_sampling=lambda_mst_sampling,
@@ -42,6 +44,7 @@ class ParamManager(object):
                                      kappa_ext_sampling=kappa_ext_sampling,
                                      kappa_ext_distribution=kappa_ext_distribution,
                                      alpha_lambda_sampling=alpha_lambda_sampling,
+                                     log_scatter=log_scatter,
                                      kwargs_fixed=kwargs_fixed_lens)
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = kwargs_upper_cosmo, kwargs_lower_cosmo
         self._kwargs_upper_lens, self._kwargs_lower_lens = kwargs_upper_lens, kwargs_lower_lens

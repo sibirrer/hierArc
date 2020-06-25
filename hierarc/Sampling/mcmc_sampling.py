@@ -11,6 +11,7 @@ class MCMCSampler(object):
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
+                 log_scatter=False,
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
                  num_redshift_interp=100, cosmo_fixed=None):
         """
@@ -42,6 +43,7 @@ class MCMCSampler(object):
          measurement
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
+        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
@@ -58,7 +60,7 @@ class MCMCSampler(object):
                                      sigma_v_systematics=sigma_v_systematics,
                                      kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
                                      anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
-                                     anisotropy_distribution=anisotropy_distribution,
+                                     anisotropy_distribution=anisotropy_distribution, log_scatter=log_scatter,
                                      custom_prior=custom_prior, interpolate_cosmo=interpolate_cosmo,
                                      num_redshift_interp=num_redshift_interp, cosmo_fixed=cosmo_fixed)
         self.param = self.chain.param
