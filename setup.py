@@ -38,7 +38,7 @@ setup(
     author_email='sibirrer@gmail.com',
     python_requires='>=3.5',
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
@@ -61,7 +61,7 @@ setup(
     test_suite='test',
     tests_require=test_requirements,
     url='https://github.com/sibirrer/hierarc',
-    version='0.1.0',
+    version='1.0.0',
     zip_safe=False,
     cmdclass={'test': PyTest}
 )
