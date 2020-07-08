@@ -43,8 +43,15 @@ Installation
     $ pip install lenstronomy --user
 
 
+Usage
+-----
+The full analysis of `Birrer et al. 2020 <https://arxiv.org/abs/2007.02941>`_ is publicly available `here <https://github.com/TDCOSMO/hierarchy_analysis_2020_public>`_ .
+For example use cases we refer to the notebooks of this analysis. More examples are in preparation.
+
+
 Credits
 -------
 
 Simon Birrer & the TDCOSMO team
+
 Please cite `Birrer et al. 2020 <https://arxiv.org/abs/2007.02941>`_ if you make use of this software for your research.
