@@ -22,8 +22,9 @@ hierArc
 
 
 
-Hierarchical analysis of strong lensing systems to infer lens properties and cosmological parameters simultaneously
+Hierarchical analysis of strong lensing systems to infer lens properties and cosmological parameters simultaneously.
 
+The software is originated from `Birrer et al. 2020 <https://arxiv.org/abs/2007.02941>`_ and is in active development.
 
 * Free software: BSD license
 * Documentation: https://hierarc.readthedocs.io.
@@ -32,9 +33,18 @@ Hierarchical analysis of strong lensing systems to infer lens properties and cos
 Features
 --------
 
-* Hierarchical analysis of strong gravitational lenses
+* The software allows to fit lenses with measured time delays and lenses with imaging and kinematics constraints with parameters described on the ensemble level.
+
+Installation
+------------
+
+.. code-block:: bash
+
+    $ pip install lenstronomy --user
+
 
 Credits
 -------
 
 Simon Birrer & the TDCOSMO team
+Please cite `Birrer et al. 2020 <https://arxiv.org/abs/2007.02941>`_ if you make use of this software for your research.
