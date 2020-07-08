@@ -40,7 +40,7 @@ Installation
 
 .. code-block:: bash
 
-    $ pip install lenstronomy --user
+    $ pip install hierarc --user
 
 
 Usage
