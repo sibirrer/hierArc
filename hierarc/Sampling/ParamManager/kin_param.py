@@ -6,14 +6,14 @@ class KinParam(object):
     manager for the kinematics anisotropy parameters
     """
     def __init__(self, anisotropy_sampling=False, anisotropy_model='OM', distribution_function='NONE',
-                 sigma_v_systematics=False, log_scatter=False, kwargs_fixed={}):
+                 sigma_v_systematics=False, log_scatter=False, kwargs_fixed=None):
         """
 
         :param anisotropy_sampling: bool, if True, makes use of this module, else ignores it's functionalities
         :param anisotropy_model: string, name of anisotropy model to consider
         :param distribution_function: string, 'NONE', 'GAUSSIAN', description of the distribution function of the
         anisotropy model parameters
-        :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
+        :param sigma_v_systematics: bool, if True samples parameters relative to systematics in the velocity dispersion
          measurement
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param kwargs_fixed: keyword arguments of the fixed parameters
@@ -23,6 +23,8 @@ class KinParam(object):
         self._anisotropy_model = anisotropy_model
         self._distribution_function = distribution_function
         self._sigma_v_systematics = sigma_v_systematics
+        if kwargs_fixed is None:
+            kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
         self._log_scatter = log_scatter
 

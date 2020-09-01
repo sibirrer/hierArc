@@ -12,7 +12,7 @@ class DdtLogNormLikelihood(object):
         """
         :param z_lens: lens redshift
         :param z_source: source redshift
-        :param ddt_mean: mean of log(Ddt distance)
+        :param ddt_mu: mean of log(Ddt distance)
         :param ddt_sigma: 1-sigma uncertainty in the log(Ddt distance)
         """
         self._z_lens = z_lens

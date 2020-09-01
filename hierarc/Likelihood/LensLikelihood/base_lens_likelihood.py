@@ -1,6 +1,5 @@
 __author__ = 'sibirrer'
 
-import numpy as np
 
 LIKELIHOOD_TYPES = ['DdtGaussian', 'DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian', 'DdtLogNorm', 'IFUKinCov', 'DdtHist',
                     'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin']
