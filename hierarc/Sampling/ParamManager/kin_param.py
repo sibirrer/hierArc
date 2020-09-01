@@ -82,6 +82,7 @@ class KinParam(object):
         """
 
         :param args: sampling argument list
+        :param i: integer, index to start reading out the argument list
         :return: keyword argument list with parameter names
         """
         kwargs = {}
