@@ -36,12 +36,12 @@ class TDMagLikelihood(object):
         self._cov_data = np.zeros((n_tot, n_tot))
         self._cov_data[:self._n_td, :self._n_td] = self._cov_td_measured
         self._cov_data[self._n_td:, self._n_td:] = self._cov_amp_measured
-
         #self._fermat_diff = fermat_diff   # in units arcsec^2
         self._fermat_unit_conversion = const.Mpc / const.c / const.day_s * const.arcsec ** 2
         #self._mag_model = mag_model
         self._model_tot = np.append(fermat_diff, mag_model)
         self._cov_model = cov_model
+        self.num_data = n_tot
 
     def log_likelihood(self, ddt, mu_intrinsic):
         """
@@ -57,6 +57,7 @@ class TDMagLikelihood(object):
         cov_model = model_scale * (self._cov_model * model_scale).T
         # combine data and model covariance matrix
         cov_tot = self._cov_data + cov_model
+        print(cov_tot, 'test cov tot')
         # invert matrix
         try:
             cov_tot_inv = np.linalg.inv(cov_tot)

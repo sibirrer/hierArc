@@ -2,7 +2,7 @@ __author__ = 'sibirrer'
 
 
 LIKELIHOOD_TYPES = ['DdtGaussian', 'DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian', 'DdtLogNorm', 'IFUKinCov', 'DdtHist',
-                    'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin']
+                    'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin', 'Mag', 'TDMag']
 
 
 class LensLikelihoodBase(object):
@@ -53,6 +53,12 @@ class LensLikelihoodBase(object):
         elif likelihood_type == 'DdtGaussKin':
             from hierarc.Likelihood.LensLikelihood.ddt_gauss_kin_likelihood import DdtGaussKinLikelihood
             self._lens_type = DdtGaussKinLikelihood(z_lens, z_source, **kwargs_likelihood)
+        elif likelihood_type == 'Mag':
+            from hierarc.Likelihood.LensLikelihood.mag_likelihood import MagnificationLikelihood
+            self._lens_type = MagnificationLikelihood(**kwargs_likelihood)
+        elif likelihood_type == 'TDMag':
+            from hierarc.Likelihood.LensLikelihood.td_mag_likelihood import TDMagLikelihood
+            self._lens_type = TDMagLikelihood(**kwargs_likelihood)
         else:
             raise ValueError('likelihood_type %s not supported! Supported are %s.' % (likelihood_type, LIKELIHOOD_TYPES))
 
@@ -64,7 +70,7 @@ class LensLikelihoodBase(object):
         """
         return self._lens_type.num_data
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None):
+    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None):
         """
 
         :param ddt: time-delay distance [physical Mpc]
@@ -73,6 +79,7 @@ class LensLikelihoodBase(object):
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
+        :param mu_intrinsic: float, intrinsic source brightness
         :return: natural logarithm of the likelihood of the data given the model
         """
         if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist', 'DdtHistKDE']:
@@ -82,6 +89,10 @@ class LensLikelihoodBase(object):
         elif self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
             return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling,
                                                   sigma_v_sys_error=sigma_v_sys_error)
+        elif self.likelihood_type in ['Mag']:
+            return self._lens_type.log_likelihood(mu_intrinsic=mu_intrinsic)
+        elif self.likelihood_type in ['TDMag']:
+            return self._lens_type.log_likelihood(ddt=ddt, mu_intrinsic=mu_intrinsic)
         else:
             raise ValueError('likelihood type %s not fully supported.' % self.likelihood_type)
 

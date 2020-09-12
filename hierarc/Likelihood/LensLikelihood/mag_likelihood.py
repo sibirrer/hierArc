@@ -24,6 +24,7 @@ class MagnificationLikelihood(object):
         self._cov_data = self._cov_amp_measured
         self._model_tot = np.array(mag_model)
         self._cov_model = cov_model
+        self.num_data = n_tot
 
     def log_likelihood(self, mu_intrinsic):
         """

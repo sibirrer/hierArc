@@ -23,7 +23,9 @@ class TestLensLikelihood(object):
                                 'DdtHist',
                                 'DdtHistKDE',
                                 'DdtHistKin',
-                                'DdtGaussKin']
+                                'DdtGaussKin',
+                                     'Mag',
+                                     'TDMag']
 
         self.kwargs_likelihood_list = [{'ddt_mean': 1, 'ddt_sigma': 0.1},
                                   {'dd_samples': dd_samples, 'ddt_samples': ddt_samples, 'kde_type': 'scipy_gaussian', 'bandwidth': 1},
@@ -35,6 +37,8 @@ class TestLensLikelihood(object):
                                   {'ddt_samples': ddt_samples},
                                   {'ddt_samples': ddt_samples, 'sigma_v_measurement': [1], 'j_model': [1], 'error_cov_measurement': [[1]], 'error_cov_j_sqrt': [[1]]},
                                   {'ddt_mean': 1, 'ddt_sigma': 0.1, 'sigma_v_measurement': [1], 'j_model': [1], 'error_cov_measurement': [[1]], 'error_cov_j_sqrt': [[1]]},
+                                       {'amp_measured': [1], 'cov_amp_measured': [[1]], 'mag_model': [1], 'cov_model': [[1]]},
+                                       {'time_delay_measured': [1.], 'cov_td_measured': [[1.]], 'amp_measured': [1., 1.], 'cov_amp_measured': [[1., 0], [0, 1.]], 'fermat_diff': [1.], 'mag_model': [1., 1.], 'cov_model': np.ones((3, 3))}
                                   ]
 
     def test_log_likelihood(self):
@@ -42,7 +46,8 @@ class TestLensLikelihood(object):
             likelihood = LensLikelihoodBase(z_lens=self.z_lens, z_source=self.z_source, likelihood_type=likelihood_type,
                                **self.kwargs_likelihood_list[i])
             print(likelihood_type)
-            logl = likelihood.log_likelihood(ddt=1, dd=1, aniso_scaling=None, sigma_v_sys_error=1)
+            logl = likelihood.log_likelihood(ddt=1, dd=1, aniso_scaling=None, sigma_v_sys_error=1, mu_intrinsic=1)
+            print(logl)
             assert logl > -np.inf
 
     def test_predictions_measurements(self):
