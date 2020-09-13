@@ -81,21 +81,20 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :return: log likelihood given the single lens analysis for the given hyper parameter
         """
-        if kwargs_lens is None:
-            kwargs_lens = {}
-        if kwargs_kin is None:
-            kwargs_kin = {}
-        if kwargs_source is None:
-            kwargs_source = {}
+        kwargs_lens = self._kwargs_init(kwargs_lens)
+        kwargs_kin = self._kwargs_init(kwargs_kin)
+        kwargs_source = self._kwargs_init(kwargs_source)
         kwargs_kin_copy = copy.deepcopy(kwargs_kin)
         sigma_v_sys_error = kwargs_kin_copy.pop('sigma_v_sys_error', None)
 
         if self.check_dist(kwargs_lens, kwargs_kin, kwargs_source):  # sharp distributions
-            return self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source, sigma_v_sys_error=sigma_v_sys_error)
+            return self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source,
+                                              sigma_v_sys_error=sigma_v_sys_error)
         else:
             likelihood = 0
             for i in range(self._num_distribution_draws):
-                logl = self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source, sigma_v_sys_error=sigma_v_sys_error)
+                logl = self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source,
+                                                  sigma_v_sys_error=sigma_v_sys_error)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl) and exp_logl > 0:
                     likelihood += exp_logl
@@ -251,3 +250,15 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             ddt_draws.append(ddt_)
             dd_draws.append(dd_)
         return np.mean(ddt_draws), np.std(ddt_draws), np.mean(dd_draws), np.std(dd_draws)
+
+    @staticmethod
+    def _kwargs_init(kwargs=None):
+        """
+
+        :param kwargs: keyword argument or None
+        :return: keyword argument
+        """
+        if kwargs is None:
+            kwargs = {}
+        return kwargs
+
