@@ -24,7 +24,10 @@ class TestMagnificationLikelihood(object):
                                              cov_model=magnification_model_cov)
 
         logl = likelihood.log_likelihood(mu_intrinsic=amp_int)
-        npt.assert_almost_equal(logl, 0, decimal=6)
+        _, cov_tot = likelihood._scale_model(mu_intrinsic=amp_int)
+        sign_det, lndet = np.linalg.slogdet(cov_tot)
+        logl_test = -1 / 2. * (likelihood.num_data * np.log(2 * np.pi) + lndet)
+        npt.assert_almost_equal(logl, logl_test, decimal=6)
 
         num = 4
         magnification_model = np.ones(num)

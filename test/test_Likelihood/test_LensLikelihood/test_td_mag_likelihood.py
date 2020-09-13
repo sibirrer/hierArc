@@ -29,7 +29,10 @@ class TestMagnificationLikelihood(object):
                                      fermat_diff, mag_model, cov_model)
 
         logl = likelihood.log_likelihood(ddt=ddt, mu_intrinsic=amp_int)
-        npt.assert_almost_equal(logl, 0, decimal=6)
+        model_vector, cov_tot = likelihood._model_cov(ddt, mu_intrinsic=amp_int)
+        sign_det, lndet = np.linalg.slogdet(cov_tot)
+        logl_norm = -1 / 2. * (likelihood.num_data * np.log(2 * np.pi) + lndet)
+        npt.assert_almost_equal(logl, logl_norm, decimal=6)
 
         num = 4
         mag_model = np.ones(num)

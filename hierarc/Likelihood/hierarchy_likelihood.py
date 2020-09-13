@@ -117,13 +117,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
         # TODO: scale source amplitude with distance Ds and or redshift
         amp_source = self.draw_source(**kwargs_source)
-        ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+        ddt_, dd_, amp_source_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                              kappa_ext=kappa_ext, amp_source=amp_source)
         aniso_param_array = self.draw_anisotropy(**kwargs_kin)
         aniso_scaling = self.ani_scaling(aniso_param_array)
 
         lnlikelihood = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error,
-                                           mu_intrinsic=amp_source)
+                                           mu_intrinsic=amp_source_)
         return lnlikelihood
 
     def angular_diameter_distances(self, cosmo):
@@ -218,7 +218,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         cov_error_predict = np.zeros_like(cov_error_measurement)
         for i in range(self._num_distribution_draws):
             lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
-            ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+            ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                  kappa_ext=kappa_ext)
             aniso_param_array = self.draw_anisotropy(**kwargs_kin_copy)
             aniso_scaling = self.ani_scaling(aniso_param_array)
@@ -246,7 +246,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         dd_draws = []
         for i in range(self._num_distribution_draws):
             lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
-            ddt_, dd_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+            ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                  kappa_ext=kappa_ext)
             ddt_draws.append(ddt_)
             dd_draws.append(dd_)

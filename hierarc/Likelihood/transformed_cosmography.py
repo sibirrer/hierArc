@@ -35,7 +35,7 @@ class TransformedCosmography(object):
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
         ddt_, dd_, amp_source_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
                                                            amp_source=amp_source)
-        return ddt_, dd_
+        return ddt_, dd_, amp_source_
 
     @staticmethod
     def _displace_ppn(ddt, dd, gamma_ppn=1):

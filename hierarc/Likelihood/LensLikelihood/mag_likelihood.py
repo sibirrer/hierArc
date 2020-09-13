@@ -32,12 +32,7 @@ class MagnificationLikelihood(object):
         :param mu_intrinsic: intrinsic brightness of the source (already incorporating the inverse MST transform)
         :return: log likelihood of the measured magnified images given the source brightness
         """
-        # compute model predicted magnified image amplitude and time delay
-        model_vector = mu_intrinsic * self._model_tot
-        # scale model covariance matrix with model_scale vector (in quadrature)
-        cov_model = self._cov_model * mu_intrinsic**2
-        # combine data and model covariance matrix
-        cov_tot = self._cov_data + cov_model
+        model_vector, cov_tot = self._scale_model(mu_intrinsic)
         # invert matrix
         try:
             cov_tot_inv = np.linalg.inv(cov_tot)
@@ -47,5 +42,21 @@ class MagnificationLikelihood(object):
         delta = self._data_vector - model_vector
         # evaluate likelihood
         lnlikelihood = -delta.dot(cov_tot_inv.dot(delta)) / 2.
+        sign_det, lndet = np.linalg.slogdet(cov_tot)
+        lnlikelihood -= 1 / 2. * (self.num_data * np.log(2 * np.pi) + lndet)
         return lnlikelihood
+
+    def _scale_model(self, mu_intrinsic):
+        """
+
+        :param mu_intrinsic: intrinsic brightness of the source (already incorporating the inverse MST transform)
+        :return:
+        """
+        # compute model predicted magnified image amplitude and time delay
+        model_vector = mu_intrinsic * self._model_tot
+        # scale model covariance matrix with model_scale vector (in quadrature)
+        cov_model = self._cov_model * mu_intrinsic ** 2
+        # combine data and model covariance matrix
+        cov_tot = self._cov_data + cov_model
+        return model_vector, cov_tot
 
