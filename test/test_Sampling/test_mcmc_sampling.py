@@ -54,7 +54,8 @@ class TestMCMCSampling(object):
         backend = emcee.backends.HDFBackend(backup_filename)
         kwargs_emcee = {'backend': backend}
 
-        mcmc_sampler = MCMCSampler(kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
+        mcmc_sampler = MCMCSampler(kwargs_likelihood_list=kwargs_likelihood_list, cosmology=cosmology,
+                                   kwargs_bounds=kwargs_bounds, ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
                  cosmo_fixed=None)

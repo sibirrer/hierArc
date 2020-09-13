@@ -1,4 +1,3 @@
-import math
 import numpy as np
 from scipy.stats import truncnorm
 
@@ -9,7 +8,7 @@ def log_likelihood_cov(data, model, cov_error):
 
     :param data: data vector
     :param model: model vector
-    :param cov_error: covariance matrix
+    :param cov_error: inverse covariance matrix
     :return: log likelihood
     """
     delta = data - model

@@ -13,6 +13,7 @@ class CosmoLikelihood(object):
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
+                 sne_sampling=False, sne_distribution='GAUSSIAN',
                  log_scatter=False,
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
                  num_redshift_interp=100, cosmo_fixed=None):
@@ -41,6 +42,11 @@ class CosmoLikelihood(object):
         :param anisotropy_distribution: string, distribution of the anisotropy parameters
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
+        :param sne_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
+         (not intrinsic magnitudes but apparent!)
+        :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
+         Currently supports:
+         'GAUSSIAN': Gaussian distribution
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
@@ -56,6 +62,8 @@ class CosmoLikelihood(object):
                                   lambda_ifu_sampling=lambda_ifu_sampling,
                                   lambda_ifu_distribution=lambda_ifu_distribution,
                                   alpha_lambda_sampling=alpha_lambda_sampling,
+                                  sne_sampling=sne_sampling,
+                                  sne_distribution=sne_distribution,
                                   sigma_v_systematics=sigma_v_systematics,
                                   kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
                                   anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
@@ -85,7 +93,7 @@ class CosmoLikelihood(object):
             if args[i] < self._lower_limit[i] or args[i] > self._upper_limit[i]:
                 return -np.inf
 
-        kwargs_cosmo, kwargs_lens, kwargs_kin = self.param.args2kwargs(args)
+        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source = self.param.args2kwargs(args)
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo['h0'], kwargs_cosmo['ok'], kwargs_cosmo['om']
@@ -97,7 +105,8 @@ class CosmoLikelihood(object):
             if 1.0 - om - ok <= 0:
                 return -np.inf
         cosmo = self.cosmo_instance(kwargs_cosmo)
-        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
+        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+                                                         kwargs_source=kwargs_source)
 
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin)
@@ -116,7 +125,8 @@ class CosmoLikelihood(object):
         else:
             if self._interpolate_cosmo is True:
                 if not hasattr(self, '_cosmo_fixed_interp'):
-                    self._cosmo_fixed_interp = CosmoInterp(cosmo=self._cosmo_fixed, z_stop=self._z_max, num_interp=self._num_redshift_interp)
+                    self._cosmo_fixed_interp = CosmoInterp(cosmo=self._cosmo_fixed, z_stop=self._z_max,
+                                                           num_interp=self._num_redshift_interp)
                 cosmo = self._cosmo_fixed_interp
             else:
                 cosmo = self._cosmo_fixed

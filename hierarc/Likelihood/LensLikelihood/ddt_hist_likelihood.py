@@ -36,7 +36,6 @@ class DdtHistLikelihood(object):
         # ignore potential zero weights, sklearn does not like them
         kde_bins = [b for v, b in zip(vals, bins) if v > 0]
         kde_weights = [v for v in vals if v > 0]
-        print(np.shape(kde_weights), np.shape(kde_bins))
         self._kde = gaussian_kde(dataset=kde_bins, weights=kde_weights[:])
         self.num_data = 1
         self._sigma = np.std(ddt_samples)

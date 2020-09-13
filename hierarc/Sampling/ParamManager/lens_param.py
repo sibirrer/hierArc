@@ -7,7 +7,7 @@ class LensParam(object):
     """
     def __init__(self, lambda_mst_sampling=False, lambda_mst_distribution='NONE', kappa_ext_sampling=False,
                  kappa_ext_distribution='NONE', lambda_ifu_sampling=False, lambda_ifu_distribution='NONE',
-                 alpha_lambda_sampling=False, kwargs_fixed={}, log_scatter=False):
+                 alpha_lambda_sampling=False, kwargs_fixed=None, log_scatter=False):
         """
 
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
@@ -30,7 +30,8 @@ class LensParam(object):
         self._kappa_ext_distribution = kappa_ext_distribution
         self._alpha_lambda_sampling = alpha_lambda_sampling
         self._log_scatter = log_scatter
-
+        if kwargs_fixed is None:
+            kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
 
     def param_list(self, latex_style=False):

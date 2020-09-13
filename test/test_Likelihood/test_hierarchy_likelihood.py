@@ -62,6 +62,9 @@ class TestLensLikelihood(object):
         ln_inf = self.likelihood_single.lens_log_likelihood(self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
         assert ln_inf < -10000000
 
+        kwargs_test = self.likelihood._kwargs_init(kwargs=None)
+        assert type(kwargs_test) is dict
+
 
 if __name__ == '__main__':
     pytest.main()
