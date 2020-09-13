@@ -52,12 +52,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             self._draw_kappa = False
         self._lambda_scaling_property = lambda_scaling_property
 
-    def lens_log_likelihood(self, cosmo, kwargs_lens={}, kwargs_kin={}):
+    def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :param kwargs_source: keyword argument of the source model (such as SNe)
         :return: log likelihood of the data given the model
         """
 
@@ -67,26 +68,34 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         ddt, dd = self.angular_diameter_distances(cosmo)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
-        return self.hyper_param_likelihood(ddt, dd, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
+        return self.hyper_param_likelihood(ddt, dd, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+                                           kwargs_source=kwargs_source)
 
-    def hyper_param_likelihood(self, ddt, dd, kwargs_lens, kwargs_kin):
+    def hyper_param_likelihood(self, ddt, dd, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :param kwargs_source: keyword argument of the source model (such as SNe)
         :return: log likelihood given the single lens analysis for the given hyper parameter
         """
+        if kwargs_lens is None:
+            kwargs_lens = {}
+        if kwargs_kin is None:
+            kwargs_kin = {}
+        if kwargs_source is None:
+            kwargs_source = {}
         kwargs_kin_copy = copy.deepcopy(kwargs_kin)
         sigma_v_sys_error = kwargs_kin_copy.pop('sigma_v_sys_error', None)
 
         if self.check_dist(kwargs_lens, kwargs_kin):  # sharp distributions
-            return self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, sigma_v_sys_error=sigma_v_sys_error)
+            return self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source, sigma_v_sys_error=sigma_v_sys_error)
         else:
             likelihood = 0
             for i in range(self._num_distribution_draws):
-                logl = self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, sigma_v_sys_error=sigma_v_sys_error)
+                logl = self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source, sigma_v_sys_error=sigma_v_sys_error)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl) and exp_logl > 0:
                     likelihood += exp_logl
@@ -94,13 +103,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                 return -np.inf
             return np.log(likelihood/self._num_distribution_draws)
 
-    def log_likelihood_single(self, ddt, dd, kwargs_lens, kwargs_kin, sigma_v_sys_error=None):
+    def log_likelihood_single(self, ddt, dd, kwargs_lens, kwargs_kin, kwargs_source, sigma_v_sys_error=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :param kwargs_source: keyword arguments of source brightness
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
         :return: log likelihood given the single lens analysis for a single (random) realization of the hyper parameter distribution
         """
@@ -109,7 +119,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                                              kappa_ext=kappa_ext)
         aniso_param_array = self.draw_anisotropy(**kwargs_kin)
         aniso_scaling = self.ani_scaling(aniso_param_array)
-        lnlikelihood = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error)
+        # TODO: dispalce source amplitude
+        # TODO: scale source amplitude with distance Ds
+        mu_source = self.draw_source(**kwargs_source)
+        lnlikelihood = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error,
+                                           mu_intrinsic=mu_source)
         return lnlikelihood
 
     def angular_diameter_distances(self, cosmo):
@@ -169,6 +183,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         else:
             kappa_ext_draw = 0
         return lambda_mst_draw, kappa_ext_draw, gamma_ppn
+
+    def draw_source(self, mu_sne=1, sigma_sne=0):
+        """
+
+        :param mu_sne: mean brightness of SNe
+        :param sigma_sne:
+        :return:
+        """
 
     def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens={}, kwargs_kin={}):
         """

@@ -1,6 +1,7 @@
 from hierarc.Sampling.ParamManager.kin_param import KinParam
 from hierarc.Sampling.ParamManager.cosmo_param import CosmoParam
 from hierarc.Sampling.ParamManager.lens_param import LensParam
+from hierarc.Sampling.ParamManager.source_param import SourceParam
 
 
 class ParamManager(object):
@@ -11,10 +12,12 @@ class ParamManager(object):
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
                  lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, sigma_v_systematics=False,
+                 sne_sampling=False, sne_distribution='GAUSSIAN',
                  log_scatter=False,
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
-                 kwargs_fixed_cosmo={}, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens={},
-                 kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin={}):
+                 kwargs_fixed_cosmo=None, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens=None,
+                 kwargs_lower_kin=None, kwargs_upper_kin=None, kwargs_fixed_kin=None,
+                 kwargs_lower_source=None, kwargs_upper_source=None, kwargs_fixed_source=None):
         """
 
         :param cosmology: string describing cosmological model
@@ -29,6 +32,11 @@ class ParamManager(object):
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
+        :param sne_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
+         (not intrinsic magnitudes but apparent!)
+        :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
+         Currently supports:
+         'GAUSSIAN': Gaussian distribution
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
@@ -46,9 +54,12 @@ class ParamManager(object):
                                      alpha_lambda_sampling=alpha_lambda_sampling,
                                      log_scatter=log_scatter,
                                      kwargs_fixed=kwargs_fixed_lens)
+        self._source_param = SourceParam(sne_sampling=sne_sampling, sne_distribution=sne_distribution,
+                                         kwargs_fixed=kwargs_fixed_source)
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = kwargs_upper_cosmo, kwargs_lower_cosmo
         self._kwargs_upper_lens, self._kwargs_lower_lens = kwargs_upper_lens, kwargs_lower_lens
         self._kwargs_upper_kin, self._kwargs_lower_kin = kwargs_upper_kin, kwargs_lower_kin
+        self._kwargs_upper_source, self._kwargs_lower_source = kwargs_upper_source, kwargs_lower_source
 
     @property
     def num_param(self):
@@ -65,11 +76,12 @@ class ParamManager(object):
         :param latex_style: bool, if True returns strings in latex symbols, else in the convention of the sampler
         :return: list of the free parameters being sampled in the same order as the sampling
         """
-        list = []
-        list += self._cosmo_param.param_list(latex_style=latex_style)
-        list += self._lens_param.param_list(latex_style=latex_style)
-        list += self._kin_param.param_list(latex_style=latex_style)
-        return list
+        list_param = []
+        list_param += self._cosmo_param.param_list(latex_style=latex_style)
+        list_param += self._lens_param.param_list(latex_style=latex_style)
+        list_param += self._kin_param.param_list(latex_style=latex_style)
+        list_param += self._source_param.param_list(latex_style=latex_style)
+        return list_param
 
     def args2kwargs(self, args):
         """
@@ -81,20 +93,23 @@ class ParamManager(object):
         kwargs_cosmo, i = self._cosmo_param.args2kwargs(args, i=i)
         kwargs_lens, i = self._lens_param.args2kwargs(args, i=i)
         kwargs_kin, i = self._kin_param.args2kwargs(args, i=i)
-        return kwargs_cosmo, kwargs_lens, kwargs_kin
+        kwargs_source, i = self._source_param.args2kwargs(args, i=i)
+        return kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source
 
-    def kwargs2args(self, kwargs_cosmo=None, kwargs_lens=None, kwargs_kin=None):
+    def kwargs2args(self, kwargs_cosmo=None, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
 
         :param kwargs_cosmo: keyword argument list of parameters for cosmology sampling
         :param kwargs_lens: keyword argument list of parameters for lens model sampling
         :param kwargs_kin: keyword argument list of parameters for kinematic sampling
+        :param kwargs_source: keyword arguments of parameters of source brightness
         :return: sampling argument list in specified order
         """
         args = []
         args += self._cosmo_param.kwargs2args(kwargs_cosmo)
         args += self._lens_param.kwargs2args(kwargs_lens)
         args += self._kin_param.kwargs2args(kwargs_kin)
+        args += self._source_param.kwargs2args(kwargs_source)
         return args
 
     def cosmo(self, kwargs_cosmo):
@@ -112,7 +127,7 @@ class ParamManager(object):
         :return: argument list of the hard bounds in the order of the sampling
         """
         lower_limit = self.kwargs2args(kwargs_cosmo=self._kwargs_lower_cosmo, kwargs_lens=self._kwargs_lower_lens,
-                                       kwargs_kin=self._kwargs_lower_kin)
+                                       kwargs_kin=self._kwargs_lower_kin, kwargs_source=self._kwargs_lower_source)
         upper_limit = self.kwargs2args(kwargs_cosmo=self._kwargs_upper_cosmo, kwargs_lens=self._kwargs_upper_lens,
-                                       kwargs_kin=self._kwargs_upper_kin)
+                                       kwargs_kin=self._kwargs_upper_kin, kwargs_source=self._kwargs_upper_source)
         return lower_limit, upper_limit

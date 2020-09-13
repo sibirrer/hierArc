@@ -5,7 +5,7 @@ class CosmoParam(object):
     """
     manages the cosmological parameters in the sampling
     """
-    def __init__(self, cosmology, ppn_sampling=False, kwargs_fixed={}):
+    def __init__(self, cosmology, ppn_sampling=False, kwargs_fixed=None):
         """
 
         :param cosmology: string describing cosmological model
@@ -13,6 +13,8 @@ class CosmoParam(object):
         :param kwargs_fixed: keyword arguments of fixed parameters during sampling
         """
         self._cosmology = cosmology
+        if kwargs_fixed is None:
+            kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
         self._ppn_sampling = ppn_sampling
         self._supported_cosmologies = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]

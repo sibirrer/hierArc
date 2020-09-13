@@ -85,7 +85,7 @@ class CosmoLikelihood(object):
             if args[i] < self._lower_limit[i] or args[i] > self._upper_limit[i]:
                 return -np.inf
 
-        kwargs_cosmo, kwargs_lens, kwargs_kin = self.param.args2kwargs(args)
+        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source = self.param.args2kwargs(args)
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo['h0'], kwargs_cosmo['ok'], kwargs_cosmo['om']
@@ -97,7 +97,8 @@ class CosmoLikelihood(object):
             if 1.0 - om - ok <= 0:
                 return -np.inf
         cosmo = self.cosmo_instance(kwargs_cosmo)
-        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
+        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+                                                         kwargs_source=kwargs_source)
 
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin)

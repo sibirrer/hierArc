@@ -12,7 +12,7 @@ class TestCosmoParamFLCDM(object):
         self._param_list = []
         self._param_list_fixed = []
         for cosmology in cosmology_list:
-            self._param_list.append(CosmoParam(cosmology, ppn_sampling=True, kwargs_fixed={}))
+            self._param_list.append(CosmoParam(cosmology, ppn_sampling=True, kwargs_fixed=None))
             self._param_list_fixed.append(CosmoParam(cosmology, ppn_sampling=True, kwargs_fixed=kwargs_fixed))
 
     def test_param_list(self):
