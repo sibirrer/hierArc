@@ -30,7 +30,6 @@ class TDMagLikelihood(object):
         self._n_amp = len(amp_measured)
         assert self._n_td == len(cov_td_measured)
         assert self._n_amp == len(cov_amp_measured)
-        print(n_tot, len(cov_model))
         assert n_tot == len(cov_model)
         # merge data covariance matrices from time delay and image amplitudes
         self._cov_data = np.zeros((n_tot, n_tot))
@@ -57,7 +56,6 @@ class TDMagLikelihood(object):
         cov_model = model_scale * (self._cov_model * model_scale).T
         # combine data and model covariance matrix
         cov_tot = self._cov_data + cov_model
-        print(cov_tot, 'test cov tot')
         # invert matrix
         try:
             cov_tot_inv = np.linalg.inv(cov_tot)

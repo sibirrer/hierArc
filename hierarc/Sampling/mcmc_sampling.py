@@ -7,62 +7,13 @@ class MCMCSampler(object):
     """
     class which executes the different sampling  methods
     """
-    def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
-                 lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
-                 kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
-                 lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
-                 log_scatter=False,
-                 anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
-                 num_redshift_interp=100, cosmo_fixed=None):
+    def __init__(self, **kwargs):
         """
         initialise the classes of the chain and for parameter options
-
-        :param kwargs_likelihood_list: keyword argument list specifying the arguments of the LensLikelihood class
-        :param cosmology: string describing cosmological model
-        :param kwargs_bounds: keyword arguments for the bounds and fixed parameters
-        :param kwargs_bounds: keyword arguments of the lower and upper bounds and parameters that are held fixed.
-        Includes:
-        'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
-        'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
-        'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
-        :param ppn_sampling:post-newtonian parameter sampling
-        :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
-        :param lambda_mst_distribution: string, defines the distribution function of lambda_mst
-        :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
-        independently
-        :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
-        :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
-         according to a predefined quantity of the lens
-        :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
-        :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
-        :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
-        kinematic prediction
-        :param anisotropy_model: string, specifies the stellar anisotropy model
-        :param anisotropy_distribution: string, distribution of the anisotropy parameters
-        :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
-         measurement
-        :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
-         measurement
-        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
-        :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
-        log likelihood value (e.g. prior)
-        :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
-        :param num_redshift_interp: int, number of redshift interpolation steps
-        :param cosmo_fixed: astropy.cosmology instance to be used and held fixed throughout the sampling
+        :param kwargs: keyword arguments for the CosmoLikelihood() instance
 
         """
-        self.chain = CosmoLikelihood(kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=ppn_sampling,
-                                     lambda_mst_sampling=lambda_mst_sampling,
-                                     lambda_mst_distribution=lambda_mst_distribution,
-                                     lambda_ifu_sampling=lambda_ifu_sampling,
-                                     lambda_ifu_distribution=lambda_ifu_distribution,
-                                     alpha_lambda_sampling=alpha_lambda_sampling,
-                                     sigma_v_systematics=sigma_v_systematics,
-                                     kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
-                                     anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
-                                     anisotropy_distribution=anisotropy_distribution, log_scatter=log_scatter,
-                                     custom_prior=custom_prior, interpolate_cosmo=interpolate_cosmo,
-                                     num_redshift_interp=num_redshift_interp, cosmo_fixed=cosmo_fixed)
+        self.chain = CosmoLikelihood(**kwargs)
         self.param = self.chain.param
 
     def mcmc_emcee(self, n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start, continue_from_backend=False,

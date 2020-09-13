@@ -191,10 +191,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         """
 
         :param mu_sne: mean brightness of SNe
-        :param sigma_sne: std of brightness distribution of SNe
+        :param sigma_sne: std of brightness distribution of SNe relative to the mean brightness
         :return: realization of source amplitude given distribution
         """
-        return np.random.normal(loc=mu_sne, scale=sigma_sne)
+        return np.random.normal(loc=mu_sne, scale=sigma_sne/mu_sne)
 
     def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens={}, kwargs_kin={}):
         """
