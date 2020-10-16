@@ -15,7 +15,7 @@ class DdtHistLikelihood(object):
     credits to Martin Millon, Aymeric Galan
     """
     def __init__(self, z_lens, z_source, ddt_samples, kde_kernel=None, ddt_weights=None, bandwidth=20, nbins_hist=200,
-                 normalized=False):
+                 normalized=False, binning_method=None):
         """
 
         :param z_lens: lens redshift
@@ -27,16 +27,19 @@ class DdtHistLikelihood(object):
         :param nbins_hist: number of bins in the histogram
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
+        :binning_method: method used to calculate the bandwidth. "scott", "silverman", and a scalar constant (KDE factor) are supported. (See the scipy.stats.gaussian_kde documentation for details.)
         """
+        if binning_method is None:
+            hist = np.histogram(ddt_samples, bins=nbins_hist, weights=ddt_weights)
+            vals = hist[0]
+            bins = [(h + hist[1][i + 1]) / 2.0 for i, h in enumerate(hist[1][:-1])]
 
-        hist = np.histogram(ddt_samples, bins=nbins_hist, weights=ddt_weights)
-        vals = hist[0]
-        bins = [(h + hist[1][i + 1]) / 2.0 for i, h in enumerate(hist[1][:-1])]
-
-        # ignore potential zero weights, sklearn does not like them
-        kde_bins = [b for v, b in zip(vals, bins) if v > 0]
-        kde_weights = [v for v in vals if v > 0]
-        self._kde = gaussian_kde(dataset=kde_bins, weights=kde_weights[:])
+            # ignore potential zero weights, sklearn does not like them
+            kde_bins = [b for v, b in zip(vals, bins) if v > 0]
+            kde_weights = [v for v in vals if v > 0]
+            self._kde = gaussian_kde(dataset=kde_bins, weights=kde_weights[:])
+        else:
+            self._kde = gaussian_kde(dataset=ddt_samples, bw_method=binning_method, weights=ddt_weights)
         self.num_data = 1
         self._sigma = np.std(ddt_samples)
         self._norm_factor = 0
@@ -54,7 +57,7 @@ class DdtHistLikelihood(object):
         :param dd: angular diameter distance to the deflector
         :return: log likelihood given the single lens analysis
         """
-        return np.log(self._kde(ddt)) - self._norm_factor
+        return self._kde.logpdf(ddt) - self._norm_factor
 
     def ddt_measurement(self):
         """
