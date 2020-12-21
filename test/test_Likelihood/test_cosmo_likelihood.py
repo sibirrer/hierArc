@@ -115,6 +115,14 @@ class TestCosmoLikelihood(object):
         npt.assert_almost_equal(dd_astropy, dd_fixed, decimal=1)
         npt.assert_almost_equal(dd_astropy, dd_fixed_interp, decimal=1)
 
+    def test_sne_likelihood_integration(self):
+        cosmoL = CosmoLikelihood([], self.cosmology, self.kwargs_bounds, sne_likelihood='Pantheon_binned',
+                                 interpolate_cosmo=True, num_redshift_interp=100, cosmo_fixed=None)
+        kwargs_cosmo = {'h0': self.H0_true, 'om': self.omega_m_true, 'ok': 0}
+        args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
+        logl = cosmoL.likelihood(args=args)
+        assert logl < 0
+
 
 if __name__ == '__main__':
     pytest.main()

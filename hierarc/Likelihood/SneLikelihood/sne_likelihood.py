@@ -32,7 +32,7 @@ _twopi = 2 * np.pi
 _SAMPLE_NAME_SUPPORTED = ['Pantheon_binned']
 
 
-class SneBaseLikelihood(object):
+class SneLikelihood(object):
     """
     Base likelihood class for evaluating Sne likelihoods
     """
@@ -40,7 +40,7 @@ class SneBaseLikelihood(object):
         """
 
         :param sample_name: string, name of data sample
-        :param pec_z: float, peculiar velocity in units of redshift
+        :param pec_z: float, peculiar velocity in units of redshift (ignored when binned data products are used)
         """
         if sample_name not in _SAMPLE_NAME_SUPPORTED:
             raise ValueError('Sample name %s not supported. Please chose the Sne sample name among %s.'
@@ -48,6 +48,7 @@ class SneBaseLikelihood(object):
         if sample_name == 'Pantheon_binned':
             self._data_file = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'SNe',
                                            'pantheon_binned_lcparam_DS17f.txt')
+            pec_z = 0
 
         self._pecz = pec_z
         cols = None
@@ -85,7 +86,6 @@ class SneBaseLikelihood(object):
         # Check whether required instances are read in
         assert hasattr(self, 'dz')
         # TODO: make read-in such that the arguments required are explicitly matched ('zcmb', 'zhel', 'dz', 'mag', 'dmb')
-
         # spectroscopic redshift error. ATTENTION! This value =0 for binned data. In this code the value is not used.
         # Cobaya also does not use it!
         self.z_var = self.dz ** 2
@@ -145,6 +145,6 @@ class SneBaseLikelihood(object):
         :param cosmo: instance of a class to compute angular diameter distances on arrays
         :return: log likelihood of the data given the specified cosmology
         """
-        angular_diameter_distances = cosmo.angular_diameter_distance(self.zcmb).values
+        angular_diameter_distances = cosmo.angular_diameter_distance(self.zcmb).value
         lum_dists = (5 * np.log10((1 + self.zhel) * (1 + self.zcmb) * angular_diameter_distances))
         return self.logp_lum_dist(lum_dists)
