@@ -3,6 +3,7 @@ This is a lightweight version of the COSMOMC/Cobaya sampler: https://github.com/
 It uses the binned Pantheon data: https://github.com/dscolnic/Pantheon/blob/master/Binned_data/lcparam_DS17f.txt
 And computes the cosmographic likelihood.
 The main difference is that this class is compatible with the hierArc cosmology module for evaluating likelihoods.
+This likelihood does NOT include systematics!
 
 .. |br| raw:: html
    <br />
