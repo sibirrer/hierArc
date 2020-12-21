@@ -10,8 +10,8 @@ class TestSnePantheon(object):
         pass
 
     def test_import_pantheon(self):
-        base = SneBaseLikelihood(sample_name='Pantheon')
-        assert os.path.exists(base._data_path)
+        base = SneBaseLikelihood(sample_name='Pantheon_binned')
+        assert os.path.exists(base._data_file)
 
 
 class TestRaise(unittest.TestCase):
