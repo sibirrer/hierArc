@@ -30,11 +30,12 @@ class DdtHistLikelihood(object):
         :param ddt_weights: optional weights for the samples in Ddt
         :param nbins_hist: number of bins in the histogram
         :param normalized: bool, if True, returns the normalized likelihood, 
-        if False, separates the constant prefactor (in case of a Gaussian 
-        1/(sigma sqrt(2 pi))) to compute the reduced chi2 statistics
+         if False, separates the constant prefactor (in case of a Gaussian 
+         1/(sigma sqrt(2 pi))) to compute the reduced chi2 statistics
         :binning_method: method used to calculate the bandwidth. "scott", 
-        "silverman", and a scalar constant (KDE bandwidth) are supported. 
-        (See the scipy.stats.gaussian_kde documentation for details.)
+         "silverman", and a scalar constant (KDE bandwidth) are supported. 
+         (See the scipy.stats.gaussian_kde documentation for details.)
+
         """
         if binning_method is None:
             hist = np.histogram(ddt_samples, 
@@ -69,6 +70,7 @@ class DdtHistLikelihood(object):
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :return: log likelihood given the single lens analysis
+        
         """
         return self._kde.logpdf(ddt) - self._norm_factor
 
@@ -76,6 +78,7 @@ class DdtHistLikelihood(object):
         """
 
         :return: mean, 1-sigma of the ddt inference/model measurement
+
         """
         return self._ddt_mean, self._ddt_sigma
 
