@@ -1,6 +1,7 @@
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
 from hierarc.Sampling.ParamManager.param_manager import ParamManager
 from hierarc.Likelihood.cosmo_interp import CosmoInterp
+from hierarc.Likelihood.SneLikelihood.sne_likelihood import SneLikelihood
 import numpy as np
 
 
@@ -9,7 +10,8 @@ class CosmoLikelihood(object):
     this class contains the likelihood function of the Strong lensing analysis
     """
 
-    def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, ppn_sampling=False,
+    def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, sne_likelihood=None,
+                 ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
@@ -26,6 +28,8 @@ class CosmoLikelihood(object):
         'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
         'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
         'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
+        :param sne_likelihood: (string), optional. Sampling supernovae relative expansion history likelihood, see
+         SneLikelihood module for options
         :param ppn_sampling:post-newtonian parameter sampling
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
         :param lambda_mst_distribution: string, defines the distribution function of lambda_mst
@@ -78,6 +82,13 @@ class CosmoLikelihood(object):
         self._num_redshift_interp = num_redshift_interp
         self._cosmo_fixed = cosmo_fixed
         z_max = 0
+        if sne_likelihood is not None:
+            self._sne_likelihood = SneLikelihood(sample_name=sne_likelihood)
+            z_max = np.max(self._sne_likelihood.zcmb)
+            self._sne_evaluate = True
+        else:
+            self._sne_evaluate = False
+
         for kwargs_lens in kwargs_likelihood_list:
             if kwargs_lens['z_source'] > z_max:
                 z_max = kwargs_lens['z_source']
@@ -108,6 +119,8 @@ class CosmoLikelihood(object):
         logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
                                                          kwargs_source=kwargs_source)
 
+        if self._sne_evaluate is True:
+            logL += self._sne_likelihood.log_likelihood(cosmo=cosmo)
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin)
         return logL

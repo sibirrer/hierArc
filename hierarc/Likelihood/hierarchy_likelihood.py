@@ -21,7 +21,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param name: string (optional) to name the specific lens
         :param likelihood_type: string to specify the likelihood type
         :param ani_param_array: array of anisotropy parameter values for which the kinematics are predicted
-        :param ani_scaling_array: velocity dispersion sigma**2 scaling of anisotropy parameter relative to default prediction
+        :param ani_scaling_array: velocity dispersion sigma**2 scaling (also J scaling) of anisotropy parameter relative
+         to default prediction. The scaling corresponds to the ani_param_array parameter spacing
+         (to generate an interpolation function). A value =1 in ani_scaling_array results in the value stored in the
+         provided J() predictions.
         :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.

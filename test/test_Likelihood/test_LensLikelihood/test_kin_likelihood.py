@@ -90,6 +90,17 @@ class TestKinLikelihood(object):
         logl_average = np.log(l_sum/num_sample)
         npt.assert_almost_equal(logl, logl_average, decimal=1)
 
+    def test_log_likelihood_invert_error(self):
+        """
+        test that in the case of a none-invertable covariance matrix -np.inf is returned by the likelihood statement
+
+        """
+        ifu_likelihood = KinLikelihood(z_lens=0.5, z_source=2., sigma_v_measurement=[100],
+                                       j_model=[1], error_cov_measurement=[0], error_cov_j_sqrt=[0], normalized=True,
+                                       sigma_sys_error_include=True)
+        logl = ifu_likelihood.log_likelihood(ddt=1, dd=1, aniso_scaling=1)
+        assert logl == -np.inf
+
 
 class TestRaise(unittest.TestCase):
 
