@@ -37,6 +37,22 @@ class TestCosmoInterp(object):
         npt.assert_almost_equal(da_interp / da, 1, decimal=3)
         assert da.unit == da_interp.unit
 
+    def test_angular_diameter_distance_array(self):
+        # test for array input
+        z1 = 1.
+        z2 = 2.
+        da_z1 = self.cosmo.angular_diameter_distance(z=[z1])
+        da_z2 = self.cosmo.angular_diameter_distance(z=[z2])
+        da_interp = self.cosmo_interp.angular_diameter_distance(z=[z1, z2])
+        npt.assert_almost_equal(da_interp[0] / da_z1, 1, decimal=3)
+        npt.assert_almost_equal(da_interp[1] / da_z2, 1, decimal=3)
+        assert da_z1.unit == da_interp.unit
+        assert len(da_interp) == 2
+
+        da_z12 = self.cosmo.angular_diameter_distance(z=[z1, z2])
+        npt.assert_almost_equal(da_z12[0] / da_z1, 1, decimal=3)
+        npt.assert_almost_equal(da_z12[1] / da_z2, 1, decimal=3)
+
     def test_angular_diameter_distance_z1z2(self):
         z1 = .3
         z2 = 2.
