@@ -75,8 +75,7 @@ class SneLikelihood(object):
                     for col in cols:
                         setattr(self, col, zeros.copy())
                 elif line.strip():
-                    if cols is None:
-                        raise ImportError('Data file must have comment header')
+                    if cols is None: raise ImportError('Data file must have comment header')
                     vals = line.split()
                     for i, (col, val) in enumerate(zip(cols, vals)):
                         if col == 'name':
