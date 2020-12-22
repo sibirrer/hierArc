@@ -16,8 +16,7 @@ class DdtHistLikelihood(object):
     """
     def __init__(self, z_lens, z_source, 
                  ddt_samples, kde_kernel=None, ddt_weights=None, 
-                 bandwidth=20, nbins_hist=200, 
-                 normalized=False, binning_method=None):
+                 nbins_hist=200, normalized=False, binning_method=None):
         """
 
         :param z_lens: lens redshift
