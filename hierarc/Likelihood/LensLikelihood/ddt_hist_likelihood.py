@@ -6,16 +6,21 @@ from sklearn.neighbors import KernelDensity
 
 class DdtHistLikelihood(object):
     """
-    Evaluates the likelihood of a time-delay distance ddt (in Mpc) against the model predictions, using a
-         loglikelihood sampled from a Kernel Density Estimator. the KDE is constructed using a binned version of the
-         full samples. Greatly improves speed at the cost of a (tiny) loss in precision
-        __warning:: you should adjust bandwidth and nbins_hist to the spacing and size of your samples chain!
+    Evaluates the likelihood of a time-delay distance ddt (in Mpc) against the 
+    model predictions, using a loglikelihood sampled from a Kernel Density 
+    Estimator. The KDE is constructed using a binned version of the full samples. 
+    Greatly improves speed at the cost of a (tiny) loss in precision.
+    
+    __warning:: you should adjust bandwidth and nbins_hist to the spacing and 
+    size of your samples chain!
 
-    original source: https://github.com/shsuyu/H0LiCOW-public/blob/master/H0_inference_code/lensutils.py
+    original source: 
+    https://github.com/shsuyu/H0LiCOW-public/blob/master/H0_inference_code/lensutils.py
     credits to Martin Millon, Aymeric Galan
+    
     """
     def __init__(self, z_lens, z_source, 
-                 ddt_samples, kde_kernel=None, ddt_weights=None, 
+                 ddt_samples, ddt_weights=None, 
                  nbins_hist=200, normalized=False, binning_method=None):
         """
 
@@ -23,14 +28,12 @@ class DdtHistLikelihood(object):
         :param z_source: source redshift
         :param ddt_samples: numpy array of Ddt values
         :param ddt_weights: optional weights for the samples in Ddt
-        :param kde_kernel: string of KDE kernel type
-        :param bandwidth: bandwith of kernel
         :param nbins_hist: number of bins in the histogram
         :param normalized: bool, if True, returns the normalized likelihood, 
         if False, separates the constant prefactor (in case of a Gaussian 
         1/(sigma sqrt(2 pi))) to compute the reduced chi2 statistics
         :binning_method: method used to calculate the bandwidth. "scott", 
-        "silverman", and a scalar constant (KDE factor) are supported. 
+        "silverman", and a scalar constant (KDE bandwidth) are supported. 
         (See the scipy.stats.gaussian_kde documentation for details.)
         """
         if binning_method is None:
@@ -60,7 +63,8 @@ class DdtHistLikelihood(object):
 
     def log_likelihood(self, ddt, dd=None):
         """
-        Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
+        Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, 
+        Dd is transformed here to match Ds/Dds
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
