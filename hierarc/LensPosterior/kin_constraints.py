@@ -125,8 +125,17 @@ class KinConstraints(BaseLensConfig):
 
         :return: anisotropy scaling grid along the axes defined by ani_param_array
         """
-        num_data = len(self._sigma_v)
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
+        return self._anisotropy_scaling_relative(j_ani_0)
+
+    def _anisotropy_scaling_relative(self, j_ani_0):
+        """
+        anisotropy scaling relative to a default J prediction
+
+        :param j_ani_0: default J() prediction for default anisotropy
+        :return: list of arrays (for the number of measurements) according to anisotropy scaling
+        """
+        num_data = len(self._sigma_v)
 
         if self._anisotropy_model == 'GOM':
             ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for i in
