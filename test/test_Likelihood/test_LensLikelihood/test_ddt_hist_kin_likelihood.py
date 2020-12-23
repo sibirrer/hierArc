@@ -17,7 +17,7 @@ class TestDdtHistKinHist(object):
         ddt_weights = None  # np.random.uniform(low=0, high=1, size=100000)
 
         self._ddthist = DdtHistLikelihood(z_lens=None, z_source=None, ddt_samples=ddt_samples,
-                                          kde_kernel='gaussian', ddt_weights=ddt_weights, bandwidth=20, nbins_hist=400)
+                                          ddt_weights=ddt_weights, nbins_hist=400)
 
         self._num_ifu = 10
         z_lens = 0.5
