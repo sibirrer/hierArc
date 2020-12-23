@@ -3,7 +3,7 @@ import numpy as np
 import numpy.testing as npt
 import unittest
 
-def test_log_likelihood(hist_obj, mean, sig_factor):
+def log_likelihood(hist_obj, mean, sig_factor):
     logl_max = hist_obj.log_likelihood(ddt=mean, dd=None)
     npt.assert_almost_equal(logl_max, 0, decimal=1)
     logl_sigma = hist_obj.log_likelihood(ddt=mean*(1+sig_factor), dd=None)
@@ -14,7 +14,7 @@ def test_log_likelihood(hist_obj, mean, sig_factor):
     npt.assert_array_less(logl_sigma, -1e6) # some very small number
     assert np.exp(logl_sigma) == 0
 
-def test_ddt_measurement(hist_obj, mean, sig_factor):
+def ddt_measurement(hist_obj, mean, sig_factor):
     ddt_mean, ddt_sigma = hist_obj.ddt_measurement()
     npt.assert_almost_equal(ddt_mean/mean, 1, decimal=3)
     npt.assert_almost_equal(ddt_sigma/(sig_factor*mean), 1, decimal=3)
@@ -29,8 +29,8 @@ class TestDdtHist(unittest.TestCase):
                                        scale=cls._sigma*cls._ddt, 
                                        size=1000000)
         weights = None  # np.random.uniform(low=0, high=1, size=100000)
-        cls.test_log_likelihood = staticmethod(test_log_likelihood)
-        cls.test_ddt_measurement = staticmethod(test_ddt_measurement)
+        cls.test_log_likelihood = staticmethod(log_likelihood)
+        cls.test_ddt_measurement = staticmethod(ddt_measurement)
         cls._ddthist = DdtHistLikelihood(z_lens=None, z_source=None, 
                                           ddt_samples=ddt_samples,
                                           ddt_weights=weights, 
