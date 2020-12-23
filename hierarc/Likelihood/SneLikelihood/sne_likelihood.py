@@ -30,7 +30,8 @@ import os
 import hierarc
 
 _twopi = 2 * np.pi
-_SAMPLE_NAME_SUPPORTED = ['Pantheon_binned']
+_SAMPLE_NAME_SUPPORTED = ['Pantheon_binned', 'Pantheon']
+_PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'SNe')
 
 
 class SneLikelihood(object):
@@ -47,11 +48,14 @@ class SneLikelihood(object):
             raise ValueError('Sample name %s not supported. Please chose the Sne sample name among %s.'
                              % (sample_name, _SAMPLE_NAME_SUPPORTED))
         if sample_name == 'Pantheon_binned':
-            self._data_file = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'SNe',
-                                           'pantheon_binned_lcparam_DS17f.txt')
+            self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_binned_lcparam_DS17f.txt')
+            self._cov_file = None
             pec_z = 0
 
-        self._pecz = pec_z
+        if sample_name == 'Pantheon':
+            self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_lcparam_full_long_zhel.txt')
+            self._cov_file = os.path.join(_PATH_2_DATA, 'pantheon_sys_full_long.txt')
+        self._pec_z = pec_z
         cols = None
 
         self.names = []
@@ -92,13 +96,28 @@ class SneLikelihood(object):
         self.mag_var = self.dmb ** 2
 
         self.nsn = ix
+        self._cov = self._read_covmat(self._cov_file)
 
         # jla_prep
         zfacsq = 25.0 / np.log(10.0) ** 2
-        self.pre_vars = self.mag_var + zfacsq * self._pecz ** 2 * (
+        self.pre_vars = self.mag_var + zfacsq * self._pec_z ** 2 * (
                 (1.0 + self.zcmb) / (self.zcmb * (1 + 0.5 * self.zcmb))) ** 2
 
         self._inv_cov = self._inverse_covariance_matrix()
+
+    def _read_covmat(self, filename):
+        """
+        reads in covariance matrix file and returns it as a numpy matrix
+
+        :param filename: string, absolute path of covariance matrix file
+        :return: nxn covariance matrix
+        """
+        if filename is None:
+            return np.zeros((self.nsn, self.nsn))
+        cov = np.loadtxt(filename)
+        if np.isscalar(cov[0]) and cov[0] ** 2 + 1 == len(cov):
+            cov = cov[1:]
+        return cov.reshape((self.nsn, self.nsn))
 
     def _inverse_covariance_matrix(self):
         """
@@ -108,7 +127,7 @@ class SneLikelihood(object):
         """
         # here is the option for adding an additional covariance matrix term of the calibration and/or systematic
         # errors in the evolution of the Sne population
-        invcovmat = np.zeros((len(self.pre_vars), len(self.pre_vars)))
+        invcovmat = self._cov
         invcovmat_diag = invcovmat.diagonal()  # if invcovmat is a matrix, then this is invcovmat.diagonal()
 
         delta = self.pre_vars
