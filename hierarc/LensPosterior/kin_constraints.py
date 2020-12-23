@@ -144,6 +144,5 @@ class KinConstraints(BaseLensConfig):
                 j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                 for i, j_kin in enumerate(j_kin_ani):
                     ani_scaling_array_list[i].append(j_kin / j_ani_0[i])
-        else:
-            raise ValueError('anisotropy model %s not valid.' % self._anisotropy_model)
+        else: raise ValueError('anisotropy model %s not valid.' % self._anisotropy_model)
         return ani_scaling_array_list
