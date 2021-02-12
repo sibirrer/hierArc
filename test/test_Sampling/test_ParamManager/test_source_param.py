@@ -7,10 +7,10 @@ import unittest
 class TestSourceParam(object):
 
     def setup(self):
-        self._param = SourceParam(sne_distribution='GAUSSIAN', sne_sampling=True, kwargs_fixed=None)
+        self._param = SourceParam(sne_distribution='GAUSSIAN', sne_apparent_m_sampling=True, kwargs_fixed=None)
 
         kwargs_fixed = {'mu_sne': 1, 'sigma_sne': 0.1}
-        self._param_fixed = SourceParam(sne_distribution='GAUSSIAN', sne_sampling=True, kwargs_fixed=kwargs_fixed)
+        self._param_fixed = SourceParam(sne_distribution='GAUSSIAN', sne_apparent_m_sampling=True, kwargs_fixed=kwargs_fixed)
 
     def test_param_list(self):
         param_list = self._param.param_list(latex_style=False)
@@ -41,7 +41,7 @@ class TestRaise(unittest.TestCase):
     def test_raise(self):
 
         with self.assertRaises(ValueError):
-            param = SourceParam(sne_sampling=True, sne_distribution='BAD')
+            param = SourceParam(sne_apparent_m_sampling=True, sne_distribution='BAD')
 
 
 if __name__ == '__main__':
