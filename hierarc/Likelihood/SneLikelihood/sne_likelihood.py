@@ -135,18 +135,20 @@ class SneLikelihood(object):
         invcov = np.linalg.inv(invcovmat)
         return invcov
 
-    def logp_lum_dist(self, lum_dists):
+    def logp_lum_dist(self, lum_dists, estimated_scriptm=None):
         """
 
         :param lum_dists: numpy array of luminosity distances to the measured supernovae bins
          (units do not matter since normalization is subtracted off for the likelihood)
+        :param estimated_scriptm: mean magnitude at lum_dist=0 (optional)
         :return: log likelihood of the data given the luminosity distances
         """
 
         invvars = 1.0 / self.pre_vars
         wtval = np.sum(invvars)
         # uncertainty weighted estimated normalization of magnitude (maximum likelihood value)
-        estimated_scriptm = np.sum((self.mag - lum_dists) * invvars) / wtval
+        if estimated_scriptm is None:
+            estimated_scriptm = np.sum((self.mag - lum_dists) * invvars) / wtval
         diffmag = self.mag - lum_dists - estimated_scriptm
         invcovmat = self._inv_cov
 
@@ -158,12 +160,18 @@ class SneLikelihood(object):
         chi2 = amarg_A + np.log(amarg_E / _twopi) - amarg_B ** 2 / amarg_E
         return - chi2 / 2
 
-    def log_likelihood(self, cosmo):
+    def log_likelihood(self, cosmo, apparent_m_z01=None):
         """
 
         :param cosmo: instance of a class to compute angular diameter distances on arrays
+        :param apparent_m_z01: mean apparent magnitude of SN Ia at z=0.1 (optional)
         :return: log likelihood of the data given the specified cosmology
         """
         angular_diameter_distances = cosmo.angular_diameter_distance(self.zcmb).value
         lum_dists = (5 * np.log10((1 + self.zhel) * (1 + self.zcmb) * angular_diameter_distances))
-        return self.logp_lum_dist(lum_dists)
+
+        z_anchor = 0.1
+        ang_dist_anchor = cosmo.angular_diameter_distance(z_anchor).value
+        lum_dist_anchor = (5 * np.log10((1 + z_anchor) * (1 + z_anchor) * ang_dist_anchor))
+
+        return self.logp_lum_dist(lum_dists - lum_dist_anchor, apparent_m_z01)
