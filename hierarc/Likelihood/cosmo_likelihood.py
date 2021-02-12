@@ -15,7 +15,7 @@ class CosmoLikelihood(object):
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
-                 sne_sampling=False, sne_distribution='GAUSSIAN',
+                 sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN',
                  log_scatter=False,
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
                  num_redshift_interp=100, cosmo_fixed=None):
@@ -46,7 +46,7 @@ class CosmoLikelihood(object):
         :param anisotropy_distribution: string, distribution of the anisotropy parameters
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
-        :param sne_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
+        :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
          (not intrinsic magnitudes but apparent!)
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
          Currently supports:
@@ -66,7 +66,7 @@ class CosmoLikelihood(object):
                                   lambda_ifu_sampling=lambda_ifu_sampling,
                                   lambda_ifu_distribution=lambda_ifu_distribution,
                                   alpha_lambda_sampling=alpha_lambda_sampling,
-                                  sne_sampling=sne_sampling,
+                                  sne_apparent_m_sampling=sne_apparent_m_sampling,
                                   sne_distribution=sne_distribution,
                                   sigma_v_systematics=sigma_v_systematics,
                                   kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,

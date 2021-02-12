@@ -11,10 +11,10 @@ class TestTransformedCoismography(object):
 
     def test_displace_prediction(self):
 
-        ddt, dd = 1, 1
+        ddt, dd, ds = 1, 1, 1
         amp_source = 1
         # case where nothing happens
-        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0,
+        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, ds, gamma_ppn=1, lambda_mst=1, kappa_ext=0,
                                                                     amp_source=amp_source)
         assert ddt == ddt_
         assert dd == dd_
@@ -22,7 +22,7 @@ class TestTransformedCoismography(object):
 
         # case where kappa_ext is displaced
         kappa_ext = 0.1
-        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, gamma_ppn=1, lambda_mst=1,
+        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, ds, gamma_ppn=1, lambda_mst=1,
                                                                     kappa_ext=kappa_ext, amp_source=amp_source)
         assert ddt_ == ddt * (1 - kappa_ext)
         assert dd_ == dd
@@ -30,7 +30,7 @@ class TestTransformedCoismography(object):
 
         # case where lambda_mst is displaced
         lambda_mst = 0.9
-        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, gamma_ppn=1, lambda_mst=lambda_mst,
+        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, ds, gamma_ppn=1, lambda_mst=lambda_mst,
                                                                     kappa_ext=0, amp_source=amp_source)
         assert ddt_ == ddt * lambda_mst
         assert dd == dd_
@@ -38,7 +38,7 @@ class TestTransformedCoismography(object):
 
         # case for gamma_ppn
         gamma_ppn = 1.1
-        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=1,
+        ddt_, dd_, amp_source_ = self.transform.displace_prediction(ddt, dd, ds, gamma_ppn=gamma_ppn, lambda_mst=1,
                                                                     kappa_ext=0, amp_source=amp_source)
         assert ddt_ == ddt
         assert dd_ == dd * (1 + gamma_ppn) / 2.

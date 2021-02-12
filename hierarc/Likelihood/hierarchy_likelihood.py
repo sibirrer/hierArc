@@ -68,17 +68,18 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         # here we compute the unperturbed angular diameter distances of the lens system given the cosmology
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
-        ddt, dd = self.angular_diameter_distances(cosmo)
+        ddt, dd, ds = self.angular_diameter_distances(cosmo)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
-        return self.hyper_param_likelihood(ddt, dd, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+        return self.hyper_param_likelihood(ddt, dd, ds, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
                                            kwargs_source=kwargs_source)
 
-    def hyper_param_likelihood(self, ddt, dd, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
+    def hyper_param_likelihood(self, ddt, dd, ds, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
+        :param ds: angular diameter distance from observer to the source
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
@@ -91,12 +92,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         sigma_v_sys_error = kwargs_kin_copy.pop('sigma_v_sys_error', None)
 
         if self.check_dist(kwargs_lens, kwargs_kin, kwargs_source):  # sharp distributions
-            return self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source,
+            return self.log_likelihood_single(ddt, dd, ds, kwargs_lens, kwargs_kin_copy, kwargs_source,
                                               sigma_v_sys_error=sigma_v_sys_error)
         else:
             likelihood = 0
             for i in range(self._num_distribution_draws):
-                logl = self.log_likelihood_single(ddt, dd, kwargs_lens, kwargs_kin_copy, kwargs_source,
+                logl = self.log_likelihood_single(ddt, dd, ds, kwargs_lens, kwargs_kin_copy, kwargs_source,
                                                   sigma_v_sys_error=sigma_v_sys_error)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl) and exp_logl > 0:
@@ -105,11 +106,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                 return -np.inf
             return np.log(likelihood/self._num_distribution_draws)
 
-    def log_likelihood_single(self, ddt, dd, kwargs_lens, kwargs_kin, kwargs_source, sigma_v_sys_error=None):
+    def log_likelihood_single(self, ddt, dd, ds, kwargs_lens, kwargs_kin, kwargs_source, sigma_v_sys_error=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
+        :param ds: angular diameter distance from the observer to the source
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword arguments of source brightness
@@ -119,7 +121,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
         # TODO: scale source amplitude with distance Ds and or redshift
         amp_source = self.draw_source(**kwargs_source)
-        ddt_, dd_, amp_source_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+        ddt_, dd_, amp_source_ = self.displace_prediction(ddt, dd, ds, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                              kappa_ext=kappa_ext, amp_source=amp_source)
         aniso_param_array = self.draw_anisotropy(**kwargs_kin)
         aniso_scaling = self.ani_scaling(aniso_param_array)
@@ -130,15 +132,17 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
 
     def angular_diameter_distances(self, cosmo):
         """
+        time-delay distance Ddt, angular diameter distance to the lens (dd) and angular diameter distance from the
+        observer to the source (ds)
 
         :param cosmo: astropy.cosmology instance (or equivalent with interpolation
-        :return: ddt, dd in units physical Mpc
+        :return: ddt, dd, ds in units physical Mpc
         """
         dd = cosmo.angular_diameter_distance(z=self._z_lens).value
         ds = cosmo.angular_diameter_distance(z=self._z_source).value
         dds = cosmo.angular_diameter_distance_z1z2(z1=self._z_lens, z2=self._z_source).value
         ddt = (1. + self._z_lens) * dd * ds / dds
-        return ddt, dd
+        return ddt, dd, ds
 
     def check_dist(self, kwargs_lens, kwargs_kin, kwargs_source):
         """

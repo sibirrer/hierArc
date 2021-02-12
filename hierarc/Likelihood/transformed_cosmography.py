@@ -16,7 +16,7 @@ class TransformedCosmography(object):
         self._z_lens = z_lens
         self._z_source = z_source
 
-    def displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, amp_source=0):
+    def displace_prediction(self, ddt, dd, ds, gamma_ppn=1, lambda_mst=1, kappa_ext=0, amp_source=0):
         """
         here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         displace the predicted angular diameter distances in the opposite direction
@@ -25,6 +25,7 @@ class TransformedCosmography(object):
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
+        :param ds: angular diameter distance from the observer to the source
         :param lambda_mst: overall global mass-sheet transform applied on the sample,
         lambda_mst=1 corresponds to the input model
         :param gamma_ppn: post-newtonian gravity parameter (=1 is GR)
@@ -33,6 +34,7 @@ class TransformedCosmography(object):
         :return: ddt_, dd_
         """
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
+        #TODO scale source with ds, make sure definition is either linear or magnitudes (log) consistently
         ddt_, dd_, amp_source_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
                                                            amp_source=amp_source)
         return ddt_, dd_, amp_source_
