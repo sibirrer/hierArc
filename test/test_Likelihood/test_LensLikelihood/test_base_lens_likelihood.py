@@ -37,8 +37,10 @@ class TestLensLikelihood(object):
                                   {'ddt_samples': ddt_samples},
                                   {'ddt_samples': ddt_samples, 'sigma_v_measurement': [1], 'j_model': [1], 'error_cov_measurement': [[1]], 'error_cov_j_sqrt': [[1]]},
                                   {'ddt_mean': 1, 'ddt_sigma': 0.1, 'sigma_v_measurement': [1], 'j_model': [1], 'error_cov_measurement': [[1]], 'error_cov_j_sqrt': [[1]]},
-                                       {'amp_measured': [1], 'cov_amp_measured': [[1]], 'mag_model': [1], 'cov_model': [[1]]},
-                                       {'time_delay_measured': [1.], 'cov_td_measured': [[1.]], 'amp_measured': [1., 1.], 'cov_amp_measured': [[1., 0], [0, 1.]], 'fermat_diff': [1.], 'mag_model': [1., 1.], 'cov_model': np.ones((3, 3))}
+                                       {'amp_measured': [1.], 'cov_amp_measured': [[1.]], 'magnification_model': [1.], 'cov_magnification_model': [[1.]], 'magnitude_zero_point': 20.},
+                                       {'time_delay_measured': [1.], 'cov_td_measured': [[1.]], 'amp_measured': [1., 1.],
+                                        'cov_amp_measured': [[1., 0], [0, 1.]], 'fermat_diff': [1.], 'magnification_model': [1., 1.],
+                                        'cov_model': np.ones((3, 3)), 'magnitude_zero_point': 20.}
                                   ]
 
     def test_log_likelihood(self):

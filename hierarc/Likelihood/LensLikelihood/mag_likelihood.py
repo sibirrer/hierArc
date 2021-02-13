@@ -1,4 +1,5 @@
 import numpy as np
+from lenstronomy.Util.data_util import magnitude2cps
 
 
 class MagnificationLikelihood(object):
@@ -7,24 +8,28 @@ class MagnificationLikelihood(object):
     This can i.e. be applied to lensed SNIa on the population level
 
     """
-    def __init__(self, amp_measured, cov_amp_measured, mag_model, cov_model):
+    def __init__(self, amp_measured, cov_amp_measured, magnification_model, cov_magnification_model,
+                 magnitude_zero_point=20):
         """
 
         :param amp_measured: array, amplitudes of measured fluxes of image positions
-        :param cov_amp_measured: 2d array, error covariance matrix of the measured amplitudes
-        :param mag_model: mean magnification of the model prediction
-        :param cov_model: 2d array (image amplitudes); model lensing magnification covariances
+        :param cov_amp_measured: 2d array, error covariance matrix of the measured amplitudes, in linear space
+        for given magnitude zero point
+        :param magnitude_zero_point: magnitude zero point for which the image amplitudes and covariance matrix are
+        defined
+        :param magnification_model: mean magnification of the model prediction (array with number of images)
+        :param cov_magnification_model: 2d array (image amplitudes); model lensing magnification covariances
         """
 
-        self._data_vector = amp_measured
+        self._amp_measured = amp_measured
         self._cov_amp_measured = np.array(cov_amp_measured)
         # check sizes of covariances matches
-        n_tot = len(self._data_vector)
-        assert n_tot == len(cov_model)
-        self._cov_data = self._cov_amp_measured
-        self._model_tot = np.array(mag_model)
-        self._cov_model = cov_model
+        n_tot = len(self._amp_measured)
+        assert n_tot == len(cov_magnification_model)
+        self._mean_magnification_model = np.array(magnification_model)
+        self._cov_magnification_model = np.array(cov_magnification_model)
         self.num_data = n_tot
+        self._magnitude_zero_point = magnitude_zero_point
 
     def log_likelihood(self, mu_intrinsic):
         """
@@ -39,7 +44,7 @@ class MagnificationLikelihood(object):
         except:
             return -np.inf
         # difference to data vector
-        delta = self._data_vector - model_vector
+        delta = self._amp_measured - model_vector
         # evaluate likelihood
         lnlikelihood = -delta.dot(cov_tot_inv.dot(delta)) / 2.
         sign_det, lndet = np.linalg.slogdet(cov_tot)
@@ -52,11 +57,12 @@ class MagnificationLikelihood(object):
         :param mu_intrinsic: intrinsic brightness of the source (already incorporating the inverse MST transform)
         :return:
         """
+        amp_intrinsic = magnitude2cps(magnitude=mu_intrinsic, magnitude_zero_point=self._magnitude_zero_point)
         # compute model predicted magnified image amplitude and time delay
-        model_vector = mu_intrinsic * self._model_tot
+        model_vector = amp_intrinsic * self._mean_magnification_model
         # scale model covariance matrix with model_scale vector (in quadrature)
-        cov_model = self._cov_model * mu_intrinsic ** 2
+        cov_model = self._cov_magnification_model * amp_intrinsic ** 2
         # combine data and model covariance matrix
-        cov_tot = self._cov_data + cov_model
+        cov_tot = self._cov_amp_measured + cov_model
         return model_vector, cov_tot
 

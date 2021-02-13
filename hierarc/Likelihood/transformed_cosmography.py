@@ -1,4 +1,5 @@
 __author__ = 'sibirrer'
+import numpy as np
 
 
 class TransformedCosmography(object):
@@ -16,7 +17,7 @@ class TransformedCosmography(object):
         self._z_lens = z_lens
         self._z_source = z_source
 
-    def displace_prediction(self, ddt, dd, ds, gamma_ppn=1, lambda_mst=1, kappa_ext=0, amp_source=0):
+    def displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0):
         """
         here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         displace the predicted angular diameter distances in the opposite direction
@@ -30,14 +31,14 @@ class TransformedCosmography(object):
         lambda_mst=1 corresponds to the input model
         :param gamma_ppn: post-newtonian gravity parameter (=1 is GR)
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
-        :param amp_source: source amplitude
-        :return: ddt_, dd_
+        :param mag_source: source magnitude (attention, log scale, thus transform needs to be changed!_
+        :return: ddt_, dd_, mag_source_
         """
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
         #TODO scale source with ds, make sure definition is either linear or magnitudes (log) consistently
-        ddt_, dd_, amp_source_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
-                                                           amp_source=amp_source)
-        return ddt_, dd_, amp_source_
+        ddt_, dd_, mag_source_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
+                                                           mag_source=mag_source)
+        return ddt_, dd_, mag_source_
 
     @staticmethod
     def _displace_ppn(ddt, dd, gamma_ppn=1):
@@ -70,7 +71,7 @@ class TransformedCosmography(object):
         return ddt_, dd
 
     @staticmethod
-    def _displace_lambda_mst(ddt, dd, lambda_mst=1, kappa_ext=0, amp_source=0):
+    def _displace_lambda_mst(ddt, dd, lambda_mst=1, kappa_ext=0, mag_source=0):
         """
         approximate internal mass-sheet transform on top of the assumed profiles inferred in the analysis of the
         individual lenses. The effect is to first order the same as for a pure mass sheet as a kappa_ext term.
@@ -81,16 +82,18 @@ class TransformedCosmography(object):
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param lambda_mst: overall global mass-sheet transform applied on the sample,
-        lambda_mst=1 corresponds to the input model, 0.9 corresponds to a positive mass sheet of 0.1
+        lambda_mst = 1 corresponds to the input model, 0.9 corresponds to a positive mass sheet of 0.1
         kappa_ext = 1 - lambda_mst
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
-        :param amp_source: source amplitude
-        :return: ddt_, dd_
+        :param mag_source: source magnitude (-2.5 log10 base)
+        :return: ddt_, dd_, mag_source
         """
         lambda_tot = lambda_mst * (1 - kappa_ext)  # combine internal and external MST
         ddt_ = ddt * lambda_tot  # the actual posteriors needed to be corrected by Ddt_true = Ddt_mst / (1-kappa_ext)
         # this line can be changed in case the physical 3-d approximation of the chosen profile does scale differently with the kinematics
         sigma_v2_scaling = lambda_mst
         dd_ = dd * sigma_v2_scaling / lambda_mst  # the kinematics constrain Dd/Dds and thus the constraints on Dd is not affected by lambda
-        amp_source_ = amp_source / lambda_tot ** 2  # inverse MST transform of magnification
-        return ddt_, dd_, amp_source_
+
+        # amp_source_ = amp_source / lambda_tot ** 2  # inverse MST transform of magnification
+        mag_source_ = mag_source + 5 * np.log10(lambda_tot)  # inverse MST transform of magnification in magnitude
+        return ddt_, dd_, mag_source_

@@ -68,18 +68,19 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         # here we compute the unperturbed angular diameter distances of the lens system given the cosmology
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
-        ddt, dd, ds = self.angular_diameter_distances(cosmo)
+        ddt, dd = self.angular_diameter_distances(cosmo)
+        delta_lum_dist = self.luminosity_distance_modulus(cosmo)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
-        return self.hyper_param_likelihood(ddt, dd, ds, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+        return self.hyper_param_likelihood(ddt, dd, delta_lum_dist, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
                                            kwargs_source=kwargs_source)
 
-    def hyper_param_likelihood(self, ddt, dd, ds, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
+    def hyper_param_likelihood(self, ddt, dd, delta_lum_dist, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param ds: angular diameter distance from observer to the source
+        :param delta_lum_dist: relative luminosity distance to pivot redshift
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
@@ -92,12 +93,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         sigma_v_sys_error = kwargs_kin_copy.pop('sigma_v_sys_error', None)
 
         if self.check_dist(kwargs_lens, kwargs_kin, kwargs_source):  # sharp distributions
-            return self.log_likelihood_single(ddt, dd, ds, kwargs_lens, kwargs_kin_copy, kwargs_source,
+            return self.log_likelihood_single(ddt, dd, delta_lum_dist, kwargs_lens, kwargs_kin_copy, kwargs_source,
                                               sigma_v_sys_error=sigma_v_sys_error)
         else:
             likelihood = 0
             for i in range(self._num_distribution_draws):
-                logl = self.log_likelihood_single(ddt, dd, ds, kwargs_lens, kwargs_kin_copy, kwargs_source,
+                logl = self.log_likelihood_single(ddt, dd, delta_lum_dist, kwargs_lens, kwargs_kin_copy, kwargs_source,
                                                   sigma_v_sys_error=sigma_v_sys_error)
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl) and exp_logl > 0:
@@ -106,12 +107,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                 return -np.inf
             return np.log(likelihood/self._num_distribution_draws)
 
-    def log_likelihood_single(self, ddt, dd, ds, kwargs_lens, kwargs_kin, kwargs_source, sigma_v_sys_error=None):
+    def log_likelihood_single(self, ddt, dd, delta_lum_dist, kwargs_lens, kwargs_kin, kwargs_source, sigma_v_sys_error=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param ds: angular diameter distance from the observer to the source
+        :param delta_lum_dist: relative luminosity distance to pivot redshift
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword arguments of source brightness
@@ -119,30 +120,46 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :return: log likelihood given the single lens analysis for a single (random) realization of the hyper parameter distribution
         """
         lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
-        # TODO: scale source amplitude with distance Ds and or redshift
-        amp_source = self.draw_source(**kwargs_source)
-        ddt_, dd_, amp_source_ = self.displace_prediction(ddt, dd, ds, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
-                                             kappa_ext=kappa_ext, amp_source=amp_source)
+        # draw intrinsic source magnitude
+        mag_source = self.draw_source(lum_dist=delta_lum_dist, **kwargs_source)
+        ddt_, dd_, mag_source_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+                                                          kappa_ext=kappa_ext, mag_source=mag_source)
         aniso_param_array = self.draw_anisotropy(**kwargs_kin)
         aniso_scaling = self.ani_scaling(aniso_param_array)
 
         lnlikelihood = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error,
-                                           mu_intrinsic=amp_source_)
+                                           mu_intrinsic=mag_source_)
         return lnlikelihood
 
     def angular_diameter_distances(self, cosmo):
         """
-        time-delay distance Ddt, angular diameter distance to the lens (dd) and angular diameter distance from the
-        observer to the source (ds)
+        time-delay distance Ddt, angular diameter distance to the lens (dd)
 
-        :param cosmo: astropy.cosmology instance (or equivalent with interpolation
+        :param cosmo: astropy.cosmology instance (or equivalent with interpolation)
         :return: ddt, dd, ds in units physical Mpc
         """
         dd = cosmo.angular_diameter_distance(z=self._z_lens).value
         ds = cosmo.angular_diameter_distance(z=self._z_source).value
         dds = cosmo.angular_diameter_distance_z1z2(z1=self._z_lens, z2=self._z_source).value
         ddt = (1. + self._z_lens) * dd * ds / dds
-        return ddt, dd, ds
+        return ddt, dd
+
+    def luminosity_distance_modulus(self, cosmo):
+        """
+        the difference in luminosity distance between a pivot redshift (z=0.1) and the source redshift
+        (effectively the ratio as this is the magnitude transform)
+
+        :param cosmo: astropy.cosmology instance (or equivalent with interpolation)
+        :return: lum_dist(z_source) - lum_dist(z_pivot)
+        """
+        angular_diameter_distances = cosmo.angular_diameter_distance(self._z_source).value
+        lum_dists = (5 * np.log10((1 + self._z_source) * (1 + self._z_source) * angular_diameter_distances))
+
+        z_anchor = 0.1
+        ang_dist_anchor = cosmo.angular_diameter_distance(z_anchor).value
+        lum_dist_anchor = (5 * np.log10((1 + z_anchor) * (1 + z_anchor) * ang_dist_anchor))
+        delta_lum_dist = lum_dists - lum_dist_anchor
+        return delta_lum_dist
 
     def check_dist(self, kwargs_lens, kwargs_kin, kwargs_source):
         """
@@ -193,14 +210,22 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return lambda_mst_draw, kappa_ext_draw, gamma_ppn
 
     @staticmethod
-    def draw_source(mu_sne=1, sigma_sne=0):
+    def draw_source(mu_sne=1, sigma_sne=0, lum_dist=0):
         """
 
         :param mu_sne: mean brightness of SNe
         :param sigma_sne: std of brightness distribution of SNe relative to the mean brightness
+        :param lum_dist: luminosity distance
+        (astronomical magnitude scaling of defined brightness to the source redshift)
         :return: realization of source amplitude given distribution
         """
-        return np.random.normal(loc=mu_sne, scale=sigma_sne/mu_sne)
+        # draw apparent magnitude at pivot luminosity distance (z=0.1)
+        mag_draw = np.random.normal(loc=mu_sne, scale=sigma_sne/mu_sne)
+        # move apparent magnitude to redshift of source with relative luminosity distance
+        # TODO is this a minus sign or positive, please check!
+        mag_source = mag_draw - lum_dist
+        # return linear amplitude with base log 10
+        return mag_source
 
     def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens={}, kwargs_kin={}):
         """
@@ -217,14 +242,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             return None, None, None, None
         kwargs_kin_copy = copy.deepcopy(kwargs_kin)
         sigma_v_sys_error = kwargs_kin_copy.pop('sigma_v_sys_error', None)
-        ddt, dd, ds = self.angular_diameter_distances(cosmo)
+        ddt, dd = self.angular_diameter_distances(cosmo)
         sigma_v_measurement, cov_error_measurement = self.sigma_v_measurement(sigma_v_sys_error=sigma_v_sys_error)
         sigma_v_predict_list = []
         sigma_v_predict_mean = np.zeros_like(sigma_v_measurement)
         cov_error_predict = np.zeros_like(cov_error_measurement)
         for i in range(self._num_distribution_draws):
             lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
-            ddt_, dd_, _ = self.displace_prediction(ddt, dd, ds, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+            ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                     kappa_ext=kappa_ext)
             aniso_param_array = self.draw_anisotropy(**kwargs_kin_copy)
             aniso_scaling = self.ani_scaling(aniso_param_array)
@@ -247,12 +272,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :return: ddt_model mean, ddt_model sigma, dd_model mean, dd_model sigma
         """
-        ddt, dd, ds = self.angular_diameter_distances(cosmo)
+        ddt, dd = self.angular_diameter_distances(cosmo)
         ddt_draws = []
         dd_draws = []
         for i in range(self._num_distribution_draws):
             lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
-            ddt_, dd_, _ = self.displace_prediction(ddt, dd, ds, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
+            ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                     kappa_ext=kappa_ext)
             ddt_draws.append(ddt_)
             dd_draws.append(dd_)
