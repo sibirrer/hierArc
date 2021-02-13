@@ -1,5 +1,5 @@
 
-_SNE_DISTRIBUTIONS = ['GAUSSIAN']
+_SNE_DISTRIBUTIONS = ['GAUSSIAN', 'NONE']
 
 
 class SourceParam(object):
@@ -19,7 +19,7 @@ class SourceParam(object):
         :param kwargs_fixed: keyword arguments of fixed parameters (and values)
         """
         self._sne_apparent_m_sampling = sne_apparent_m_sampling
-        if sne_distribution not in ['GAUSSIAN']:
+        if sne_distribution not in _SNE_DISTRIBUTIONS:
             raise ValueError('SNE distribution %s not supported. Please chose among %s.' % (sne_distribution, _SNE_DISTRIBUTIONS))
         self._sne_distribution = sne_distribution
         if kwargs_fixed is None:
@@ -35,12 +35,12 @@ class SourceParam(object):
         """
         name_list = []
         if self._sne_apparent_m_sampling is True:
+            if 'mu_sne' not in self._kwargs_fixed:
+                if latex_style is True:
+                    name_list.append(r'$\langle \mu_{\rm SNe}\rangle$')
+                else:
+                    name_list.append('mu_sne')
             if self._sne_distribution in ['GAUSSIAN']:
-                if 'mu_sne' not in self._kwargs_fixed:
-                    if latex_style is True:
-                        name_list.append(r'$\langle \mu_{\rm SNe}\rangle$')
-                    else:
-                        name_list.append('mu_sne')
                 if 'sigma_sne' not in self._kwargs_fixed:
                     if latex_style is True:
                         name_list.append(r'$\sigma_{\rm SNe}$')
@@ -57,12 +57,12 @@ class SourceParam(object):
         """
         kwargs = {}
         if self._sne_apparent_m_sampling is True:
+            if 'mu_sne' in self._kwargs_fixed:
+                kwargs['mu_sne'] = self._kwargs_fixed['mu_sne']
+            else:
+                kwargs['mu_sne'] = args[i]
+                i += 1
             if self._sne_distribution in ['GAUSSIAN']:
-                if 'mu_sne' in self._kwargs_fixed:
-                    kwargs['mu_sne'] = self._kwargs_fixed['mu_sne']
-                else:
-                    kwargs['mu_sne'] = args[i]
-                    i += 1
                 if 'sigma_sne' in self._kwargs_fixed:
                     kwargs['sigma_sne'] = self._kwargs_fixed['sigma_sne']
                 else:
@@ -78,9 +78,9 @@ class SourceParam(object):
         """
         args = []
         if self._sne_apparent_m_sampling is True:
+            if 'mu_sne' not in self._kwargs_fixed:
+                args.append(kwargs['mu_sne'])
             if self._sne_distribution in ['GAUSSIAN']:
-                if 'mu_sne' not in self._kwargs_fixed:
-                    args.append(kwargs['mu_sne'])
                 if 'sigma_sne' not in self._kwargs_fixed:
                     args.append(kwargs['sigma_sne'])
         return args
