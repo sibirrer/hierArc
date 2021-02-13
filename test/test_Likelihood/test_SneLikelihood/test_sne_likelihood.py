@@ -40,6 +40,12 @@ class TestSnePantheon(object):
         logL = self.pantheon_full_likelihood.log_likelihood(cosmo=cosmo)
         npt.assert_almost_equal(logL, -490.65642769784324, decimal=4)
 
+        # here we use the apparent magnitude at z=0.1 as part of the likelihood. We are using the best fit value and
+        # demand the same outcome as having solved for it.
+        apparent_mag_sne_z01 = 18.963196264371216
+        logL_with_mag = self.pantheon_full_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z01=apparent_mag_sne_z01)
+        npt.assert_almost_equal(logL_with_mag /logL, 1, decimal=3)
+
         # here we demand the 1-sigma difference in the Om constraints to be reflected in the likelihood
         # for the binned data (no systematics!!!) Scolnic et al. 2018 gets 0.284 ± 0.012 in FLCDM
         om_mean, om_sigma = 0.284, 0.012
