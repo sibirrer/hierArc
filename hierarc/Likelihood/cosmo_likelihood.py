@@ -123,7 +123,7 @@ class CosmoLikelihood(object):
             apparent_m_z01 = kwargs_source.get('mu_sne', None)
             logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z01=apparent_m_z01)
         if self._prior_add is True:
-            logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin)
+            logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
         return logL
 
     def cosmo_instance(self, kwargs_cosmo):

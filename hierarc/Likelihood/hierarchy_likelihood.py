@@ -222,8 +222,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         # draw apparent magnitude at pivot luminosity distance (z=0.1)
         mag_draw = np.random.normal(loc=mu_sne, scale=sigma_sne/mu_sne)
         # move apparent magnitude to redshift of source with relative luminosity distance
-        # TODO is this a minus sign or positive, please check!
-        mag_source = mag_draw - lum_dist
+        mag_source = mag_draw + lum_dist
         # return linear amplitude with base log 10
         return mag_source
 
