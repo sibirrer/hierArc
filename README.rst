@@ -56,6 +56,6 @@ For example use cases we refer to the notebooks of these analyses.
 Credits
 -------
 
-Simon Birrer & the `TDCOSMO <http://tdcosmo.org>`_ team
+Simon Birrer & the `TDCOSMO <http://tdcosmo.org>`_ team.
 
 Please cite `Birrer et al. 2020 <https://arxiv.org/abs/2007.02941>`_ if you make use of this software for your research.
