@@ -2,6 +2,7 @@ numpy>=1.13
 astropy>=3.0
 #lenstronomy>=1.4.0
 scipy
+numba
 emcee
 mpmath
 h5py
