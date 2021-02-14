@@ -147,6 +147,7 @@ class SneLikelihood(object):
         invvars = 1.0 / self.pre_vars
         wtval = np.sum(invvars)
         # uncertainty weighted estimated normalization of magnitude (maximum likelihood value)
+
         if estimated_scriptm is None:
             estimated_scriptm = np.sum((self.mag - lum_dists) * invvars) / wtval
         diffmag = self.mag - lum_dists - estimated_scriptm
@@ -157,7 +158,8 @@ class SneLikelihood(object):
 
         amarg_B = np.sum(invvars)
         amarg_E = np.sum(invcovmat)
-        chi2 = amarg_A + np.log(amarg_E / _twopi) - amarg_B ** 2 / amarg_E
+        chi2 = amarg_A + np.log(amarg_E / _twopi)  # - amarg_B ** 2 / amarg_E
+
         return - chi2 / 2
 
     def log_likelihood(self, cosmo, apparent_m_z01=None):

@@ -46,6 +46,10 @@ class TestSnePantheon(object):
         logL_with_mag = self.pantheon_full_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z01=apparent_mag_sne_z01)
         npt.assert_almost_equal(logL_with_mag /logL, 1, decimal=3)
 
+        # and here we test that if we change the apparent magnitude, the likelihood gets off
+        logL_with_mag = self.pantheon_full_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z01=apparent_mag_sne_z01+10)
+        assert logL_with_mag / logL < -2
+
         # here we demand the 1-sigma difference in the Om constraints to be reflected in the likelihood
         # for the binned data (no systematics!!!) Scolnic et al. 2018 gets 0.284 ± 0.012 in FLCDM
         om_mean, om_sigma = 0.284, 0.012
