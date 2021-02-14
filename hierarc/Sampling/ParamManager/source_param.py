@@ -1,12 +1,12 @@
 
-_SNE_DISTRIBUTIONS = ['GAUSSIAN']
+_SNE_DISTRIBUTIONS = ['GAUSSIAN', 'NONE']
 
 
 class SourceParam(object):
     """
     manager for the source property parameters (currently particularly source magnitudes for SNe)
     """
-    def __init__(self, sne_sampling=False, sne_distribution='GAUSSIAN', kwargs_fixed=None):
+    def __init__(self, sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', kwargs_fixed=None):
         """
 
         :param sne_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
@@ -14,10 +14,12 @@ class SourceParam(object):
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
          Currently supports:
          'GAUSSIAN': Gaussian distribution
+        :param apparent_m_sampling: boolean, sampling the apparent magnitude (mean) of the SNIa population at
+         redshift z=0.1 (only adviced when evaluating supernova datasets that can constrain this parameter
         :param kwargs_fixed: keyword arguments of fixed parameters (and values)
         """
-        self._sne_sampling = sne_sampling
-        if sne_distribution not in ['GAUSSIAN']:
+        self._sne_apparent_m_sampling = sne_apparent_m_sampling
+        if sne_distribution not in _SNE_DISTRIBUTIONS:
             raise ValueError('SNE distribution %s not supported. Please chose among %s.' % (sne_distribution, _SNE_DISTRIBUTIONS))
         self._sne_distribution = sne_distribution
         if kwargs_fixed is None:
@@ -32,13 +34,13 @@ class SourceParam(object):
         :return: list of the free parameters being sampled in the same order as the sampling
         """
         name_list = []
-        if self._sne_sampling is True:
+        if self._sne_apparent_m_sampling is True:
+            if 'mu_sne' not in self._kwargs_fixed:
+                if latex_style is True:
+                    name_list.append(r'$\langle \mu_{\rm SNe}\rangle$')
+                else:
+                    name_list.append('mu_sne')
             if self._sne_distribution in ['GAUSSIAN']:
-                if 'mu_sne' not in self._kwargs_fixed:
-                    if latex_style is True:
-                        name_list.append(r'$\langle \mu_{\rm SNe}\rangle$')
-                    else:
-                        name_list.append('mu_sne')
                 if 'sigma_sne' not in self._kwargs_fixed:
                     if latex_style is True:
                         name_list.append(r'$\sigma_{\rm SNe}$')
@@ -54,13 +56,13 @@ class SourceParam(object):
         :return: keyword argument list with parameter names
         """
         kwargs = {}
-        if self._sne_sampling is True:
+        if self._sne_apparent_m_sampling is True:
+            if 'mu_sne' in self._kwargs_fixed:
+                kwargs['mu_sne'] = self._kwargs_fixed['mu_sne']
+            else:
+                kwargs['mu_sne'] = args[i]
+                i += 1
             if self._sne_distribution in ['GAUSSIAN']:
-                if 'mu_sne' in self._kwargs_fixed:
-                    kwargs['mu_sne'] = self._kwargs_fixed['mu_sne']
-                else:
-                    kwargs['mu_sne'] = args[i]
-                    i += 1
                 if 'sigma_sne' in self._kwargs_fixed:
                     kwargs['sigma_sne'] = self._kwargs_fixed['sigma_sne']
                 else:
@@ -75,10 +77,10 @@ class SourceParam(object):
         :return: sampling argument list in specified order
         """
         args = []
-        if self._sne_sampling is True:
+        if self._sne_apparent_m_sampling is True:
+            if 'mu_sne' not in self._kwargs_fixed:
+                args.append(kwargs['mu_sne'])
             if self._sne_distribution in ['GAUSSIAN']:
-                if 'mu_sne' not in self._kwargs_fixed:
-                    args.append(kwargs['mu_sne'])
                 if 'sigma_sne' not in self._kwargs_fixed:
                     args.append(kwargs['sigma_sne'])
         return args

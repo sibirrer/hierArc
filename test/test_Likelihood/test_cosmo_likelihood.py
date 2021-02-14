@@ -48,7 +48,7 @@ class TestCosmoLikelihood(object):
                                  anisotropy_model='OM', custom_prior=None, interpolate_cosmo=True, num_redshift_interp=100,
                                  cosmo_fixed=None)
 
-        def custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin):
+        def custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source):
             return -1
 
         cosmoL_prior = CosmoLikelihood(self.kwargs_likelihood_list, self.cosmology, self.kwargs_bounds, ppn_sampling=False,

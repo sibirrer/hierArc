@@ -12,7 +12,7 @@ class ParamManager(object):
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
                  lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, sigma_v_systematics=False,
-                 sne_sampling=False, sne_distribution='GAUSSIAN',
+                 sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN',
                  log_scatter=False,
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo=None, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens=None,
@@ -32,7 +32,7 @@ class ParamManager(object):
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
-        :param sne_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
+        :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
          (not intrinsic magnitudes but apparent!)
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
          Currently supports:
@@ -54,7 +54,7 @@ class ParamManager(object):
                                      alpha_lambda_sampling=alpha_lambda_sampling,
                                      log_scatter=log_scatter,
                                      kwargs_fixed=kwargs_fixed_lens)
-        self._source_param = SourceParam(sne_sampling=sne_sampling, sne_distribution=sne_distribution,
+        self._source_param = SourceParam(sne_apparent_m_sampling=sne_apparent_m_sampling, sne_distribution=sne_distribution,
                                          kwargs_fixed=kwargs_fixed_source)
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = kwargs_upper_cosmo, kwargs_lower_cosmo
         self._kwargs_upper_lens, self._kwargs_lower_lens = kwargs_upper_lens, kwargs_lower_lens

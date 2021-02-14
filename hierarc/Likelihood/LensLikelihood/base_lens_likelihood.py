@@ -79,7 +79,7 @@ class LensLikelihoodBase(object):
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
-        :param mu_intrinsic: float, intrinsic source brightness
+        :param mu_intrinsic: float, intrinsic source brightness (in magnitude)
         :return: natural logarithm of the likelihood of the data given the model
         """
         if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist', 'DdtHistKDE']:
