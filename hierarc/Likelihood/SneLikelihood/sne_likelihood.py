@@ -162,18 +162,18 @@ class SneLikelihood(object):
 
         return - chi2 / 2
 
-    def log_likelihood(self, cosmo, apparent_m_z01=None):
+    def log_likelihood(self, cosmo, apparent_m_z=None, z_anchor=0.1):
         """
 
         :param cosmo: instance of a class to compute angular diameter distances on arrays
-        :param apparent_m_z01: mean apparent magnitude of SN Ia at z=0.1 (optional)
+        :param apparent_m_z: mean apparent magnitude of SN Ia at z=z_anchor (optional)
+        :param z_anchor: redshift where definition of apparent_m_z is set (only applicable when apparent_m_z != None)
         :return: log likelihood of the data given the specified cosmology
         """
         angular_diameter_distances = cosmo.angular_diameter_distance(self.zcmb).value
         lum_dists = (5 * np.log10((1 + self.zhel) * (1 + self.zcmb) * angular_diameter_distances))
 
-        z_anchor = 0.1
         ang_dist_anchor = cosmo.angular_diameter_distance(z_anchor).value
         lum_dist_anchor = (5 * np.log10((1 + z_anchor) * (1 + z_anchor) * ang_dist_anchor))
 
-        return self.logp_lum_dist(lum_dists - lum_dist_anchor, apparent_m_z01)
+        return self.logp_lum_dist(lum_dists - lum_dist_anchor, apparent_m_z)

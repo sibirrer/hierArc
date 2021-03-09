@@ -15,7 +15,7 @@ class CosmoLikelihood(object):
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
-                 sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN',
+                 sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', z_apparent_m_anchor=0.1,
                  log_scatter=False,
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
                  num_redshift_interp=100, cosmo_fixed=None):
@@ -51,6 +51,7 @@ class CosmoLikelihood(object):
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
          Currently supports:
          'GAUSSIAN': Gaussian distribution
+        :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
@@ -88,6 +89,7 @@ class CosmoLikelihood(object):
             self._sne_evaluate = True
         else:
             self._sne_evaluate = False
+        self._z_apparent_m_anchor = z_apparent_m_anchor
 
         for kwargs_lens in kwargs_likelihood_list:
             if kwargs_lens['z_source'] > z_max:
@@ -120,8 +122,9 @@ class CosmoLikelihood(object):
                                                          kwargs_source=kwargs_source)
 
         if self._sne_evaluate is True:
-            apparent_m_z01 = kwargs_source.get('mu_sne', None)
-            logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z01=apparent_m_z01)
+            apparent_m_z = kwargs_source.get('mu_sne', None)
+            logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
+                                                        z_anchor=self._z_apparent_m_anchor)
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
         return logL
