@@ -69,7 +69,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
         ddt, dd = self.angular_diameter_distances(cosmo)
-        delta_lum_dist = self.luminosity_distance_modulus(cosmo)
+        kwargs_source = self._kwargs_init(kwargs_source)
+        z_apparent_m_anchor = kwargs_source.get('z_apparent_m_anchor', 0.1)
+        delta_lum_dist = self.luminosity_distance_modulus(cosmo, z_apparent_m_anchor)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
         return self.hyper_param_likelihood(ddt, dd, delta_lum_dist, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
@@ -144,18 +146,19 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         ddt = (1. + self._z_lens) * dd * ds / dds
         return ddt, dd
 
-    def luminosity_distance_modulus(self, cosmo):
+    def luminosity_distance_modulus(self, cosmo, z_apparent_m_anchor):
         """
-        the difference in luminosity distance between a pivot redshift (z=0.1) and the source redshift
+        the difference in luminosity distance between a pivot redshift (z_apparent_m_anchor) and the source redshift
         (effectively the ratio as this is the magnitude transform)
 
         :param cosmo: astropy.cosmology instance (or equivalent with interpolation)
+        :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
         :return: lum_dist(z_source) - lum_dist(z_pivot)
         """
         angular_diameter_distances = cosmo.angular_diameter_distance(self._z_source).value
         lum_dists = (5 * np.log10((1 + self._z_source) * (1 + self._z_source) * angular_diameter_distances))
 
-        z_anchor = 0.1
+        z_anchor = z_apparent_m_anchor
         ang_dist_anchor = cosmo.angular_diameter_distance(z_anchor).value
         lum_dist_anchor = (5 * np.log10((1 + z_anchor) * (1 + z_anchor) * ang_dist_anchor))
         delta_lum_dist = lum_dists - lum_dist_anchor
@@ -210,7 +213,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return lambda_mst_draw, kappa_ext_draw, gamma_ppn
 
     @staticmethod
-    def draw_source(mu_sne=1, sigma_sne=0, lum_dist=0):
+    def draw_source(mu_sne=1, sigma_sne=0, lum_dist=0, **kwargs):
         """
 
         :param mu_sne: mean brightness of SNe

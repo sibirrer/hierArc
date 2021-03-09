@@ -6,16 +6,17 @@ class SourceParam(object):
     """
     manager for the source property parameters (currently particularly source magnitudes for SNe)
     """
-    def __init__(self, sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', kwargs_fixed=None):
+    def __init__(self, sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', kwargs_fixed=None,
+                 z_apparent_m_anchor=0.1):
         """
 
-        :param sne_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
+        :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
         (not intrinsic magnitudes but apparent!)
+        (only adviced when evaluating supernova datasets that can constrain this parameter, or when providing priors)
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
          Currently supports:
          'GAUSSIAN': Gaussian distribution
-        :param apparent_m_sampling: boolean, sampling the apparent magnitude (mean) of the SNIa population at
-         redshift z=0.1 (only adviced when evaluating supernova datasets that can constrain this parameter
+        :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
         :param kwargs_fixed: keyword arguments of fixed parameters (and values)
         """
         self._sne_apparent_m_sampling = sne_apparent_m_sampling
@@ -25,6 +26,7 @@ class SourceParam(object):
         if kwargs_fixed is None:
             kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
+        self._z_apparent_m_anchor = z_apparent_m_anchor
 
     def param_list(self, latex_style=False):
         """
@@ -68,6 +70,7 @@ class SourceParam(object):
                 else:
                     kwargs['sigma_sne'] = args[i]
                     i += 1
+        kwargs['z_apparent_m_anchor'] = self._z_apparent_m_anchor
         return kwargs, i
 
     def kwargs2args(self, kwargs):

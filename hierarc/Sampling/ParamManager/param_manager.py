@@ -12,7 +12,7 @@ class ParamManager(object):
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
                  lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, sigma_v_systematics=False,
-                 sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN',
+                 sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', z_apparent_m_anchor=0.1,
                  log_scatter=False,
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
                  kwargs_fixed_cosmo=None, kwargs_lower_lens=None, kwargs_upper_lens=None, kwargs_fixed_lens=None,
@@ -54,7 +54,8 @@ class ParamManager(object):
                                      alpha_lambda_sampling=alpha_lambda_sampling,
                                      log_scatter=log_scatter,
                                      kwargs_fixed=kwargs_fixed_lens)
-        self._source_param = SourceParam(sne_apparent_m_sampling=sne_apparent_m_sampling, sne_distribution=sne_distribution,
+        self._source_param = SourceParam(sne_apparent_m_sampling=sne_apparent_m_sampling,
+                                         sne_distribution=sne_distribution, z_apparent_m_anchor=z_apparent_m_anchor,
                                          kwargs_fixed=kwargs_fixed_source)
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = kwargs_upper_cosmo, kwargs_lower_cosmo
         self._kwargs_upper_lens, self._kwargs_lower_lens = kwargs_upper_lens, kwargs_lower_lens

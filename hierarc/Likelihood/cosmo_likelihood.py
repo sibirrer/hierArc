@@ -68,7 +68,7 @@ class CosmoLikelihood(object):
                                   lambda_ifu_distribution=lambda_ifu_distribution,
                                   alpha_lambda_sampling=alpha_lambda_sampling,
                                   sne_apparent_m_sampling=sne_apparent_m_sampling,
-                                  sne_distribution=sne_distribution,
+                                  sne_distribution=sne_distribution, z_apparent_m_anchor=z_apparent_m_anchor,
                                   sigma_v_systematics=sigma_v_systematics,
                                   kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
                                   anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
@@ -89,7 +89,6 @@ class CosmoLikelihood(object):
             self._sne_evaluate = True
         else:
             self._sne_evaluate = False
-        self._z_apparent_m_anchor = z_apparent_m_anchor
 
         for kwargs_lens in kwargs_likelihood_list:
             if kwargs_lens['z_source'] > z_max:
@@ -123,8 +122,9 @@ class CosmoLikelihood(object):
 
         if self._sne_evaluate is True:
             apparent_m_z = kwargs_source.get('mu_sne', None)
+            z_apparent_m_anchor = kwargs_source['z_apparent_m_anchor']
             logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
-                                                        z_anchor=self._z_apparent_m_anchor)
+                                                        z_anchor=z_apparent_m_anchor)
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
         return logL
