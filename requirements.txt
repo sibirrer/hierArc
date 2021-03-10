@@ -7,5 +7,5 @@ emcee
 mpmath
 h5py
 matplotlib
--e git://github.com/sibirrer/lenstronomy.git@master#egg=lenstronomy
+-e git://github.com/sibirrer/lenstronomy.git@main#egg=lenstronomy
 scikit-learn>=0.22
