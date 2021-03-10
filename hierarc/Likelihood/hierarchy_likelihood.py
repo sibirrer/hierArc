@@ -57,6 +57,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
 
     def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
+        log likelihood of the data of a lens given a model (defined with hyper-parameters) and cosmology
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyper parameters of the lens model
@@ -79,6 +80,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
 
     def hyper_param_likelihood(self, ddt, dd, delta_lum_dist, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
+        log likelihood of the data of a lens given a model (defined with hyper-parameters) and cosmological distances
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
@@ -109,8 +111,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                 return -np.inf
             return np.log(likelihood/self._num_distribution_draws)
 
-    def log_likelihood_single(self, ddt, dd, delta_lum_dist, kwargs_lens, kwargs_kin, kwargs_source, sigma_v_sys_error=None):
+    def log_likelihood_single(self, ddt, dd, delta_lum_dist, kwargs_lens, kwargs_kin, kwargs_source,
+                              sigma_v_sys_error=None):
         """
+        log likelihood of the data of a lens given a specific model (as a draw from hyper-parameters) and cosmological
+        distances
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
@@ -187,6 +192,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1, lambda_ifu=1,
                   lambda_ifu_sigma=0, alpha_lambda=0):
         """
+        draws a realization of a specific model from the hyper-parameter distribution
 
         :param lambda_mst: MST transform
         :param lambda_mst_sigma: spread in the distribution
@@ -215,6 +221,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     @staticmethod
     def draw_source(mu_sne=1, sigma_sne=0, lum_dist=0, **kwargs):
         """
+        draws a source magnitude from a distribution specified by population parameters
 
         :param mu_sne: mean brightness of SNe
         :param sigma_sne: std of brightness distribution of SNe relative to the mean brightness
