@@ -16,7 +16,8 @@ class GoodnessOfFit(object):
         self._kwargs_likelihood_list = kwargs_likelihood_list
         self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list)
 
-    def plot_ddt_fit(self, cosmo, kwargs_lens, kwargs_kin, color_measurement=None, color_prediction=None):
+    def plot_ddt_fit(self, cosmo, kwargs_lens, kwargs_kin, color_measurement=None, color_prediction=None,
+                     redshift_trend=False):
         """
         plots the prediction and the uncorrelated error bars on the individual lenses
         currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
@@ -26,6 +27,7 @@ class GoodnessOfFit(object):
         :param kwargs_kin: kinematics model keyword arguments
         :param color_measurement: color of measurement
         :param color_prediction: color of model prediction
+        :param redshift_trend: boolean, if True, plots as a function of redshift
         :return: fig, axes of matplotlib instance
         """
         logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
@@ -39,6 +41,7 @@ class GoodnessOfFit(object):
 
         ddt_data_mean_list = []
         ddt_data_sigma_list = []
+        z_list = []
 
         for i, kwargs_likelihood in enumerate(self._kwargs_likelihood_list):
             name = kwargs_likelihood.get('name', 'lens ' + str(i))
@@ -53,21 +56,34 @@ class GoodnessOfFit(object):
                 ddt_model_sigma_list.append(ddt_model_sigma)
                 ddt_data_mean_list.append(ddt_mean_measurement)
                 ddt_data_sigma_list.append(ddt_sigma_measurement)
+                z_list.append(likelihood.z_lens)
+        if redshift_trend:
+            x = z_list
+        else:
+            x = np.arange(len(ddt_name_list))
 
         f, ax = plt.subplots(1, 1, figsize=(len(ddt_name_list)/1.5, 4))
-        ax.errorbar(np.arange(len(ddt_name_list)), ddt_data_mean_list, yerr=ddt_data_sigma_list,
+        ax.errorbar(x, ddt_data_mean_list, yerr=ddt_data_sigma_list,
                     color=color_measurement,
                     xerr=None, fmt='o', ecolor=None, elinewidth=None,
                      capsize=None, barsabove=False, lolims=False, uplims=False,
                      xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
 
-        ax.errorbar(np.arange(len(ddt_name_list)), ddt_model_mean_list, yerr=ddt_model_sigma_list,
+        ax.errorbar(x, ddt_model_mean_list, yerr=ddt_model_sigma_list,
                     color=color_prediction,
                     xerr=None, fmt='o', ecolor=None, elinewidth=None,
                     capsize=None, barsabove=False, lolims=False, uplims=False,
                     xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='prediction')
 
-        ax.set_xticks(ticks=np.arange(len(ddt_name_list)))
+        if redshift_trend:
+            # put redshift ticks on top of plot
+            ax2 = ax.twiny()
+            ax2.set_xlim(ax.get_xlim())
+            #ax2.set_xticks(z_list)
+            #ax2.set_xticklabels(labels=ddt_name_list, rotation='vertical')
+            ax2.set_xlabel('lens redshift', fontsize=15)
+
+        ax.set_xticks(ticks=x)
         ax.set_xticklabels(labels=ddt_name_list, rotation='vertical')
         ax.set_ylabel(r'$D_{\Delta t}$ [Mpc]', fontsize=15)
         ax.legend()

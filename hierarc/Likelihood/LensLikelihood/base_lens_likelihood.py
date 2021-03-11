@@ -20,8 +20,8 @@ class LensLikelihoodBase(object):
         see individual classes for their use
         """
         self._name = name
-        self._z_lens = z_lens
-        self._z_source = z_source
+        self.z_lens = z_lens
+        self.z_source = z_source
         self.likelihood_type = likelihood_type
         if likelihood_type in ['DdtGaussian']:
             from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import DdtGaussianLikelihood
@@ -98,6 +98,8 @@ class LensLikelihoodBase(object):
 
     def ddt_measurement(self):
         """
+        Inferred Ddt from a lens model (i.e. power-law fit) and time-delay, without lambda correction (excludes also the
+        external convergence contribution)
 
         :return: ddt measurement median, 1-sigma (without lambda correction factor)
         """

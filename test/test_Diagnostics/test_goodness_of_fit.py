@@ -70,7 +70,9 @@ class TestGoodnessOfFit(object):
     def test_plot_ddt_fit(self):
         kwargs_lens = {'lambda_mst': 1}
         kwargs_kin = {}
-        f, ax = self.goodnessofFit.plot_ddt_fit(self.cosmo, kwargs_lens, kwargs_kin)
+        f, ax = self.goodnessofFit.plot_ddt_fit(self.cosmo, kwargs_lens, kwargs_kin, redshift_trend=False)
+        plt.close()
+        f, ax = self.goodnessofFit.plot_ddt_fit(self.cosmo, kwargs_lens, kwargs_kin, redshift_trend=True)
         plt.close()
 
     def test_plot_kin_fit(self):
