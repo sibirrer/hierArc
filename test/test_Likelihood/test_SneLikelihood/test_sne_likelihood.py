@@ -74,6 +74,7 @@ class TestSnePantheon(object):
         npt.assert_almost_equal(logL_sigma_neg - logL_mean, -1 / 2., decimal=1)
 
 
+
 class TestRaise(unittest.TestCase):
 
     def test_raise(self):

@@ -93,6 +93,7 @@ class SneLikelihood(object):
         # spectroscopic redshift error. ATTENTION! This value =0 for binned data. In this code the value is not used.
         # Cobaya also does not use it!
         self.z_var = self.dz ** 2
+        # variance in the bolometric magnitude distribution of the same for the redshift and type of the SNe
         self.mag_var = self.dmb ** 2
 
         self.nsn = ix
@@ -100,8 +101,10 @@ class SneLikelihood(object):
 
         # jla_prep
         zfacsq = 25.0 / np.log(10.0) ** 2
+        # adding peculiar redshift uncertainties to be added to the diagonal variance elements of the covariance matrix
         self.pre_vars = self.mag_var + zfacsq * self._pec_z ** 2 * (
                 (1.0 + self.zcmb) / (self.zcmb * (1 + 0.5 * self.zcmb))) ** 2
+
 
         self._inv_cov = self._inverse_covariance_matrix()
 
