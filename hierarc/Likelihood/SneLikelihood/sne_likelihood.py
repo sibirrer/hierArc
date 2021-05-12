@@ -105,7 +105,6 @@ class SneLikelihood(object):
         self.pre_vars = self.mag_var + zfacsq * self._pec_z ** 2 * (
                 (1.0 + self.zcmb) / (self.zcmb * (1 + 0.5 * self.zcmb))) ** 2
 
-
         self._inv_cov = self._inverse_covariance_matrix()
 
     def _read_covmat(self, filename):

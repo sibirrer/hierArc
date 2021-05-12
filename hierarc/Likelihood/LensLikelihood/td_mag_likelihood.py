@@ -69,10 +69,12 @@ class TDMagLikelihood(object):
 
     def _model_cov(self, ddt, mu_intrinsic):
         """
+        combined covariance matrix of the data and model when marginialized over the Gaussian model uncertainties
+        in the Fermat potential and magnification.
 
         :param ddt: time-delay distance (physical Mpc)
         :param mu_intrinsic: intrinsic brightness of the source (already incorporating the inverse MST transform)
-        :return:
+        :return: model vector, combined covariance matrix
         """
         # compute model predicted magnified image amplitude and time delay
         amp_intrinsic = magnitude2cps(magnitude=mu_intrinsic, magnitude_zero_point=self._magnitude_zero_point)
