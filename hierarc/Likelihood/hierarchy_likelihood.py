@@ -223,14 +223,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         """
         draws a source magnitude from a distribution specified by population parameters
 
-        :param mu_sne: mean brightness of SNe
-        :param sigma_sne: std of brightness distribution of SNe relative to the mean brightness
+        :param mu_sne: mean magnitude of SNe
+        :param sigma_sne: std of magnitude distribution of SNe relative to the mean magnitude
         :param lum_dist: luminosity distance
         (astronomical magnitude scaling of defined brightness to the source redshift)
         :return: realization of source amplitude given distribution
         """
         # draw apparent magnitude at pivot luminosity distance (z=0.1)
-        mag_draw = np.random.normal(loc=mu_sne, scale=sigma_sne/mu_sne)
+        mag_draw = np.random.normal(loc=mu_sne, scale=sigma_sne)
         # move apparent magnitude to redshift of source with relative luminosity distance
         mag_source = mag_draw + lum_dist
         # return linear amplitude with base log 10

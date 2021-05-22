@@ -31,7 +31,7 @@ class TransformedCosmography(object):
         lambda_mst=1 corresponds to the input model
         :param gamma_ppn: post-newtonian gravity parameter (=1 is GR)
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
-        :param mag_source: source magnitude (attention, log scale, thus transform needs to be changed!_
+        :param mag_source: source magnitude (attention, log scale, thus transform needs to be changed!)
         :return: ddt_, dd_, mag_source_
         """
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)

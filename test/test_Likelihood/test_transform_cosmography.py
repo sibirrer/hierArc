@@ -1,6 +1,7 @@
 import pytest
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from lenstronomy.Util.data_util import magnitude2cps
+import numpy.testing as npt
 
 
 class TestTransformedCoismography(object):
@@ -30,7 +31,7 @@ class TestTransformedCoismography(object):
         assert ddt_ == ddt * (1 - kappa_ext)
         assert dd_ == dd
         amp_source_ = magnitude2cps(magnitude=mag_source_, magnitude_zero_point=magnitude_zero_point)
-        assert amp_source_ == amp_source / (1 - kappa_ext)**2
+        npt.assert_almost_equal(amp_source_, amp_source / (1 - kappa_ext)**2, decimal=7)
 
         # case where lambda_mst is displaced
         lambda_mst = 0.9
@@ -39,8 +40,7 @@ class TestTransformedCoismography(object):
         assert ddt_ == ddt * lambda_mst
         assert dd == dd_
         amp_source_ = magnitude2cps(magnitude=mag_source_, magnitude_zero_point=magnitude_zero_point)
-        assert amp_source_ == amp_source / lambda_mst ** 2
-
+        npt.assert_almost_equal(amp_source_, amp_source / lambda_mst ** 2, decimal=7)
         # case for gamma_ppn
         gamma_ppn = 1.1
         ddt_, dd_, mag_source_ = self.transform.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=1,
