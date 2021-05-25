@@ -127,8 +127,9 @@ class CosmoLikelihood(object):
         if self._sne_evaluate is True:
             apparent_m_z = kwargs_source.get('mu_sne', None)
             z_apparent_m_anchor = kwargs_source['z_apparent_m_anchor']
+            sigma_m_z = kwargs_source.get('sigma_sne', None)
             logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
-                                                        z_anchor=z_apparent_m_anchor)
+                                                        z_anchor=z_apparent_m_anchor, sigma_m_z=sigma_m_z)
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
         return logL
