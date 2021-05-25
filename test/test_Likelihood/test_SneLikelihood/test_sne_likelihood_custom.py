@@ -46,6 +46,8 @@ class TestCustomSneLikelihood(object):
         logL = self.likelihood.log_likelihood_lum_dist(self.lum_dists_true, estimated_scriptm=self.m_apparent_true,
                                                        sigma_m_z=self.sigma_m_true)
 
+
+
         cov_mag, inv_cov = self.likelihood._inverse_covariance_matrix(sigma_m_z=self.sigma_m_true)
         sign_det, lndet = np.linalg.slogdet(cov_mag)
         logL_unnorm = logL + 1 / 2. * (len(self.lum_dists_true) * np.log(2 * np.pi) + lndet)
@@ -58,6 +60,18 @@ class TestCustomSneLikelihood(object):
         logL_high = self.likelihood.log_likelihood_lum_dist(self.lum_dists_true, estimated_scriptm=self.m_apparent_true,
                                                            sigma_m_z=self.sigma_m_true + 0.1)
         assert logL_high < logL
+
+        # check whether estimated apparent magnitude matches with the truth
+        logL_no_m = self.likelihood.log_likelihood_lum_dist(self.lum_dists_true, estimated_scriptm=None,
+                                                       sigma_m_z=self.sigma_m_true)
+        npt.assert_almost_equal(logL, logL_no_m, decimal=1)
+
+        # check whether output with sigma_m_z=0 and =None are identical
+        logL_sigma_0 = self.likelihood.log_likelihood_lum_dist(self.lum_dists_true,
+                                                               estimated_scriptm=self.m_apparent_true, sigma_m_z=0)
+        logL_sigma_none = self.likelihood.log_likelihood_lum_dist(self.lum_dists_true,
+                                                               estimated_scriptm=self.m_apparent_true, sigma_m_z=None)
+        npt.assert_almost_equal(logL_sigma_0, logL_sigma_none, decimal=5)
 
 
 if __name__ == '__main__':
