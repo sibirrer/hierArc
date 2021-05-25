@@ -44,7 +44,7 @@ class LensParam(object):
         if self._lambda_mst_sampling is True:
             if 'lambda_mst' not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\lambda_{\rm int}$')
+                    list.append(r'$\overline{\lambda}_{\rm int}$')
                 else:
                     list.append('lambda_mst')
             if self._lambda_mst_distribution == 'GAUSSIAN':
@@ -74,7 +74,7 @@ class LensParam(object):
         if self._kappa_ext_sampling is True:
             if 'kappa_ext' not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\kappa_{\rm ext}$')
+                    list.append(r'$\overline{\kappa}_{\rm ext}$')
                 else:
                     list.append('kappa_ext')
             if self._kappa_ext_distribution == 'GAUSSIAN':

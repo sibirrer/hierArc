@@ -39,13 +39,13 @@ class SourceParam(object):
         if self._sne_apparent_m_sampling is True:
             if 'mu_sne' not in self._kwargs_fixed:
                 if latex_style is True:
-                    name_list.append(r'$\langle \mu_{\rm SNe}\rangle$')
+                    name_list.append(r'$\overline{m}_{\rm p}$')
                 else:
                     name_list.append('mu_sne')
             if self._sne_distribution in ['GAUSSIAN']:
                 if 'sigma_sne' not in self._kwargs_fixed:
                     if latex_style is True:
-                        name_list.append(r'$\sigma_{\rm SNe}$')
+                        name_list.append(r'$\sigma(m_{\rm p})$')
                     else:
                         name_list.append('sigma_sne')
         return name_list
