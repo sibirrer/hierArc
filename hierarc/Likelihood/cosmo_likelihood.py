@@ -11,6 +11,7 @@ class CosmoLikelihood(object):
     """
 
     def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, sne_likelihood=None,
+                 kwargs_sne_likelihood=None,
                  ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
@@ -30,6 +31,7 @@ class CosmoLikelihood(object):
         'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
         :param sne_likelihood: (string), optional. Sampling supernovae relative expansion history likelihood, see
          SneLikelihood module for options
+        :param kwargs_sne_likelihood: keyword argument for the SNe likelihood, see SneLikelihood module for options
         :param ppn_sampling:post-newtonian parameter sampling
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
         :param lambda_mst_distribution: string, defines the distribution function of lambda_mst
@@ -84,7 +86,9 @@ class CosmoLikelihood(object):
         self._cosmo_fixed = cosmo_fixed
         z_max = 0
         if sne_likelihood is not None:
-            self._sne_likelihood = SneLikelihood(sample_name=sne_likelihood)
+            if kwargs_sne_likelihood is None:
+                kwargs_sne_likelihood = {}
+            self._sne_likelihood = SneLikelihood(sample_name=sne_likelihood, **kwargs_sne_likelihood)
             z_max = np.max(self._sne_likelihood.zcmb)
             self._sne_evaluate = True
         else:
