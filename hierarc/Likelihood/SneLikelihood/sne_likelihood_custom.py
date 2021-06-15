@@ -14,8 +14,8 @@ class CustomSneLikelihood(object):
 
         :param mag_mean: array of mean astronomical magnitudes of the sample of Sne
         :param cov_mag: error covariance matrix of the magnitudes to result in relative distance moduli
-         (including measurement and systematic uncertainties
-        :param zhel: array, redshift of the exploding shell
+         (including measurement and systematic uncertainties)
+        :param zhel: array, heliocentric redshift of the exploding shell
         :param zcmb: array, CMB-corrected redshift of the Sne
         """
         self.zhel = zhel

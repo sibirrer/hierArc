@@ -30,7 +30,7 @@ import os
 import hierarc
 
 _twopi = 2 * np.pi
-_SAMPLE_NAME_SUPPORTED = ['Pantheon_binned', 'Pantheon']
+_SAMPLE_NAME_SUPPORTED = ['Pantheon_binned', 'Pantheon', 'RomanWFIRST_forecast']
 _PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'SNe')
 
 
@@ -97,7 +97,7 @@ class SneLikelihoodFromFile(object):
         self.mag_var = self.dmb ** 2
 
         self.nsn = ix
-        self._cov = self._read_covmat(self._cov_file)
+        self._cov = read_covariance_matrix(self._cov_file, self.nsn)
 
         # jla_prep
         zfacsq = 25.0 / np.log(10.0) ** 2
@@ -164,3 +164,19 @@ class SneLikelihoodFromFile(object):
         chi2 = amarg_A + np.log(amarg_E / _twopi)  # - amarg_B ** 2 / amarg_E
 
         return - chi2 / 2
+
+
+def read_covariance_matrix(filename, nsn):
+    """
+    reads in covariance matrix file and returns it as a numpy matrix
+
+    :param filename: string, absolute path of covariance matrix file
+    :param nsn: number of supernovae (or bins)
+    :return: nxn covariance matrix
+    """
+    if filename is None:
+        return np.zeros((nsn, nsn))
+    cov = np.loadtxt(filename)
+    if np.isscalar(cov[0]) and cov[0] ** 2 + 1 == len(cov):
+        cov = cov[1:]
+    return cov.reshape((nsn, nsn))

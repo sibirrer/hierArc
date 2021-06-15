@@ -22,7 +22,6 @@ class TestCustomSneLikelihood(object):
         # define apparent magnitudes
         m_apparent = 18
 
-
         # compute luminosity distances
         angular_diameter_distances = cosmo_true.angular_diameter_distance(zcmb).value
         lum_dists_true = (5 * np.log10((1 + zhel) * (1 + zcmb) * angular_diameter_distances))
