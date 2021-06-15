@@ -111,20 +111,6 @@ class SneLikelihoodFromFile(object):
 
         self._inv_cov = self._inverse_covariance_matrix()
 
-    def _read_covmat(self, filename):
-        """
-        reads in covariance matrix file and returns it as a numpy matrix
-
-        :param filename: string, absolute path of covariance matrix file
-        :return: nxn covariance matrix
-        """
-        if filename is None:
-            return np.zeros((self.nsn, self.nsn))
-        cov = np.loadtxt(filename)
-        if np.isscalar(cov[0]) and cov[0] ** 2 + 1 == len(cov):
-            cov = cov[1:]
-        return cov.reshape((self.nsn, self.nsn))
-
     def _inverse_covariance_matrix(self):
         """
         inverse error covariance matrix. Combines redshift uncertainties (to first order) and magnitude uncertainties
@@ -133,12 +119,12 @@ class SneLikelihoodFromFile(object):
         """
         # here is the option for adding an additional covariance matrix term of the calibration and/or systematic
         # errors in the evolution of the Sne population
-        invcovmat = self._cov
-        invcovmat_diag = invcovmat.diagonal()  # if invcovmat is a matrix, then this is invcovmat.diagonal()
+        cov = self._cov
+        cov_diag = cov.diagonal()  # if invcovmat is a matrix, then this is invcovmat.diagonal()
 
         delta = self.diag_uncorr_errors
-        np.fill_diagonal(invcovmat, invcovmat_diag + delta)
-        invcov = np.linalg.inv(invcovmat)
+        np.fill_diagonal(cov, cov_diag + delta)
+        invcov = np.linalg.inv(cov)
         return invcov
 
     def log_likelihood_lum_dist(self, lum_dists, estimated_scriptm=None, sigma_m_z=None):
