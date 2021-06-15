@@ -2,6 +2,7 @@ import numpy.testing as npt
 import pytest
 import os
 import numpy as np
+from astropy.cosmology import FlatLambdaCDM
 
 from hierarc.Likelihood.SneLikelihood.sne_likelihood_from_file import SneLikelihoodFromFile
 from hierarc.Likelihood.SneLikelihood.sne_likelihood import SneLikelihood
@@ -66,7 +67,6 @@ class TestSneLikelihoodFromFile(object):
         pantheon_full_likelihood = SneLikelihood(sample_name='Pantheon')
 
         # cosmo instance
-        from astropy.cosmology import FlatLambdaCDM
 
         # here we demand the 1-sigma difference in the Om constraints to be reflected in the likelihood
         # for the binned data (no systematics!!!) Scolnic et al. 2018 gets 0.284 ± 0.012 in FLCDM
@@ -90,6 +90,13 @@ class TestSneLikelihoodFromFile(object):
         cosmo_sigma_neg = FlatLambdaCDM(H0=70, Om0=om_mean - om_sigma)
         logL_sigma_neg = pantheon_full_likelihood.log_likelihood(cosmo=cosmo_sigma_neg)
         npt.assert_almost_equal(logL_sigma_neg - logL_mean, -1 / 2., decimal=1)
+
+    def test_roman_forecast(self):
+        roman_binned_likelihood = SneLikelihood(sample_name='Roman_forecast')
+        om_mean, om_sigma = 0.284, 0.012
+        cosmo_mean = FlatLambdaCDM(H0=70, Om0=om_mean)
+        logL_mean = roman_binned_likelihood.log_likelihood(cosmo=cosmo_mean)
+        npt.assert_almost_equal(logL_mean, -22.395743577818184, decimal=3)
 
     def test_raise(self):
         npt.assert_raises(ValueError, SneLikelihoodFromFile, sample_name='BAD')

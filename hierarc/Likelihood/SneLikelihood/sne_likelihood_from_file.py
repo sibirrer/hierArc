@@ -30,7 +30,7 @@ import os
 import hierarc
 
 _twopi = 2 * np.pi
-_SAMPLE_NAME_SUPPORTED = ['Pantheon_binned', 'Pantheon', 'RomanWFIRST_forecast']
+_SAMPLE_NAME_SUPPORTED = ['Pantheon_binned', 'Pantheon', 'Roman_forecast']
 _PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'SNe')
 
 
@@ -52,9 +52,13 @@ class SneLikelihoodFromFile(object):
             self._cov_file = None
             pec_z = 0
 
-        if sample_name == 'Pantheon':
+        elif sample_name == 'Pantheon':
             self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_lcparam_full_long_zhel.txt')
             self._cov_file = os.path.join(_PATH_2_DATA, 'pantheon_sys_full_long.txt')
+        elif sample_name == 'Roman_forecast':
+            self._data_file = os.path.join(_PATH_2_DATA, 'RomanWFIRST', 'lcparam_WFIRST_G10.txt')
+            self._cov_file = os.path.join(_PATH_2_DATA, 'RomanWFIRST', 'sys_WFIRST_G10_0.txt')
+
         self._pec_z = pec_z
         cols = None
 
@@ -102,7 +106,7 @@ class SneLikelihoodFromFile(object):
         # jla_prep
         zfacsq = 25.0 / np.log(10.0) ** 2
         # adding peculiar redshift uncertainties to be added to the diagonal variance elements of the covariance matrix
-        self.pre_vars = self.mag_var + zfacsq * self._pec_z ** 2 * (
+        self.diag_uncorr_errors = self.mag_var + zfacsq * self._pec_z ** 2 * (
                 (1.0 + self.zcmb) / (self.zcmb * (1 + 0.5 * self.zcmb))) ** 2
 
         self._inv_cov = self._inverse_covariance_matrix()
@@ -132,7 +136,7 @@ class SneLikelihoodFromFile(object):
         invcovmat = self._cov
         invcovmat_diag = invcovmat.diagonal()  # if invcovmat is a matrix, then this is invcovmat.diagonal()
 
-        delta = self.pre_vars
+        delta = self.diag_uncorr_errors
         np.fill_diagonal(invcovmat, invcovmat_diag + delta)
         invcov = np.linalg.inv(invcovmat)
         return invcov
@@ -147,7 +151,7 @@ class SneLikelihoodFromFile(object):
          by the covariance matrix. This variable is not supported in the current implementation of the Pantheon sample
         :return: log likelihood of the data given the luminosity distances
         """
-        invvars = 1.0 / self.pre_vars
+        invvars = 1.0 / self.diag_uncorr_errors
         wtval = np.sum(invvars)
         # uncertainty weighted estimated normalization of magnitude (maximum likelihood value)
 
