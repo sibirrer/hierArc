@@ -9,7 +9,7 @@ class CustomSneLikelihood(object):
     covariance matrix is described in astronomical magnitude space
     """
 
-    def __init__(self, mag_mean, cov_mag, zhel, zcmb):
+    def __init__(self, mag_mean, cov_mag, zhel, zcmb, no_intrinsic_scatter=False):
         """
 
         :param mag_mean: array of mean astronomical magnitudes of the sample of Sne
@@ -17,6 +17,8 @@ class CustomSneLikelihood(object):
          (including measurement and systematic uncertainties)
         :param zhel: array, heliocentric redshift of the exploding shell
         :param zcmb: array, CMB-corrected redshift of the Sne
+        :param no_intrinsic_scatter: boolean; if True, ignores possible additional intrinsic scatter parameters in the
+        likelihood and does not require a re-inversion of the covariance matrix at each evaluation of the likelihood
         """
         self.zhel = zhel
         self.zcmb = zcmb
@@ -24,6 +26,7 @@ class CustomSneLikelihood(object):
         self._cov_mag = cov_mag
         self._inv_cov_mag_input = np.linalg.inv(cov_mag)
         self.num_sne = len(mag_mean)
+        self._no_intrinsic_scatter = no_intrinsic_scatter
 
     def log_likelihood_lum_dist(self, lum_dists, estimated_scriptm=None, sigma_m_z=None):
         """
@@ -61,7 +64,7 @@ class CustomSneLikelihood(object):
         """
         # here is the option for adding an additional covariance matrix term of the calibration and/or systematic
         # errors in the evolution of the Sne population
-        if sigma_m_z is None:
+        if sigma_m_z is None or self._no_intrinsic_scatter:
             return self._cov_mag, self._inv_cov_mag_input
         # cov_mag_diag = self._cov_mag.diagonal()
         cov_mag = self._cov_mag + np.diag(np.ones(self.num_sne) * sigma_m_z**2)
