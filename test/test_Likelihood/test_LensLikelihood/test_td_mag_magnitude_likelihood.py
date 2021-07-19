@@ -59,7 +59,6 @@ class TestMagnificationLikelihood(object):
         magnification_model = np.ones(num)
         cov_td_measured = np.zeros((num - 1, num - 1))
         cov_magnitude_measured = np.zeros((num, num))
-        amp_int = 10
         magnitude_measured = magnitude_intrinsic - 2.5 * np.log10(magnification_model)
         cov_model = np.zeros((num + num - 1, num + num - 1))
 

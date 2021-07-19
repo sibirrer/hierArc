@@ -25,7 +25,8 @@ class TestLensLikelihood(object):
                                 'DdtHistKin',
                                 'DdtGaussKin',
                                      'Mag',
-                                     'TDMag']
+                                     'TDMag',
+                                     'TDMagMagnitude']
 
         self.kwargs_likelihood_list = [{'ddt_mean': 1, 'ddt_sigma': 0.1},
                                   {'dd_samples': dd_samples, 'ddt_samples': ddt_samples, 'kde_type': 'scipy_gaussian', 'bandwidth': 1},
@@ -40,7 +41,12 @@ class TestLensLikelihood(object):
                                        {'amp_measured': [1.], 'cov_amp_measured': [[1.]], 'magnification_model': [1.], 'cov_magnification_model': [[1.]], 'magnitude_zero_point': 20.},
                                        {'time_delay_measured': [1.], 'cov_td_measured': [[1.]], 'amp_measured': [1., 1.],
                                         'cov_amp_measured': [[1., 0], [0, 1.]], 'fermat_diff': [1.], 'magnification_model': [1., 1.],
-                                        'cov_model': np.ones((3, 3)), 'magnitude_zero_point': 20.}
+                                        'cov_model': np.ones((3, 3)), 'magnitude_zero_point': 20.},
+                                       {'time_delay_measured': [1.], 'cov_td_measured': [[1.]],
+                                        'magnitude_measured': [1., 1.],
+                                        'cov_magnitude_measured': [[1., 0], [0, 1.]], 'fermat_diff': [1.],
+                                        'magnification_model': [1., 1.],
+                                        'cov_model': np.ones((3, 3))}
                                   ]
 
     def test_log_likelihood(self):

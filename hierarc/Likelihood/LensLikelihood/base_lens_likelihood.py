@@ -2,7 +2,7 @@ __author__ = 'sibirrer'
 
 
 LIKELIHOOD_TYPES = ['DdtGaussian', 'DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian', 'DdtLogNorm', 'IFUKinCov', 'DdtHist',
-                    'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin', 'Mag', 'TDMag']
+                    'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin', 'Mag', 'TDMag', 'TDMagMagnitude']
 
 
 class LensLikelihoodBase(object):
@@ -59,6 +59,9 @@ class LensLikelihoodBase(object):
         elif likelihood_type == 'TDMag':
             from hierarc.Likelihood.LensLikelihood.td_mag_likelihood import TDMagLikelihood
             self._lens_type = TDMagLikelihood(**kwargs_likelihood)
+        elif likelihood_type == 'TDMagMagnitude':
+            from hierarc.Likelihood.LensLikelihood.td_mag_magnitude_likelihood import TDMagMagnitudeLikelihood
+            self._lens_type = TDMagMagnitudeLikelihood(**kwargs_likelihood)
         else:
             raise ValueError('likelihood_type %s not supported! Supported are %s.' % (likelihood_type, LIKELIHOOD_TYPES))
 
@@ -91,7 +94,7 @@ class LensLikelihoodBase(object):
                                                   sigma_v_sys_error=sigma_v_sys_error)
         elif self.likelihood_type in ['Mag']:
             return self._lens_type.log_likelihood(mu_intrinsic=mu_intrinsic)
-        elif self.likelihood_type in ['TDMag']:
+        elif self.likelihood_type in ['TDMag', 'TDMagMagnitude']:
             return self._lens_type.log_likelihood(ddt=ddt, mu_intrinsic=mu_intrinsic)
         else:
             raise ValueError('likelihood type %s not fully supported.' % self.likelihood_type)
