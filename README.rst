@@ -33,7 +33,7 @@ The software is originated from `Birrer et al. 2020 <https://arxiv.org/abs/2007.
 Features
 --------
 
-* The software allows to fit lenses with measured time delays, imaging information, kinematics constraints and
+The software allows to fit lenses with measured time delays, imaging information, kinematics constraints and
 standardizable magnifications with parameters described on the ensemble level.
 
 Installation
