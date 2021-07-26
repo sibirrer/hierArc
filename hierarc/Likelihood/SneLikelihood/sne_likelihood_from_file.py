@@ -5,11 +5,9 @@ And computes the cosmographic likelihood.
 The main difference is that this class is compatible with the hierArc cosmology module for evaluating likelihoods.
 This likelihood does NOT include systematics!
 
-.. |br| raw:: html
-   <br />
-.. note::
-   - If you use ``sn.pantheon``, please cite:|br|
-     Scolnic, D. M. et al,
+
+   - If you use ``sn.pantheon``, please cite:
+     Scolnic, D. M. et al, 2018
      `The Complete Light-curve Sample of Spectroscopically
      Confirmed Type Ia Supernovae from Pan-STARRS1 and
      Cosmological Constraints from The Combined Pantheon Sample`

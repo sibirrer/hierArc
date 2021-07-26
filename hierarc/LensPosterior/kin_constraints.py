@@ -75,8 +75,7 @@ class KinConstraints(BaseLensConfig):
         supported.
 
         :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the
-        dimensionless kinematic component J()
-
+         dimensionless kinematic component J()
         :return: keyword arguments
         """
 
@@ -95,7 +94,7 @@ class KinConstraints(BaseLensConfig):
         """
 
         :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
-        kinematic component J()
+         kinematic component J()
         :return: J() as array for each measurement prediction, covariance matrix in sqrt(J)
         """
         num_data = len(self._sigma_v)

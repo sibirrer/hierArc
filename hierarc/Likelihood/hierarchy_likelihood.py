@@ -226,7 +226,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param mu_sne: mean magnitude of SNe
         :param sigma_sne: std of magnitude distribution of SNe relative to the mean magnitude
         :param lum_dist: luminosity distance
-        (astronomical magnitude scaling of defined brightness to the source redshift)
+         (astronomical magnitude scaling of defined brightness to the source redshift)
         :return: realization of source amplitude given distribution
         """
         # draw apparent magnitude at pivot luminosity distance (z=0.1)

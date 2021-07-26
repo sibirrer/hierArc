@@ -26,9 +26,8 @@ class TransformedCosmography(object):
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param ds: angular diameter distance from the observer to the source
         :param lambda_mst: overall global mass-sheet transform applied on the sample,
-        lambda_mst=1 corresponds to the input model
+         lambda_mst=1 corresponds to the input model
         :param gamma_ppn: post-newtonian gravity parameter (=1 is GR)
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
         :param mag_source: source magnitude (attention, log scale, thus transform needs to be changed!)
@@ -82,9 +81,8 @@ class TransformedCosmography(object):
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param lambda_mst: overall global mass-sheet transform applied on the sample,
-        lambda_mst = 1 corresponds to the input model, 0.9 corresponds to a positive mass sheet of 0.1
-        kappa_ext = 1 - lambda_mst
-        :param kappa_ext: external convergence to be added on top of the D_dt posterior
+         lambda_mst = 1 corresponds to the input model, 0.9 corresponds to a positive mass sheet of 0.1
+        :param kappa_ext: external convergence to be added on top of the D_dt posterior kappa_ext = 1 - lambda_mst
         :param mag_source: source magnitude (-2.5 log10 base)
         :return: ddt_, dd_, mag_source
         """

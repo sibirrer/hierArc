@@ -62,7 +62,7 @@ class DdtKinConstraints(KinConstraints):
         supported.
 
         :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
-        kinematic component J()
+         kinematic component J()
         :return: keyword arguments
         """
         j_model_list, error_cov_j_sqrt = self.model_marginalization(num_sample_model)
