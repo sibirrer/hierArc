@@ -87,6 +87,7 @@ class TransformedCosmography(object):
         :return: ddt_, dd_, mag_source
         """
         lambda_tot = lambda_mst * (1 - kappa_ext)  # combine internal and external MST
+        lambda_tot = np.maximum(lambda_tot, 0.0001)  # lambda can not get negative and zero is leading to infinite magnitudes
         ddt_ = ddt * lambda_tot  # the actual posteriors needed to be corrected by Ddt_true = Ddt_mst / (1-kappa_ext)
         # this line can be changed in case the physical 3-d approximation of the chosen profile does scale differently with the kinematics
         sigma_v2_scaling = lambda_mst
