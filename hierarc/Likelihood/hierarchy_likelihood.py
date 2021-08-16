@@ -149,7 +149,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         ds = cosmo.angular_diameter_distance(z=self._z_source).value
         dds = cosmo.angular_diameter_distance_z1z2(z1=self._z_lens, z2=self._z_source).value
         ddt = (1. + self._z_lens) * dd * ds / dds
-        return ddt, dd
+        return np.maximum(np.nan_to_num(ddt), 0.00001), np.maximum(np.nan_to_num(dd), 0.00001)
 
     def luminosity_distance_modulus(self, cosmo, z_apparent_m_anchor):
         """
@@ -160,11 +160,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
         :return: lum_dist(z_source) - lum_dist(z_pivot)
         """
-        angular_diameter_distances = cosmo.angular_diameter_distance(self._z_source).value
+        angular_diameter_distances = np.maximum(np.nan_to_num(cosmo.angular_diameter_distance(self._z_source).value),
+                                                0.00001)
         lum_dists = (5 * np.log10((1 + self._z_source) * (1 + self._z_source) * angular_diameter_distances))
 
         z_anchor = z_apparent_m_anchor
-        ang_dist_anchor = cosmo.angular_diameter_distance(z_anchor).value
+        ang_dist_anchor = np.maximum(np.nan_to_num(cosmo.angular_diameter_distance(z_anchor).value), 0.00001)
         lum_dist_anchor = (5 * np.log10((1 + z_anchor) * (1 + z_anchor) * ang_dist_anchor))
         delta_lum_dist = lum_dists - lum_dist_anchor
         return delta_lum_dist
