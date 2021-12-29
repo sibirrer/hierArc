@@ -16,3 +16,8 @@ History
 ------------------
 
 * Standardizable magnifications added
+
+1.1.1 (2021-12-29)
+------------------
+
+* using CosmoInterp module from lenstronomy

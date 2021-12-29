@@ -1,14 +1,15 @@
 numpy>=1.13
 astropy>=3.0
-#lenstronomy>=1.4.0
+
 scipy
-numba
+# numba
 emcee
 mpmath
 h5py
 matplotlib
--e git://github.com/sibirrer/lenstronomy.git@main#egg=lenstronomy
+lenstronomy>=1.9.2
+# -e git://github.com/sibirrer/lenstronomy.git@main#egg=lenstronomy
 scikit-learn>=0.22
 
 # only required through lenstronomy
-scikit-image
+# scikit-image

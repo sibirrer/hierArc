@@ -1,6 +1,7 @@
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
 from hierarc.Sampling.ParamManager.param_manager import ParamManager
-from hierarc.Likelihood.cosmo_interp import CosmoInterp
+# from hierarc.Likelihood.cosmo_interp import CosmoInterp
+from lenstronomy.Cosmo.cosmo_interp import CosmoInterp
 from hierarc.Likelihood.SneLikelihood.sne_likelihood import SneLikelihood
 import numpy as np
 

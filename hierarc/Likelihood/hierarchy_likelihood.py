@@ -136,7 +136,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
 
         lnlikelihood = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error,
                                            mu_intrinsic=mag_source_)
-        return lnlikelihood
+        return np.nan_to_num(lnlikelihood)
 
     def angular_diameter_distances(self, cosmo):
         """
