@@ -6,8 +6,8 @@ hierArc
 .. image:: https://img.shields.io/pypi/v/hierarc.svg
         :target: https://pypi.python.org/pypi/hierarc
 
-.. image:: https://img.shields.io/travis/sibirrer/hierarc.svg
-        :target: https://travis-ci.com/sibirrer/hierarc
+.. image:: https://github.com/sibirrer/hierarc/workflows/Tests/badge.svg
+    :target: https://github.com/sibirrer/hierarc/actions
 
 .. image:: https://coveralls.io/repos/github/sibirrer/hierArc/badge.svg?branch=main
     :target: https://coveralls.io/github/sibirrer/hierArc?branch=main
