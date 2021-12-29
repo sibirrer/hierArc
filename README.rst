@@ -4,7 +4,7 @@ hierArc
 
 
 .. image:: https://img.shields.io/pypi/v/hierarc.svg
-        :target: https://pypi.python.org/pypi/hierarc
+    :target: https://pypi.python.org/pypi/hierarc
 
 .. image:: https://github.com/sibirrer/hierarc/workflows/Tests/badge.svg
     :target: https://github.com/sibirrer/hierarc/actions
@@ -47,7 +47,7 @@ Installation
 Usage
 -----
 
-The full analysis of `Birrer et al. 2020 <https://arxiv.org/abs/2007.02941>`_ is publicly available `here <https://github.com/TDCOSMO/hierarchy_analysis_2020_public>`_ .
+The full analysis of `Birrer et al. 2020 <https://arxiv.org/abs/2007.02941>`_ is publicly available `at this TDCOSMO repository <https://github.com/TDCOSMO/hierarchy_analysis_2020_public>`_ .
 A forecast based on hierArc is presented by `Birrer & Treu 2020 <https://arxiv.org/abs/2008.06157>`_
 and the notebooks are available `at this repository <https://github.com/sibirrer/TDCOSMO_forecast>`_.
 The extension to using hierArc with standardizable magnifications is presented by `Birrer et al. 2021 <https://arxiv.org/abs/2107.12385>`_

@@ -36,7 +36,7 @@ PACKAGE_PATH = os.path.abspath(os.path.join(__file__, os.pardir))
 setup(
     author="Simon Birrer",
     author_email='sibirrer@gmail.com',
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -51,7 +51,7 @@ setup(
     description="Hierarchical analysis of strong lensing systems to infer lens properties and cosmological parameters simultaneously",
     install_requires=requirements,
     license="BSD license",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     include_package_data=True,
     keywords='hierarc',
     name='hierarc',
