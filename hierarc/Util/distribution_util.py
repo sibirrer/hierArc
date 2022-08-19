@@ -33,11 +33,12 @@ class PDFSampling(object):
 
 
 def approx_cdf_1d(bin_edges, pdf_array):
+
     """
 
     :param bin_edges: bin edges of PDF values
     :param pdf_array: pdf array of given bins (len(bin_edges)-1)
-    :return cdf, interp1d function of cdf, inverse interpolation function
+    :return: cdf, interp1d function of cdf, inverse interpolation function
     """
     assert len(bin_edges) == len(pdf_array) + 1
     norm_pdf = pdf_array/np.sum(pdf_array)

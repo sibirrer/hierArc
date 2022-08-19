@@ -21,7 +21,7 @@ def cov_error_create(error_independent, error_covariance):
 
     :param error_independent: array of Gaussian 1-sigma uncertainties
     :param error_covariance: float, shared covariant error among all data points. So if all data points are off by
-    1-sigma, then the log likelihood is 1-sigma
+     1-sigma, then the log likelihood is 1-sigma
     :return: error covariance matrix
     """
     error_covariance_array = np.ones_like(error_independent) * error_covariance
