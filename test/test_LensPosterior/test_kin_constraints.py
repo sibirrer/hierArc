@@ -56,8 +56,10 @@ class TestIFUKinPosterior(object):
 
         # compute likelihood
         kin_constraints = KinConstraints(z_lens=z_lens, z_source=z_source, theta_E=theta_E, theta_E_error=0.01,
-                                         gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05, sigma_v=[sigma_v],
-                                         sigma_v_error_independent=[10], sigma_v_error_covariant=0,
+                                         gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05,
+                                         sigma_v_measured=[sigma_v],
+                                         sigma_v_error_independent=[10], sigma_v_error_cov_matrix=[[100]],
+                                         sigma_v_error_covariant=0,
                                          kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
                                          anisotropy_model=anisotropy_model, **kwargs_kin_api_settings)
 
@@ -115,7 +117,7 @@ class TestIFUKinPosterior(object):
 
         # compute likelihood
         kin_constraints = KinConstraints(z_lens=z_lens, z_source=z_source, theta_E=theta_E, theta_E_error=0.01,
-                                         gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05, sigma_v=[sigma_v],
+                                         gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05, sigma_v_measured=[sigma_v],
                                          sigma_v_error_independent=[10], sigma_v_error_covariant=0,
                                          kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
                                          anisotropy_model=anisotropy_model, **kwargs_kin_api_settings)
@@ -157,7 +159,7 @@ class TestRaise(unittest.TestCase):
                                        'num_kin_sampling': 1000, 'num_psf_sampling': 100}
             kin_constraints = KinConstraints(z_lens=z_lens, z_source=z_source, theta_E=theta_E, theta_E_error=0.01,
                                              gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05,
-                                             sigma_v=[200],
+                                             sigma_v_measured=[200],
                                              sigma_v_error_independent=[10], sigma_v_error_covariant=0,
                                              kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
                                              anisotropy_model=anisotropy_model, **kwargs_kin_api_settings)
