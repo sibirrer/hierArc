@@ -53,9 +53,6 @@ class SneLikelihoodFromFile(object):
         elif sample_name == 'Pantheon':
             self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_lcparam_full_long_zhel.txt')
             self._cov_file = os.path.join(_PATH_2_DATA, 'pantheon_sys_full_long.txt')
-        elif sample_name == 'Pantheon+SH0ES':
-            self._data_file = os.path.join(_PATH_2_DATA, 'Pantheon+SH0ES', 'Pantheon+SH0ES.dat')
-            self._cov_file = os.path.join(_PATH_2_DATA, 'Pantheon+SH0ES', 'Pantheon+SH0ES_STAT+SYS.cov')
         elif sample_name == 'Roman_forecast':
             self._data_file = os.path.join(_PATH_2_DATA, 'RomanWFIRST', 'lcparam_WFIRST_G10.txt')
             self._cov_file = os.path.join(_PATH_2_DATA, 'RomanWFIRST', 'sys_WFIRST_G10_0.txt')
