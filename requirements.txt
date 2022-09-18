@@ -6,6 +6,7 @@ emcee
 mpmath
 h5py
 matplotlib
+pandas
 lenstronomy>=1.9.2
 # -e git://github.com/sibirrer/lenstronomy.git@main#egg=lenstronomy
 scikit-learn>=0.22
