@@ -46,13 +46,13 @@ class PantheonPlusData(object):
         # to match the only rows of data that are used for cosmology
 
         f = open(filename)
-        # line = f.readline()
+        line = f.readline()
         n = int(len(self.zCMB))
         C = np.zeros((n,n))
         ii = -1
-        # jj = -1
-        # mine = 999
-        # maxe = -999
+        jj = -1
+        mine = 999
+        maxe = -999
         for i in range(self.origlen):
             jj = -1
             if self.ww[i]:
