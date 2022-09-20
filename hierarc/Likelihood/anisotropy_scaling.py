@@ -56,7 +56,7 @@ class AnisotropyScalingIFU(object):
         """
         self._anisotropy_model = anisotropy_model
         self._evalute_ani = False
-        if ani_param_array is not None and ani_scaling_array_list is not None and self._anisotropy_model is not 'NONE':
+        if ani_param_array is not None and ani_scaling_array_list is not None and self._anisotropy_model != 'NONE':
             self._evalute_ani = True
             self._anisotropy_scaling_list = []
             self._f_ani_list = []

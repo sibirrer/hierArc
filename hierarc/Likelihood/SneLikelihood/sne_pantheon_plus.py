@@ -48,7 +48,7 @@ class PantheonPlusData(object):
         f = open(filename)
         line = f.readline()
         n = int(len(self.zCMB))
-        C = np.zeros((n,n))
+        C = np.zeros((n, n))
         ii = -1
         jj = -1
         mine = 999
@@ -63,6 +63,6 @@ class PantheonPlusData(object):
                 val = float(f.readline())
                 if self.ww[i]:
                     if self.ww[j]:
-                        C[ii,jj] = val
+                        C[ii, jj] = val
         f.close()
         return C
