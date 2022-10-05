@@ -1,6 +1,5 @@
 import numpy as np
 from lenstronomy.Util import constants as const
-from lenstronomy.Util.data_util import magnitude2cps
 
 
 class TDMagMagnitudeLikelihood(object):

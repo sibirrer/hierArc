@@ -11,10 +11,10 @@ class GoodnessOfFit(object):
         """
 
         :param kwargs_likelihood_list: list of likelihood kwargs of individual lenses consistent with the
-        LensLikelihood module
+         LensLikelihood module
         """
         self._kwargs_likelihood_list = kwargs_likelihood_list
-        self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list)
+        self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list, normalized=True)
 
     def plot_ddt_fit(self, cosmo, kwargs_lens, kwargs_kin, color_measurement=None, color_prediction=None,
                      redshift_trend=False):

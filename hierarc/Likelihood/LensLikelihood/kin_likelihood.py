@@ -61,6 +61,8 @@ class KinLikelihood(object):
         lnlikelihood = -delta.dot(cov_error_inv.dot(delta)) / 2.
         if self._normalized is True:
             sign_det, lndet = np.linalg.slogdet(cov_error)
+            if sign_det < 0:
+                raise ValueError('error covariance matrix needs to be positive definite')
             lnlikelihood -= 1 / 2. * (self.num_data * np.log(2 * np.pi) + lndet)
         return lnlikelihood
 
@@ -78,7 +80,7 @@ class KinLikelihood(object):
 
     def sigma_v_model(self, ds_dds, aniso_scaling=1):
         """
-        model predicted velocity dispersion for the iFU's
+        model predicted velocity dispersion for the IFU's
 
         :param ds_dds: Ds/Dds
         :param aniso_scaling: scaling of the anisotropy affecting sigma_v^2

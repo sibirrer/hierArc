@@ -13,7 +13,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
                  num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
-                 lambda_scaling_property=0, **kwargs_likelihood):
+                 lambda_scaling_property=0, normalized=False, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -37,6 +37,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
          in sampling this lens.
         :param lambda_scaling_property: float (optional), scaling of
          lambda_mst = lambda_mst_global + alpha * lambda_scaling_property
+        :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
+         (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -46,7 +48,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         AnisotropyScalingIFU.__init__(self, anisotropy_model=anisotropy_model, ani_param_array=ani_param_array,
                                       ani_scaling_array_list=ani_scaling_array_list)
         LensLikelihoodBase.__init__(self, z_lens=z_lens, z_source=z_source, likelihood_type=likelihood_type, name=name,
-                                    **kwargs_likelihood)
+                                    normalized=normalized, **kwargs_likelihood)
         self._num_distribution_draws = int(num_distribution_draws)
         self._kappa_ext_bias = kappa_ext_bias
         self._mst_ifu = mst_ifu
