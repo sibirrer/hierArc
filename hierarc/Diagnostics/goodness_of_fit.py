@@ -16,6 +16,15 @@ class GoodnessOfFit(object):
         self._kwargs_likelihood_list = kwargs_likelihood_list
         self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list, normalized=True)
 
+    def reduced_chi2(self, cosmo, kwargs_lens, kwargs_kin):
+        """
+        reduced chi^2 of fit
+
+        """
+        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
+        num_data = self._sample_likelihood.num_data()
+        return -logL * 2 / num_data
+
     def plot_ddt_fit(self, cosmo, kwargs_lens, kwargs_kin, color_measurement=None, color_prediction=None,
                      redshift_trend=False):
         """
@@ -30,10 +39,8 @@ class GoodnessOfFit(object):
         :param redshift_trend: boolean, if True, plots as a function of redshift
         :return: fig, axes of matplotlib instance
         """
-        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
-        print(logL, 'log likelihood')
-        num_data = self._sample_likelihood.num_data()
-        print(-logL * 2 / num_data, 'reduced chi2')
+        red_chi2 = self.reduced_chi2(cosmo, kwargs_lens, kwargs_kin)
+        print(red_chi2, 'reduced chi2')
 
         ddt_name_list = []
         ddt_model_mean_list = []
