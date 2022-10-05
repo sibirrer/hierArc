@@ -66,8 +66,8 @@ class GoodnessOfFit(object):
         ax.errorbar(x, ddt_data_mean_list, yerr=ddt_data_sigma_list,
                     color=color_measurement,
                     xerr=None, fmt='o', ecolor=None, elinewidth=None,
-                     capsize=None, barsabove=False, lolims=False, uplims=False,
-                     xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
+                    capsize=None, barsabove=False, lolims=False, uplims=False,
+                    xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
 
         ax.errorbar(x, ddt_model_mean_list, yerr=ddt_model_sigma_list,
                     color=color_prediction,
@@ -79,8 +79,8 @@ class GoodnessOfFit(object):
             # put redshift ticks on top of plot
             ax2 = ax.twiny()
             ax2.set_xlim(ax.get_xlim())
-            #ax2.set_xticks(z_list)
-            #ax2.set_xticklabels(labels=ddt_name_list, rotation='vertical')
+            # ax2.set_xticks(z_list)
+            # ax2.set_xticklabels(labels=ddt_name_list, rotation='vertical')
             ax2.set_xlabel('lens redshift', fontsize=15)
 
         ax.set_xticks(ticks=x)
@@ -144,20 +144,20 @@ class GoodnessOfFit(object):
 
         f, ax = plt.subplots(1, 1, figsize=(int(len(sigma_v_name_list)/2), 4))
         ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_measurement_list,
-                         yerr=sigma_v_measurement_error_list, xerr=None, fmt='o',
-                         ecolor=None, elinewidth=None, color=color_measurement,
-                         capsize=5, barsabove=False, lolims=False, uplims=False,
-                         xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
+                    yerr=sigma_v_measurement_error_list, xerr=None, fmt='o',
+                    ecolor=None, elinewidth=None, color=color_measurement,
+                    capsize=5, barsabove=False, lolims=False, uplims=False,
+                    xlolims=False, xuplims=False, errorevery=1, capthick=None, data=None, label='measurement')
         ax.errorbar(np.arange(len(sigma_v_name_list)), sigma_v_model_list, color=color_prediction,
-                         yerr=sigma_v_model_error_list, xerr=None, fmt='o',
-                         ecolor=None, elinewidth=None, label='prediction', capsize=5)
+                    yerr=sigma_v_model_error_list, xerr=None, fmt='o',
+                    ecolor=None, elinewidth=None, label='prediction', capsize=5)
         ax.set_xticks(ticks=np.arange(len(sigma_v_name_list)))
         ax.set_xticklabels(labels=sigma_v_name_list, rotation='vertical')
         ax.set_ylabel(r'$\sigma^{\rm P}$ [km/s]', fontsize=15)
         ax.legend()
         return f, ax
 
-    def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, radial_bin_size, show_legend=True,
+    def plot_ifu_fit(self, ax, cosmo, kwargs_lens, kwargs_kin, lens_index, bin_edges, show_legend=True,
                      color_measurement=None, color_prediction=None):
         """
         plot an individual IFU data goodness of fit
@@ -166,8 +166,9 @@ class GoodnessOfFit(object):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
-        :param lens_index: int, index in kwargs_lens to be plotted (needs to by of type 'IFUKinCov')
-        :param radial_bin_size: radial bin size in arc seconds
+        :param lens_index: int, index in kwargs_lens to be plotted (needs to be of type 'IFUKinCov')
+        :param bin_edges: radial bin edges in arc seconds. If number, then uniform bin_edges sampled from 0
+        :type bin_edges: numpy array or float.
         :param show_legend: bool, to show legend
         :param color_measurement: color of measurement
         :param color_prediction: color of model prediction
@@ -176,16 +177,22 @@ class GoodnessOfFit(object):
         kwargs_likelihood = self._kwargs_likelihood_list[lens_index]
         name = kwargs_likelihood.get('name', 'lens ' + str(lens_index))
         likelihood = self._sample_likelihood._lens_list[lens_index]
-        if not likelihood.likelihood_type == 'IFUKinCov':
-            raise ValueError('likelihood type of lens %s is %s. Must be "IFUKinCov"' %(name, likelihood.likelihood_type))
+
+        if likelihood.likelihood_type not in ['IFUKinCov', 'DdtHistKin', 'DdtGaussKin']:
+            raise ValueError('likelihood type of lens %s is %s. Must be "IFUKinCov", "DdtHistKin", "DdtGaussKin" '
+                             % (name, likelihood.likelihood_type))
         sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict = likelihood.sigma_v_measured_vs_predict(
             cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin)
 
-        r_bins = radial_bin_size/2. + np.arange(len(sigma_v_measurement))
-        ax.errorbar(r_bins, sigma_v_measurement, yerr=np.sqrt(np.diag(cov_error_measurement)), xerr=radial_bin_size/2.,
-                      fmt='o', label='data', capsize=5, color=color_measurement)
-        ax.errorbar(r_bins, sigma_v_predict_mean, yerr=np.sqrt(np.diag(cov_error_predict)), xerr=radial_bin_size/2.,
-                      fmt='o', label='model', capsize=5, color=color_prediction)
+        if len(np.atleast_1d(bin_edges)) < 2:
+            bin_edges = np.arange(len(sigma_v_measurement)+1) * bin_edges
+        r_bins = (bin_edges[:-1] + np.diff(bin_edges) / 2)
+
+        ax.errorbar(x=r_bins, y=sigma_v_measurement, xerr=np.diff(bin_edges) / 2.,
+                    yerr=np.sqrt(np.diag(cov_error_measurement)),
+                    fmt='o', label='data', capsize=5, color=color_measurement)
+        ax.errorbar(r_bins, sigma_v_predict_mean, yerr=np.sqrt(np.diag(cov_error_predict)), xerr=np.diff(bin_edges) / 2.,
+                    fmt='o', label='model', capsize=5, color=color_prediction)
         if show_legend is True:
             ax.legend(fontsize=20)
         ax.set_title(name, fontsize=20)

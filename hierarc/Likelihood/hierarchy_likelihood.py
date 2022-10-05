@@ -26,7 +26,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
          (to generate an interpolation function). A value =1 in ani_scaling_array results in the value stored in the
          provided J() predictions.
         :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
-        :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged over
+        :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
+         over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
         If False, the likelihood needs to incorporate the individual selection function with sufficient accuracy.
         :param kappa_pdf: array of probability density function of the external convergence distribution
@@ -34,7 +35,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kappa_bin_edges: array of length (len(kappa_pdf)+1), bin edges of the kappa PDF
         :param mst_ifu: bool, if True replaces the lambda_mst parameter by the lambda_ifu parameter (and distribution)
          in sampling this lens.
-        :param lambda_scaling_property: float (optional), scaling of lambda_mst = lambda_mst_global + alpha * lambda_scaling_property
+        :param lambda_scaling_property: float (optional), scaling of
+         lambda_mst = lambda_mst_global + alpha * lambda_scaling_property
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -124,7 +126,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword arguments of source brightness
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
-        :return: log likelihood given the single lens analysis for a single (random) realization of the hyper parameter distribution
+        :return: log likelihood given the single lens analysis for a single (random) realization of the hyper parameter
+         distribution
         """
         lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
         # draw intrinsic source magnitude
@@ -185,7 +188,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         a_ani_sigma = kwargs_kin.get('a_ani_sigma', 0)
         beta_inf_sigma = kwargs_kin.get('beta_inf_sigma', 0)
         sne_sigma = kwargs_source.get('sigma_sne', 0)
-        if a_ani_sigma == 0 and lambda_mst_sigma == 0 and kappa_ext_sigma == 0 and beta_inf_sigma == 0 and sne_sigma == 0:
+        if a_ani_sigma == 0 and lambda_mst_sigma == 0 and kappa_ext_sigma == 0 and beta_inf_sigma == 0 \
+           and sne_sigma == 0:
             if self._draw_kappa is False:
                 return True
         return False
@@ -202,7 +206,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param gamma_ppn: Post-Newtonian parameter
         :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified for
         :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of lenses specified for
-        :param alpha_lambda: float, linear slope of the lambda_int scaling relation with lens quantity self._lambda_scaling_property
+        :param alpha_lambda: float, linear slope of the lambda_int scaling relation with lens quantity
+         self._lambda_scaling_property
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
@@ -237,7 +242,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         # return linear amplitude with base log 10
         return mag_source
 
-    def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens={}, kwargs_kin={}):
+    def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens=None, kwargs_kin=None):
         """
         mean and error covariance of velocity dispersion measurement
         mean and error covariance of velocity dispersion predictions
@@ -248,8 +253,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :return: sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict
         """
         # if no kinematics is provided, return None's
-        if not self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
+        if self.likelihood_type not in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
             return None, None, None, None
+        if kwargs_lens is None:
+            kwargs_lens = {}
+        if kwargs_kin is None:
+            kwargs_kin = {}
         kwargs_kin_copy = copy.deepcopy(kwargs_kin)
         sigma_v_sys_error = kwargs_kin_copy.pop('sigma_v_sys_error', None)
         ddt, dd = self.angular_diameter_distances(cosmo)
@@ -274,7 +283,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         cov_error_predict += np.outer(sigma_v_mean_std, sigma_v_mean_std)
         return sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict
 
-    def ddt_dd_model_prediction(self, cosmo, kwargs_lens={}):
+    def ddt_dd_model_prediction(self, cosmo, kwargs_lens=None):
         """
         predicts the model uncertainty corrected ddt prediction of the applied model (e.g. power-law)
 
@@ -282,6 +291,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :return: ddt_model mean, ddt_model sigma, dd_model mean, dd_model sigma
         """
+        if kwargs_lens is None:
+            kwargs_lens = {}
         ddt, dd = self.angular_diameter_distances(cosmo)
         ddt_draws = []
         dd_draws = []
@@ -303,4 +314,3 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         if kwargs is None:
             kwargs = {}
         return kwargs
-
