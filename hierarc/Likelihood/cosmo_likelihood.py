@@ -105,6 +105,7 @@ class CosmoLikelihood(object):
                 kwargs_kde_likelihood = {}
             self._kde_likelihood = KDELikelihood(KDE_likelihood_chain, **kwargs_kde_likelihood)
             self._kde_evaluate = True
+            self._chain_params = self._kde_likelihood.chain.list_params()
         else:
             self._kde_evaluate = False
 
@@ -146,9 +147,9 @@ class CosmoLikelihood(object):
             logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
                                                         z_anchor=z_apparent_m_anchor, sigma_m_z=sigma_m_z)
         if self._kde_evaluate is True:
-            cosmo_params = np.array([[kwargs_cosmo[k] for k in kwargs_cosmo.keys()]])
+            cosmo_params = np.array([[kwargs_cosmo[k] for k in self._chain_params]]) #all chain_params must be in the kwargs_cosmo
             cosmo_params = rescale_vector_to_unity(cosmo_params, self._kde_likelihood.chain.rescale_dic,
-                                                   kwargs_cosmo.keys())
+                                                   self._chain_params)
             logL += self._kde_likelihood.kdelikelihood_samples(cosmo_params)[0]
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
