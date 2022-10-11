@@ -63,12 +63,12 @@ class TestDdtKinGaussConstraints(object):
 
         # compute likelihood
         kin_constraints = DdtKinConstraints(z_lens=z_lens, z_source=z_source, theta_E=theta_E, theta_E_error=0.01,
-                                                 ddt_samples=ddt_samples, ddt_weights=None,
-                                         gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05, sigma_v=[sigma_v],
-                                         sigma_v_error_independent=[10], sigma_v_error_covariant=0,
-                                         kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
+                                            ddt_samples=ddt_samples, ddt_weights=None,
+                                            gamma=gamma, gamma_error=0.02, r_eff=r_eff, r_eff_error=0.05, sigma_v_measured=[sigma_v],
+                                            sigma_v_error_independent=[10], sigma_v_error_covariant=0,
+                                            kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
                                             kwargs_lens_light=kwargs_lens_light,
-                                         anisotropy_model=anisotropy_model, **kwargs_kin_api_settings)
+                                            anisotropy_model=anisotropy_model, **kwargs_kin_api_settings)
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood['normalized'] = False

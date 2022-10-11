@@ -7,9 +7,10 @@ class DdtKinConstraints(KinConstraints):
     time-delay distance Ddt
     """
 
-    def __init__(self, z_lens, z_source, ddt_samples, ddt_weights, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
-                 sigma_v, sigma_v_error_independent, sigma_v_error_covariant, kwargs_aperture, kwargs_seeing,
-                 kwargs_numerics_galkin, anisotropy_model,
+    def __init__(self, z_lens, z_source, ddt_samples, ddt_weights, theta_E, theta_E_error, gamma, gamma_error, r_eff,
+                 r_eff_error, sigma_v_measured, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
+                 anisotropy_model, sigma_v_error_independent=None, sigma_v_error_covariant=None,
+                 sigma_v_error_cov_matrix=None,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
                  hernquist_approx=True, kappa_ext=0, kappa_ext_sigma=0, sampling_number=1000, num_psf_sampling=100,
                  num_kin_sampling=1000, multi_observations=False):
@@ -20,9 +21,12 @@ class DdtKinConstraints(KinConstraints):
         :param ddt_samples: numpy array with a sample reflecting the likelihood density in Ddt given imaging data and
          time delays.
         :param ddt_weights: None or lenght of ddt_samples, weights of individual ddt_samples
-        :param sigma_v: numpy array of IFU velocity dispersion of the main deflector in km/s
-        :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity dispersion of the IFU observation independent of each other
+        :param sigma_v_measured: numpy array of IFU velocity dispersion of the main deflector in km/s
+        :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity dispersion of the IFU
+         observation independent of each other
         :param sigma_v_error_covariant: covariant error in the measured kinematics shared among all IFU measurements
+        :param sigma_v_error_cov_matrix: error covariance matrix in the sigma_v measurements (km/s)^2
+        :type sigma_v_error_cov_matrix: nxn matrix with n the length of the sigma_v_measured array
         :param kwargs_aperture: spectroscopic aperture keyword arguments, see lenstronomy.Galkin.aperture for options
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
         :param theta_E: Einstein radius (in arc seconds)
@@ -44,9 +48,11 @@ class DdtKinConstraints(KinConstraints):
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
         super(DdtKinConstraints, self).__init__(z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff,
-                                                r_eff_error, sigma_v, sigma_v_error_independent,
-                                                sigma_v_error_covariant, kwargs_aperture, kwargs_seeing,
+                                                r_eff_error, sigma_v_measured, kwargs_aperture, kwargs_seeing,
                                                 kwargs_numerics_galkin, anisotropy_model,
+                                                sigma_v_error_independent=sigma_v_error_independent,
+                                                sigma_v_error_covariant=sigma_v_error_covariant,
+                                                sigma_v_error_cov_matrix=sigma_v_error_cov_matrix,
                                                 kwargs_lens_light=kwargs_lens_light,
                                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
                                                 kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
@@ -71,7 +77,7 @@ class DdtKinConstraints(KinConstraints):
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtHistKin',
                              'ddt_samples': self._ddt_sample, 'ddt_weights': self._ddt_weights,
-                             'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
+                             'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
                              'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.ani_param_array,
                              'ani_scaling_array_list': ani_scaling_array_list}

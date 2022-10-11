@@ -6,11 +6,12 @@ class KinConstraints(BaseLensConfig):
     """
     class that manages constraints from Integral Field Unit spectral observations.
     """
-    def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error, sigma_v,
-                 sigma_v_error_independent, sigma_v_error_covariant, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
-                 kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000,
-                 multi_observations=False):
+    def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
+                 sigma_v_measured, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
+                 sigma_v_error_independent=None, sigma_v_error_covariant=None, sigma_v_error_cov_matrix=None,
+                 kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'],
+                 MGE_light=False, kwargs_mge_light=None, hernquist_approx=True, sampling_number=1000,
+                 num_psf_sampling=100, num_kin_sampling=1000, multi_observations=False):
         """
 
         :param z_lens: lens redshift
@@ -21,22 +22,28 @@ class KinConstraints(BaseLensConfig):
         :param gamma_error: 1-sigma uncertainty on power-law slope
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
-        :param sigma_v: numpy array of IFU velocity dispersion of the main deflector in km/s
-        :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity dispersion of the IFU observation independent of each other
+        :param sigma_v_measured: numpy array of IFU velocity dispersion of the main deflector in km/s
+        :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity dispersion of the IFU
+         observation independent of each other
         :param sigma_v_error_covariant: covariant error in the measured kinematics shared among all IFU measurements
+        :param sigma_v_error_cov_matrix: error covariance matrix in the sigma_v measurements (km/s)^2
+        :type sigma_v_error_cov_matrix: nxn matrix with n the length of the sigma_v_measured array
         :param kwargs_aperture: spectroscopic aperture keyword arguments, see lenstronomy.Galkin.aperture for options
-        :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
+        :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds to kwargs_psf in the GalKin
+         module specified in lenstronomy.GalKin.psf
         :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
-        :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of
+         lenstronomy.GalKin.anisotropy
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
         """
-        self._sigma_v = np.array(sigma_v)
+        self._sigma_v_measured = np.array(sigma_v_measured)
         self._sigma_v_error_independent = np.array(sigma_v_error_independent)
         self._sigma_v_error_covariant = sigma_v_error_covariant
+        self._sigma_v_error_cov_matrix = sigma_v_error_cov_matrix
 
         self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
@@ -84,7 +91,7 @@ class KinConstraints(BaseLensConfig):
         error_cov_measurement = self.error_cov_measurement
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
-                             'sigma_v_measurement': self._sigma_v, 'anisotropy_model': self._anisotropy_model,
+                             'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
                              'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.ani_param_array,
                              'ani_scaling_array_list': ani_scaling_array_list}
@@ -97,7 +104,7 @@ class KinConstraints(BaseLensConfig):
          kinematic component J()
         :return: J() as array for each measurement prediction, covariance matrix in sqrt(J)
         """
-        num_data = len(self._sigma_v)
+        num_data = len(self._sigma_v_measured)
         j_kin_matrix = np.zeros((num_sample_model, num_data))  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
             j_kin = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=False)
@@ -110,14 +117,22 @@ class KinConstraints(BaseLensConfig):
     @property
     def error_cov_measurement(self):
         """
-        error covariance matrix
+        error covariance matrix of the measured velocity dispersion data points
+        This is either calculated from the diagonal 'sigma_v_error_independent' and the off-diagonal
+        'sigma_v_error_covariant' terms, or directly from the 'sigma_v_error_cov_matrix' if provided.
 
-        :return:
+        :return: nxn matrix of the error covariances in the velocity dispersion measurements (km/s)^2
         """
-        error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
-        error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(
-            self._sigma_v_error_independent ** 2)
-        return error_cov_measurement
+        if self._sigma_v_error_cov_matrix is None:
+            if self._sigma_v_error_independent is None or self._sigma_v_error_covariant is None:
+                raise ValueError('sigma_v_error_independent and sigma_v_error_covariant need to be provided as arrays '
+                                 'of the same length as sigma_v_measurement.')
+            error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
+            error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(
+                self._sigma_v_error_independent ** 2)
+            return error_cov_measurement
+        else:
+            return self._sigma_v_error_cov_matrix
 
     def anisotropy_scaling(self):
         """
@@ -134,10 +149,10 @@ class KinConstraints(BaseLensConfig):
         :param j_ani_0: default J() prediction for default anisotropy
         :return: list of arrays (for the number of measurements) according to anisotropy scaling
         """
-        num_data = len(self._sigma_v)
+        num_data = len(self._sigma_v_measured)
 
         if self._anisotropy_model == 'GOM':
-            ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for i in
+            ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for _ in
                                       range(num_data)]
             for i, a_ani in enumerate(self.ani_param_array[0]):
                 for j, beta_inf in enumerate(self.ani_param_array[1]):
@@ -146,7 +161,7 @@ class KinConstraints(BaseLensConfig):
                     for k, j_kin in enumerate(j_kin_ani):
                         ani_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
         elif self._anisotropy_model == 'OM':
-            ani_scaling_array_list = [[] for i in range(num_data)]
+            ani_scaling_array_list = [[] for _ in range(num_data)]
             for a_ani in self.ani_param_array:
                 kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
                 j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)

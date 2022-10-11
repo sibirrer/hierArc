@@ -9,13 +9,15 @@ class LensLikelihoodBase(object):
     """
     master class containing the likelihood definitions of different analysis
     """
-    def __init__(self, z_lens, z_source, likelihood_type, name='name', **kwargs_likelihood):
+    def __init__(self, z_lens, z_source, likelihood_type, name='name', normalized=False, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
         :param z_source: source redshift
         :param name: string (optional) to name the specific lens
         :param likelihood_type: string to specify the likelihood type
+        :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
+         (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -40,7 +42,7 @@ class LensLikelihoodBase(object):
             self._lens_type = DdtLogNormLikelihood(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'IFUKinCov':
             from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
-            self._lens_type = KinLikelihood(z_lens, z_source, **kwargs_likelihood)
+            self._lens_type = KinLikelihood(z_lens, z_source, normalized=normalized, **kwargs_likelihood)
         elif likelihood_type == 'DdtHist':
             from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistLikelihood
             self._lens_type = DdtHistLikelihood(z_lens, z_source, **kwargs_likelihood)
@@ -49,10 +51,10 @@ class LensLikelihoodBase(object):
             self._lens_type = DdtHistKDELikelihood(z_lens, z_source, **kwargs_likelihood)
         elif likelihood_type == 'DdtHistKin':
             from hierarc.Likelihood.LensLikelihood.ddt_hist_kin_likelihood import DdtHistKinLikelihood
-            self._lens_type = DdtHistKinLikelihood(z_lens, z_source, **kwargs_likelihood)
+            self._lens_type = DdtHistKinLikelihood(z_lens, z_source, normalized=normalized, **kwargs_likelihood)
         elif likelihood_type == 'DdtGaussKin':
             from hierarc.Likelihood.LensLikelihood.ddt_gauss_kin_likelihood import DdtGaussKinLikelihood
-            self._lens_type = DdtGaussKinLikelihood(z_lens, z_source, **kwargs_likelihood)
+            self._lens_type = DdtGaussKinLikelihood(z_lens, z_source, normalized=normalized, **kwargs_likelihood)
         elif likelihood_type == 'Mag':
             from hierarc.Likelihood.LensLikelihood.mag_likelihood import MagnificationLikelihood
             self._lens_type = MagnificationLikelihood(**kwargs_likelihood)

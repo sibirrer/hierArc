@@ -34,7 +34,7 @@ class AnisotropyScalingSingleAperture(object):
         :param aniso_param_array: anisotropy parameter array
         :return: scaling J(a_ani) for single slit
         """
-        if not self._evalute_ani is True or aniso_param_array is None:
+        if self._evalute_ani is not True or aniso_param_array is None:
             return 1
         if self._dim_scaling == 1:
             return self._f_ani(aniso_param_array[0])
@@ -56,7 +56,7 @@ class AnisotropyScalingIFU(object):
         """
         self._anisotropy_model = anisotropy_model
         self._evalute_ani = False
-        if ani_param_array is not None and ani_scaling_array_list is not None and self._anisotropy_model is not 'NONE':
+        if ani_param_array is not None and ani_scaling_array_list is not None and self._anisotropy_model != 'NONE':
             self._evalute_ani = True
             self._anisotropy_scaling_list = []
             self._f_ani_list = []
@@ -84,7 +84,7 @@ class AnisotropyScalingIFU(object):
         :param aniso_param_array: anisotropy parameter array
         :return: scaling J(a_ani) for the IFU's
         """
-        if not self._evalute_ani is True or aniso_param_array is None:
+        if self._evalute_ani is not True or aniso_param_array is None:
             return [1]
         scaling_list = []
         for scaling_class in self._anisotropy_scaling_list:

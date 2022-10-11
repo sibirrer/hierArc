@@ -59,7 +59,8 @@ class CosmoLikelihood(object):
          Currently supports:
          'GAUSSIAN': Gaussian distribution
         :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
-        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
+        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space
+         (and thus flat prior in log)
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
         log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up

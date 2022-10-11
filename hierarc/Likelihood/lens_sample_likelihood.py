@@ -7,14 +7,16 @@ class LensSampleLikelihood(object):
     class to evaluate the likelihood of a cosmology given a sample of angular diameter posteriors
     Currently this class does not include possible covariances between the lens samples
     """
-    def __init__(self, kwargs_lens_list):
+    def __init__(self, kwargs_lens_list, normalized=False):
         """
 
         :param kwargs_lens_list: keyword argument list specifying the arguments of the LensLikelihood class
+        :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
+         (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         """
         self._lens_list = []
         for kwargs_lens in kwargs_lens_list:
-            self._lens_list.append(LensLikelihood(**kwargs_lens))
+            self._lens_list.append(LensLikelihood(normalized=normalized, **kwargs_lens))
 
     def log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
@@ -25,11 +27,11 @@ class LensSampleLikelihood(object):
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :return: log likelihood of the combined lenses
         """
-        logL = 0
+        log_likelihood = 0
         for lens in self._lens_list:
-            logL += lens.lens_log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
-                                             kwargs_source=kwargs_source)
-        return logL
+            log_likelihood += lens.lens_log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+                                                       kwargs_source=kwargs_source)
+        return log_likelihood
 
     def num_data(self):
         """

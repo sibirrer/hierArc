@@ -49,7 +49,6 @@ class SneLikelihoodFromFile(object):
             self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_binned_lcparam_DS17f.txt')
             self._cov_file = None
             pec_z = 0
-
         elif sample_name == 'Pantheon':
             self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_lcparam_full_long_zhel.txt')
             self._cov_file = os.path.join(_PATH_2_DATA, 'pantheon_sys_full_long.txt')

@@ -2,6 +2,7 @@ import numpy as np
 
 from hierarc.Likelihood.SneLikelihood.sne_likelihood_from_file import SneLikelihoodFromFile
 from hierarc.Likelihood.SneLikelihood.sne_likelihood_custom import CustomSneLikelihood
+from hierarc.Likelihood.SneLikelihood.sne_pantheon_plus import PantheonPlusData
 
 
 class SneLikelihood(object):
@@ -17,6 +18,14 @@ class SneLikelihood(object):
         """
         if sample_name == 'CUSTOM':
             self._likelihood = CustomSneLikelihood(**kwargs_sne_likelihood)
+        elif sample_name == 'PantheonPlus':
+            from hierarc.Likelihood.SneLikelihood.sne_pantheon_plus import PantheonPlusData
+            data = PantheonPlusData()
+            mag_mean = data.m_obs
+            cov_mag = data.cov_mag_b
+            zhel = data.zHEL
+            zcmb = data.zCMB
+            self._likelihood = CustomSneLikelihood(mag_mean, cov_mag, zhel, zcmb, no_intrinsic_scatter=True)
         else:
             self._likelihood = SneLikelihoodFromFile(sample_name=sample_name, **kwargs_sne_likelihood)
         self.zhel = self._likelihood.zhel

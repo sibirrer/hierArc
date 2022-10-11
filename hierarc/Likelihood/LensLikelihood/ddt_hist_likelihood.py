@@ -90,7 +90,8 @@ class DdtHistKDELikelihood(object):
     Evaluates the likelihood of a time-delay distance ddt (in Mpc) against the model predictions, using a
          loglikelihood sampled from a Kernel Density Estimator. the KDE is constructed using a binned version of the
          full samples. Greatly improves speed at the cost of a (tiny) loss in precision
-        __warning:: you should adjust bandwidth and nbins_hist to the spacing and size of your samples chain!
+
+    __warning:: you should adjust bandwidth and nbins_hist to the spacing and size of your samples chain!
 
     original source: https://github.com/shsuyu/H0LiCOW-public/blob/master/H0_inference_code/lensutils.py
     credits to Martin Millon, Aymeric Galan

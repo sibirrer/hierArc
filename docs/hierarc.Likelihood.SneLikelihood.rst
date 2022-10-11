@@ -28,6 +28,14 @@ hierarc.Likelihood.SneLikelihood.sne\_likelihood\_from\_file module
    :undoc-members:
    :show-inheritance:
 
+hierarc.Likelihood.SneLikelihood.sne\_pantheon\_plus module
+-----------------------------------------------------------
+
+.. automodule:: hierarc.Likelihood.SneLikelihood.sne_pantheon_plus
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 
