@@ -2,6 +2,7 @@ __author__ = 'martin-millon'
 
 import glob
 import os
+
 import numpy as np
 
 
@@ -14,7 +15,7 @@ class Chain(object):
         """
 
         :param kw: (str). Planck base cosmology keyword. For example, "base" or "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-        :param probe: (str). Planck probe combination. For example "plikHM_TTTEEE_lowl_lowE" for default Planck results
+        :param probe: (str). Planck probe combination. For example, "plikHM_TTTEEE_lowl_lowE" for default Planck results
         :param params: (dictionnary). Dictionnary containing the samples.
         :param default_weights: (numpy array). Default weights associated to the samples.
         :param cosmology: (str). Astropy cosmology
@@ -126,7 +127,7 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
 
     :param datapath: (str). Path to the Planck chain
     :param kw: (str). Planck base cosmology keyword. For example, "base" or "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-    :param probe: (str). Planck probe combination. For example "plikHM_TTTEEE_lowl_lowE" for default Planck results
+    :param probe: (str). Planck probe combination. For example, "plikHM_TTTEEE_lowl_lowE" for default Planck results
     :param params: (list). List of cosmological parameters. ["h0", "om"] for FLCDM.
     :param cosmology: (str). Astropy cosmology
     :param rescale: (bool). Rescale the chains between 0 and 1 for all parameters. This is absolutely necessary if you want to evaluate a KDE on these chains.
@@ -160,23 +161,23 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
         elif 'omegam*\t\\Omega_m\n' in line:
             params_index["om"] = ind + 2
 
-        elif 'mnu\t\\Sigma m_\\nu\n' in line:
+        elif 'mnu\t\\Sigma m_\\nu\n' in line:  # pragma: no cover
             params_index["mnu"] = ind + 2
 
-        elif 'nnu\tN_{eff}\n' in line:
+        elif 'nnu\tN_{eff}\n' in line:  # pragma: no cover
             params_index["nnu"] = ind + 2
 
-        elif 'omegak\t\\Omega_K\n' in line:
+        elif 'omegak\t\\Omega_K\n' in line:  # pragma: no cover
             params_index["ok"] = ind + 2
 
-        elif 'w\tw\n' in line:
+        elif 'w\tw\n' in line:  # pragma: no cover
             params_index["w"] = ind + 2
             params_index["w0"] = ind + 2
 
-        elif 'wa\tw_a\n' in line:
+        elif 'wa\tw_a\n' in line:  # pragma: no cover
             params_index["wa"] = ind + 2
 
-        elif 'meffsterile\tm_{\\nu,{\\rm{sterile}}}^{\\rm{eff}}\n' in line:
+        elif 'meffsterile\tm_{\\nu,{\\rm{sterile}}}^{\\rm{eff}}\n' in line:  # pragma: no cover
             params_index["meffsterile"] = ind + 2
 
     default_weights = []

@@ -1,11 +1,15 @@
 __author__ = 'martin-millon'
 
-import pandas as pd
+import os
+
 import numpy as np
+import pandas as pd
 from sklearn.neighbors import KernelDensity
 
-LIKELIHOOD_TYPES = ["kde_hist_nd", "kde_full"]
+import hierarc
 
+LIKELIHOOD_TYPES = ["kde_hist_nd", "kde_full"]
+_PATH_2_PLANCKDATA = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'Planck')
 
 class KDELikelihood(object):
     """
@@ -19,7 +23,7 @@ class KDELikelihood(object):
 
     def __init__(self, chain, likelihood_type="kde_hist_nd",
                  weight_type='default',
-                 kde_kernel=None,
+                 kde_kernel='gaussian',
                  bandwidth=0.01, nbins_hist=30):
         """
 
@@ -77,9 +81,9 @@ class KDELikelihood(object):
         :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled between 0 and 1.
         :return: scikit-learn KernelDensity
         """
-        data = pd.DataFrame.from_dict(self.params)
+        data = pd.DataFrame.from_dict(self.chain.params)
         kde = KernelDensity(kernel=kde_kernel, bandwidth=bandwidth).fit(data.values,
-                                                                        sample_weight=self.weights[self.weight_type])
+                                                                        sample_weight=self.chain.weights[self.weight_type])
         return kde
 
     def init_kernel_kdelikelihood_hist_nd(self, kde_kernel, bandwidth, nbins_hist):
