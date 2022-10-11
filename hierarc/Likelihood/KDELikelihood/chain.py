@@ -19,6 +19,7 @@ class Chain(object):
         :param params: (dictionnary). Dictionnary containing the samples.
         :param default_weights: (numpy array). Default weights associated to the samples.
         :param cosmology: (str). Astropy cosmology
+        :param loglsamples: (numpy array). Corresponding Loglikelihood of the samples (optionnal).
         :param rescale: (bool). Rescale the chains between 0 and 1 for all parameters. This is absolutely necessary if you want to evaluate a KDE on these chains.
         """
         self.kw = kw
@@ -33,18 +34,35 @@ class Chain(object):
             self.rescale_to_unity()
 
     def __str__(self):
+        """
+        Print the identifier of the Chain.
+        :return:
+        """
         return "%s_%s" % (self.kw, self.probe)
 
     def list_params(self):
-        """list the cosmo parameters that are not empty"""
+        """
+        List the cosmo parameters that are not empty
+        :return: List of parameter name
+        """
         return [p for p in self.params.keys() if len(self.params[p]) > 0]
 
     def list_weights(self):
-        """list the existing weights"""
+        """
+        List the existing weights
+        :return: Array of weights
+        """
         return [w for w in self.weights.keys() if len(self.weights[w]) > 0]
 
     def fill_default(self, param, default_val, nsamples=None, verbose=False):
-        """fill an empty default param with a default value"""
+        """
+        Fill an empty default param with a default value
+
+        :param param: (string) Name of the parameter to fill with default value
+        :param default_val: (float). Default value.
+        :param nsamples: (int). Number of samples in the Chain. If None, it will take the same number of samples as for the other parameters
+        :param verbose: (bool).
+        """
         assert (len(self.params[param]) == 0)
         if nsamples is None:
             lp = self.list_params()
@@ -57,7 +75,7 @@ class Chain(object):
 
     def fill_default_array(self, param, default_array, verbose=False):
         """
-        fill an empty default param with a default array
+        Fill an empty default param with a default array
 
         :param param: (str). Name of the parameter
         :param default_array: (numpy array). Must have the same dimension as the samples.
