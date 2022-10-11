@@ -1,8 +1,25 @@
 __author__ = 'martin-millon'
 
+import glob
+import os
+import numpy as np
+
 
 class Chain(object):
+    """
+    Chain class to have a convenient way to manipulate posteriors distributions of some experiments.
+    """
+
     def __init__(self, kw, probe, params, default_weights, cosmology, loglsamples=None, rescale=True):
+        """
+
+        :param kw: (str). Planck base cosmology keyword. For example, "base" or "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
+        :param probe: (str). Planck probe combination. For example "plikHM_TTTEEE_lowl_lowE" for default Planck results
+        :param params: (dictionnary). Dictionnary containing the samples.
+        :param default_weights: (numpy array). Default weights associated to the samples.
+        :param cosmology: (str). Astropy cosmology
+        :param rescale: (bool). Rescale the chains between 0 and 1 for all parameters. This is absolutely necessary if you want to evaluate a KDE on these chains.
+        """
         self.kw = kw
         self.probe = probe
         self.params = params
@@ -38,7 +55,14 @@ class Chain(object):
             print("filled %s with value %f" % (param, default_val))
 
     def fill_default_array(self, param, default_array, verbose=False):
-        """fill an empty default param with a default array"""
+        """
+        fill an empty default param with a default array
+
+        :param param: (str). Name of the parameter
+        :param default_array: (numpy array). Must have the same dimension as the samples.
+        :param verbose: (bool).
+        """
+
         lp = self.list_params()
         assert (len(lp) > 0)
         nsamples = len(self.params[lp[0]])
@@ -53,9 +77,19 @@ class Chain(object):
             print("filled %s" % (param))
 
     def create_param(self, param_key):
+        """
+        Add a new parameter to the Chain
+
+        :param param_key: (str). Parameter name.
+        """
         self.params[param_key] = []
 
     def rescale_to_unity(self, verbose=False):
+        """
+        Rescale all parameter chains between 0 and 1.
+
+        :param verbose: (bool).
+        """
         if self.rescale_dic['rescaled']:
             raise RuntimeError('Your data are already rescaled!')
         else:
@@ -69,6 +103,11 @@ class Chain(object):
             self.rescale_dic['rescaled'] = True
 
     def rescale_from_unity(self, verbose=False):
+        """
+        Rescale all parameter chains to their original values.
+
+        :param verbose: (bool).
+        """
         if not self.rescale_dic['rescaled']:
             raise RuntimeError('Your data are not rescaled, call rescale_to_unity() first')
         else:
@@ -83,15 +122,15 @@ class Chain(object):
 
 def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
     """
-    Special function to import Planck chain. Return a Chain object.
+    Special function to parse Planck files. Return a Chain object.
 
-    :param datapath: path to the Placnk chain
-    :param kw:
-    :param probe:
-    :param params:
-    :param cosmology:
-    :param rescale:
-    :return:
+    :param datapath: (str). Path to the Planck chain
+    :param kw: (str). Planck base cosmology keyword. For example, "base" or "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
+    :param probe: (str). Planck probe combination. For example "plikHM_TTTEEE_lowl_lowE" for default Planck results
+    :param params: (list). List of cosmological parameters. ["h0", "om"] for FLCDM.
+    :param cosmology: (str). Astropy cosmology
+    :param rescale: (bool). Rescale the chains between 0 and 1 for all parameters. This is absolutely necessary if you want to evaluate a KDE on these chains.
+    :return: Chain object.
     """
     # the planck chains are usually split in four files
     chainspaths = glob.glob("%s/%s_%s_?.txt" % (os.path.join(datapath, kw, probe), kw, probe))
@@ -110,16 +149,16 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
     # We corresponding index is +2, since the first two parameters of each sample (weights ) are not in params
     for ind, line in enumerate(params_all):
         if 'omegal*\t\\Omega_\\Lambda\n' in line:
-            params_index["omegal"] = ind + 2
+            params_index["ol"] = ind + 2
 
         elif 'ns\tn_s\n' in line:
             params_index["ns"] = ind + 2
 
         elif 'H0*\tH_0\n' in line:
-            params_index["H0"] = ind + 2
+            params_index["h0"] = ind + 2
 
         elif 'omegam*\t\\Omega_m\n' in line:
-            params_index["omegam"] = ind + 2
+            params_index["om"] = ind + 2
 
         elif 'mnu\t\\Sigma m_\\nu\n' in line:
             params_index["mnu"] = ind + 2
@@ -128,10 +167,11 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
             params_index["nnu"] = ind + 2
 
         elif 'omegak\t\\Omega_K\n' in line:
-            params_index["omegak"] = ind + 2
+            params_index["ok"] = ind + 2
 
         elif 'w\tw\n' in line:
             params_index["w"] = ind + 2
+            params_index["w0"] = ind + 2
 
         elif 'wa\tw_a\n' in line:
             params_index["wa"] = ind + 2
@@ -162,6 +202,14 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
 
 
 def rescale_vector_from_unity(vector, rescale_dic, keys):
+    """
+    Restore the original scaling of the samples, given the value in `rescale_dic`.
+
+    :param vector: (numpy array). Vector to be rescaled.
+    :param rescale_dic: (dictionnary). Contains the min and max value for each parameters.
+    :param keys: (list). Contain the name of the parameter to be rescaled. all keys must be in the rescale_dic.
+    :return:
+    """
     for i, key in enumerate(keys):
         max, min = rescale_dic[key]
         vector[:, i] = ((max - min)) * vector[:, i] + min
@@ -169,6 +217,14 @@ def rescale_vector_from_unity(vector, rescale_dic, keys):
 
 
 def rescale_vector_to_unity(vector, rescale_dic, keys):
+    """
+    Rescale a vector accroding to the min adn max value provided in rescale_dic
+
+    :param vector: (numpy array). Vector to be rescaled.
+    :param rescale_dic: (dictionnary). Contains the min and max value for each parameters.
+    :param keys: Contain the name of the parameter to be rescaled. all keys must be in the rescale_dic.
+    :return:
+    """
     for i, key in enumerate(keys):
         max, min = rescale_dic[key]
         vector[:, i] = ((vector[:, i] - min) / (max - min))

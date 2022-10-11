@@ -1,6 +1,7 @@
 __author__ = 'martin-millon'
 
 import pandas as pd
+import numpy as np
 from sklearn.neighbors import KernelDensity
 
 LIKELIHOOD_TYPES = ["kde_hist_nd", "kde_full"]
@@ -8,13 +9,28 @@ LIKELIHOOD_TYPES = ["kde_hist_nd", "kde_full"]
 
 class KDELikelihood(object):
     """
-    KDE likelihood class. Provide Chain object that will be used as your likelihood.
+    KDE likelihood class. Provide a Chain object that will be used as your likelihood.
+    __warning:: This class is not fully tested for more than 5 free parameters. Use at your own risk.
+
+    __note:: Parameters need to be rescaled between 0 and 1 for this to work optimally. Think about rescaling your Chain
+    with the 'rescale = True' option.
+
     """
 
     def __init__(self, chain, likelihood_type="kde_hist_nd",
                  weight_type='default',
                  kde_kernel=None,
                  bandwidth=0.01, nbins_hist=30):
+        """
+
+        :param chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density estimator
+        :param likelihood_type: (str). "kde_hist_nd" or "kde_full". Use "kde_hist_nd" in most cases as it is much faster and do not decrease much the precision
+        :param weight_type: (str). Name of the weight to use. You can provude several type of weights for your samples. This is usefull when you importance sampling
+        :param kde_kernel: (str). Kernel type to be passed to scikit-learn. Default : 'gaussian'.
+        :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled between 0 and 1.
+        :param nbins_hist: (float). Number of bins to use before fitting KDE. Used only if likelihood_type = 'kde_hist_nd'.
+        """
+
         self.chain = chain
         self.loglikelihood_type = likelihood_type
         self.weight_type = weight_type
@@ -24,6 +40,9 @@ class KDELikelihood(object):
         self.init_loglikelihood()
 
     def init_loglikelihood(self):
+        """
+        Initialisation of the KDE, depending on loglikelihood_type.
+        """
         if self.loglikelihood_type == "kde_full":
             self.kde = self.init_kernel_full(kde_kernel=self.kde_kernel, bandwidth=self.bandwidth)
             self.loglikelihood = self.kdelikelihood()
@@ -52,6 +71,12 @@ class KDELikelihood(object):
         return self.kde.score_samples(samples)
 
     def init_kernel_full(self, kde_kernel, bandwidth):
+        """
+
+        :param kde_kernel: kde_kernel: (str). Kernel type to be passed to scikit-learn. Default : 'gaussian'.
+        :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled between 0 and 1.
+        :return: scikit-learn KernelDensity
+        """
         data = pd.DataFrame.from_dict(self.params)
         kde = KernelDensity(kernel=kde_kernel, bandwidth=bandwidth).fit(data.values,
                                                                         sample_weight=self.weights[self.weight_type])
@@ -65,6 +90,10 @@ class KDELikelihood(object):
 
         __note:: nbins_hist refer to the number of bins per dimension. Hence, the final number of bins will be nbins_hist**n
 
+        :param kde_kernel: kde_kernel: (str). Kernel type to be passed to scikit-learn. Default : 'gaussian'.
+        :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled between 0 and 1.
+        :param nbins_hist: (float). Number of bins to use before fitting KDE. Used only if likelihood_type = 'kde_hist_nd'.
+        :return: scikit-learn KernelDensity
         """
         samples = np.asarray([self.chain.params[keys] for keys in self.chain.params.keys()])
         hist, edges = np.histogramdd(samples.T, bins=nbins_hist)

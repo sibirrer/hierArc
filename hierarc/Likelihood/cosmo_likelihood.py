@@ -3,6 +3,8 @@ from hierarc.Sampling.ParamManager.param_manager import ParamManager
 # from hierarc.Likelihood.cosmo_interp import CosmoInterp
 from lenstronomy.Cosmo.cosmo_interp import CosmoInterp
 from hierarc.Likelihood.SneLikelihood.sne_likelihood import SneLikelihood
+from hierarc.Likelihood.KDELikelihood.kde_likelihood import KDELikelihood
+from hierarc.Likelihood.KDELikelihood.chain import rescale_vector_from_unity, rescale_vector_to_unity
 import numpy as np
 
 
@@ -12,7 +14,7 @@ class CosmoLikelihood(object):
     """
 
     def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, sne_likelihood=None,
-                 kwargs_sne_likelihood=None,
+                 kwargs_sne_likelihood=None, KDE_likelihood_chain=None, kwargs_kde_likelihood=None,
                  ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
@@ -30,6 +32,8 @@ class CosmoLikelihood(object):
         'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
         'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
         'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
+        :param KDE_likelihood_chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density estimator
+        :param kwargs_kde_likelihood: keyword argument for the KDE likelihood, see KDELikelihood module for options
         :param sne_likelihood: (string), optional. Sampling supernovae relative expansion history likelihood, see
          SneLikelihood module for options
         :param kwargs_sne_likelihood: keyword argument for the SNe likelihood, see SneLikelihood module for options
@@ -95,6 +99,14 @@ class CosmoLikelihood(object):
         else:
             self._sne_evaluate = False
 
+        if KDE_likelihood_chain is not None:
+            if kwargs_kde_likelihood is None:
+                kwargs_kde_likelihood = {}
+            self._kde_likelihood = KDELikelihood(KDE_likelihood_chain, **kwargs_kde_likelihood)
+            self._kde_evaluate = True
+        else:
+            self._kde_evaluate = False
+
         for kwargs_lens in kwargs_likelihood_list:
             if kwargs_lens['z_source'] > z_max:
                 z_max = kwargs_lens['z_source']
@@ -115,8 +127,9 @@ class CosmoLikelihood(object):
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo['h0'], kwargs_cosmo['ok'], kwargs_cosmo['om']
             if np.any(
-                    [ok * (1.0 + lens['z_source']) ** 2 + om * (1.0 + lens['z_source']) ** 3 + (1.0 - om - ok) <= 0 for lens in
-                     self._kwargs_lens_list]):
+                [ok * (1.0 + lens['z_source']) ** 2 + om * (1.0 + lens['z_source']) ** 3 + (1.0 - om - ok) <= 0 for lens
+                 in
+                 self._kwargs_lens_list]):
                 return -np.inf
             # make sure that Omega_DE is not negative...
             if 1.0 - om - ok <= 0:
@@ -131,6 +144,11 @@ class CosmoLikelihood(object):
             sigma_m_z = kwargs_source.get('sigma_sne', None)
             logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
                                                         z_anchor=z_apparent_m_anchor, sigma_m_z=sigma_m_z)
+        if self._kde_evaluate is True:
+            cosmo_params = np.array([[kwargs_cosmo[k] for k in kwargs_cosmo.keys()]])
+            cosmo_params = rescale_vector_to_unity(cosmo_params, self._kde_likelihood.chain.rescale_dic,
+                                                   kwargs_cosmo.keys())
+            logL += self._kde_likelihood.kdelikelihood_samples(cosmo_params)[0]
         if self._prior_add is True:
             logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
         return logL
