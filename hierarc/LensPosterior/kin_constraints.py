@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 from hierarc.LensPosterior.base_config import BaseLensConfig
 
@@ -63,12 +65,17 @@ class KinConstraints(BaseLensConfig):
         :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        theta_E_draw, gamma_draw, r_eff_draw = self.draw_lens(no_error=no_error)
+        theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(no_error=no_error)
         kwargs_lens = [{'theta_E': theta_E_draw, 'gamma': gamma_draw, 'center_x': 0, 'center_y': 0}]
         if self._kwargs_lens_light is None:
             kwargs_light = [{'Rs': r_eff_draw * 0.551, 'amp': 1.}]
         else:
-            kwargs_light = self._kwargs_lens_light
+            kwargs_light = copy.deepcopy(self._kwargs_lens_light)
+            for kwargs in kwargs_light:
+                if 'Rs' in kwargs:
+                    kwargs['Rs'] *= delta_r_eff
+                if 'R_sersic' in kwargs:
+                    kwargs['R_sersic'] *= delta_r_eff
         j_kin = self.velocity_dispersion_map_dimension_less(kwargs_lens=kwargs_lens, kwargs_lens_light=kwargs_light,
                                                             kwargs_anisotropy=kwargs_anisotropy, r_eff=r_eff_draw,
                                                             theta_E=theta_E_draw, gamma=gamma_draw)
@@ -100,8 +107,8 @@ class KinConstraints(BaseLensConfig):
     def model_marginalization(self, num_sample_model=20):
         """
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
-         kinematic component J()
+        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the
+         dimensionless kinematic component J()
         :return: J() as array for each measurement prediction, covariance matrix in sqrt(J)
         """
         num_data = len(self._sigma_v_measured)

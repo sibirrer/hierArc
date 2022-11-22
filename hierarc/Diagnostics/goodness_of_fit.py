@@ -14,7 +14,7 @@ class GoodnessOfFit(object):
          LensLikelihood module
         """
         self._kwargs_likelihood_list = kwargs_likelihood_list
-        self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list, normalized=True)
+        self._sample_likelihood = LensSampleLikelihood(kwargs_likelihood_list, normalized=False)
 
     def reduced_chi2(self, cosmo, kwargs_lens, kwargs_kin):
         """

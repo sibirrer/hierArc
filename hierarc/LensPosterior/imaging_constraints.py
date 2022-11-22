@@ -23,10 +23,10 @@ class ImageModelPosterior(object):
         """
 
         :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
-        :return: theta_E, gamma, r_eff
+        :return: theta_E, gamma, r_eff, delta_r_eff
         """
         if no_error is True:
-            return self._theta_E, self._gamma, self._r_eff
+            return self._theta_E, self._gamma, self._r_eff, 0
         theta_E_draw = np.maximum(np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0)
         gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
         # distributions are drawn in the range [1, 3)
@@ -35,5 +35,6 @@ class ImageModelPosterior(object):
         gamma_draw = np.maximum(gamma_draw, 1.)
         gamma_draw = np.minimum(gamma_draw, 2.999)
         # we make sure no negative r_eff are being sampled
-        r_eff_draw = np.maximum(np.random.normal(loc=self._r_eff, scale=self._r_eff_error), 0.001)
-        return theta_E_draw, gamma_draw, r_eff_draw
+        delta_r_eff = np.maximum(np.random.normal(loc=1, scale=self._r_eff_error/self._r_eff), 0.001)
+        r_eff_draw = delta_r_eff * self._r_eff
+        return theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff

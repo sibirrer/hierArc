@@ -3,6 +3,7 @@ from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 import numpy.testing as npt
+import numpy as np
 import pytest
 
 
@@ -12,6 +13,7 @@ class TestDdtKinGaussConstraints(object):
         pass
 
     def test_likelihoodconfiguration_om(self):
+        np.random.seed(42)
         anisotropy_model = 'OM'
         kwargs_aperture = {'aperture_type': 'shell', 'r_in': 0, 'r_out': 3 / 2., 'center_ra': 0.0, 'center_dec': 0}
         kwargs_seeing = {'psf_type': 'GAUSSIAN', 'fwhm': 1.4}
