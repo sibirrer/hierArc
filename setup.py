@@ -27,7 +27,7 @@ class PyTest(TestCommand):
 
 requirements = ['numpy>=1.13', 'scipy>=0.14.0']
 
-setup_requirements = ['pytest-runner']
+setup_requirements = []
 
 test_requirements = ['pytest>=3', ]
 
