@@ -15,9 +15,9 @@ def blind_posterior(posterior, param_names):
     posterior_blind = copy.deepcopy(posterior)
     for i, param_name in enumerate(param_names):
         if param_name == 'lambda_mst':
-            # shift all lambda_int posteriors to a mean = 1
-            posterior_blind[:, i] *= 1 / np.mean(posterior_blind[:, i])
+            # shift all lambda_int posteriors to a median = 1
+            posterior_blind[:, i] *= 1 / np.median(posterior_blind[:, i])
         if param_name == 'h0':
             # shift all H0 posteriors to a mean = 70
-            posterior_blind[:, i] *= 70 / np.mean(posterior_blind[:, i])
+            posterior_blind[:, i] *= 70 / np.median(posterior_blind[:, i])
     return posterior_blind

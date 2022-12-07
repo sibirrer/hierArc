@@ -9,7 +9,8 @@ class LensLikelihoodBase(object):
     """
     master class containing the likelihood definitions of different analysis
     """
-    def __init__(self, z_lens, z_source, likelihood_type, name='name', normalized=False, **kwargs_likelihood):
+    def __init__(self, z_lens, z_source, likelihood_type, name='name', normalized=False,
+                 kwargs_lens_properties=None, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -18,6 +19,7 @@ class LensLikelihoodBase(object):
         :param likelihood_type: string to specify the likelihood type
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
+        :param kwargs_lens_properties: keyword arguments of the lens properties
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -25,6 +27,9 @@ class LensLikelihoodBase(object):
         self.z_lens = z_lens
         self.z_source = z_source
         self.likelihood_type = likelihood_type
+        if kwargs_lens_properties is None:
+            kwargs_lens_properties = {}
+        self.kwargs_lens_properties = kwargs_lens_properties
         if likelihood_type in ['DdtGaussian']:
             from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import DdtGaussianLikelihood
             self._lens_type = DdtGaussianLikelihood(z_lens, z_source, **kwargs_likelihood)
