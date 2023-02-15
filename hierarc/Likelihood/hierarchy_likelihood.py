@@ -223,7 +223,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                           + beta_lambda * self._lambda_scaling_property_beta
             lambda_mst_draw = np.random.normal(lambda_lens, lambda_ifu_sigma)
         else:
-            lambda_lens = lambda_ifu + alpha_lambda * self._lambda_scaling_property \
+            lambda_lens = lambda_mst + alpha_lambda * self._lambda_scaling_property \
                           + beta_lambda * self._lambda_scaling_property_beta
             lambda_mst_draw = np.random.normal(lambda_lens, lambda_mst_sigma)
         if self._draw_kappa is True:
