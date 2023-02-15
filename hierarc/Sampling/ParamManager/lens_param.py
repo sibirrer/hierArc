@@ -7,7 +7,7 @@ class LensParam(object):
     """
     def __init__(self, lambda_mst_sampling=False, lambda_mst_distribution='NONE', kappa_ext_sampling=False,
                  kappa_ext_distribution='NONE', lambda_ifu_sampling=False, lambda_ifu_distribution='NONE',
-                 alpha_lambda_sampling=False, kwargs_fixed=None, log_scatter=False):
+                 alpha_lambda_sampling=False, beta_lambda_sampling=False, kwargs_fixed=None, log_scatter=False):
         """
 
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
@@ -19,6 +19,8 @@ class LensParam(object):
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
          according to a predefined quantity of the lens
+        :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly
+         according to a predefined quantity of the lens
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param kwargs_fixed: keyword arguments that are held fixed through the sampling
         """
@@ -29,6 +31,7 @@ class LensParam(object):
         self._kappa_ext_sampling = kappa_ext_sampling
         self._kappa_ext_distribution = kappa_ext_distribution
         self._alpha_lambda_sampling = alpha_lambda_sampling
+        self._beta_lambda_sampling = beta_lambda_sampling
         self._log_scatter = log_scatter
         if kwargs_fixed is None:
             kwargs_fixed = {}
@@ -89,6 +92,12 @@ class LensParam(object):
                     list.append(r'$\alpha_{\lambda}$')
                 else:
                     list.append('alpha_lambda')
+        if self._beta_lambda_sampling is True:
+            if 'beta_lambda' not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r'$\beta_{\lambda}$')
+                else:
+                    list.append('beta_lambda')
         return list
 
     def args2kwargs(self, args, i=0):
@@ -146,6 +155,12 @@ class LensParam(object):
             else:
                 kwargs['alpha_lambda'] = args[i]
                 i += 1
+        if self._beta_lambda_sampling is True:
+            if 'beta_lambda' in self._kwargs_fixed:
+                kwargs['beta_lambda'] = self._kwargs_fixed['beta_lambda']
+            else:
+                kwargs['beta_lambda'] = args[i]
+                i += 1
         return kwargs, i
 
     def kwargs2args(self, kwargs):
@@ -182,4 +197,7 @@ class LensParam(object):
         if self._alpha_lambda_sampling is True:
             if 'alpha_lambda' not in self._kwargs_fixed:
                 args.append(kwargs['alpha_lambda'])
+        if self._beta_lambda_sampling is True:
+            if 'beta_lambda' not in self._kwargs_fixed:
+                args.append(kwargs['beta_lambda'])
         return args
