@@ -20,7 +20,7 @@ class AnisotropyConfig(object):
         elif self._anisotropy_model == 'GOM':
             self._ani_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5]), np.array([0, 0.5, 0.8, 1])]
         elif self._anisotropy_model == 'const':
-            self._ani_param_array = np.linspace(0, 1, 10)  # used for constant anisotropy description
+            self._ani_param_array = np.linspace(-1, 1, 10)  # used for constant anisotropy description
         else:
             raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
 

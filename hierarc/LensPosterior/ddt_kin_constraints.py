@@ -12,7 +12,7 @@ class DdtKinConstraints(KinConstraints):
                  anisotropy_model, sigma_v_error_independent=None, sigma_v_error_covariant=None,
                  sigma_v_error_cov_matrix=None,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True, kappa_ext=0, kappa_ext_sigma=0, sampling_number=1000, num_psf_sampling=100,
+                 hernquist_approx=False, kappa_ext=0, kappa_ext_sigma=0, sampling_number=1000, num_psf_sampling=100,
                  num_kin_sampling=1000, multi_observations=False):
         """
 
@@ -47,9 +47,12 @@ class DdtKinConstraints(KinConstraints):
         """
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
-        super(DdtKinConstraints, self).__init__(z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff,
-                                                r_eff_error, sigma_v_measured, kwargs_aperture, kwargs_seeing,
-                                                kwargs_numerics_galkin, anisotropy_model,
+        super(DdtKinConstraints, self).__init__(z_lens=z_lens, z_source=z_source, theta_E=theta_E,
+                                                theta_E_error=theta_E_error, gamma=gamma, gamma_error=gamma_error,
+                                                r_eff=r_eff, r_eff_error=r_eff_error, sigma_v_measured=sigma_v_measured,
+                                                kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
+                                                kwargs_numerics_galkin=kwargs_numerics_galkin,
+                                                anisotropy_model=anisotropy_model,
                                                 sigma_v_error_independent=sigma_v_error_independent,
                                                 sigma_v_error_covariant=sigma_v_error_covariant,
                                                 sigma_v_error_cov_matrix=sigma_v_error_cov_matrix,
