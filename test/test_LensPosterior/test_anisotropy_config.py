@@ -31,7 +31,7 @@ class TestAnisotropyConfig(object):
         assert len(ani_param_array[1]) == 4
 
         ani_param_array = self.config_const.ani_param_array
-        assert len(ani_param_array) == 10
+        assert len(ani_param_array) == 7
 
     def test_anisotropy_kwargs(self):
         a_ani = 2
