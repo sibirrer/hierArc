@@ -18,7 +18,7 @@ class KinParam(object):
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param kwargs_fixed: keyword arguments of the fixed parameters
         """
-        assert anisotropy_model in ['NONE', 'GOM', 'OM']
+        assert anisotropy_model in ['NONE', 'GOM', 'OM', 'const']
         self._anisotropy_sampling = anisotropy_sampling
         self._anisotropy_model = anisotropy_model
         self._distribution_function = distribution_function
@@ -37,7 +37,7 @@ class KinParam(object):
         """
         list = []
         if self._anisotropy_sampling is True:
-            if self._anisotropy_model in ['OM', 'GOM']:
+            if self._anisotropy_model in ['OM', 'GOM', 'const']:
                 if 'a_ani' not in self._kwargs_fixed:
                     if latex_style is True:
                         list.append(r'$\langle a_{\rm ani}\rangle$')
@@ -87,7 +87,7 @@ class KinParam(object):
         """
         kwargs = {}
         if self._anisotropy_sampling is True:
-            if self._anisotropy_model in ['OM', 'GOM']:
+            if self._anisotropy_model in ['OM', 'GOM', 'const']:
                 if 'a_ani' in self._kwargs_fixed:
                     kwargs['a_ani'] = self._kwargs_fixed['a_ani']
                 else:
@@ -136,7 +136,7 @@ class KinParam(object):
         """
         args = []
         if self._anisotropy_sampling is True:
-            if self._anisotropy_model in ['OM', 'GOM']:
+            if self._anisotropy_model in ['OM', 'GOM', 'const']:
                 if 'a_ani' not in self._kwargs_fixed:
                     args.append(kwargs['a_ani'])
                 if self._distribution_function in ['GAUSSIAN']:

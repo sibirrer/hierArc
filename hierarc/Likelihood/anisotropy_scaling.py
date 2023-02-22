@@ -68,7 +68,7 @@ class AnisotropyScalingIFU(object):
                 self._dim_scaling = len(ani_param_array)
             else:
                 self._dim_scaling = 1
-            if self._dim_scaling == 1 and anisotropy_model == 'OM':
+            if self._dim_scaling == 1 and anisotropy_model in ['OM', 'const']:
                 self._ani_param_min = np.min(ani_param_array)
                 self._ani_param_max = np.max(ani_param_array)
             elif self._dim_scaling == 2 and anisotropy_model == 'GOM':
@@ -102,10 +102,14 @@ class AnisotropyScalingIFU(object):
         :param beta_inf_sigma: std of beta_inf distribution
         :return: random draw from the distribution
         """
-        if self._anisotropy_model in ['OM']:
+        if self._anisotropy_model in ['OM', 'const']:
             if a_ani < self._ani_param_min or a_ani > self._ani_param_max:
                 raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
-            a_ani_draw = np.random.normal(a_ani, a_ani_sigma*a_ani)
+            # we draw a linear gaussian for 'const' anisotropy and a scaled proportional one for 'OM
+            if self._anisotropy_model == 'OM':
+                a_ani_draw = np.random.normal(a_ani, a_ani_sigma*a_ani)
+            else:
+                a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
             if a_ani_draw < self._ani_param_min or a_ani_draw > self._ani_param_max:
                 return self.draw_anisotropy(a_ani, a_ani_sigma)
             return np.array([a_ani_draw])

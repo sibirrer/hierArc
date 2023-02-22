@@ -167,7 +167,7 @@ class KinConstraints(BaseLensConfig):
                     j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                     for k, j_kin in enumerate(j_kin_ani):
                         ani_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
-        elif self._anisotropy_model == 'OM':
+        elif self._anisotropy_model in ['OM', 'const']:
             ani_scaling_array_list = [[] for _ in range(num_data)]
             for a_ani in self.ani_param_array:
                 kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
