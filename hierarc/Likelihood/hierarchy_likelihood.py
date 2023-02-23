@@ -13,7 +13,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
                  num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
-                 lambda_scaling_property=0, normalized=False, kwargs_lens_properties=None, **kwargs_likelihood):
+                 lambda_scaling_property=0,lambda_scaling_property_beta=0,
+                 normalized=False, kwargs_lens_properties=None, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -37,6 +38,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
          in sampling this lens.
         :param lambda_scaling_property: float (optional), scaling of
          lambda_mst = lambda_mst_global + alpha * lambda_scaling_property
+        :param lambda_scaling_property_beta: float (optional), scaling of
+         lambda_mst = lambda_mst_global + beta * lambda_scaling_property_beta
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
@@ -60,6 +63,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         else:
             self._draw_kappa = False
         self._lambda_scaling_property = lambda_scaling_property
+        self._lambda_scaling_property_beta = lambda_scaling_property_beta
 
     def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
@@ -199,7 +203,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return False
 
     def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1, lambda_ifu=1,
-                  lambda_ifu_sigma=0, alpha_lambda=0):
+                  lambda_ifu_sigma=0, alpha_lambda=0, beta_lambda=0):
         """
         draws a realization of a specific model from the hyper-parameter distribution
 
@@ -212,13 +216,17 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of lenses specified for
         :param alpha_lambda: float, linear slope of the lambda_int scaling relation with lens quantity
          self._lambda_scaling_property
+        :param beta_lambda: float, a second linear slope of the lambda_int scaling relation with lens quantity
+         self._lambda_scaling_property_beta
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
-            lambda_lens = lambda_ifu + alpha_lambda * self._lambda_scaling_property
+            lambda_lens = lambda_ifu + alpha_lambda * self._lambda_scaling_property \
+                          + beta_lambda * self._lambda_scaling_property_beta
             lambda_mst_draw = np.random.normal(lambda_lens, lambda_ifu_sigma)
         else:
-            lambda_lens = lambda_mst + alpha_lambda * self._lambda_scaling_property
+            lambda_lens = lambda_mst + alpha_lambda * self._lambda_scaling_property \
+                          + beta_lambda * self._lambda_scaling_property_beta
             lambda_mst_draw = np.random.normal(lambda_lens, lambda_mst_sigma)
         if self._draw_kappa is True:
             kappa_ext_draw = self._kappa_dist.draw_one

@@ -17,7 +17,8 @@ class CosmoLikelihood(object):
                  kwargs_sne_likelihood=None, KDE_likelihood_chain=None, kwargs_kde_likelihood=None,
                  ppn_sampling=False,
                  lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
-                 kappa_ext_sampling=False, kappa_ext_distribution='NONE', alpha_lambda_sampling=False,
+                 kappa_ext_sampling=False, kappa_ext_distribution='NONE',
+                 alpha_lambda_sampling=False, beta_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
                  sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', z_apparent_m_anchor=0.1,
                  log_scatter=False,
@@ -44,7 +45,9 @@ class CosmoLikelihood(object):
         independently
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
-         according to a predefined quantity of the lens
+         according to the lens posterior kwargs 'lambda_scaling_property'
+        :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly
+         according to the lens posterior kwargs 'lambda_scaling_property_beta'
         :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
         :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
@@ -75,6 +78,7 @@ class CosmoLikelihood(object):
                                   lambda_ifu_sampling=lambda_ifu_sampling,
                                   lambda_ifu_distribution=lambda_ifu_distribution,
                                   alpha_lambda_sampling=alpha_lambda_sampling,
+                                  beta_lambda_sampling=beta_lambda_sampling,
                                   sne_apparent_m_sampling=sne_apparent_m_sampling,
                                   sne_distribution=sne_distribution, z_apparent_m_anchor=z_apparent_m_anchor,
                                   sigma_v_systematics=sigma_v_systematics,

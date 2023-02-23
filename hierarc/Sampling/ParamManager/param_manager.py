@@ -11,7 +11,8 @@ class ParamManager(object):
     def __init__(self, cosmology, ppn_sampling=False, lambda_mst_sampling=False, lambda_mst_distribution='NONE',
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
-                 lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, sigma_v_systematics=False,
+                 lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, beta_lambda_sampling=False,
+                 sigma_v_systematics=False,
                  sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', z_apparent_m_anchor=0.1,
                  log_scatter=False,
                  kwargs_lower_cosmo=None, kwargs_upper_cosmo=None,
@@ -27,6 +28,8 @@ class ParamManager(object):
         :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
         independently
         :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
+         according to a predefined quantity of the lens
+        :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly
          according to a predefined quantity of the lens
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
@@ -52,6 +55,7 @@ class ParamManager(object):
                                      kappa_ext_sampling=kappa_ext_sampling,
                                      kappa_ext_distribution=kappa_ext_distribution,
                                      alpha_lambda_sampling=alpha_lambda_sampling,
+                                     beta_lambda_sampling=beta_lambda_sampling,
                                      log_scatter=log_scatter,
                                      kwargs_fixed=kwargs_fixed_lens)
         self._source_param = SourceParam(sne_apparent_m_sampling=sne_apparent_m_sampling,
