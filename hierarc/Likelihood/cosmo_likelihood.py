@@ -45,9 +45,9 @@ class CosmoLikelihood(object):
         independently
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
-         according to a predefined quantity of the lens
+         according to the lens posterior kwargs 'lambda_scaling_property'
         :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly
-         according to a predefined quantity of the lens
+         according to the lens posterior kwargs 'lambda_scaling_property_beta'
         :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
         :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens

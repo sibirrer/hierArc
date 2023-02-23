@@ -216,6 +216,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of lenses specified for
         :param alpha_lambda: float, linear slope of the lambda_int scaling relation with lens quantity
          self._lambda_scaling_property
+        :param beta_lambda: float, a second linear slope of the lambda_int scaling relation with lens quantity
+         self._lambda_scaling_property_beta
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
