@@ -1,5 +1,7 @@
+import copy
 
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
+from hierarc.Likelihood.LensLikelihood.double_source_plane import DSPLikelihood
 
 
 class LensSampleLikelihood(object):
@@ -16,7 +18,12 @@ class LensSampleLikelihood(object):
         """
         self._lens_list = []
         for kwargs_lens in kwargs_lens_list:
-            self._lens_list.append(LensLikelihood(normalized=normalized, **kwargs_lens))
+            if kwargs_lens['likelihood_type'] == 'DSPL':
+                _kwargs_lens = copy.deepcopy(kwargs_lens)
+                _kwargs_lens.pop('likelihood_type')
+                self._lens_list.append(DSPLikelihood(normalized=normalized, **_kwargs_lens))
+            else:
+                self._lens_list.append(LensLikelihood(normalized=normalized, **kwargs_lens))
 
     def log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """

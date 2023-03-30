@@ -13,7 +13,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
                  num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
-                 lambda_scaling_property=0,lambda_scaling_property_beta=0,
+                 lambda_scaling_property=0, lambda_scaling_property_beta=0,
                  normalized=False, kwargs_lens_properties=None, **kwargs_likelihood):
         """
 
@@ -86,9 +86,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
         return self.hyper_param_likelihood(ddt, dd, delta_lum_dist, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
-                                           kwargs_source=kwargs_source)
+                                           kwargs_source=kwargs_source, cosmo=cosmo)
 
-    def hyper_param_likelihood(self, ddt, dd, delta_lum_dist, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
+    def hyper_param_likelihood(self, ddt, dd, delta_lum_dist, kwargs_lens=None, kwargs_kin=None, kwargs_source=None,
+                               cosmo=None):
         """
         log likelihood of the data of a lens given a model (defined with hyper-parameters) and cosmological distances
 
@@ -98,6 +99,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
+        :param cosmo: astropy.cosmology instance
         :return: log likelihood given the single lens analysis for the given hyper parameter
         """
         kwargs_lens = self._kwargs_init(kwargs_lens)
@@ -186,9 +188,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         checks if the provided keyword arguments describe a distribution function of hyper parameters or are single
         values
 
-        :param kwargs_lens: lens model hyper parameter keywords
-        :param kwargs_kin: kinematic model hyper parameter keywords
-        :param kwargs_source: source brightness hyper parameter keywords
+        :param kwargs_lens: lens model hyper-parameter keywords
+        :param kwargs_kin: kinematic model hyper-parameter keywords
+        :param kwargs_source: source brightness hyper-parameter keywords
         :return: bool, True if delta function, else False
         """
         lambda_mst_sigma = kwargs_lens.get('lambda_mst_sigma', 0)  # scatter in MST

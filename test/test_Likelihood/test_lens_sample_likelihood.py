@@ -1,11 +1,10 @@
 import numpy as np
 import pytest
 import numpy.testing as npt
-import unittest
-import copy
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
 from astropy.cosmology import FlatLambdaCDM
+from hierarc.Likelihood.LensLikelihood.double_source_plane import beta_double_source_plane
 
 
 class TestLensLikelihood(object):
@@ -48,6 +47,21 @@ class TestLensLikelihood(object):
     def test_num_data(self):
         num_data = self.likelihood.num_data()
         assert num_data == 3
+
+    def test_double_source_plane(self):
+        cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)
+        zl = 0.5
+        zs1 = 1
+        zs2 = 2
+        beta = beta_double_source_plane(z_lens=zl, z_source_1=zs1, z_source_2=zs2, cosmo=cosmo)
+        sigma_beta = 0.1
+
+        kwargs_lens_list = [{'z_lens': zl, 'z_source_1': zs1, 'z_source_2': zs2,
+                             'beta_dspl': beta, 'sigma_beta_dspl': sigma_beta,
+                             'likelihood_type': 'DSPL'}]
+        likelihood = LensSampleLikelihood(kwargs_lens_list=kwargs_lens_list)
+        log_l = likelihood.log_likelihood(cosmo=cosmo)
+        npt.assert_almost_equal(log_l, 0, decimal=5)
 
 
 if __name__ == '__main__':
