@@ -293,8 +293,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
 
         sigma_v_predict_mean /= self._num_distribution_draws
         cov_error_predict /= self._num_distribution_draws
-        sigma_v_mean_std = np.std(sigma_v_predict_list, axis=0)
-        cov_error_predict += np.outer(sigma_v_mean_std, sigma_v_mean_std)
+        sigma_v_predict_list = np.array(sigma_v_predict_list)
+        # TODO: check whether covariance matrix is calculated properly
+        cov_error_predict += np.cov(sigma_v_predict_list.T)
+        # sigma_v_mean_std = np.std(sigma_v_predict_list, axis=0)
+        # cov_error_predict += np.outer(sigma_v_mean_std, sigma_v_mean_std)
         return sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict
 
     def ddt_dd_model_prediction(self, cosmo, kwargs_lens=None):
