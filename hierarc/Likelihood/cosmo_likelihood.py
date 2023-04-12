@@ -1,10 +1,9 @@
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
 from hierarc.Sampling.ParamManager.param_manager import ParamManager
-# from hierarc.Likelihood.cosmo_interp import CosmoInterp
 from lenstronomy.Cosmo.cosmo_interp import CosmoInterp
 from hierarc.Likelihood.SneLikelihood.sne_likelihood import SneLikelihood
 from hierarc.Likelihood.KDELikelihood.kde_likelihood import KDELikelihood
-from hierarc.Likelihood.KDELikelihood.chain import rescale_vector_from_unity, rescale_vector_to_unity
+from hierarc.Likelihood.KDELikelihood.chain import rescale_vector_to_unity
 import numpy as np
 
 
@@ -33,7 +32,8 @@ class CosmoLikelihood(object):
         'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
         'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
         'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
-        :param KDE_likelihood_chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density estimator
+        :param KDE_likelihood_chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density
+         estimator
         :param kwargs_kde_likelihood: keyword argument for the KDE likelihood, see KDELikelihood module for options
         :param sne_likelihood: (string), optional. Sampling supernovae relative expansion history likelihood, see
          SneLikelihood module for options
@@ -114,8 +114,12 @@ class CosmoLikelihood(object):
             self._kde_evaluate = False
 
         for kwargs_lens in kwargs_likelihood_list:
-            if kwargs_lens['z_source'] > z_max:
-                z_max = kwargs_lens['z_source']
+            if 'z_source' in kwargs_lens:
+                if kwargs_lens['z_source'] > z_max:
+                    z_max = kwargs_lens['z_source']
+            if 'z_source_2' in kwargs_lens:
+                if kwargs_lens['z_source_2'] > z_max:
+                    z_max = kwargs_lens['z_source_2']
         self._z_max = z_max
 
     def likelihood(self, args):
@@ -141,23 +145,24 @@ class CosmoLikelihood(object):
             if 1.0 - om - ok <= 0:
                 return -np.inf
         cosmo = self.cosmo_instance(kwargs_cosmo)
-        logL = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
-                                                         kwargs_source=kwargs_source)
+        log_l = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+                                                          kwargs_source=kwargs_source)
 
         if self._sne_evaluate is True:
             apparent_m_z = kwargs_source.get('mu_sne', None)
             z_apparent_m_anchor = kwargs_source['z_apparent_m_anchor']
             sigma_m_z = kwargs_source.get('sigma_sne', None)
-            logL += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
-                                                        z_anchor=z_apparent_m_anchor, sigma_m_z=sigma_m_z)
+            log_l += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
+                                                         z_anchor=z_apparent_m_anchor, sigma_m_z=sigma_m_z)
         if self._kde_evaluate is True:
-            cosmo_params = np.array([[kwargs_cosmo[k] for k in self._chain_params]]) #all chain_params must be in the kwargs_cosmo
+            # all chain_params must be in the kwargs_cosmo
+            cosmo_params = np.array([[kwargs_cosmo[k] for k in self._chain_params]])
             cosmo_params = rescale_vector_to_unity(cosmo_params, self._kde_likelihood.chain.rescale_dic,
                                                    self._chain_params)
-            logL += self._kde_likelihood.kdelikelihood_samples(cosmo_params)[0]
+            log_l += self._kde_likelihood.kdelikelihood_samples(cosmo_params)[0]
         if self._prior_add is True:
-            logL += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
-        return logL
+            log_l += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
+        return log_l
 
     def cosmo_instance(self, kwargs_cosmo):
         """
