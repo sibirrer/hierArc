@@ -1,4 +1,4 @@
-from hierarc.LensPosterior.anisotropy_config import AnisotropyConfig
+from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
 import unittest
 import pytest
 
@@ -7,9 +7,9 @@ class TestAnisotropyConfig(object):
 
     def setup(self):
         self.r_eff = 2
-        self.config_om = AnisotropyConfig(anisotropy_model='OM', r_eff=self.r_eff)
-        self.config_gom = AnisotropyConfig(anisotropy_model='GOM', r_eff=self.r_eff)
-        self.config_const = AnisotropyConfig(anisotropy_model='const', r_eff=self.r_eff)
+        self.config_om = KinScalingConfig(anisotropy_model='OM', r_eff=self.r_eff)
+        self.config_gom = KinScalingConfig(anisotropy_model='GOM', r_eff=self.r_eff)
+        self.config_const = KinScalingConfig(anisotropy_model='const', r_eff=self.r_eff)
 
     def test_kwargs_anisotropy_base(self):
         kwargs = self.config_om.kwargs_anisotropy_base
@@ -23,14 +23,14 @@ class TestAnisotropyConfig(object):
         assert kwargs['beta'] == 0.1
 
     def test_ani_param_array(self):
-        ani_param_array = self.config_om.ani_param_array
+        ani_param_array = self.config_om.scaling_param_array
         assert len(ani_param_array) == 6
 
-        ani_param_array = self.config_gom.ani_param_array
+        ani_param_array = self.config_gom.scaling_param_array
         assert len(ani_param_array[0]) == 6
         assert len(ani_param_array[1]) == 4
 
-        ani_param_array = self.config_const.ani_param_array
+        ani_param_array = self.config_const.scaling_param_array
         assert len(ani_param_array) == 7
 
     def test_anisotropy_kwargs(self):
@@ -52,15 +52,15 @@ class TestRaise(unittest.TestCase):
     def test_raise(self):
 
         with self.assertRaises(ValueError):
-            AnisotropyConfig(anisotropy_model='BAD', r_eff=1)
+            KinScalingConfig(anisotropy_model='BAD', r_eff=1)
 
         with self.assertRaises(ValueError):
-            conf = AnisotropyConfig(anisotropy_model='OM', r_eff=1)
+            conf = KinScalingConfig(anisotropy_model='OM', r_eff=1)
             conf._anisotropy_model = 'BAD'
             kwargs = conf.kwargs_anisotropy_base
 
         with self.assertRaises(ValueError):
-            conf = AnisotropyConfig(anisotropy_model='OM', r_eff=1)
+            conf = KinScalingConfig(anisotropy_model='OM', r_eff=1)
             conf._anisotropy_model = 'BAD'
             kwargs = conf.anisotropy_kwargs(a_ani=1, beta_inf=1)
 

@@ -19,16 +19,20 @@ class ImageModelPosterior(object):
         self._gamma, self._gamma_error = gamma, gamma_error
         self._r_eff, self._r_eff_error = r_eff, r_eff_error
 
-    def draw_lens(self, no_error=False):
+    def draw_lens(self, no_error=False, draw_gamma=True):
         """
 
         :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :param draw_gamma: if True, draws from gamma, otherwise takes the mean
         :return: theta_E, gamma, r_eff, delta_r_eff
         """
         if no_error is True:
             return self._theta_E, self._gamma, self._r_eff, 1
         theta_E_draw = np.maximum(np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0)
-        gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
+        if draw_gamma:
+            gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
+        else:
+            gamma_draw = self._gamma
         # distributions are drawn in the range [1, 3)
         # the power-law slope gamma=3 is divergent in mass in the center and values close close to =3 may be unstable
         # to compute the kinematics for.

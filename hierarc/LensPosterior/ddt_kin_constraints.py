@@ -75,13 +75,13 @@ class DdtKinConstraints(KinConstraints):
         :return: keyword arguments
         """
         j_model_list, error_cov_j_sqrt = self.model_marginalization(num_sample_model)
-        ani_scaling_array_list = self.anisotropy_scaling()
+        ani_scaling_array_list = self.j_kin_scaling()
         error_cov_measurement = self.error_cov_measurement
         # configuration keyword arguments for the hierarchical sampling
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtHistKin',
                              'ddt_samples': self._ddt_sample, 'ddt_weights': self._ddt_weights,
                              'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.ani_param_array,
+                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.scaling_param_array,
                              'ani_scaling_array_list': ani_scaling_array_list}
         return kwargs_likelihood

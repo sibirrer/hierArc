@@ -1,9 +1,9 @@
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
-from hierarc.LensPosterior.anisotropy_config import AnisotropyConfig
+from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
 
 
-class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
+class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
     """
     this class contains and manages the base configurations of the lens posteriors and makes sure that they
     are universally applied consistently through the different likelihood definitions
@@ -12,7 +12,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
                  kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
                  hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000,
-                 multi_observations=False):
+                 multi_observations=False, density_slope_scaling=False):
         """
 
         :param z_lens: lens redshift
@@ -32,6 +32,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
+        :param density_slope_scaling: scaling of kinematics with power-law density slope of deflector
+        :type density_slope_scaling: bool
         """
         self._z_lens, self._z_source = z_lens, z_source
         kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
@@ -48,4 +50,4 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
                                           num_psf_sampling=num_psf_sampling, num_kin_sampling=num_kin_sampling)
         self._kwargs_lens_light = kwargs_lens_light
         ImageModelPosterior.__init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error)
-        AnisotropyConfig.__init__(self, anisotropy_model, r_eff)
+        KinScalingConfig.__init__(self, anisotropy_model, r_eff, gamma0=gamma, density_slope_scaling=density_slope_scaling)

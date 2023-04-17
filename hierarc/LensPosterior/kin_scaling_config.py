@@ -1,28 +1,43 @@
 import numpy as np
 
 
-class AnisotropyConfig(object):
+class KinScalingConfig(object):
     """
     class to manage the anisotropy model and parameters for the Posterior processing
     """
-    def __init__(self, anisotropy_model, r_eff):
+    def __init__(self, anisotropy_model, r_eff, gamma0=2, density_slope_scaling=False):
         """
 
         :param anisotropy_model: type of stellar anisotropy model. Supported are 'OM' and 'GOM' or 'const', see details in lenstronomy.Galkin module
         :param r_eff: half-light radius of the deflector galaxy
+        :param gamma0: power-law density slope mean
+        :param density_slope_scaling: scaling of kinematics with power-law density slope of deflector
+        :type density_slope_scaling: bool
         """
         self._r_eff = r_eff
         self._anisotropy_model = anisotropy_model
+        self._density_scaling = density_slope_scaling
 
-        if self._anisotropy_model == 'OM':
-            self._ani_param_array = np.array(
-                [0.1, 0.2, 0.5, 1, 2, 5])  # used for r_ani OsipkovMerritt anisotropy description
-        elif self._anisotropy_model == 'GOM':
-            self._ani_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5]), np.array([0, 0.5, 0.8, 1])]
-        elif self._anisotropy_model == 'const':
-            self._ani_param_array = np.linspace(-0.49, 1, 7)  # used for constant anisotropy description
+        if self._density_scaling:
+            gamma_scaling = np.linspace(start=gamma0-0.2, stop=gamma0+0.2, num=5)
+            if self._anisotropy_model == 'OM':
+                self._scaling_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5]), gamma_scaling]
+            elif self._anisotropy_model == 'const':
+                self._scaling_param_array = [np.linspace(-0.49, 1, 7), gamma_scaling]
+            else:
+                raise ValueError('Anisotropy model %s does not support power-law slope scaling.'
+                                 % self._anisotropy_model)
+
         else:
-            raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
+            if self._anisotropy_model == 'OM':
+                self._scaling_param_array = np.array(
+                    [0.1, 0.2, 0.5, 1, 2, 5])  # used for r_ani OsipkovMerritt anisotropy description
+            elif self._anisotropy_model == 'GOM':
+                self._scaling_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5]), np.array([0, 0.5, 0.8, 1])]
+            elif self._anisotropy_model == 'const':
+                self._scaling_param_array = np.linspace(-0.49, 1, 7)  # used for constant anisotropy description
+            else:
+                raise ValueError('anisotropy model %s not supported.' % self._anisotropy_model)
 
     @property
     def kwargs_anisotropy_base(self):
@@ -47,12 +62,13 @@ class AnisotropyConfig(object):
         return kwargs_anisotropy_0
 
     @property
-    def ani_param_array(self):
+    def scaling_param_array(self):
         """
 
-        :return: numpy array of anisotropy parameter values to be explored
+        :return: numpy array of anisotropy and power-law parameter values to be explored with which the kinematics are
+         being scaled.
         """
-        return self._ani_param_array
+        return self._scaling_param_array
 
     def anisotropy_kwargs(self, a_ani, beta_inf=None):
         """
