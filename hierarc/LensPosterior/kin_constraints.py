@@ -12,7 +12,7 @@ class KinConstraints(BaseLensConfig):
                  sigma_v_measured, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  sigma_v_error_independent=None, sigma_v_error_covariant=None, sigma_v_error_cov_matrix=None,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'],
-                 MGE_light=False, kwargs_mge_light=None, hernquist_approx=True, sampling_number=1000,
+                 MGE_light=False, kwargs_mge_light=None, hernquist_approx=False, sampling_number=1000,
                  num_psf_sampling=100, num_kin_sampling=1000, multi_observations=False):
         """
 
@@ -147,13 +147,14 @@ class KinConstraints(BaseLensConfig):
         :return: anisotropy scaling grid along the axes defined by ani_param_array
         """
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
-        return self._anisotropy_scaling_relative(j_ani_0)
+        return self._relative_j_scaling(j_ani_0)
 
-    def _anisotropy_scaling_relative(self, j_ani_0):
+    def _relative_j_scaling(self, j_ani_0, gamma_0=2):
         """
         anisotropy scaling relative to a default J prediction
 
         :param j_ani_0: default J() prediction for default anisotropy
+        :param gamma_0: power-law slope of mass density profile for default J() prediction
         :return: list of arrays (for the number of measurements) according to anisotropy scaling
         """
         num_data = len(self._sigma_v_measured)

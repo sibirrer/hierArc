@@ -164,7 +164,7 @@ class TestRaise(unittest.TestCase):
                                              kwargs_aperture=kwargs_aperture, kwargs_seeing=kwargs_seeing,
                                              anisotropy_model=anisotropy_model, **kwargs_kin_api_settings)
             kin_constraints._anisotropy_model = 'BAD'
-            kin_constraints._anisotropy_scaling_relative(j_ani_0=1)
+            kin_constraints._relative_j_scaling(j_ani_0=1)
 
 
 if __name__ == '__main__':
