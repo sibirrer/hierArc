@@ -40,7 +40,7 @@ class TestDdtHistKinHist(object):
     def test_log_likelihood(self):
 
         logl_max = self._ddt_kin_likelihood.log_likelihood(ddt=self._ddt, dd=self._dd)
-        logl = self._ddt_kin_likelihood.log_likelihood(self._ddt, self._dd / (1 + self._sigma) ** 2, aniso_scaling=None)
+        logl = self._ddt_kin_likelihood.log_likelihood(self._ddt, self._dd / (1 + self._sigma) ** 2, j_kin_scaling=None)
         npt.assert_almost_equal(logl - logl_max, -self._num_ifu / 2, decimal=5)
 
     def test_ddt_measurement(self):
@@ -54,7 +54,7 @@ class TestDdtHistKinHist(object):
         assert sigma_v_measurement_[0] == self.sigma_v_measurement[0]
         assert error_cov_measurement_[0, 0] == self.error_cov_measurement[0, 0]
 
-        sigma_v_predict, error_cov_predict = self._ddt_kin_likelihood.sigma_v_prediction(self._ddt, self._dd, aniso_scaling=1)
+        sigma_v_predict, error_cov_predict = self._ddt_kin_likelihood.sigma_v_prediction(self._ddt, self._dd, j_kin_scaling=1)
         assert sigma_v_predict[0] == self.sigma_v_measurement[0]
         assert error_cov_predict[0, 0] == 0
 

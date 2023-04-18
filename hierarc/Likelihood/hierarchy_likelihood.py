@@ -1,17 +1,18 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.LensLikelihood.base_lens_likelihood import LensLikelihoodBase
-from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
+from hierarc.Likelihood.kinematic_scaling import KinematicScalingIFU
 from hierarc.Util.distribution_util import PDFSampling
 import numpy as np
 import copy
 
 
-class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScalingIFU):
+class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalingIFU):
     """
     master class containing the likelihood definitions of different analysis for s single lens
     """
     def __init__(self, z_lens, z_source, name='name', likelihood_type='TDKin', anisotropy_model='NONE',
-                 ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
+                 j_kin_param_array=None, j_kin_scaling_array_list=None, j_kin_scaling_array=None,
+                 gamma_pl_scaling=False,
                  num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
                  lambda_scaling_property=0, lambda_scaling_property_beta=0,
                  normalized=False, kwargs_lens_properties=None, **kwargs_likelihood):
@@ -21,12 +22,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param z_source: source redshift
         :param name: string (optional) to name the specific lens
         :param likelihood_type: string to specify the likelihood type
-        :param ani_param_array: array of anisotropy parameter values for which the kinematics are predicted
-        :param ani_scaling_array: velocity dispersion sigma**2 scaling (also J scaling) of anisotropy parameter relative
+        :param j_kin_param_array: array of anisotropy parameter values for which the kinematics are predicted
+        :param j_kin_scaling_array: velocity dispersion sigma**2 scaling (also J scaling) of anisotropy parameter relative
          to default prediction. The scaling corresponds to the ani_param_array parameter spacing
          (to generate an interpolation function). A value =1 in ani_scaling_array results in the value stored in the
          provided J() predictions.
-        :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
+        :param j_kin_scaling_array_list: list of array with the scalings of J() for each IFU
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
@@ -47,12 +48,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         see individual classes for their use
         """
         TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
-        if ani_scaling_array_list is None and ani_scaling_array is not None:
-            ani_scaling_array_list = [ani_scaling_array]
-        AnisotropyScalingIFU.__init__(self, anisotropy_model=anisotropy_model, ani_param_array=ani_param_array,
-                                      ani_scaling_array_list=ani_scaling_array_list)
+        if j_kin_scaling_array_list is None and j_kin_scaling_array is not None:
+            j_kin_scaling_array_list = [j_kin_scaling_array]
+        KinematicScalingIFU.__init__(self, anisotropy_model=anisotropy_model, scaling_param_array=j_kin_param_array,
+                                     scaling_array_list=j_kin_scaling_array_list, power_law_scaling=gamma_pl_scaling)
         LensLikelihoodBase.__init__(self, z_lens=z_lens, z_source=z_source, likelihood_type=likelihood_type, name=name,
                                     normalized=normalized, kwargs_lens_properties=kwargs_lens_properties,
+                                    gamma_pl_likelihood=gamma_pl_scaling,
                                     **kwargs_likelihood)
         self._num_distribution_draws = int(num_distribution_draws)
         self._kappa_ext_bias = kappa_ext_bias
@@ -144,10 +146,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         mag_source = self.draw_source(lum_dist=delta_lum_dist, **kwargs_source)
         ddt_, dd_, mag_source_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                           kappa_ext=kappa_ext, mag_source=mag_source)
-        aniso_param_array = self.draw_anisotropy(**kwargs_kin)
-        aniso_scaling = self.ani_scaling(aniso_param_array)
+        j_kin_param_array = self.draw_j_kin(**kwargs_kin)  # TODO make sure gamma_pl is used
+        j_kin_scaling = self.j_kin_scaling(j_kin_param_array)
 
-        lnlikelihood = self.log_likelihood(ddt_, dd_, aniso_scaling=aniso_scaling, sigma_v_sys_error=sigma_v_sys_error,
+        lnlikelihood = self.log_likelihood(ddt_, dd_, j_kin_scaling=j_kin_scaling, sigma_v_sys_error=sigma_v_sys_error,
                                            mu_intrinsic=mag_source_)
         return np.nan_to_num(lnlikelihood)
 
@@ -205,7 +207,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return False
 
     def draw_lens(self, lambda_mst=1, lambda_mst_sigma=0, kappa_ext=0, kappa_ext_sigma=0, gamma_ppn=1, lambda_ifu=1,
-                  lambda_ifu_sigma=0, alpha_lambda=0, beta_lambda=0):
+                  lambda_ifu_sigma=0, alpha_lambda=0, beta_lambda=0, gamma_pl=2, gamma_pl_sigma=0):
         """
         draws a realization of a specific model from the hyper-parameter distribution
 
@@ -284,8 +286,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
             ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                     kappa_ext=kappa_ext)
-            aniso_param_array = self.draw_anisotropy(**kwargs_kin_copy)
-            aniso_scaling = self.ani_scaling(aniso_param_array)
+            aniso_param_array = self.draw_j_kin(**kwargs_kin_copy)
+            aniso_scaling = self.j_kin_scaling(aniso_param_array)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(ddt_, dd_, aniso_scaling=aniso_scaling)
             sigma_v_predict_mean += sigma_v_predict_i
             cov_error_predict += cov_error_predict_i

@@ -40,9 +40,9 @@ class TestDdtGaussKinLikelihood(object):
 
     def test_log_likelihood(self):
         ddt, dd = 9, 0.9
-        lnlog_tot = self.ddt_gauss_kin_likelihood.log_likelihood(ddt, dd, aniso_scaling=None, sigma_v_sys_error=None)
+        lnlog_tot = self.ddt_gauss_kin_likelihood.log_likelihood(ddt, dd, j_kin_scaling=None, sigma_v_sys_error=None)
         lnlog_ddt = self.ddt_gauss_likelihood.log_likelihood(ddt, dd)
-        lnlog_kin = self.kin_likelihood.log_likelihood(ddt, dd, aniso_scaling=None, sigma_v_sys_error=None)
+        lnlog_kin = self.kin_likelihood.log_likelihood(ddt, dd, j_kin_scaling=None, sigma_v_sys_error=None)
         npt.assert_almost_equal(lnlog_tot, lnlog_ddt + lnlog_kin, decimal=5)
 
     def test_ddt_measurement(self):

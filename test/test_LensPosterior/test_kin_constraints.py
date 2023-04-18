@@ -70,7 +70,6 @@ class TestIFUKinPosterior(object):
         ln_likelihood = ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
-
     def test_likelihoodconfiguration_gom(self):
         anisotropy_model = 'GOM'
         kwargs_aperture = {'aperture_type': 'shell', 'r_in': 0, 'r_out': 3 / 2., 'center_ra': 0.0, 'center_dec': 0}

@@ -33,7 +33,7 @@ class TestLensLikelihood(object):
                                   'kde_type': 'scipy_gaussian', 'bandwidth': 1},
                                  {'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'DsDdsGaussian',
                                   'ds_dds_mean': lensCosmo.ds/lensCosmo.dds, 'ds_dds_sigma': 1,
-                                  'ani_param_array': ani_param_array, 'ani_scaling_array': ani_scaling_array}]
+                                  'j_kin_param_array': ani_param_array, 'j_kin_scaling_array': ani_scaling_array}]
         self.likelihood = LensSampleLikelihood(kwargs_lens_list=self.kwargs_lens_list)
 
     def test_log_likelihood(self):

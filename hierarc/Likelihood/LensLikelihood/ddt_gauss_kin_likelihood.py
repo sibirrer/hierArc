@@ -31,12 +31,12 @@ class DdtGaussKinLikelihood(object):
                                             normalized=normalized)
         self.num_data = self._ddt_gauss_likelihood.num_data + self._kinlikelihood.num_data
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, sigma_v_sys_offset=None):
+    def log_likelihood(self, ddt, dd, j_kin_scaling=None, sigma_v_sys_error=None, sigma_v_sys_offset=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+        :param j_kin_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :param sigma_v_sys_error: float (optional) added error on the velocity dispersion measurement in quadrature
@@ -44,7 +44,7 @@ class DdtGaussKinLikelihood(object):
          such that sigma_v = sigma_v_measured * (1 + sigma_v_sys_offset)
         :return: log likelihood given the single lens analysis
         """
-        lnlikelihood = self._ddt_gauss_likelihood.log_likelihood(ddt) + self._kinlikelihood.log_likelihood(ddt, dd, aniso_scaling,
+        lnlikelihood = self._ddt_gauss_likelihood.log_likelihood(ddt) + self._kinlikelihood.log_likelihood(ddt, dd, j_kin_scaling,
                                                                                                            sigma_v_sys_error=sigma_v_sys_error,
                                                                                                            sigma_v_sys_offset=sigma_v_sys_offset)
         return lnlikelihood

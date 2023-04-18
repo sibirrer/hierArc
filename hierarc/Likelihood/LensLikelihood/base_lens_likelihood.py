@@ -10,7 +10,8 @@ class LensLikelihoodBase(object):
     master class containing the likelihood definitions of different analysis
     """
     def __init__(self, z_lens, z_source, likelihood_type, name='name', normalized=False,
-                 kwargs_lens_properties=None, **kwargs_likelihood):
+                 kwargs_lens_properties=None, gamma_pl=None, gamma_pl_error=0,
+                 gamma_pl_likelihood=False, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
@@ -20,12 +21,19 @@ class LensLikelihoodBase(object):
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
+        :param gamma_pl: mean of the power-law mass density slope
+        :param gamma_pl_error: sigma of the power-law mass density slope
+        :param gamma_pl_likelihood: if True, evaluates the power-law slope likelihood
+        :type gamma_pl_likelihood: bool
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
         self._name = name
         self.z_lens = z_lens
         self.z_source = z_source
+        self._gamma_pl_mean = gamma_pl
+        self._gamma_pl_sigma = gamma_pl_error
+        self._gamma_pl_likelihood = gamma_pl_likelihood
         self.likelihood_type = likelihood_type
         if kwargs_lens_properties is None:
             kwargs_lens_properties = {}
@@ -80,29 +88,33 @@ class LensLikelihoodBase(object):
         """
         return self._lens_type.num_data
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None):
+    def log_likelihood(self, ddt, dd, j_kin_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None, gamma=None):
         """
 
         :param ddt: time-delay distance [physical Mpc]
         :param dd: angular diameter distance to the lens [physical Mpc]
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+        :param j_kin_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
         :param mu_intrinsic: float, intrinsic source brightness (in magnitude)
+        :param gamma: mass density power-law slope
         :return: natural logarithm of the likelihood of the data given the model
         """
+        log_l = 0
+        if self._gamma_pl_likelihood:
+            log_l = - (gamma - self._gamma_pl_mean) ** 2 / self._gamma_pl_sigma / 2
         if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist', 'DdtHistKDE']:
-            return self._lens_type.log_likelihood(ddt, dd)
+            return self._lens_type.log_likelihood(ddt, dd) + log_l
         elif self.likelihood_type in ['DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian']:
-            return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling)
+            return self._lens_type.log_likelihood(ddt, dd, j_kin_scaling=j_kin_scaling) + log_l
         elif self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
-            return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling,
-                                                  sigma_v_sys_error=sigma_v_sys_error)
+            return self._lens_type.log_likelihood(ddt, dd, j_kin_scaling=j_kin_scaling,
+                                                  sigma_v_sys_error=sigma_v_sys_error) + log_l
         elif self.likelihood_type in ['Mag']:
-            return self._lens_type.log_likelihood(mu_intrinsic=mu_intrinsic)
+            return self._lens_type.log_likelihood(mu_intrinsic=mu_intrinsic) + log_l
         elif self.likelihood_type in ['TDMag', 'TDMagMagnitude']:
-            return self._lens_type.log_likelihood(ddt=ddt, mu_intrinsic=mu_intrinsic)
+            return self._lens_type.log_likelihood(ddt=ddt, mu_intrinsic=mu_intrinsic) + log_l
         else:
             raise ValueError('likelihood type %s not fully supported.' % self.likelihood_type)
 

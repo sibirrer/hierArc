@@ -108,10 +108,10 @@ class KinConstraints(BaseLensConfig):
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
                              'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.scaling_param_array,
+                             'error_cov_j_sqrt': error_cov_j_sqrt, 'j_kin_param_array': self.scaling_param_array,
                              'gamma_pl': self._gamma, 'gamma_pl_error': self._gamma_error,
                              'gamma_pl_scaling': self._density_slope_scaling,
-                             'j_scaling_array_list': scaling_array_list}
+                             'j_kin_scaling_array_list': scaling_array_list}
         return kwargs_likelihood
 
     def model_marginalization(self, num_sample_model=20):

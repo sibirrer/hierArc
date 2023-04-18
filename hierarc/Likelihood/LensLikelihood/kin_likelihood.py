@@ -32,13 +32,13 @@ class KinLikelihood(object):
         self._normalized = normalized
         self._sigma_sys_error_include = sigma_sys_error_include
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, sigma_v_sys_offset=None):
+    def log_likelihood(self, ddt, dd, j_kin_scaling=None, sigma_v_sys_error=None, sigma_v_sys_offset=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+        :param j_kin_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :param sigma_v_sys_error: float (optional) added error on the velocity dispersion measurement in quadrature
@@ -47,10 +47,10 @@ class KinLikelihood(object):
         :return: log likelihood given the single lens analysis
         """
         ds_dds = np.maximum(ddt / dd / (1 + self._z_lens), 0)
-        if aniso_scaling is None:
+        if j_kin_scaling is None:
             scaling_ifu = 1
         else:
-            scaling_ifu = aniso_scaling
+            scaling_ifu = j_kin_scaling
         sigma_v_predict = self.sigma_v_model(ds_dds, scaling_ifu)
         delta = self.sigma_v_measurement_mean(sigma_v_sys_offset) - sigma_v_predict
         cov_error = self.cov_error_measurement(sigma_v_sys_error) + self.cov_error_model(ds_dds, scaling_ifu)
@@ -78,25 +78,25 @@ class KinLikelihood(object):
         else:
             return self._sigma_v_measured * (1 + sigma_v_sys_offset)
 
-    def sigma_v_model(self, ds_dds, aniso_scaling=1):
+    def sigma_v_model(self, ds_dds, j_kin_scaling=1):
         """
         model predicted velocity dispersion for the IFU's
 
         :param ds_dds: Ds/Dds
-        :param aniso_scaling: scaling of the anisotropy affecting sigma_v^2
+        :param j_kin_scaling: scaling of the affecting sigma_v^2 due to anisotropy or power-law
         :return: array of predicted velocity dispersions
         """
-        sigma_v_predict = np.sqrt(self._j_model * ds_dds * aniso_scaling) * const.c / 1000
+        sigma_v_predict = np.sqrt(self._j_model * ds_dds * j_kin_scaling) * const.c / 1000
         return sigma_v_predict
 
-    def cov_error_model(self, ds_dds, aniso_scaling=1):
+    def cov_error_model(self, ds_dds, j_kin_scaling=1):
         """
 
         :param ds_dds: Ds/Dds
-        :param aniso_scaling: scaling of the anisotropy affecting sigma_v^2
+        :param j_kin_scaling: scaling of the affecting sigma_v^2 due to anisotropy or power-law
         :return: covariance matrix of the error in the predicted model (from mass model uncertainties)
         """
-        scaling_matix = np.outer(np.sqrt(aniso_scaling), np.sqrt(aniso_scaling))
+        scaling_matix = np.outer(np.sqrt(j_kin_scaling), np.sqrt(j_kin_scaling))
         return self._error_cov_j_sqrt * scaling_matix * ds_dds * (const.c / 1000)**2
 
     def cov_error_measurement(self, sigma_v_sys_error=None):
@@ -111,20 +111,20 @@ class KinLikelihood(object):
         else:
             return self._error_cov_measurement
 
-    def sigma_v_prediction(self, ddt, dd, aniso_scaling=1):
+    def sigma_v_prediction(self, ddt, dd, j_kin_scaling=1):
         """
         model prediction mean velocity dispersion vector and model prediction covariance matrix
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+        :param j_kin_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :return: model prediction mean velocity dispersion vector and model prediction covariance matrix
         """
         ds_dds = np.maximum(ddt / dd / (1 + self._z_lens), 0)
-        sigma_v_predict = self.sigma_v_model(ds_dds, aniso_scaling)
-        cov_error_predict = self.cov_error_model(ds_dds, aniso_scaling)
+        sigma_v_predict = self.sigma_v_model(ds_dds, j_kin_scaling)
+        cov_error_predict = self.cov_error_model(ds_dds, j_kin_scaling)
         return sigma_v_predict, cov_error_predict
 
     def sigma_v_measurement(self, sigma_v_sys_error=None, sigma_v_sys_offset=None):

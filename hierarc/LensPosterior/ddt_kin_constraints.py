@@ -82,6 +82,6 @@ class DdtKinConstraints(KinConstraints):
                              'ddt_samples': self._ddt_sample, 'ddt_weights': self._ddt_weights,
                              'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.scaling_param_array,
-                             'ani_scaling_array_list': ani_scaling_array_list}
+                             'error_cov_j_sqrt': error_cov_j_sqrt, 'j_kin_param_array': self.scaling_param_array,
+                             'j_kin_scaling_array_list': ani_scaling_array_list}
         return kwargs_likelihood

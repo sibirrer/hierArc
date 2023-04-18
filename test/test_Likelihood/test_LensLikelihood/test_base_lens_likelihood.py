@@ -54,7 +54,7 @@ class TestLensLikelihood(object):
             likelihood = LensLikelihoodBase(z_lens=self.z_lens, z_source=self.z_source, likelihood_type=likelihood_type,
                                **self.kwargs_likelihood_list[i])
             print(likelihood_type)
-            logl = likelihood.log_likelihood(ddt=1, dd=1, aniso_scaling=None, sigma_v_sys_error=1, mu_intrinsic=1)
+            logl = likelihood.log_likelihood(ddt=1, dd=1, j_kin_scaling=None, sigma_v_sys_error=1, mu_intrinsic=1)
             print(logl)
             assert logl > -np.inf
 
