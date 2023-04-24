@@ -64,16 +64,19 @@ class KinConstraints(BaseLensConfig):
                                 num_kin_sampling=num_kin_sampling, multi_observations=multi_observations,
                                 density_slope_scaling=self._density_slope_scaling)
 
-    def j_kin_draw(self, kwargs_anisotropy, no_error=False):
+    def j_kin_draw(self, kwargs_anisotropy, no_error=False, gamma_pl=None):
         """
         one simple sampling realization of the dimensionless kinematics of the model
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :param gamma_pl: power-law slope of density profile
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(no_error=no_error,
                                                                            draw_gamma=self._density_slope_marg)
+        if gamma_pl is not None:
+            gamma_draw = gamma_pl
         kwargs_lens = [{'theta_E': theta_E_draw, 'gamma': gamma_draw, 'center_x': 0, 'center_y': 0}]
         if self._kwargs_lens_light is None:
             kwargs_light = [{'Rs': r_eff_draw * 0.551, 'amp': 1.}]
@@ -108,10 +111,12 @@ class KinConstraints(BaseLensConfig):
         kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
                              'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
                              'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': error_cov_j_sqrt, 'j_kin_param_array': self.scaling_param_array,
+                             'error_cov_j_sqrt': error_cov_j_sqrt,
+                             'j_kin_param_array': self.scaling_param_array,
+                             'j_kin_scaling_array_list': scaling_array_list,
                              'gamma_pl': self._gamma, 'gamma_pl_error': self._gamma_error,
                              'gamma_pl_scaling': self._density_slope_scaling,
-                             'j_kin_scaling_array_list': scaling_array_list}
+                             }
         return kwargs_likelihood
 
     def model_marginalization(self, num_sample_model=20):
@@ -159,32 +164,41 @@ class KinConstraints(BaseLensConfig):
         j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
         return self._relative_j_scaling(j_ani_0)
 
-    def _relative_j_scaling(self, j_ani_0, gamma_0=2):
+    def _relative_j_scaling(self, j_ani_0):
         """
         anisotropy scaling relative to a default J prediction
 
         :param j_ani_0: default J() prediction for default anisotropy
-        :param gamma_0: power-law slope of mass density profile for default J() prediction
         :return: list of arrays (for the number of measurements) according to anisotropy scaling
         """
+        # TODO fix this definition
         num_data = len(self._sigma_v_measured)
 
         if self._anisotropy_model == 'GOM':
-            ani_scaling_array_list = [np.zeros((len(self.scaling_param_array[0]), len(self.scaling_param_array[1]))) for _ in
-                                      range(num_data)]
+            j_kin_scaling_array_list = [np.zeros((len(self.scaling_param_array[0]), len(self.scaling_param_array[1])))
+                                        for _ in range(num_data)]
             for i, a_ani in enumerate(self.scaling_param_array[0]):
                 for j, beta_inf in enumerate(self.scaling_param_array[1]):
                     kwargs_anisotropy = self.anisotropy_kwargs(a_ani=a_ani, beta_inf=beta_inf)
                     j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                     for k, j_kin in enumerate(j_kin_ani):
-                        ani_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
-        elif self._anisotropy_model in ['OM', 'const']:
-            ani_scaling_array_list = [[] for _ in range(num_data)]
+                        j_kin_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
+        elif self._anisotropy_model in ['OM', 'const'] and self._density_slope_marg:
+            j_kin_scaling_array_list = [[] for _ in range(num_data)]
             for a_ani in self.scaling_param_array:
                 kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
                 j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                 for i, j_kin in enumerate(j_kin_ani):
-                    ani_scaling_array_list[i].append(j_kin / j_ani_0[i])
+                    j_kin_scaling_array_list[i].append(j_kin / j_ani_0[i])
+        elif self._anisotropy_model in ['OM', 'const'] and not self._density_slope_marg:
+            j_kin_scaling_array_list = [np.zeros((len(self.scaling_param_array[0]), len(self.scaling_param_array[1])))
+                                        for _ in range(num_data)]
+            for i, a_ani in enumerate(self.scaling_param_array[0]):
+                for j, gamma in enumerate(self.scaling_param_array[1]):
+                    kwargs_anisotropy = self.anisotropy_kwargs(a_ani=a_ani)
+                    j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True, gamma_pl=gamma)
+                    for k, j_kin in enumerate(j_kin_ani):
+                        j_kin_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
         else:
             raise ValueError('anisotropy model %s not valid.' % self._anisotropy_model)
-        return ani_scaling_array_list
+        return j_kin_scaling_array_list

@@ -1,5 +1,6 @@
 __author__ = 'sibirrer'
 import numpy as np
+from hierarc.LensPosterior.power_law_marginalization import theory_ddt_gamma_scaling
 
 
 class TransformedCosmography(object):
@@ -8,16 +9,21 @@ class TransformedCosmography(object):
     lenses.
     """
 
-    def __init__(self, z_lens, z_source):
+    def __init__(self, z_lens, z_source, power_law_scaling=False, gamma_pl_baseline=None):
         """
 
         :param z_lens: lens redshift
         :param z_source: source redshift
+        :param power_law_scaling: scaling of mass density power-law slope with Ddt
+         (meaning power-law slope marginalization on Ddt has not been performed)
+        :param gamma_pl_baseline: baseline power-law slope of Ddt posteriors for re-scaling
         """
         self._z_lens = z_lens
         self._z_source = z_source
+        self._power_law_scaling = power_law_scaling
+        self._gamma_pl_baseline = gamma_pl_baseline
 
-    def displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0):
+    def displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0, gamma_pl=None):
         """
         here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         displace the predicted angular diameter distances in the opposite direction
@@ -31,12 +37,14 @@ class TransformedCosmography(object):
         :param gamma_ppn: post-newtonian gravity parameter (=1 is GR)
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
         :param mag_source: source magnitude (attention, log scale, thus transform needs to be changed!)
+        :param gamma_pl: power-law slope of deflector density profile
         :returns: ddt, dd, mag_source
         """
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
-        #TODO scale source with ds, make sure definition is either linear or magnitudes (log) consistently
+        # TODO scale source with ds, make sure definition is either linear or magnitudes (log) consistently
         ddt_, dd_, mag_source_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
                                                            mag_source=mag_source)
+        ddt_ = self._displace_gamma_pl(ddt_, gamma_pl)
         return ddt_, dd_, mag_source_
 
     @staticmethod
@@ -52,6 +60,20 @@ class TransformedCosmography(object):
         """
         dd_ = dd * (1 + gamma_ppn) / 2.
         return ddt, dd_
+
+    def _displace_gamma_pl(self, ddt, gamma_pl):
+        """
+
+        :param ddt: time-delay distance
+        :param gamma_pl: poer-law mass density slope
+        :return: re-scaled Ddt prediction
+        """
+        if self._power_law_scaling:
+            factor = theory_ddt_gamma_scaling(gamma_pl, gamma_base=self._gamma_pl_baseline)
+        else:
+            factor = 1
+        ddt_ = ddt / factor
+        return ddt_
 
     @staticmethod
     def _displace_kappa_ext(ddt, dd, kappa_ext=0):

@@ -32,3 +32,16 @@ def fermat_pl_slope_scaling(gamma):
     h0_scaling = 1 - kappa_e  # see e.g., Kochanek 2021
     fermat_scaling = h0_scaling  # the Fermat potential scales proportional to the Hubble constant
     return fermat_scaling
+
+
+def ddt_uncertainty(gamma, gamma_sigma):
+    """
+    standard deviation of uncertainty on time-delay distance coming from an uncertainty in the power-law slope
+
+    :param gamma: mean power-law slope
+    :param gamma_sigma: 1-sigma uncertainty in the power-law slope
+    :return: sigma(ddt) / <ddt>
+    """
+    d_ddt_d_gamma = abs(2 / (1 - gamma) ** 2)
+    ddt_sigma = d_ddt_d_gamma * gamma_sigma
+    return ddt_sigma

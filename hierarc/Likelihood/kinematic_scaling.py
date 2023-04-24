@@ -102,7 +102,7 @@ class KinematicScalingIFU(object):
             scaling_list.append(scaling)
         return np.array(scaling_list)
 
-    def draw_j_kin(self, a_ani=None, a_ani_sigma=0, beta_inf=None, beta_inf_sigma=0, gamma=None, gamma_sigma=0):
+    def draw_j_kin(self, a_ani=None, a_ani_sigma=0, beta_inf=None, beta_inf_sigma=0, gamma_pl=None, gamma_pl_sigma=0):
         """
         draw Gaussian distribution and re-sample if outside bounds
 
@@ -110,8 +110,8 @@ class KinematicScalingIFU(object):
         :param a_ani_sigma: std of the distribution
         :param beta_inf: anisotropy at infinity (relevant for GOM model)
         :param beta_inf_sigma: std of beta_inf distribution
-        :param gamma: mean of power-law slope distribution
-        :param gamma_sigma: std of the power-law distribution
+        :param gamma_pl: power-law slope (not distribution
+        :param gamma_pl_sigma: std of the power-law distribution
         :return: random draw from the distribution
         """
         if self._anisotropy_model in ['OM', 'const'] and not self._power_law_scaling:
@@ -127,13 +127,14 @@ class KinematicScalingIFU(object):
             return np.array([a_ani_draw])
 
         elif self._anisotropy_model in ['OM', 'const'] and self._power_law_scaling:
-            if a_ani < self._scaling_param_min[0] or a_ani > self._scaling_param_max[0] or gamma < self._scaling_param_min[1] or gamma > self._scaling_param_max[1]:
+            if a_ani < self._scaling_param_min[0] or a_ani > self._scaling_param_max[0]:
                 raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
             a_ani_draw = np.random.normal(a_ani, a_ani_sigma*a_ani)
-            gamma_draw = np.random.normal(gamma, gamma_sigma)
             if a_ani_draw < self._scaling_param_min[0] or a_ani_draw > self._scaling_param_max[0]:
-                return self.draw_j_kin(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma)
-            return np.array([a_ani_draw, gamma_draw])
+                return self.draw_j_kin(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma, gamma_pl=gamma_pl,
+                                       gamma_pl_sigma=gamma_pl_sigma)
+            gamma_pl_draw = np.random.normal(gamma_pl, gamma_pl_sigma)
+            return np.array([a_ani_draw, gamma_pl_draw])
 
         elif self._anisotropy_model in ['GOM'] and not self._power_law_scaling:
             if a_ani < self._scaling_param_min[0] or a_ani > self._scaling_param_max[0] or beta_inf < self._scaling_param_min[1] or beta_inf > self._scaling_param_max[1]:

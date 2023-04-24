@@ -1,4 +1,5 @@
 __author__ = 'sibirrer'
+import numpy as np
 
 
 LIKELIHOOD_TYPES = ['DdtGaussian', 'DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian', 'DdtLogNorm', 'IFUKinCov', 'DdtHist',
@@ -103,7 +104,8 @@ class LensLikelihoodBase(object):
         """
         log_l = 0
         if self._gamma_pl_likelihood:
-            log_l = - (gamma - self._gamma_pl_mean) ** 2 / self._gamma_pl_sigma / 2
+            log_l = - (gamma - self._gamma_pl_mean) ** 2 / self._gamma_pl_sigma ** 2 / 2 \
+                    + np.log(self._gamma_pl_sigma * np.sqrt(2*np.pi))  # normalize
         if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist', 'DdtHistKDE']:
             return self._lens_type.log_likelihood(ddt, dd) + log_l
         elif self.likelihood_type in ['DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian']:

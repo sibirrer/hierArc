@@ -14,7 +14,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
                  j_kin_param_array=None, j_kin_scaling_array_list=None, j_kin_scaling_array=None,
                  gamma_pl_scaling=False,
                  num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
-                 lambda_scaling_property=0, lambda_scaling_property_beta=0,
+                 lambda_scaling_property=0, lambda_scaling_property_beta=0, gamma_pl=None,
                  normalized=False, kwargs_lens_properties=None, **kwargs_likelihood):
         """
 
@@ -44,17 +44,20 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
+        :param gamma_pl: power-law slope of deflector density profile
+         (the baseline slope relative to the scaling of ddt)
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
-        TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
+        TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source, power_law_scaling=gamma_pl_scaling,
+                                        gamma_pl_baseline=gamma_pl)
         if j_kin_scaling_array_list is None and j_kin_scaling_array is not None:
             j_kin_scaling_array_list = [j_kin_scaling_array]
         KinematicScalingIFU.__init__(self, anisotropy_model=anisotropy_model, scaling_param_array=j_kin_param_array,
                                      scaling_array_list=j_kin_scaling_array_list, power_law_scaling=gamma_pl_scaling)
         LensLikelihoodBase.__init__(self, z_lens=z_lens, z_source=z_source, likelihood_type=likelihood_type, name=name,
                                     normalized=normalized, kwargs_lens_properties=kwargs_lens_properties,
-                                    gamma_pl_likelihood=gamma_pl_scaling,
+                                    gamma_pl_likelihood=gamma_pl_scaling, gamma_pl=gamma_pl,
                                     **kwargs_likelihood)
         self._num_distribution_draws = int(num_distribution_draws)
         self._kappa_ext_bias = kappa_ext_bias
@@ -66,14 +69,15 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
             self._draw_kappa = False
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
+        self._draw_gamma_pl = gamma_pl_scaling
 
     def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
         """
         log likelihood of the data of a lens given a model (defined with hyper-parameters) and cosmology
 
         :param cosmo: astropy.cosmology instance
-        :param kwargs_lens: keywords of the hyper parameters of the lens model
-        :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :param kwargs_lens: keywords of the hyperparameters of the lens model
+        :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :return: log likelihood of the data given the model
         """
@@ -141,16 +145,17 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
         :return: log likelihood given the single lens analysis for a single (random) realization of the hyper parameter
          distribution
         """
-        lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+        lambda_mst, kappa_ext, gamma_ppn, gamma_pl = self.draw_lens(**kwargs_lens)
         # draw intrinsic source magnitude
         mag_source = self.draw_source(lum_dist=delta_lum_dist, **kwargs_source)
         ddt_, dd_, mag_source_ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
-                                                          kappa_ext=kappa_ext, mag_source=mag_source)
-        j_kin_param_array = self.draw_j_kin(**kwargs_kin)  # TODO make sure gamma_pl is used
+                                                          kappa_ext=kappa_ext, mag_source=mag_source,
+                                                          gamma_pl=gamma_pl)  # TODO re-scale power-law Ddt prediction
+        j_kin_param_array = self.draw_j_kin(gamma_pl=gamma_pl, **kwargs_kin)
         j_kin_scaling = self.j_kin_scaling(j_kin_param_array)
 
         lnlikelihood = self.log_likelihood(ddt_, dd_, j_kin_scaling=j_kin_scaling, sigma_v_sys_error=sigma_v_sys_error,
-                                           mu_intrinsic=mag_source_)
+                                           mu_intrinsic=mag_source_, gamma=gamma_pl)
         return np.nan_to_num(lnlikelihood)
 
     def angular_diameter_distances(self, cosmo):
@@ -200,8 +205,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
         a_ani_sigma = kwargs_kin.get('a_ani_sigma', 0)
         beta_inf_sigma = kwargs_kin.get('beta_inf_sigma', 0)
         sne_sigma = kwargs_source.get('sigma_sne', 0)
+        gamma_pl_sigma = kwargs_lens.get('gamma_pl_sigma', 0)
         if a_ani_sigma == 0 and lambda_mst_sigma == 0 and kappa_ext_sigma == 0 and beta_inf_sigma == 0 \
-           and sne_sigma == 0:
+           and sne_sigma == 0 and gamma_pl_sigma == 0:
             if self._draw_kappa is False:
                 return True
         return False
@@ -222,6 +228,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
          self._lambda_scaling_property
         :param beta_lambda: float, a second linear slope of the lambda_int scaling relation with lens quantity
          self._lambda_scaling_property_beta
+        :param gamma_pl: mean of power-law slope of population
+        :param gamma_pl_sigma: spread in gamma_pl distribution
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
@@ -238,7 +246,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
             kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
         else:
             kappa_ext_draw = 0
-        return lambda_mst_draw, kappa_ext_draw, gamma_ppn
+        if self._draw_gamma_pl and gamma_pl_sigma>0:
+            gamma_pl_draw = np.random.normal(gamma_pl, gamma_pl_sigma)
+        else:
+            gamma_pl_draw = gamma_pl
+        return lambda_mst_draw, kappa_ext_draw, gamma_ppn, gamma_pl_draw
 
     @staticmethod
     def draw_source(mu_sne=1, sigma_sne=0, lum_dist=0, **kwargs):
@@ -283,10 +295,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
         sigma_v_predict_mean = np.zeros_like(sigma_v_measurement)
         cov_error_predict = np.zeros_like(cov_error_measurement)
         for i in range(self._num_distribution_draws):
-            lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+            lambda_mst, kappa_ext, gamma_ppn, gamma_pl = self.draw_lens(**kwargs_lens)
             ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                     kappa_ext=kappa_ext)
-            aniso_param_array = self.draw_j_kin(**kwargs_kin_copy)
+            aniso_param_array = self.draw_j_kin(gamma_pl=gamma_pl, **kwargs_kin_copy)
             aniso_scaling = self.j_kin_scaling(aniso_param_array)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(ddt_, dd_, aniso_scaling=aniso_scaling)
             sigma_v_predict_mean += sigma_v_predict_i
@@ -316,7 +328,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
         ddt_draws = []
         dd_draws = []
         for i in range(self._num_distribution_draws):
-            lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+            lambda_mst, kappa_ext, gamma_ppn, gamma_pl = self.draw_lens(**kwargs_lens)
             ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
                                                     kappa_ext=kappa_ext)
             ddt_draws.append(ddt_)

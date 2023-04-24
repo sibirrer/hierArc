@@ -3,11 +3,12 @@ import numpy as np
 
 class LensParam(object):
     """
-    manages the lens model covariant parameters
+    manages the lens model population parameters
     """
     def __init__(self, lambda_mst_sampling=False, lambda_mst_distribution='NONE', kappa_ext_sampling=False,
                  kappa_ext_distribution='NONE', lambda_ifu_sampling=False, lambda_ifu_distribution='NONE',
-                 alpha_lambda_sampling=False, beta_lambda_sampling=False, kwargs_fixed=None, log_scatter=False):
+                 alpha_lambda_sampling=False, beta_lambda_sampling=False, kwargs_fixed=None, log_scatter=False,
+                 gamma_pl_sampling=False, gamma_pl_distribution='NONE'):
         """
 
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
@@ -23,6 +24,9 @@ class LensParam(object):
          according to a predefined quantity of the lens
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param kwargs_fixed: keyword arguments that are held fixed through the sampling
+        :param gamma_pl_sampling: if True, samples a Gaussian
+        :param gamma_pl_distribution: distribution of gamma_pl
+        :type gamma_pl_distribution: str
         """
         self._lambda_mst_sampling = lambda_mst_sampling
         self._lambda_mst_distribution = lambda_mst_distribution
@@ -33,6 +37,8 @@ class LensParam(object):
         self._alpha_lambda_sampling = alpha_lambda_sampling
         self._beta_lambda_sampling = beta_lambda_sampling
         self._log_scatter = log_scatter
+        self._gamma_pl_sampling = gamma_pl_sampling
+        self._gamma_pl_distribution = gamma_pl_distribution
         if kwargs_fixed is None:
             kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
@@ -98,12 +104,26 @@ class LensParam(object):
                     list.append(r'$\beta_{\lambda}$')
                 else:
                     list.append('beta_lambda')
+        if self._gamma_pl_sampling is True:
+            if 'gamma_pl' not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r'$\overline{\gamma}_{\rm pl}$')
+                else:
+                    list.append('gamma_pl')
+            if self._gamma_pl_distribution == 'GAUSSIAN':
+                if 'gamma_pl_sigma' not in self._kwargs_fixed:
+                    if latex_style is True:
+                        list.append(r'$\sigma(\gamma_{\rm pl})$')
+                    else:
+                        list.append('gamma_pl_sigma')
         return list
 
     def args2kwargs(self, args, i=0):
         """
 
         :param args: sampling argument list
+        :param i: index of next argument in args
+        :type i: int
         :return: keyword argument list with parameter names
         """
         kwargs = {}
@@ -161,6 +181,18 @@ class LensParam(object):
             else:
                 kwargs['beta_lambda'] = args[i]
                 i += 1
+        if self._gamma_pl_sampling is True:
+            if 'gamma_pl' in self._kwargs_fixed:
+                kwargs['gamma_pl'] = self._kwargs_fixed['gamma_pl']
+            else:
+                kwargs['gamma_pl'] = args[i]
+                i += 1
+            if self._gamma_pl_distribution == 'GAUSSIAN':
+                if 'gamma_pl_sigma' in self._kwargs_fixed:
+                    kwargs['gamma_pl_sigma'] = self._kwargs_fixed['gamma_pl_sigma']
+                else:
+                    kwargs['gamma_pl_sigma'] = args[i]
+                    i += 1
         return kwargs, i
 
     def kwargs2args(self, kwargs):
@@ -200,4 +232,10 @@ class LensParam(object):
         if self._beta_lambda_sampling is True:
             if 'beta_lambda' not in self._kwargs_fixed:
                 args.append(kwargs['beta_lambda'])
+        if self._gamma_pl_sampling is True:
+            if 'gamma_pl' not in self._kwargs_fixed:
+                args.append(kwargs['gamma_pl'])
+            if self._gamma_pl_distribution == 'GAUSSIAN':
+                if 'gamma_pl_sigma' not in self._kwargs_fixed:
+                    args.append(kwargs['gamma_pl_sigma'])
         return args

@@ -89,3 +89,23 @@ def test_power_law_marginalization():
 
     npt.assert_almost_equal(fermat_pot_ratios[0] / fermat_ratio_theory, 1, decimal=1)
     npt.assert_almost_equal(ddt_ratios[0] / ddt_ratio_theory, 1, decimal=1)
+
+
+def test_ddt_uncertainty():
+
+    gamma, gamma_sigma = 2., 0.1
+    sigma_ddt = power_law_marginalization.ddt_uncertainty(gamma, gamma_sigma)
+    gamma_draws = np.random.normal(loc=gamma, scale=gamma_sigma, size=10000)
+    ddt_draws = power_law_marginalization.theory_ddt_gamma_scaling(gamma_draws, gamma_base=gamma)
+    sigma_ddt_draw = np.std(ddt_draws)
+    print(sigma_ddt_draw / gamma_sigma, 'test relative sigma')
+
+    npt.assert_almost_equal(sigma_ddt_draw / sigma_ddt, 1, decimal=1)
+
+    gamma, gamma_sigma = 1.8, 0.1
+    sigma_ddt = power_law_marginalization.ddt_uncertainty(gamma, gamma_sigma)
+    gamma_draws = np.random.normal(loc=gamma, scale=gamma_sigma, size=10000)
+    ddt_draws = power_law_marginalization.theory_ddt_gamma_scaling(gamma_draws, gamma_base=gamma)
+    sigma_ddt_draw = np.std(ddt_draws)
+    print(sigma_ddt_draw / gamma_sigma, 'test relative sigma')
+    npt.assert_almost_equal(sigma_ddt_draw / sigma_ddt, 1, decimal=1)

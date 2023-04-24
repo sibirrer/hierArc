@@ -12,6 +12,7 @@ class ParamManager(object):
                  anisotropy_sampling=False, anisotropy_model='OM', anisotropy_distribution='NONE',
                  kappa_ext_sampling=False, kappa_ext_distribution='NONE', lambda_ifu_sampling=False,
                  lambda_ifu_distribution='NONE', alpha_lambda_sampling=False, beta_lambda_sampling=False,
+                 gamma_pl_sampling=False, gamma_pl_distribution='NONE',
                  sigma_v_systematics=False,
                  sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', z_apparent_m_anchor=0.1,
                  log_scatter=False,
@@ -40,6 +41,9 @@ class ParamManager(object):
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
          Currently supports:
          'GAUSSIAN': Gaussian distribution
+        :param gamma_pl_sampling: if True, samples a Gaussian
+        :param gamma_pl_distribution: distribution of gamma_pl
+        :type gamma_pl_distribution: str
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
@@ -56,6 +60,8 @@ class ParamManager(object):
                                      kappa_ext_distribution=kappa_ext_distribution,
                                      alpha_lambda_sampling=alpha_lambda_sampling,
                                      beta_lambda_sampling=beta_lambda_sampling,
+                                     gamma_pl_sampling=gamma_pl_sampling,
+                                     gamma_pl_distribution=gamma_pl_distribution,
                                      log_scatter=log_scatter,
                                      kwargs_fixed=kwargs_fixed_lens)
         self._source_param = SourceParam(sne_apparent_m_sampling=sne_apparent_m_sampling,
