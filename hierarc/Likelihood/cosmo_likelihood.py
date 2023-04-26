@@ -136,11 +136,16 @@ class CosmoLikelihood(object):
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo['h0'], kwargs_cosmo['ok'], kwargs_cosmo['om']
-            if np.any(
-                [ok * (1.0 + lens['z_source']) ** 2 + om * (1.0 + lens['z_source']) ** 3 + (1.0 - om - ok) <= 0 for lens
-                 in
-                 self._kwargs_lens_list]):
-                return -np.inf
+            for lens in self._kwargs_lens_list:
+                if 'z_source' in lens:
+                    z = lens['z_source']
+                elif 'z_source_2' in lens:
+                    z = lens['z_source_2']
+                else:
+                    z = 1100
+                cut = ok * (1.0 + z) ** 2 + om * (1.0 + z) ** 3 + (1.0 - om - ok)
+                if cut <= 0:
+                    return -np.inf
             # make sure that Omega_DE is not negative...
             if 1.0 - om - ok <= 0:
                 return -np.inf

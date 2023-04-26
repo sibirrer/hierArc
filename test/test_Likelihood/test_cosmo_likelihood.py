@@ -121,6 +121,13 @@ class TestCosmoLikelihood(object):
         npt.assert_almost_equal(dd_astropy, dd_fixed, decimal=1)
         npt.assert_almost_equal(dd_astropy, dd_fixed_interp, decimal=1)
 
+    def test_oLCDM_init(self):
+        kwargs_cosmo = {'h0': 100, 'om': .1, 'ok': -0.1}
+        kwargs_likelihood_list = [{'likelihood_type': 'DSPL', 'z_lens': 0.3, 'z_source_1': 0.5, 'z_source_2':1.5,
+                                   'beta_dspl': 1.2, 'sigma_beta_dspl': 0.01}]
+        cosmoL = CosmoLikelihood(kwargs_likelihood_list, self.cosmology, self.kwargs_bounds,
+                                 interpolate_cosmo=False, cosmo_fixed=None)
+
     def test_sne_likelihood_integration(self):
         cosmoL = CosmoLikelihood([], self.cosmology, self.kwargs_bounds, sne_likelihood='Pantheon_binned',
                                  interpolate_cosmo=True, num_redshift_interp=100, cosmo_fixed=None)
