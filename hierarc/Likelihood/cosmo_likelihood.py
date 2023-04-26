@@ -141,6 +141,7 @@ class CosmoLikelihood(object):
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo['h0'], kwargs_cosmo['ok'], kwargs_cosmo['om']
+            # TODO: does not work for double source plane where z_source_1 and z_source_2 are set
             if np.any(
                 [ok * (1.0 + lens['z_source']) ** 2 + om * (1.0 + lens['z_source']) ** 3 + (1.0 - om - ok) <= 0 for lens
                  in

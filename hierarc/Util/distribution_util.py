@@ -49,3 +49,19 @@ def approx_cdf_1d(bin_edges, pdf_array):
     cdf_func = interp1d(bin_edges, cdf_array)
     cdf_inv_func = interp1d(cdf_array, bin_edges)
     return cdf_array, cdf_func, cdf_inv_func
+
+
+def weighted_avg_and_std(values, weights):
+    """
+    Return the weighted average and standard deviation.
+
+    :param values: values of the distribution
+    :type values: NumPy ndarrays with the same shape.
+    :param weights: weights of the values
+    :type weights: NumPy ndarrays with the same shape.
+    :return (mean, sigma)
+    """
+    average = np.average(values, weights=weights)
+    # Fast and numerically precise:
+    variance = np.average((values-average)**2, weights=weights)
+    return (average, np.sqrt(variance))

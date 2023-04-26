@@ -50,4 +50,5 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
                                           num_psf_sampling=num_psf_sampling, num_kin_sampling=num_kin_sampling)
         self._kwargs_lens_light = kwargs_lens_light
         ImageModelPosterior.__init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error)
-        KinScalingConfig.__init__(self, anisotropy_model, r_eff, gamma0=gamma, density_slope_scaling=density_slope_scaling)
+        KinScalingConfig.__init__(self, anisotropy_model, r_eff, gamma0=gamma,
+                                  density_slope_scaling=density_slope_scaling)

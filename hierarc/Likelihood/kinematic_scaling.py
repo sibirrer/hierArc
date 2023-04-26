@@ -129,7 +129,10 @@ class KinematicScalingIFU(object):
         elif self._anisotropy_model in ['OM', 'const'] and self._power_law_scaling:
             if a_ani < self._scaling_param_min[0] or a_ani > self._scaling_param_max[0]:
                 raise ValueError('anisotropy parameter is out of bounds of the interpolated range!')
-            a_ani_draw = np.random.normal(a_ani, a_ani_sigma*a_ani)
+            if self._anisotropy_model == 'OM':
+                a_ani_draw = np.random.normal(a_ani, a_ani_sigma * a_ani)
+            else:
+                a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
             if a_ani_draw < self._scaling_param_min[0] or a_ani_draw > self._scaling_param_max[0]:
                 return self.draw_j_kin(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma, gamma_pl=gamma_pl,
                                        gamma_pl_sigma=gamma_pl_sigma)
