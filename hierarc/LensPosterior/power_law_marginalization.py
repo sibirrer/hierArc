@@ -42,6 +42,15 @@ def ddt_uncertainty(gamma, gamma_sigma):
     :param gamma_sigma: 1-sigma uncertainty in the power-law slope
     :return: sigma(ddt) / <ddt>
     """
-    d_ddt_d_gamma = abs(2 / (1 - gamma) ** 2)
-    ddt_sigma = d_ddt_d_gamma * gamma_sigma
+    # d_ddt_d_gamma = abs(2 / (1 - gamma) ** 2)
+    ddt_sigma = d_ddt_d_gamma(gamma=gamma) * gamma_sigma
     return ddt_sigma
+
+
+def d_ddt_d_gamma(gamma):
+    """
+
+    :param gamma: power-law slope
+    :return: derivative of 1/Ddt * d Ddt/d gamma
+    """
+    return 2 / (1 - gamma) ** 2

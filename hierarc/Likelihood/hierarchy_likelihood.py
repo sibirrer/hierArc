@@ -297,7 +297,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinematicScalin
         for i in range(self._num_distribution_draws):
             lambda_mst, kappa_ext, gamma_ppn, gamma_pl = self.draw_lens(**kwargs_lens)
             ddt_, dd_, _ = self.displace_prediction(ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst,
-                                                    kappa_ext=kappa_ext)
+                                                    kappa_ext=kappa_ext, gamma_pl=gamma_pl)
             aniso_param_array = self.draw_j_kin(gamma_pl=gamma_pl, **kwargs_kin_copy)
             aniso_scaling = self.j_kin_scaling(aniso_param_array)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(ddt_, dd_, aniso_scaling=aniso_scaling)

@@ -9,7 +9,7 @@ class TransformedCosmography(object):
     lenses.
     """
 
-    def __init__(self, z_lens, z_source, power_law_scaling=False, gamma_pl_baseline=None):
+    def __init__(self, z_lens, z_source, power_law_scaling=False, gamma_pl_baseline=None, ddt_d_gamma_cov=None):
         """
 
         :param z_lens: lens redshift
@@ -17,11 +17,13 @@ class TransformedCosmography(object):
         :param power_law_scaling: scaling of mass density power-law slope with Ddt
          (meaning power-law slope marginalization on Ddt has not been performed)
         :param gamma_pl_baseline: baseline power-law slope of Ddt posteriors for re-scaling
+        :param ddt_d_gamma_cov: correlation coefficient as d Ddt/d gamma
         """
         self._z_lens = z_lens
         self._z_source = z_source
         self._power_law_scaling = power_law_scaling
         self._gamma_pl_baseline = gamma_pl_baseline
+        self._ddt_d_gamma_cov = ddt_d_gamma_cov
 
     def displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0, gamma_pl=None):
         """
@@ -65,11 +67,14 @@ class TransformedCosmography(object):
         """
 
         :param ddt: time-delay distance
-        :param gamma_pl: poer-law mass density slope
+        :param gamma_pl: power-law mass density slope
         :return: re-scaled Ddt prediction
         """
         if self._power_law_scaling:
-            factor = theory_ddt_gamma_scaling(gamma_pl, gamma_base=self._gamma_pl_baseline)
+            if self._ddt_d_gamma_cov is None:
+                factor = theory_ddt_gamma_scaling(gamma_pl, gamma_base=self._gamma_pl_baseline)
+            else:
+                factor = 1 - self._ddt_d_gamma_cov * (gamma_pl - self._gamma_pl_baseline)
         else:
             factor = 1
         ddt_ = ddt / factor

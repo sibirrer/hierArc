@@ -2,9 +2,10 @@ import pytest
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from lenstronomy.Util.data_util import magnitude2cps
 import numpy.testing as npt
+from hierarc.LensPosterior import power_law_marginalization
 
 
-class TestTransformedCoismography(object):
+class TestTransformedCosmography(object):
 
     def setup(self):
         z_lens = 0.5
@@ -55,6 +56,22 @@ class TestTransformedCoismography(object):
         ddt_, dd_ = self.transform._displace_kappa_ext(ddt, dd, kappa_ext=kappa_ext)
         assert ddt_ == ddt * (1 - kappa_ext)
         assert dd == dd_
+
+    def test_displace_gamma(self):
+        z_lens = 0.5
+        z_source = 1.5
+        gamma_pl_baseline = 2
+        ddt_dgamma_cov = power_law_marginalization.d_ddt_d_gamma(gamma_pl_baseline)
+        print(ddt_dgamma_cov, 'test ddt_d_gamma_cov')
+        transform = TransformedCosmography(z_lens=z_lens, z_source=z_source, power_law_scaling=True,
+                                           gamma_pl_baseline=gamma_pl_baseline, ddt_d_gamma_cov=None)
+        transform_cov = TransformedCosmography(z_lens=z_lens, z_source=z_source, power_law_scaling=True,
+                                               gamma_pl_baseline=gamma_pl_baseline, ddt_d_gamma_cov=ddt_dgamma_cov)
+        ddt = 1
+        delta_gamma = 0.1
+        ddt_ = transform._displace_gamma_pl(ddt=ddt, gamma_pl=gamma_pl_baseline + delta_gamma)
+        ddt_cov = transform_cov._displace_gamma_pl(ddt=ddt, gamma_pl=gamma_pl_baseline + delta_gamma)
+        npt.assert_almost_equal(ddt_, ddt_cov, decimal=1)
 
 
 if __name__ == '__main__':
