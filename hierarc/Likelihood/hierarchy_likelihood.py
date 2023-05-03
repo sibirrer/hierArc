@@ -14,7 +14,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
                  ani_param_array=None, ani_scaling_array_list=None, ani_scaling_array=None,
                  num_distribution_draws=50, kappa_ext_bias=False, kappa_pdf=None, kappa_bin_edges=None, mst_ifu=False,
                  lambda_scaling_property=0, lambda_scaling_property_beta=0,
-                 normalized=False, kwargs_lens_properties=None, **kwargs_likelihood):
+                 normalized=True, kwargs_lens_properties=None, **kwargs_likelihood):
         """
 
         :param z_lens: lens redshift
