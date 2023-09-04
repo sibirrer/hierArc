@@ -7,16 +7,17 @@ import unittest
 class TestCosmoParamFLCDM(object):
 
     def setup(self):
-        cosmology_list = ['FLCDM', "FwCDM", "w0waCDM", "oLCDM"]
+        cosmology_list = ['FLCDM', "FwCDM", "w0waCDM", "oLCDM", "NONE"]
         kwargs_fixed = {'h0': 70, 'om': 0.3, 'ok': 0., 'w': -1, 'wa': -0, 'w0': -0, 'gamma_ppn': 1}
         self._param_list = []
         self._param_list_fixed = []
         for cosmology in cosmology_list:
             self._param_list.append(CosmoParam(cosmology, ppn_sampling=True, kwargs_fixed=None))
             self._param_list_fixed.append(CosmoParam(cosmology, ppn_sampling=True, kwargs_fixed=kwargs_fixed))
+        self.cosmology_list = cosmology_list
 
     def test_param_list(self):
-        num_param_list = [3, 4, 5, 4]  # number of parameters for the cosmological models cosmology_list
+        num_param_list = [3, 4, 5, 4, 1]  # number of parameters for the cosmological models cosmology_list
         for i, param in enumerate(self._param_list):
             param_list = param.param_list(latex_style=False)
             assert len(param_list) == num_param_list[i]
@@ -45,7 +46,8 @@ class TestCosmoParamFLCDM(object):
         kwargs_cosmo = {'h0': 70, 'om': 0.3, 'ok': 0., 'w': -1, 'wa': -0, 'w0': -0, 'gamma_ppn': 1}
         for i, param in enumerate(self._param_list):
             cosmo = param.cosmo(kwargs_cosmo)
-            assert hasattr(cosmo, 'H0')
+            if self.cosmology_list[i] != "NONE":
+                assert hasattr(cosmo, 'H0')
 
 
 class TestRaise(unittest.TestCase):

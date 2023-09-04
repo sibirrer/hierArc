@@ -112,12 +112,25 @@ class TestCosmoLikelihood(object):
         kwargs_cosmo_wrong = {'h0': 10, 'om': .3, 'ok': 0}
         cosmo_fixed = cosmoL.cosmo_instance(kwargs_cosmo_wrong)
 
+        # and here we inject pre-computed angular diameter distances as a function of redshift
+        redshifts = np.linspace(start=0, stop=5, num=100)
+        ang_diameter_distances = cosmo_astropy.angular_diameter_distance(redshifts)
+        Ok0 = kwargs_cosmo['ok']
+        K = cosmo_interp.k  # compute the curvature from the interpolation class (as easily available)
+        kwargs_cosmo_interp = {'ang_diameter_distances': ang_diameter_distances,
+                               'redshifts': redshifts, 'ok': Ok0, 'K': K}
+
+        cosmo_interp_input = cosmoL.cosmo_instance(kwargs_cosmo_interp)
+
         z = 1
         dd_astropy = cosmo_astropy.angular_diameter_distance(z=z).value
         dd_interp = cosmo_interp.angular_diameter_distance(z=z).value
+        dd_interp_input = cosmo_interp_input.angular_diameter_distance(z=z).value
         dd_fixed = cosmo_fixed.angular_diameter_distance(z=z).value
         dd_fixed_interp = cosmo_fixed_interp.angular_diameter_distance(z=z).value
+
         npt.assert_almost_equal(dd_astropy, dd_interp, decimal=1)
+        npt.assert_almost_equal(dd_astropy, dd_interp_input, decimal=1)
         npt.assert_almost_equal(dd_astropy, dd_fixed, decimal=1)
         npt.assert_almost_equal(dd_astropy, dd_fixed_interp, decimal=1)
 

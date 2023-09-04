@@ -36,7 +36,7 @@ PACKAGE_PATH = os.path.abspath(os.path.join(__file__, os.pardir))
 setup(
     author="Simon Birrer",
     author_email='sibirrer@gmail.com',
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -61,7 +61,7 @@ setup(
     test_suite='test',
     tests_require=test_requirements,
     url='https://github.com/sibirrer/hierarc',
-    version='1.1.1',
+    version='1.1.2',
     zip_safe=False,
     cmdclass={'test': PyTest}
 )

@@ -21,3 +21,10 @@ History
 ------------------
 
 * using CosmoInterp module from lenstronomy
+
+1.1.2 (2023-09-04)
+------------------
+
+* double source plane likelihood
+* Pantheon+ likelihood
+* improved API

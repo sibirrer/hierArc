@@ -65,7 +65,7 @@ class CosmoLikelihood(object):
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space
          (and thus flat prior in log)
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
-        log likelihood value (e.g. prior)
+         log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
         :param num_redshift_interp: int, number of redshift interpolation steps
         :param cosmo_fixed: astropy.cosmology instance to be used and held fixed throughout the sampling
@@ -122,10 +122,13 @@ class CosmoLikelihood(object):
                     z_max = kwargs_lens['z_source_2']
         self._z_max = z_max
 
-    def likelihood(self, args):
+    def likelihood(self, args, kwargs_cosmo_interp=None):
         """
 
         :param args: list of sampled parameters
+        :param kwargs_cosmo_interp: interpolated angular diameter distances with
+         'ang_diameter_distances' and 'redshifts', and optionally 'ok' and 'K' in none-flat scenarios
+        :type kwargs_cosmo_interp: dict
         :return: log likelihood of the combined lenses
         """
         for i in range(0, len(args)):
@@ -149,6 +152,8 @@ class CosmoLikelihood(object):
             # make sure that Omega_DE is not negative...
             if 1.0 - om - ok <= 0:
                 return -np.inf
+        if kwargs_cosmo_interp is not None:
+            kwargs_cosmo = {**kwargs_cosmo, **kwargs_cosmo_interp}
         cosmo = self.cosmo_instance(kwargs_cosmo)
         log_l = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
                                                           kwargs_source=kwargs_source)
@@ -175,6 +180,13 @@ class CosmoLikelihood(object):
         :param kwargs_cosmo: cosmology parameter keyword argument list
         :return: astropy.cosmology (or equivalent interpolation scheme class)
         """
+        if hasattr(kwargs_cosmo, 'ang_diameter_distances') and hasattr(kwargs_cosmo, 'redshifts'):
+            # in that case we use directly the interpolation mode to approximate angular diameter distances
+            cosmo = CosmoInterp(ang_dist_list=kwargs_cosmo['ang_diameter_distances'],
+                                z_list=kwargs_cosmo['redshifts'],
+                                Ok0=kwargs_cosmo.get('ok', 0),
+                                K=kwargs_cosmo.get('K', None))
+            return cosmo
         if self._cosmo_fixed is None:
             cosmo = self.param.cosmo(kwargs_cosmo)
             if self._interpolate_cosmo is True:
