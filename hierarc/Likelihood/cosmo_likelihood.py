@@ -20,7 +20,7 @@ class CosmoLikelihood(object):
                  alpha_lambda_sampling=False, beta_lambda_sampling=False,
                  lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
                  sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', z_apparent_m_anchor=0.1,
-                 log_scatter=False,
+                 log_scatter=False, normalized=False,
                  anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
                  num_redshift_interp=100, cosmo_fixed=None):
         """
@@ -69,10 +69,14 @@ class CosmoLikelihood(object):
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
         :param num_redshift_interp: int, number of redshift interpolation steps
         :param cosmo_fixed: astropy.cosmology instance to be used and held fixed throughout the sampling
+        :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
+         (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         """
         self._cosmology = cosmology
         self._kwargs_lens_list = kwargs_likelihood_list
-        self._likelihoodLensSample = LensSampleLikelihood(kwargs_likelihood_list)
+        if sigma_v_systematics is True:
+            normalized = True
+        self._likelihoodLensSample = LensSampleLikelihood(kwargs_likelihood_list, normalized=normalized)
         self.param = ParamManager(cosmology, ppn_sampling=ppn_sampling, lambda_mst_sampling=lambda_mst_sampling,
                                   lambda_mst_distribution=lambda_mst_distribution,
                                   lambda_ifu_sampling=lambda_ifu_sampling,
