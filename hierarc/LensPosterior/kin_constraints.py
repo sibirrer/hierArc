@@ -12,6 +12,7 @@ class KinConstraints(BaseLensConfig):
                  sigma_v_measured, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
                  sigma_v_error_independent=None, sigma_v_error_covariant=None, sigma_v_error_cov_matrix=None,
                  kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'],
+                 lens_model_list=None,
                  MGE_light=False, kwargs_mge_light=None, hernquist_approx=True, sampling_number=1000,
                  num_psf_sampling=100, num_kin_sampling=1000, multi_observations=False):
         """
@@ -36,6 +37,7 @@ class KinConstraints(BaseLensConfig):
         :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of
          lenstronomy.GalKin.anisotropy
+        :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
@@ -51,7 +53,9 @@ class KinConstraints(BaseLensConfig):
         self._anisotropy_model = anisotropy_model
         BaseLensConfig.__init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
                                 kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
-                                anisotropy_model, kwargs_lens_light=kwargs_lens_light,
+                                anisotropy_model,
+                                lens_model_list=lens_model_list,
+                                kwargs_lens_light=kwargs_lens_light,
                                 lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
                                 kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
                                 sampling_number=sampling_number, num_psf_sampling=num_psf_sampling,

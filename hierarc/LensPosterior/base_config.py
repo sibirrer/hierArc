@@ -10,7 +10,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
     """
     def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
                  kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
-                 kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
+                 lens_model_list=None, kwargs_lens_light=None,
+                 lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
                  hernquist_approx=True, sampling_number=1000, num_psf_sampling=100, num_kin_sampling=1000,
                  multi_observations=False):
         """
@@ -29,12 +30,17 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
+         :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         """
         self._z_lens, self._z_source = z_lens, z_source
-        kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
+        if lens_model_list is None:
+            kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
+        else:
+            kwargs_model = {'lens_model_list': lens_model_list,
+                            'lens_light_model_list': lens_light_model_list}
         TDCosmography.__init__(self, z_lens, z_source, kwargs_model, cosmo_fiducial=None,
                                lens_model_kinematics_bool=None, light_model_kinematics_bool=None,
                                kwargs_seeing=kwargs_seeing, kwargs_aperture=kwargs_aperture,
