@@ -2,9 +2,8 @@ from astropy.cosmology import FlatLambdaCDM, FlatwCDM, LambdaCDM, w0waCDM
 
 
 class CosmoParam(object):
-    """
-    manages the cosmological parameters in the sampling
-    """
+    """Manages the cosmological parameters in the sampling."""
+
     def __init__(self, cosmology, ppn_sampling=False, kwargs_fixed=None):
         """
 
@@ -20,7 +19,9 @@ class CosmoParam(object):
         self._supported_cosmologies = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "NONE"]
         if cosmology not in self._supported_cosmologies:
             raise ValueError(
-                'cosmology %s not supported!. Please chose among %s ' % (cosmology, self._supported_cosmologies))
+                "cosmology %s not supported!. Please chose among %s "
+                % (cosmology, self._supported_cosmologies)
+            )
 
     def param_list(self, latex_style=False):
         """
@@ -30,46 +31,46 @@ class CosmoParam(object):
         """
         list = []
         if self._cosmology not in ["NONE"]:
-            if 'h0' not in self._kwargs_fixed:
+            if "h0" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$H_0$')
+                    list.append(r"$H_0$")
                 else:
-                    list.append('h0')
+                    list.append("h0")
             if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
-                if 'om' not in self._kwargs_fixed:
+                if "om" not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$\Omega_{\rm m}$')
+                        list.append(r"$\Omega_{\rm m}$")
                     else:
-                        list.append('om')
+                        list.append("om")
             if self._cosmology in ["FwCDM"]:
-                if 'w' not in self._kwargs_fixed:
+                if "w" not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$w$')
+                        list.append(r"$w$")
                     else:
-                        list.append('w')
+                        list.append("w")
             if self._cosmology in ["w0waCDM"]:
-                if 'w0' not in self._kwargs_fixed:
+                if "w0" not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$w_0$')
+                        list.append(r"$w_0$")
                     else:
-                        list.append('w0')
-                if 'wa' not in self._kwargs_fixed:
+                        list.append("w0")
+                if "wa" not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$w_{\rm a}$')
+                        list.append(r"$w_{\rm a}$")
                     else:
-                        list.append('wa')
+                        list.append("wa")
             if self._cosmology in ["oLCDM"]:
-                if 'ok' not in self._kwargs_fixed:
+                if "ok" not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$\Omega_{\rm k}$')
+                        list.append(r"$\Omega_{\rm k}$")
                     else:
-                        list.append('ok')
+                        list.append("ok")
         if self._ppn_sampling is True:
-            if 'gamma_ppn' not in self._kwargs_fixed:
+            if "gamma_ppn" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\gamma_{\rm ppn}$')
+                    list.append(r"$\gamma_{\rm ppn}$")
                 else:
-                    list.append('gamma_ppn')
+                    list.append("gamma_ppn")
         return list
 
     def args2kwargs(self, args, i=0):
@@ -80,45 +81,45 @@ class CosmoParam(object):
         """
         kwargs = {}
         if self._cosmology not in ["NONE"]:
-            if 'h0' in self._kwargs_fixed:
-                kwargs['h0'] = self._kwargs_fixed['h0']
+            if "h0" in self._kwargs_fixed:
+                kwargs["h0"] = self._kwargs_fixed["h0"]
             else:
-                kwargs['h0'] = args[i]
+                kwargs["h0"] = args[i]
                 i += 1
             if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
-                if 'om' in self._kwargs_fixed:
-                    kwargs['om'] = self._kwargs_fixed['om']
+                if "om" in self._kwargs_fixed:
+                    kwargs["om"] = self._kwargs_fixed["om"]
                 else:
-                    kwargs['om'] = args[i]
+                    kwargs["om"] = args[i]
                     i += 1
             if self._cosmology in ["FwCDM"]:
-                if 'w' in self._kwargs_fixed:
-                    kwargs['w'] = self._kwargs_fixed['w']
+                if "w" in self._kwargs_fixed:
+                    kwargs["w"] = self._kwargs_fixed["w"]
                 else:
-                    kwargs['w'] = args[i]
+                    kwargs["w"] = args[i]
                     i += 1
             if self._cosmology in ["w0waCDM"]:
-                if 'w0' in self._kwargs_fixed:
-                    kwargs['w0'] = self._kwargs_fixed['w0']
+                if "w0" in self._kwargs_fixed:
+                    kwargs["w0"] = self._kwargs_fixed["w0"]
                 else:
-                    kwargs['w0'] = args[i]
+                    kwargs["w0"] = args[i]
                     i += 1
-                if 'wa' in self._kwargs_fixed:
-                    kwargs['wa'] = self._kwargs_fixed['wa']
+                if "wa" in self._kwargs_fixed:
+                    kwargs["wa"] = self._kwargs_fixed["wa"]
                 else:
-                    kwargs['wa'] = args[i]
+                    kwargs["wa"] = args[i]
                     i += 1
             if self._cosmology in ["oLCDM"]:
-                if 'ok' in self._kwargs_fixed:
-                    kwargs['ok'] = self._kwargs_fixed['ok']
+                if "ok" in self._kwargs_fixed:
+                    kwargs["ok"] = self._kwargs_fixed["ok"]
                 else:
-                    kwargs['ok'] = args[i]
+                    kwargs["ok"] = args[i]
                     i += 1
         if self._ppn_sampling is True:
-            if 'gamma_ppn' in self._kwargs_fixed:
-                kwargs['gamma_ppn'] = self._kwargs_fixed['gamma_ppn']
+            if "gamma_ppn" in self._kwargs_fixed:
+                kwargs["gamma_ppn"] = self._kwargs_fixed["gamma_ppn"]
             else:
-                kwargs['gamma_ppn'] = args[i]
+                kwargs["gamma_ppn"] = args[i]
                 i += 1
         return kwargs, i
 
@@ -130,25 +131,25 @@ class CosmoParam(object):
         """
         args = []
         if self._cosmology not in ["NONE"]:
-            if 'h0' not in self._kwargs_fixed:
-                args.append(kwargs['h0'])
+            if "h0" not in self._kwargs_fixed:
+                args.append(kwargs["h0"])
             if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
-                if 'om' not in self._kwargs_fixed:
-                    args.append(kwargs['om'])
+                if "om" not in self._kwargs_fixed:
+                    args.append(kwargs["om"])
             if self._cosmology in ["FwCDM"]:
-                if 'w' not in self._kwargs_fixed:
-                    args.append(kwargs['w'])
+                if "w" not in self._kwargs_fixed:
+                    args.append(kwargs["w"])
             if self._cosmology in ["w0waCDM"]:
-                if 'w0' not in self._kwargs_fixed:
-                    args.append(kwargs['w0'])
-                if 'wa' not in self._kwargs_fixed:
-                    args.append(kwargs['wa'])
+                if "w0" not in self._kwargs_fixed:
+                    args.append(kwargs["w0"])
+                if "wa" not in self._kwargs_fixed:
+                    args.append(kwargs["wa"])
             if self._cosmology in ["oLCDM"]:
-                if 'ok' not in self._kwargs_fixed:
-                    args.append(kwargs['ok'])
+                if "ok" not in self._kwargs_fixed:
+                    args.append(kwargs["ok"])
         if self._ppn_sampling is True:
-            if 'gamma_ppn' not in self._kwargs_fixed:
-                args.append(kwargs['gamma_ppn'])
+            if "gamma_ppn" not in self._kwargs_fixed:
+                args.append(kwargs["gamma_ppn"])
         return args
 
     def cosmo(self, kwargs):
@@ -158,13 +159,23 @@ class CosmoParam(object):
         :return: astropy.cosmology instance
         """
         if self._cosmology == "FLCDM":
-            cosmo = FlatLambdaCDM(H0=kwargs['h0'], Om0=kwargs['om'])
+            cosmo = FlatLambdaCDM(H0=kwargs["h0"], Om0=kwargs["om"])
         elif self._cosmology == "FwCDM":
-            cosmo = FlatwCDM(H0=kwargs['h0'], Om0=kwargs['om'], w0=kwargs['w'])
+            cosmo = FlatwCDM(H0=kwargs["h0"], Om0=kwargs["om"], w0=kwargs["w"])
         elif self._cosmology == "w0waCDM":
-            cosmo = w0waCDM(H0=kwargs['h0'], Om0=kwargs['om'], Ode0=1.0 - kwargs['om'], w0=kwargs['w0'], wa=kwargs['wa'])
+            cosmo = w0waCDM(
+                H0=kwargs["h0"],
+                Om0=kwargs["om"],
+                Ode0=1.0 - kwargs["om"],
+                w0=kwargs["w0"],
+                wa=kwargs["wa"],
+            )
         elif self._cosmology == "oLCDM":
-            cosmo = LambdaCDM(H0=kwargs['h0'], Om0=kwargs['om'], Ode0=1.0 - kwargs['om'] - kwargs['ok'])
+            cosmo = LambdaCDM(
+                H0=kwargs["h0"],
+                Om0=kwargs["om"],
+                Ode0=1.0 - kwargs["om"] - kwargs["ok"],
+            )
         elif self._cosmology == "NONE":
             cosmo = None
         else:

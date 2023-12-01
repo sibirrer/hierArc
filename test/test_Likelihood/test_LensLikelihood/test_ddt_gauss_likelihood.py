@@ -5,7 +5,6 @@ import pytest
 
 
 class TestDdtDdGaussianLikelihood(object):
-
     def setup(self):
         np.random.seed(seed=41)
         self.z_lens = 0.8
@@ -14,8 +13,12 @@ class TestDdtDdGaussianLikelihood(object):
         self.ddt_mean = 10
         self.ddt_sigma = 0.1
 
-        self.kwargs_lens = {'z_lens': self.z_lens, 'z_source': self.z_source,
-                            'ddt_mean': self.ddt_mean, 'ddt_sigma': self.ddt_sigma}
+        self.kwargs_lens = {
+            "z_lens": self.z_lens,
+            "z_source": self.z_source,
+            "ddt_mean": self.ddt_mean,
+            "ddt_sigma": self.ddt_sigma,
+        }
 
     def test_log_likelihood(self):
         likelihood = DdtGaussianLikelihood(**self.kwargs_lens)
@@ -32,5 +35,5 @@ class TestDdtDdGaussianLikelihood(object):
         assert ddt_sigma == self.ddt_sigma
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

@@ -2,17 +2,41 @@ from hierarc.LensPosterior.kin_constraints import KinConstraints
 
 
 class DdtGaussKinConstraints(KinConstraints):
-    """
-    class for sampling Ds/Dds posteriors from imaging data and kinematic constraints with additional constraints on the
-    time-delay distance Ddt
-    """
+    """Class for sampling Ds/Dds posteriors from imaging data and kinematic constraints
+    with additional constraints on the time-delay distance Ddt."""
 
-    def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, theta_E, theta_E_error, gamma, gamma_error, r_eff,
-                 r_eff_error, sigma_v_measured, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
-                 sigma_v_error_independent=None, sigma_v_error_covariant=None, sigma_v_error_cov_matrix=None,
-                 kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'], MGE_light=False, kwargs_mge_light=None,
-                 hernquist_approx=True, kappa_ext=0, kappa_ext_sigma=0, sampling_number=1000, num_psf_sampling=100,
-                 num_kin_sampling=1000, multi_observations=False):
+    def __init__(
+        self,
+        z_lens,
+        z_source,
+        ddt_mean,
+        ddt_sigma,
+        theta_E,
+        theta_E_error,
+        gamma,
+        gamma_error,
+        r_eff,
+        r_eff_error,
+        sigma_v_measured,
+        kwargs_aperture,
+        kwargs_seeing,
+        kwargs_numerics_galkin,
+        anisotropy_model,
+        sigma_v_error_independent=None,
+        sigma_v_error_covariant=None,
+        sigma_v_error_cov_matrix=None,
+        kwargs_lens_light=None,
+        lens_light_model_list=["HERNQUIST"],
+        MGE_light=False,
+        kwargs_mge_light=None,
+        hernquist_approx=True,
+        kappa_ext=0,
+        kappa_ext_sigma=0,
+        sampling_number=1000,
+        num_psf_sampling=100,
+        num_kin_sampling=1000,
+        multi_observations=False,
+    ):
         """
 
         :param z_lens: lens redshift
@@ -45,38 +69,61 @@ class DdtGaussKinConstraints(KinConstraints):
         """
         self._ddt_mean, self._ddt_sigma = ddt_mean, ddt_sigma
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
-        super(DdtGaussKinConstraints, self).__init__(z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff,
-                                                     r_eff_error, sigma_v_measured, kwargs_aperture, kwargs_seeing,
-                                                     kwargs_numerics_galkin, anisotropy_model,
-                                                     sigma_v_error_independent=sigma_v_error_independent,
-                                                     sigma_v_error_covariant=sigma_v_error_covariant,
-                                                     sigma_v_error_cov_matrix=sigma_v_error_cov_matrix,
-                                                     kwargs_lens_light=kwargs_lens_light,
-                                                     lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
-                                                     kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
-                                                     sampling_number=sampling_number, num_psf_sampling=num_psf_sampling,
-                                                     num_kin_sampling=num_kin_sampling,
-                                                     multi_observations=multi_observations)
+        super(DdtGaussKinConstraints, self).__init__(
+            z_lens,
+            z_source,
+            theta_E,
+            theta_E_error,
+            gamma,
+            gamma_error,
+            r_eff,
+            r_eff_error,
+            sigma_v_measured,
+            kwargs_aperture,
+            kwargs_seeing,
+            kwargs_numerics_galkin,
+            anisotropy_model,
+            sigma_v_error_independent=sigma_v_error_independent,
+            sigma_v_error_covariant=sigma_v_error_covariant,
+            sigma_v_error_cov_matrix=sigma_v_error_cov_matrix,
+            kwargs_lens_light=kwargs_lens_light,
+            lens_light_model_list=lens_light_model_list,
+            MGE_light=MGE_light,
+            kwargs_mge_light=kwargs_mge_light,
+            hernquist_approx=hernquist_approx,
+            sampling_number=sampling_number,
+            num_psf_sampling=num_psf_sampling,
+            num_kin_sampling=num_kin_sampling,
+            multi_observations=multi_observations,
+        )
 
     def hierarchy_configuration(self, num_sample_model=20):
-        """
-        routine to configure the likelihood to be used in the hierarchical sampling. In particular, a default
-        configuration is set to compute the Gaussian approximation of Ds/Dds by sampling the posterior and the estimate
-        of the variance of the sample. The anisotropy scaling is then performed. Different anisotropy models are
-        supported.
+        """Routine to configure the likelihood to be used in the hierarchical sampling.
+        In particular, a default configuration is set to compute the Gaussian
+        approximation of Ds/Dds by sampling the posterior and the estimate of the
+        variance of the sample. The anisotropy scaling is then performed. Different
+        anisotropy models are supported.
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
-         kinematic component J()
+        :param num_sample_model: number of samples drawn from the lens and light model
+            posterior to compute the dimensionless kinematic component J()
         :return: keyword arguments
         """
         j_model_list, error_cov_j_sqrt = self.model_marginalization(num_sample_model)
         ani_scaling_array_list = self.anisotropy_scaling()
         error_cov_measurement = self.error_cov_measurement
         # configuration keyword arguments for the hierarchical sampling
-        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'DdtGaussKin',
-                             'ddt_mean': self._ddt_mean, 'ddt_sigma': self._ddt_sigma,
-                             'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
-                             'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.ani_param_array,
-                             'ani_scaling_array_list': ani_scaling_array_list}
+        kwargs_likelihood = {
+            "z_lens": self._z_lens,
+            "z_source": self._z_source,
+            "likelihood_type": "DdtGaussKin",
+            "ddt_mean": self._ddt_mean,
+            "ddt_sigma": self._ddt_sigma,
+            "sigma_v_measurement": self._sigma_v_measured,
+            "anisotropy_model": self._anisotropy_model,
+            "j_model": j_model_list,
+            "error_cov_measurement": error_cov_measurement,
+            "error_cov_j_sqrt": error_cov_j_sqrt,
+            "ani_param_array": self.ani_param_array,
+            "ani_scaling_array_list": ani_scaling_array_list,
+        }
         return kwargs_likelihood

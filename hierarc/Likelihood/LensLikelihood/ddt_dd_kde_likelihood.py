@@ -4,11 +4,20 @@ from scipy import interpolate
 
 
 class DdtDdKDELikelihood(object):
-    """
-    class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
-    """
-    def __init__(self, z_lens, z_source, dd_samples, ddt_samples, kde_type='scipy_gaussian', bandwidth=1,
-                 interpol=False, num_interp_grid=100):
+    """Class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time
+    delays and kinematics measurement."""
+
+    def __init__(
+        self,
+        z_lens,
+        z_source,
+        dd_samples,
+        ddt_samples,
+        kde_type="scipy_gaussian",
+        bandwidth=1,
+        interpol=False,
+        num_interp_grid=100,
+    ):
         """
 
         :param z_lens: lens redshift
@@ -20,16 +29,26 @@ class DdtDdKDELikelihood(object):
         :param interpol: bool, if True pre-computes an interpolation likelihood in 2d on a grid
         :param num_interp_grid: int, number of interpolations per axis
         """
-        self._kde_likelihood = KDELikelihood(dd_samples, ddt_samples, kde_type=kde_type, bandwidth=bandwidth)
+        self._kde_likelihood = KDELikelihood(
+            dd_samples, ddt_samples, kde_type=kde_type, bandwidth=bandwidth
+        )
 
         if interpol is True:
-            dd_grid = np.linspace(start=max(np.min(dd_samples), 0), stop=min(np.max(dd_samples), 10000), num=num_interp_grid)
-            ddt_grid = np.linspace(np.min(ddt_samples), np.max(ddt_samples), num=num_interp_grid)
+            dd_grid = np.linspace(
+                start=max(np.min(dd_samples), 0),
+                stop=min(np.max(dd_samples), 10000),
+                num=num_interp_grid,
+            )
+            ddt_grid = np.linspace(
+                np.min(ddt_samples), np.max(ddt_samples), num=num_interp_grid
+            )
             z = np.zeros((num_interp_grid, num_interp_grid))
             for i, dd in enumerate(dd_grid):
                 for j, ddt in enumerate(ddt_grid):
                     z[j, i] = self._kde_likelihood.logLikelihood(dd, ddt)[0]
-            self._interp_log_likelihood = interpolate.interp2d(dd_grid, ddt_grid, z, kind='cubic')
+            self._interp_log_likelihood = interpolate.interp2d(
+                dd_grid, ddt_grid, z, kind="cubic"
+            )
         self._interpol = interpol
         self.num_data = 2
 

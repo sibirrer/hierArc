@@ -5,7 +5,6 @@ from hierarc.Likelihood.SneLikelihood.sne_pantheon_plus import PantheonPlusData
 
 
 class TestPantheonPlusData(object):
-
     def setup(self):
         pass
 
@@ -15,7 +14,7 @@ class TestPantheonPlusData(object):
         cov_mag = data.cov_mag_b
         zhel = data.zHEL
         zcmb = data.zCMB
-        print(zcmb, 'zcmb')
+        print(zcmb, "zcmb")
         npt.assert_almost_equal(zcmb[0], 0.01016)
         assert len(mag_mean) == len(zhel)
         assert len(zhel) == len(zcmb)

@@ -4,14 +4,22 @@ from lenstronomy.Util.data_util import magnitude2cps
 
 
 class TDMagLikelihood(object):
-    """
-    likelihood of time delays and magnification likelihood
+    """Likelihood of time delays and magnification likelihood.
 
     This likelihood uses linear flux units and linear lensing magnifications.
-
     """
-    def __init__(self, time_delay_measured, cov_td_measured, amp_measured, cov_amp_measured,
-                 fermat_diff, magnification_model, cov_model, magnitude_zero_point=20):
+
+    def __init__(
+        self,
+        time_delay_measured,
+        cov_td_measured,
+        amp_measured,
+        cov_amp_measured,
+        fermat_diff,
+        magnification_model,
+        cov_model,
+        magnitude_zero_point=20,
+    ):
         """
 
         :param time_delay_measured: array, relative time delays (relative to the first image) [days]
@@ -38,11 +46,13 @@ class TDMagLikelihood(object):
         assert n_tot == len(cov_model)
         # merge data covariance matrices from time delay and image amplitudes
         self._cov_data = np.zeros((n_tot, n_tot))
-        self._cov_data[:self._n_td, :self._n_td] = self._cov_td_measured
-        self._cov_data[self._n_td:, self._n_td:] = self._cov_amp_measured
-        #self._fermat_diff = fermat_diff   # in units arcsec^2
-        self._fermat_unit_conversion = const.Mpc / const.c / const.day_s * const.arcsec ** 2
-        #self._mag_model = mag_model
+        self._cov_data[: self._n_td, : self._n_td] = self._cov_td_measured
+        self._cov_data[self._n_td :, self._n_td :] = self._cov_amp_measured
+        # self._fermat_diff = fermat_diff   # in units arcsec^2
+        self._fermat_unit_conversion = (
+            const.Mpc / const.c / const.day_s * const.arcsec**2
+        )
+        # self._mag_model = mag_model
         self._model_tot = np.append(fermat_diff, magnification_model)
         self._cov_model = cov_model
         self.num_data = n_tot
@@ -64,24 +74,28 @@ class TDMagLikelihood(object):
         # difference to data vector
         delta = self._data_vector - model_vector
         # evaluate likelihood
-        lnlikelihood = -delta.dot(cov_tot_inv.dot(delta)) / 2.
+        lnlikelihood = -delta.dot(cov_tot_inv.dot(delta)) / 2.0
         sign_det, lndet = np.linalg.slogdet(cov_tot)
-        lnlikelihood -= 1 / 2. * (self.num_data * np.log(2 * np.pi) + lndet)
+        lnlikelihood -= 1 / 2.0 * (self.num_data * np.log(2 * np.pi) + lndet)
         return lnlikelihood
 
     def _model_cov(self, ddt, mu_intrinsic):
-        """
-        combined covariance matrix of the data and model when marginialized over the Gaussian model uncertainties
-        in the Fermat potential and magnification.
+        """Combined covariance matrix of the data and model when marginialized over the
+        Gaussian model uncertainties in the Fermat potential and magnification.
 
         :param ddt: time-delay distance (physical Mpc)
-        :param mu_intrinsic: intrinsic brightness of the source (already incorporating the inverse MST transform)
+        :param mu_intrinsic: intrinsic brightness of the source (already incorporating
+            the inverse MST transform)
         :return: model vector, combined covariance matrix
         """
         # compute model predicted magnified image amplitude and time delay
-        amp_intrinsic = magnitude2cps(magnitude=mu_intrinsic, magnitude_zero_point=self._magnitude_zero_point)
-        model_scale = np.append(ddt * self._fermat_unit_conversion * np.ones(self._n_td),
-                                amp_intrinsic * np.ones(self._n_amp))
+        amp_intrinsic = magnitude2cps(
+            magnitude=mu_intrinsic, magnitude_zero_point=self._magnitude_zero_point
+        )
+        model_scale = np.append(
+            ddt * self._fermat_unit_conversion * np.ones(self._n_td),
+            amp_intrinsic * np.ones(self._n_amp),
+        )
         model_vector = model_scale * self._model_tot
         # scale model covariance matrix with model_scale vector (in quadrature)
         cov_model = model_scale * (self._cov_model * model_scale).T

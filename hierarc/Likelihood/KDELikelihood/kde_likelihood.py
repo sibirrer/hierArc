@@ -1,4 +1,4 @@
-__author__ = 'martin-millon'
+__author__ = "martin-millon"
 
 import os
 
@@ -9,7 +9,8 @@ from sklearn.neighbors import KernelDensity
 import hierarc
 
 LIKELIHOOD_TYPES = ["kde_hist_nd", "kde_full"]
-_PATH_2_PLANCKDATA = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'Planck')
+_PATH_2_PLANCKDATA = os.path.join(os.path.dirname(hierarc.__file__), "Data", "Planck")
+
 
 class KDELikelihood(object):
     """
@@ -21,10 +22,15 @@ class KDELikelihood(object):
 
     """
 
-    def __init__(self, chain, likelihood_type="kde_hist_nd",
-                 weight_type='default',
-                 kde_kernel='gaussian',
-                 bandwidth=0.01, nbins_hist=30):
+    def __init__(
+        self,
+        chain,
+        likelihood_type="kde_hist_nd",
+        weight_type="default",
+        kde_kernel="gaussian",
+        bandwidth=0.01,
+        nbins_hist=30,
+    ):
         """
 
         :param chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density estimator
@@ -44,31 +50,34 @@ class KDELikelihood(object):
         self.init_loglikelihood()
 
     def init_loglikelihood(self):
-        """
-        Initialisation of the KDE, depending on loglikelihood_type.
-        """
+        """Initialisation of the KDE, depending on loglikelihood_type."""
         if self.loglikelihood_type == "kde_full":
-            self.kde = self.init_kernel_full(kde_kernel=self.kde_kernel, bandwidth=self.bandwidth)
+            self.kde = self.init_kernel_full(
+                kde_kernel=self.kde_kernel, bandwidth=self.bandwidth
+            )
             self.loglikelihood = self.kdelikelihood()
         elif self.loglikelihood_type == "kde_hist_nd":
-            self.kde = self.init_kernel_kdelikelihood_hist_nd(kde_kernel=self.kde_kernel, bandwidth=self.bandwidth,
-                                                              nbins_hist=self.nbins_hist)
+            self.kde = self.init_kernel_kdelikelihood_hist_nd(
+                kde_kernel=self.kde_kernel,
+                bandwidth=self.bandwidth,
+                nbins_hist=self.nbins_hist,
+            )
             self.loglikelihood = self.kdelikelihood()
         else:
             raise ValueError(
-                'likelihood_type %s not supported! Supported are %s.' % (likelihood_type, LIKELIHOOD_TYPES))
+                "likelihood_type %s not supported! Supported are %s."
+                % (likelihood_type, LIKELIHOOD_TYPES)
+            )
 
     def kdelikelihood(self):
-        """
-        Evaluates the likelihood. Return a function.
+        """Evaluates the likelihood. Return a function.
 
         __ warning:: you should adjust bandwidth to the spacing of your samples chain!
         """
         return self.kde.score
 
     def kdelikelihood_samples(self, samples):
-        """
-        Evaluates the likelihood on an array. Return an array
+        """Evaluates the likelihood on an array. Return an array.
 
         __ warning:: you should adjust bandwidth to the spacing of your samples chain!
         """
@@ -82,13 +91,15 @@ class KDELikelihood(object):
         :return: scikit-learn KernelDensity
         """
         data = pd.DataFrame.from_dict(self.chain.params)
-        kde = KernelDensity(kernel=kde_kernel, bandwidth=bandwidth).fit(data.values,
-                                                                        sample_weight=self.chain.weights[self.weight_type])
+        kde = KernelDensity(kernel=kde_kernel, bandwidth=bandwidth).fit(
+            data.values, sample_weight=self.chain.weights[self.weight_type]
+        )
         return kde
 
     def init_kernel_kdelikelihood_hist_nd(self, kde_kernel, bandwidth, nbins_hist):
-        """
-        Evaluates the likelihood from a Kernel Density Estimator. The KDE is constructed using a binned version of the full samples. Greatly improves speed at the cost of a (tiny) loss in precision
+        """Evaluates the likelihood from a Kernel Density Estimator. The KDE is
+        constructed using a binned version of the full samples. Greatly improves speed
+        at the cost of a (tiny) loss in precision.
 
         __warning:: you should adjust bandwidth and nbins_hist to the spacing and size of your samples chain!
 
@@ -99,7 +110,9 @@ class KDELikelihood(object):
         :param nbins_hist: (float). Number of bins to use before fitting KDE. Used only if likelihood_type = 'kde_hist_nd'.
         :return: scikit-learn KernelDensity
         """
-        samples = np.asarray([self.chain.params[keys] for keys in self.chain.params.keys()])
+        samples = np.asarray(
+            [self.chain.params[keys] for keys in self.chain.params.keys()]
+        )
         hist, edges = np.histogramdd(samples.T, bins=nbins_hist)
         edges = np.asarray(edges)
 
@@ -107,10 +120,12 @@ class KDELikelihood(object):
         ndim = len(self.chain.params.keys())
         keys = list(self.chain.params.keys())
         for i, key in enumerate(keys):
-            dic[key] = [(p + edges[i, j + 1]) / 2.0 for j, p in enumerate(edges[i, :-1])]
+            dic[key] = [
+                (p + edges[i, j + 1]) / 2.0 for j, p in enumerate(edges[i, :-1])
+            ]
 
         # for some reasons that are not obvious, ravel do not reverse meshgrid, indexing argument is really needed here
-        mesh_tuple = np.meshgrid(*[dic[key] for key in keys], indexing='ij')
+        mesh_tuple = np.meshgrid(*[dic[key] for key in keys], indexing="ij")
         meshdic = []
         for i, key in enumerate(keys):
             meshdic.append(mesh_tuple[i].flatten())
@@ -123,5 +138,7 @@ class KDELikelihood(object):
         kde_weights = kde_weights[kde_weights > 0]
 
         # fit the KDE
-        kde = KernelDensity(kernel=kde_kernel, bandwidth=bandwidth).fit(kde_bins.values, sample_weight=kde_weights)
+        kde = KernelDensity(kernel=kde_kernel, bandwidth=bandwidth).fit(
+            kde_bins.values, sample_weight=kde_weights
+        )
         return kde
