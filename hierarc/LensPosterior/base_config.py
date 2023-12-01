@@ -49,7 +49,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
-         :param lens_model_list: keyword argument list of lens model (optional)
+        :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
