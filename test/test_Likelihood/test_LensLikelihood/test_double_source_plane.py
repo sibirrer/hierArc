@@ -8,7 +8,7 @@ from hierarc.Likelihood.LensLikelihood.double_source_plane import (
 
 
 class TestDSPLikelihood(object):
-    """ """
+    """"""
 
     def setup(self):
         self.cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)

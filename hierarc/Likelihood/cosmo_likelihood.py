@@ -8,9 +8,7 @@ import numpy as np
 
 
 class CosmoLikelihood(object):
-    """
-    this class contains the likelihood function of the Strong lensing analysis
-    """
+    """This class contains the likelihood function of the Strong lensing analysis."""
 
     def __init__(
         self,

@@ -1,7 +1,5 @@
-"""
-this file contains routines to process the data format of the SLACS IFU data set to be binned in radial annuli
-and for error estimates
-"""
+"""This file contains routines to process the data format of the SLACS IFU data set to
+be binned in radial annuli and for error estimates."""
 import numpy as np
 import astropy.io.fits as fits
 
@@ -105,9 +103,7 @@ def binned_total(
 
 
 def _2d_t0_1d(value_map, weight_map, flux_map, fiber_scale):
-    """
-    transforms map in 1-d array removing nans and artifacts
-
+    """Transforms map in 1-d array removing nans and artifacts.
 
     :param value_map: quantity (e.g. velocity dispersion or velocity) on the map level
     :param weight_map:

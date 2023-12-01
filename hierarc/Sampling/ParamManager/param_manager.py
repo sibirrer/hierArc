@@ -5,9 +5,7 @@ from hierarc.Sampling.ParamManager.source_param import SourceParam
 
 
 class ParamManager(object):
-    """
-    class for managing the parameters involved
-    """
+    """Class for managing the parameters involved."""
 
     def __init__(
         self,
@@ -117,8 +115,7 @@ class ParamManager(object):
 
     @property
     def num_param(self):
-        """
-        number of parameters being sampled
+        """Number of parameters being sampled.
 
         :return: integer
         """

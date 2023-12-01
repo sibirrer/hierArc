@@ -5,9 +5,7 @@ from hierarc.LensPosterior.base_config import BaseLensConfig
 
 
 class KinConstraints(BaseLensConfig):
-    """
-    class that manages constraints from Integral Field Unit spectral observations.
-    """
+    """Class that manages constraints from Integral Field Unit spectral observations."""
 
     def __init__(
         self,
@@ -98,11 +96,11 @@ class KinConstraints(BaseLensConfig):
         )
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):
-        """
-        one simple sampling realization of the dimensionless kinematics of the model
+        """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
-        :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :param no_error: bool, if True, does not render from the uncertainty but uses
+            the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(
@@ -131,14 +129,14 @@ class KinConstraints(BaseLensConfig):
         return j_kin
 
     def hierarchy_configuration(self, num_sample_model=20):
-        """
-        routine to configure the likelihood to be used in the hierarchical sampling. In particular, a default
-        configuration is set to compute the Gaussian approximation of Ds/Dds by sampling the posterior and the estimate
-        of the variance of the sample. The anisotropy scaling is then performed. Different anisotropy models are
-        supported.
+        """Routine to configure the likelihood to be used in the hierarchical sampling.
+        In particular, a default configuration is set to compute the Gaussian
+        approximation of Ds/Dds by sampling the posterior and the estimate of the
+        variance of the sample. The anisotropy scaling is then performed. Different
+        anisotropy models are supported.
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the
-         dimensionless kinematic component J()
+        :param num_sample_model: number of samples drawn from the lens and light model
+            posterior to compute the dimensionless kinematic component J()
         :return: keyword arguments
         """
 
@@ -181,12 +179,13 @@ class KinConstraints(BaseLensConfig):
 
     @property
     def error_cov_measurement(self):
-        """
-        error covariance matrix of the measured velocity dispersion data points
-        This is either calculated from the diagonal 'sigma_v_error_independent' and the off-diagonal
-        'sigma_v_error_covariant' terms, or directly from the 'sigma_v_error_cov_matrix' if provided.
+        """Error covariance matrix of the measured velocity dispersion data points This
+        is either calculated from the diagonal 'sigma_v_error_independent' and the off-
+        diagonal 'sigma_v_error_covariant' terms, or directly from the
+        'sigma_v_error_cov_matrix' if provided.
 
-        :return: nxn matrix of the error covariances in the velocity dispersion measurements (km/s)^2
+        :return: nxn matrix of the error covariances in the velocity dispersion
+            measurements (km/s)^2
         """
         if self._sigma_v_error_cov_matrix is None:
             if (
@@ -217,11 +216,11 @@ class KinConstraints(BaseLensConfig):
         return self._anisotropy_scaling_relative(j_ani_0)
 
     def _anisotropy_scaling_relative(self, j_ani_0):
-        """
-        anisotropy scaling relative to a default J prediction
+        """Anisotropy scaling relative to a default J prediction.
 
         :param j_ani_0: default J() prediction for default anisotropy
-        :return: list of arrays (for the number of measurements) according to anisotropy scaling
+        :return: list of arrays (for the number of measurements) according to anisotropy
+            scaling
         """
         num_data = len(self._sigma_v_measured)
 

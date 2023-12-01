@@ -4,9 +4,7 @@ from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
 
 
 class GoodnessOfFit(object):
-    """
-    class to manage goodness of fit diagnostics
-    """
+    """Class to manage goodness of fit diagnostics."""
 
     def __init__(self, kwargs_likelihood_list):
         """
@@ -20,10 +18,7 @@ class GoodnessOfFit(object):
         )
 
     def reduced_chi2(self, cosmo, kwargs_lens, kwargs_kin):
-        """
-        reduced chi^2 of fit
-
-        """
+        """Reduced chi^2 of fit."""
         logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
         num_data = self._sample_likelihood.num_data()
         return -logL * 2 / num_data
@@ -37,9 +32,8 @@ class GoodnessOfFit(object):
         color_prediction=None,
         redshift_trend=False,
     ):
-        """
-        plots the prediction and the uncorrelated error bars on the individual lenses
-        currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
+        """Plots the prediction and the uncorrelated error bars on the individual lenses
+        currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
@@ -141,14 +135,14 @@ class GoodnessOfFit(object):
         return f, ax
 
     def kin_fit(self, cosmo, kwargs_lens, kwargs_kin):
-        """
-        plots the prediction and the uncorrelated error bars on the individual lenses
-        currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
+        """Plots the prediction and the uncorrelated error bars on the individual lenses
+        currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
-        :return: list of name, measurement, measurement errors, model prediction, model prediction error
+        :return: list of name, measurement, measurement errors, model prediction, model
+            prediction error
         """
 
         sigma_v_name_list = []
@@ -197,9 +191,8 @@ class GoodnessOfFit(object):
         color_measurement=None,
         color_prediction=None,
     ):
-        """
-        plots the prediction and the uncorrelated error bars on the individual lenses
-        currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'
+        """Plots the prediction and the uncorrelated error bars on the individual lenses
+        currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
@@ -269,15 +262,16 @@ class GoodnessOfFit(object):
         color_measurement=None,
         color_prediction=None,
     ):
-        """
-        plot an individual IFU data goodness of fit
+        """Plot an individual IFU data goodness of fit.
 
         :param ax: matplotlib axes instance
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
-        :param lens_index: int, index in kwargs_lens to be plotted (needs to be of type 'IFUKinCov')
-        :param bin_edges: radial bin edges in arc seconds. If number, then uniform bin_edges sampled from 0
+        :param lens_index: int, index in kwargs_lens to be plotted (needs to be of type
+            'IFUKinCov')
+        :param bin_edges: radial bin edges in arc seconds. If number, then uniform
+            bin_edges sampled from 0
         :type bin_edges: numpy array or float.
         :param show_legend: bool, to show legend
         :param color_measurement: color of measurement

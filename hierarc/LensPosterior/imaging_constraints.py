@@ -2,9 +2,7 @@ import numpy as np
 
 
 class ImageModelPosterior(object):
-    """
-    class to manage lens and light model posteriors inferred from imaging data
-    """
+    """Class to manage lens and light model posteriors inferred from imaging data."""
 
     def __init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error):
         """

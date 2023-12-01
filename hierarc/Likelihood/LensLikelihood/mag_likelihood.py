@@ -3,11 +3,9 @@ from lenstronomy.Util.data_util import magnitude2cps
 
 
 class MagnificationLikelihood(object):
-    """
-    likelihood of an unlensed apprarent source magnification given a measurement of the magnified brightness
-    This can i.e. be applied to lensed SNIa on the population level
-
-    """
+    """Likelihood of an unlensed apprarent source magnification given a measurement of
+    the magnified brightness This can i.e. be applied to lensed SNIa on the population
+    level."""
 
     def __init__(
         self,

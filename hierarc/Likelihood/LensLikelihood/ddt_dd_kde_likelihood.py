@@ -4,9 +4,8 @@ from scipy import interpolate
 
 
 class DdtDdKDELikelihood(object):
-    """
-    class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time delays and kinematics measurement
-    """
+    """Class for evaluating the 2-d posterior of Ddt vs Dd coming from a lens with time
+    delays and kinematics measurement."""
 
     def __init__(
         self,

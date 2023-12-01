@@ -2,8 +2,9 @@ from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import DdtGaussianLi
 
 
 class DdtDdGaussian(object):
-    """
-    class for joint kinematics and time delay likelihood assuming independent Gaussian likelihoods in Ddt and Dd.
+    """Class for joint kinematics and time delay likelihood assuming independent
+    Gaussian likelihoods in Ddt and Dd.
+
     Attention: Gaussian errors in the velocity dispersion do not translate into Gaussian uncertainties in Dd.
     """
 

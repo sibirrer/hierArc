@@ -1,7 +1,7 @@
 class DdtGaussianLikelihood(object):
-    """
-    class to handle cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays.
-    Thus Ddt is not constrained but the kinematics can constrain Ds/Dds
+    """Class to handle cosmographic likelihood coming from modeling lenses with imaging
+    and kinematic data but no time delays. Thus Ddt is not constrained but the
+    kinematics can constrain Ds/Dds.
 
     The current version includes a Gaussian in Ds/Dds but can be extended.
     """

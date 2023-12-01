@@ -7,9 +7,8 @@ import numpy as np
 
 
 class Chain(object):
-    """
-    Chain class to have a convenient way to manipulate posteriors distributions of some experiments.
-    """
+    """Chain class to have a convenient way to manipulate posteriors distributions of
+    some experiments."""
 
     def __init__(
         self,
@@ -43,33 +42,28 @@ class Chain(object):
             self.rescale_to_unity()
 
     def __str__(self):
-        """
-        Print the identifier of the Chain.
+        """Print the identifier of the Chain.
+
         :return:
         """
         return "%s_%s" % (self.kw, self.probe)
 
     def list_params(self):
-        """
-        List the cosmo parameters that are not empty
-        :return: List of parameter name
-        """
+        """List the cosmo parameters that are not empty :return: List of parameter
+        name."""
         return [p for p in self.params.keys() if len(self.params[p]) > 0]
 
     def list_weights(self):
-        """
-        List the existing weights
-        :return: Array of weights
-        """
+        """List the existing weights :return: Array of weights."""
         return [w for w in self.weights.keys() if len(self.weights[w]) > 0]
 
     def fill_default(self, param, default_val, nsamples=None, verbose=False):
-        """
-        Fill an empty default param with a default value
+        """Fill an empty default param with a default value.
 
         :param param: (string) Name of the parameter to fill with default value
         :param default_val: (float). Default value.
-        :param nsamples: (int). Number of samples in the Chain. If None, it will take the same number of samples as for the other parameters
+        :param nsamples: (int). Number of samples in the Chain. If None, it will take
+            the same number of samples as for the other parameters
         :param verbose: (bool).
         """
         assert len(self.params[param]) == 0
@@ -83,11 +77,11 @@ class Chain(object):
             print("filled %s with value %f" % (param, default_val))
 
     def fill_default_array(self, param, default_array, verbose=False):
-        """
-        Fill an empty default param with a default array
+        """Fill an empty default param with a default array.
 
         :param param: (str). Name of the parameter
-        :param default_array: (numpy array). Must have the same dimension as the samples.
+        :param default_array: (numpy array). Must have the same dimension as the
+            samples.
         :param verbose: (bool).
         """
 
@@ -105,16 +99,14 @@ class Chain(object):
             print("filled %s" % (param))
 
     def create_param(self, param_key):
-        """
-        Add a new parameter to the Chain
+        """Add a new parameter to the Chain.
 
         :param param_key: (str). Parameter name.
         """
         self.params[param_key] = []
 
     def rescale_to_unity(self, verbose=False):
-        """
-        Rescale all parameter chains between 0 and 1.
+        """Rescale all parameter chains between 0 and 1.
 
         :param verbose: (bool).
         """
@@ -131,8 +123,7 @@ class Chain(object):
             self.rescale_dic["rescaled"] = True
 
     def rescale_from_unity(self, verbose=False):
-        """
-        Rescale all parameter chains to their original values.
+        """Rescale all parameter chains to their original values.
 
         :param verbose: (bool).
         """
@@ -151,15 +142,21 @@ class Chain(object):
 
 
 def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
-    """
-    Special function to parse Planck files. Return a Chain object.
+    """Special function to parse Planck files. Return a Chain object.
 
+    :param datapath: (str). Path to the Planck chain :param kw: (str). Planck base
+    cosmology keyword. For example, "base" or "base_omegak". See
+    https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
     :param datapath: (str). Path to the Planck chain
-    :param kw: (str). Planck base cosmology keyword. For example, "base" or "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-    :param probe: (str). Planck probe combination. For example, "plikHM_TTTEEE_lowl_lowE" for default Planck results
+    :param kw: (str). Planck base cosmology keyword. For example, "base" or
+        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-
+        archive/index.php/Cosmological_Parameters.
+    :param probe: (str). Planck probe combination. For example,
+        "plikHM_TTTEEE_lowl_lowE" for default Planck results
     :param params: (list). List of cosmological parameters. ["h0", "om"] for FLCDM.
     :param cosmology: (str). Astropy cosmology
-    :param rescale: (bool). Rescale the chains between 0 and 1 for all parameters. This is absolutely necessary if you want to evaluate a KDE on these chains.
+    :param rescale: (bool). Rescale the chains between 0 and 1 for all parameters. This
+        is absolutely necessary if you want to evaluate a KDE on these chains.
     :return: Chain object.
     """
     # the planck chains are usually split in four files
@@ -249,12 +246,13 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
 
 
 def rescale_vector_from_unity(vector, rescale_dic, keys):
-    """
-    Restore the original scaling of the samples, given the value in `rescale_dic`.
+    """Restore the original scaling of the samples, given the value in `rescale_dic`.
 
     :param vector: (numpy array). Vector to be rescaled.
-    :param rescale_dic: (dictionnary). Contains the min and max value for each parameters.
-    :param keys: (list). Contain the name of the parameter to be rescaled. all keys must be in the rescale_dic.
+    :param rescale_dic: (dictionnary). Contains the min and max value for each
+        parameters.
+    :param keys: (list). Contain the name of the parameter to be rescaled. all keys must
+        be in the rescale_dic.
     :return:
     """
     for i, key in enumerate(keys):
@@ -264,12 +262,13 @@ def rescale_vector_from_unity(vector, rescale_dic, keys):
 
 
 def rescale_vector_to_unity(vector, rescale_dic, keys):
-    """
-    Rescale a vector accroding to the min adn max value provided in rescale_dic
+    """Rescale a vector accroding to the min adn max value provided in rescale_dic.
 
     :param vector: (numpy array). Vector to be rescaled.
-    :param rescale_dic: (dictionnary). Contains the min and max value for each parameters.
-    :param keys: Contain the name of the parameter to be rescaled. all keys must be in the rescale_dic.
+    :param rescale_dic: (dictionnary). Contains the min and max value for each
+        parameters.
+    :param keys: Contain the name of the parameter to be rescaled. all keys must be in
+        the rescale_dic.
     :return:
     """
     for i, key in enumerate(keys):

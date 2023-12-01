@@ -2,9 +2,8 @@ import numpy as np
 
 
 class AnisotropyConfig(object):
-    """
-    class to manage the anisotropy model and parameters for the Posterior processing
-    """
+    """Class to manage the anisotropy model and parameters for the Posterior
+    processing."""
 
     def __init__(self, anisotropy_model, r_eff):
         """

@@ -5,9 +5,8 @@ import numpy as np
 
 
 class KinLikelihood(object):
-    """
-    likelihood to deal with IFU kinematics constraints with covariances in both the model and measured velocity dispersion
-    """
+    """Likelihood to deal with IFU kinematics constraints with covariances in both the
+    model and measured velocity dispersion."""
 
     def __init__(
         self,
@@ -100,8 +99,7 @@ class KinLikelihood(object):
             return self._sigma_v_measured * (1 + sigma_v_sys_offset)
 
     def sigma_v_model(self, ds_dds, aniso_scaling=1):
-        """
-        model predicted velocity dispersion for the IFU's
+        """Model predicted velocity dispersion for the IFU's.
 
         :param ds_dds: Ds/Dds
         :param aniso_scaling: scaling of the anisotropy affecting sigma_v^2
@@ -137,15 +135,18 @@ class KinLikelihood(object):
             return self._error_cov_measurement
 
     def sigma_v_prediction(self, ddt, dd, aniso_scaling=1):
-        """
-        model prediction mean velocity dispersion vector and model prediction covariance matrix
+        """Model prediction mean velocity dispersion vector and model prediction
+        covariance matrix.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
-         dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
-         anisotropy model used to derive the prediction and covariance matrix in the init of this class.
-        :return: model prediction mean velocity dispersion vector and model prediction covariance matrix
+        :param aniso_scaling: array of size of the velocity dispersion measurement or
+            None, scaling of the predicted dimensionless quantity J (proportional to
+            sigma_v^2) of the anisotropy model in the sampling relative to the
+            anisotropy model used to derive the prediction and covariance matrix in the
+            init of this class.
+        :return: model prediction mean velocity dispersion vector and model prediction
+            covariance matrix
         """
         ds_dds = np.maximum(ddt / dd / (1 + self._z_lens), 0)
         sigma_v_predict = self.sigma_v_model(ds_dds, aniso_scaling)

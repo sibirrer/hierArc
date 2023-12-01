@@ -8,10 +8,8 @@ from hierarc.Likelihood.SneLikelihood.sne_pantheon_plus import PantheonPlusData
 
 
 class SneLikelihood(object):
-    """
-    Supernovae likelihood
-    This class supports custom likelihoods as well as likelihoods from the Pantheon sample from file
-    """
+    """Supernovae likelihood This class supports custom likelihoods as well as
+    likelihoods from the Pantheon sample from file."""
 
     def __init__(self, sample_name="CUSTOM", **kwargs_sne_likelihood):
         """

@@ -5,10 +5,9 @@ from hierarc.Likelihood.LensLikelihood.double_source_plane import DSPLikelihood
 
 
 class LensSampleLikelihood(object):
-    """
-    class to evaluate the likelihood of a cosmology given a sample of angular diameter posteriors
-    Currently this class does not include possible covariances between the lens samples
-    """
+    """Class to evaluate the likelihood of a cosmology given a sample of angular
+    diameter posteriors Currently this class does not include possible covariances
+    between the lens samples."""
 
     def __init__(self, kwargs_lens_list, normalized=False):
         """
@@ -52,8 +51,7 @@ class LensSampleLikelihood(object):
         return log_likelihood
 
     def num_data(self):
-        """
-        number of data points across the lens sample
+        """Number of data points across the lens sample.
 
         :return: integer
         """

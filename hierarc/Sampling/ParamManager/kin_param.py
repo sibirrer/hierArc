@@ -2,9 +2,7 @@ import numpy as np
 
 
 class KinParam(object):
-    """
-    manager for the kinematics anisotropy parameters
-    """
+    """Manager for the kinematics anisotropy parameters."""
 
     def __init__(
         self,

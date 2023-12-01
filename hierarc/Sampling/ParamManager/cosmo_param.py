@@ -2,9 +2,7 @@ from astropy.cosmology import FlatLambdaCDM, FlatwCDM, LambdaCDM, w0waCDM
 
 
 class CosmoParam(object):
-    """
-    manages the cosmological parameters in the sampling
-    """
+    """Manages the cosmological parameters in the sampling."""
 
     def __init__(self, cosmology, ppn_sampling=False, kwargs_fixed=None):
         """

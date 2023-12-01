@@ -4,9 +4,7 @@ import numpy as np
 
 
 class AnisotropyScalingSingleAperture(object):
-    """
-    class to manage anisotropy scaling for single slit observation
-    """
+    """Class to manage anisotropy scaling for single slit observation."""
 
     def __init__(self, ani_param_array, ani_scaling_array):
         """
@@ -50,9 +48,7 @@ class AnisotropyScalingSingleAperture(object):
 
 
 class AnisotropyScalingIFU(object):
-    """
-    class to manage anisotropy scalings for IFU data
-    """
+    """Class to manage anisotropy scalings for IFU data."""
 
     def __init__(
         self, anisotropy_model="NONE", ani_param_array=None, ani_scaling_array_list=None
@@ -114,8 +110,7 @@ class AnisotropyScalingIFU(object):
     def draw_anisotropy(
         self, a_ani=None, a_ani_sigma=0, beta_inf=None, beta_inf_sigma=0
     ):
-        """
-        draw Gaussian distribution and re-sample if outside bounds
+        """Draw Gaussian distribution and re-sample if outside bounds.
 
         :param a_ani: mean of the distribution
         :param a_ani_sigma: std of the distribution

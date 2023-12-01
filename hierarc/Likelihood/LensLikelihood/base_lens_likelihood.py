@@ -19,9 +19,7 @@ LIKELIHOOD_TYPES = [
 
 
 class LensLikelihoodBase(object):
-    """
-    master class containing the likelihood definitions of different analysis
-    """
+    """Master class containing the likelihood definitions of different analysis."""
 
     def __init__(
         self,
@@ -149,8 +147,7 @@ class LensLikelihoodBase(object):
             )
 
     def num_data(self):
-        """
-        number of data points across the lens sample
+        """Number of data points across the lens sample.
 
         :return: integer
         """
@@ -196,9 +193,8 @@ class LensLikelihoodBase(object):
             )
 
     def ddt_measurement(self):
-        """
-        Inferred Ddt from a lens model (i.e. power-law fit) and time-delay, without lambda correction (excludes also the
-        external convergence contribution)
+        """Inferred Ddt from a lens model (i.e. power-law fit) and time-delay, without
+        lambda correction (excludes also the external convergence contribution)
 
         :return: ddt measurement median, 1-sigma (without lambda correction factor)
         """

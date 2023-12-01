@@ -50,9 +50,7 @@ class KDELikelihood(object):
         self.init_loglikelihood()
 
     def init_loglikelihood(self):
-        """
-        Initialisation of the KDE, depending on loglikelihood_type.
-        """
+        """Initialisation of the KDE, depending on loglikelihood_type."""
         if self.loglikelihood_type == "kde_full":
             self.kde = self.init_kernel_full(
                 kde_kernel=self.kde_kernel, bandwidth=self.bandwidth
@@ -72,16 +70,14 @@ class KDELikelihood(object):
             )
 
     def kdelikelihood(self):
-        """
-        Evaluates the likelihood. Return a function.
+        """Evaluates the likelihood. Return a function.
 
         __ warning:: you should adjust bandwidth to the spacing of your samples chain!
         """
         return self.kde.score
 
     def kdelikelihood_samples(self, samples):
-        """
-        Evaluates the likelihood on an array. Return an array
+        """Evaluates the likelihood on an array. Return an array.
 
         __ warning:: you should adjust bandwidth to the spacing of your samples chain!
         """
@@ -101,8 +97,9 @@ class KDELikelihood(object):
         return kde
 
     def init_kernel_kdelikelihood_hist_nd(self, kde_kernel, bandwidth, nbins_hist):
-        """
-        Evaluates the likelihood from a Kernel Density Estimator. The KDE is constructed using a binned version of the full samples. Greatly improves speed at the cost of a (tiny) loss in precision
+        """Evaluates the likelihood from a Kernel Density Estimator. The KDE is
+        constructed using a binned version of the full samples. Greatly improves speed
+        at the cost of a (tiny) loss in precision.
 
         __warning:: you should adjust bandwidth and nbins_hist to the spacing and size of your samples chain!
 

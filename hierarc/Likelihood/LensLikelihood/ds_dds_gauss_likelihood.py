@@ -1,6 +1,7 @@
 class DsDdsGaussianLikelihood(object):
-    """
-    class to handle cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays.
+    """Class to handle cosmographic likelihood coming from modeling lenses with imaging
+    and kinematic data but no time delays.
+
     Thus Ddt is not constrained but the kinematics can constrain Ds/Dds. The likelihood in Ds/Dds is assumed Gaussian.
     Attention: Gaussian uncertainties in velocity dispersion do not translate into Gaussian uncertainties in Ds/Dds.
     """

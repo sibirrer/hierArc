@@ -4,10 +4,9 @@ from hierarc.LensPosterior.anisotropy_config import AnisotropyConfig
 
 
 class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
-    """
-    this class contains and manages the base configurations of the lens posteriors and makes sure that they
-    are universally applied consistently through the different likelihood definitions
-    """
+    """This class contains and manages the base configurations of the lens posteriors
+    and makes sure that they are universally applied consistently through the different
+    likelihood definitions."""
 
     def __init__(
         self,

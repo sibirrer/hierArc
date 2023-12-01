@@ -2,9 +2,9 @@ import numpy as np
 
 
 class DdtLogNormLikelihood(object):
-    """
-    The cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays, where the form of the likelihood is a lognormal distribution.
-    Thus Ddt is not constrained but the kinematics can constrain Ds/Dds
+    """The cosmographic likelihood coming from modeling lenses with imaging and
+    kinematic data but no time delays, where the form of the likelihood is a lognormal
+    distribution. Thus Ddt is not constrained but the kinematics can constrain Ds/Dds.
 
     The current version includes a Gaussian in Ds/Dds but can be extended.
     """

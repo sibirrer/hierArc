@@ -137,10 +137,8 @@ class TestKinLikelihood(object):
         npt.assert_almost_equal(logl, logl_average, decimal=1)
 
     def test_log_likelihood_invert_error(self):
-        """
-        test that in the case of a none-invertable covariance matrix -np.inf is returned by the likelihood statement
-
-        """
+        """Test that in the case of a none-invertable covariance matrix -np.inf is
+        returned by the likelihood statement."""
         ifu_likelihood = KinLikelihood(
             z_lens=0.5,
             z_source=2.0,

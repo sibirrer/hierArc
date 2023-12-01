@@ -2,10 +2,8 @@ from hierarc.LensPosterior.kin_constraints import KinConstraints
 
 
 class DdtGaussKinConstraints(KinConstraints):
-    """
-    class for sampling Ds/Dds posteriors from imaging data and kinematic constraints with additional constraints on the
-    time-delay distance Ddt
-    """
+    """Class for sampling Ds/Dds posteriors from imaging data and kinematic constraints
+    with additional constraints on the time-delay distance Ddt."""
 
     def __init__(
         self,
@@ -100,14 +98,14 @@ class DdtGaussKinConstraints(KinConstraints):
         )
 
     def hierarchy_configuration(self, num_sample_model=20):
-        """
-        routine to configure the likelihood to be used in the hierarchical sampling. In particular, a default
-        configuration is set to compute the Gaussian approximation of Ds/Dds by sampling the posterior and the estimate
-        of the variance of the sample. The anisotropy scaling is then performed. Different anisotropy models are
-        supported.
+        """Routine to configure the likelihood to be used in the hierarchical sampling.
+        In particular, a default configuration is set to compute the Gaussian
+        approximation of Ds/Dds by sampling the posterior and the estimate of the
+        variance of the sample. The anisotropy scaling is then performed. Different
+        anisotropy models are supported.
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the dimensionless
-         kinematic component J()
+        :param num_sample_model: number of samples drawn from the lens and light model
+            posterior to compute the dimensionless kinematic component J()
         :return: keyword arguments
         """
         j_model_list, error_cov_j_sqrt = self.model_marginalization(num_sample_model)

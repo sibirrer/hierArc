@@ -2,9 +2,7 @@ import numpy as np
 
 
 class LensParam(object):
-    """
-    manages the lens model covariant parameters
-    """
+    """Manages the lens model covariant parameters."""
 
     def __init__(
         self,

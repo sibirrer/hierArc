@@ -4,17 +4,12 @@ from lenstronomy.Util import sampling_util
 
 
 class MCMCSampler(object):
-    """
-    class which executes the different sampling  methods
-    """
+    """Class which executes the different sampling  methods."""
 
     def __init__(self, *args, **kwargs):
-        """
-        initialise the classes of the chain and for parameter options
-        :param args: positional arguments for the CosmoLikelihood() instance
-        :param kwargs: keyword arguments for the CosmoLikelihood() instance
-
-        """
+        """Initialise the classes of the chain and for parameter options :param args:
+        positional arguments for the CosmoLikelihood() instance :param kwargs: keyword
+        arguments for the CosmoLikelihood() instance."""
         self.chain = CosmoLikelihood(*args, **kwargs)
         self.param = self.chain.param
 
@@ -28,15 +23,16 @@ class MCMCSampler(object):
         continue_from_backend=False,
         **kwargs_emcee
     ):
-        """
-        runs the EMCEE MCMC sampling
+        """Runs the EMCEE MCMC sampling.
 
         :param n_walkers: number of walkers
         :param n_burn: number of iteration of burn in (not stored in the output sample
         :param n_run: number of iterations (after burn in) to be sampled
         :param kwargs_mean_start: keyword arguments of the mean starting position
-        :param kwargs_sigma_start: keyword arguments of the spread in the initial particles per parameter
-        :param continue_from_backend: bool, if True and 'backend' in kwargs_emcee, will continue a chain sampling from backend
+        :param kwargs_sigma_start: keyword arguments of the spread in the initial
+            particles per parameter
+        :param continue_from_backend: bool, if True and 'backend' in kwargs_emcee, will
+            continue a chain sampling from backend
         :param kwargs_emcee: keyword argument for the emcee (e.g. to specify backend)
         :return: samples of the EMCEE run
         """
@@ -60,10 +56,10 @@ class MCMCSampler(object):
         return flat_samples, log_prob
 
     def param_names(self, latex_style=False):
-        """
-        list of parameter names being sampled in the same order as the sampling
+        """List of parameter names being sampled in the same order as the sampling.
 
-        :param latex_style: bool, if True returns strings in latex symbols, else in the convention of the sampler
+        :param latex_style: bool, if True returns strings in latex symbols, else in the
+            convention of the sampler
         :return: list of strings
         """
         labels = self.param.param_list(latex_style=latex_style)

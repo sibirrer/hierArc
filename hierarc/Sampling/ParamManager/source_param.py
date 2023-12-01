@@ -2,9 +2,8 @@ _SNE_DISTRIBUTIONS = ["GAUSSIAN", "NONE"]
 
 
 class SourceParam(object):
-    """
-    manager for the source property parameters (currently particularly source magnitudes for SNe)
-    """
+    """Manager for the source property parameters (currently particularly source
+    magnitudes for SNe)"""
 
     def __init__(
         self,

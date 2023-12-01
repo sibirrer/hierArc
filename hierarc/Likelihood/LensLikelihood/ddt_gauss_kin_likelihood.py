@@ -3,11 +3,8 @@ from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import DdtGaussianLi
 
 
 class DdtGaussKinLikelihood(object):
-
-    """
-    class for joint kinematics and time delay likelihood assuming that they are independent
-    Uses KinLikelihood and DdtHistLikelihood combined
-    """
+    """Class for joint kinematics and time delay likelihood assuming that they are
+    independent Uses KinLikelihood and DdtHistLikelihood combined."""
 
     def __init__(
         self,
@@ -86,15 +83,18 @@ class DdtGaussKinLikelihood(object):
         return lnlikelihood
 
     def sigma_v_prediction(self, ddt, dd, aniso_scaling=1):
-        """
-        model prediction mean velocity dispersion vector and model prediction covariance matrix
+        """Model prediction mean velocity dispersion vector and model prediction
+        covariance matrix.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
-         dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
-         anisotropy model used to derive the prediction and covariance matrix in the init of this class.
-        :return: model prediction mean velocity dispersion vector and model prediction covariance matrix
+        :param aniso_scaling: array of size of the velocity dispersion measurement or
+            None, scaling of the predicted dimensionless quantity J (proportional to
+            sigma_v^2) of the anisotropy model in the sampling relative to the
+            anisotropy model used to derive the prediction and covariance matrix in the
+            init of this class.
+        :return: model prediction mean velocity dispersion vector and model prediction
+            covariance matrix
         """
         return self._kinlikelihood.sigma_v_prediction(ddt, dd, aniso_scaling)
 

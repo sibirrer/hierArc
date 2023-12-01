@@ -4,10 +4,9 @@ _twopi = 2 * np.pi
 
 
 class CustomSneLikelihood(object):
-    """
-    class method for an arbitrary apparent magnitude likelihood of a Sne sample where the error and systematic
-    covariance matrix is described in astronomical magnitude space
-    """
+    """Class method for an arbitrary apparent magnitude likelihood of a Sne sample where
+    the error and systematic covariance matrix is described in astronomical magnitude
+    space."""
 
     def __init__(self, mag_mean, cov_mag, zhel, zcmb, no_intrinsic_scatter=False):
         """
@@ -56,12 +55,11 @@ class CustomSneLikelihood(object):
         return lnlikelihood
 
     def _inverse_covariance_matrix(self, sigma_m_z=None):
-        """
-        inverse error covariance matrix. Combines redshift uncertainties (to first order) and magnitude uncertainties
-        as well as intrinsic scatter uncertainties
+        """Inverse error covariance matrix. Combines redshift uncertainties (to first
+        order) and magnitude uncertainties as well as intrinsic scatter uncertainties.
 
-        :param sigma_m_z: float, 1-sigma additional intrinsic magnitude uncertainty of the distribution, not
-        accounted-for in the original covariance matrix
+        :param sigma_m_z: float, 1-sigma additional intrinsic magnitude uncertainty of
+            the distribution, not accounted-for in the original covariance matrix
         :return: covariance matrix, inverse covariance matrix (2d numpy array)
         """
         # here is the option for adding an additional covariance matrix term of the calibration and/or systematic

@@ -3,8 +3,7 @@ import copy
 
 
 def blind_posterior(posterior, param_names):
-    """
-    blinds H0 and lambda_int to default values
+    """Blinds H0 and lambda_int to default values.
 
     :param posterior: posterior samples of hierArc
     :type posterior: flattened posterior with num_param x num_samples array

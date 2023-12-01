@@ -3,9 +3,7 @@ from scipy.interpolate import interp1d
 
 
 class PDFSampling(object):
-    """
-    class for approximations with a given pdf sample
-    """
+    """Class for approximations with a given pdf sample."""
 
     def __init__(self, bin_edges, pdf_array):
         """

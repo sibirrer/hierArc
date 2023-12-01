@@ -33,9 +33,7 @@ _PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), "Data", "SNe")
 
 
 class SneLikelihoodFromFile(object):
-    """
-    Base likelihood class for evaluating Sne likelihoods
-    """
+    """Base likelihood class for evaluating Sne likelihoods."""
 
     def __init__(self, sample_name="Pantheon_binned", pec_z=0.001):
         """
@@ -141,8 +139,8 @@ class SneLikelihoodFromFile(object):
         self._inv_cov = self._inverse_covariance_matrix()
 
     def _inverse_covariance_matrix(self):
-        """
-        inverse error covariance matrix. Combines redshift uncertainties (to first order) and magnitude uncertainties
+        """Inverse error covariance matrix. Combines redshift uncertainties (to first
+        order) and magnitude uncertainties.
 
         :return: inverse covariance matrix (2d numpy array)
         """
@@ -190,8 +188,7 @@ class SneLikelihoodFromFile(object):
 
 
 def read_covariance_matrix(filename, nsn):
-    """
-    reads in covariance matrix file and returns it as a numpy matrix
+    """Reads in covariance matrix file and returns it as a numpy matrix.
 
     :param filename: string, absolute path of covariance matrix file
     :param nsn: number of supernovae (or bins)

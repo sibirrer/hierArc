@@ -3,12 +3,10 @@ from lenstronomy.Util import constants as const
 
 
 class TDMagMagnitudeLikelihood(object):
-    """
-    likelihood of time delays and magnification likelihood
+    """Likelihood of time delays and magnification likelihood.
 
-    This likelihood uses astronomical magnitude units in flux measurement and lensing magnification
-    and Gaussian uncertainties in this space.
-
+    This likelihood uses astronomical magnitude units in flux measurement and lensing
+    magnification and Gaussian uncertainties in this space.
     """
 
     def __init__(
@@ -79,12 +77,12 @@ class TDMagMagnitudeLikelihood(object):
         return lnlikelihood
 
     def _model_cov(self, ddt, mu_intrinsic):
-        """
-        combined covariance matrix of the data and model when marginialized over the Gaussian model uncertainties
-        in the Fermat potential and magnification.
+        """Combined covariance matrix of the data and model when marginialized over the
+        Gaussian model uncertainties in the Fermat potential and magnification.
 
         :param ddt: time-delay distance (physical Mpc)
-        :param mu_intrinsic: intrinsic brightness of the source (already incorporating the inverse MST transform)
+        :param mu_intrinsic: intrinsic brightness of the source (already incorporating
+            the inverse MST transform)
         :return: model vector, combined covariance matrix
         """
         # compute model predicted magnified image amplitude and time delay

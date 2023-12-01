@@ -7,9 +7,8 @@ import copy
 
 
 class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScalingIFU):
-    """
-    master class containing the likelihood definitions of different analysis for s single lens
-    """
+    """Master class containing the likelihood definitions of different analysis for s
+    single lens."""
 
     def __init__(
         self,
@@ -98,8 +97,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
     def lens_log_likelihood(
         self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
     ):
-        """
-        log likelihood of the data of a lens given a model (defined with hyper-parameters) and cosmology
+        """Log likelihood of the data of a lens given a model (defined with hyper-
+        parameters) and cosmology.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyper parameters of the lens model
@@ -137,8 +136,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         kwargs_source=None,
         cosmo=None,
     ):
-        """
-        log likelihood of the data of a lens given a model (defined with hyper-parameters) and cosmological distances
+        """Log likelihood of the data of a lens given a model (defined with hyper-
+        parameters) and cosmological distances.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
@@ -147,7 +146,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param cosmo: astropy.cosmology instance
-        :return: log likelihood given the single lens analysis for the given hyper parameter
+        :return: log likelihood given the single lens analysis for the given hyper
+            parameter
         """
         kwargs_lens = self._kwargs_init(kwargs_lens)
         kwargs_kin = self._kwargs_init(kwargs_kin)
@@ -196,9 +196,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         kwargs_source,
         sigma_v_sys_error=None,
     ):
-        """
-        log likelihood of the data of a lens given a specific model (as a draw from hyper-parameters) and cosmological
-        distances
+        """Log likelihood of the data of a lens given a specific model (as a draw from
+        hyper-parameters) and cosmological distances.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
@@ -206,9 +205,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword arguments of source brightness
-        :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
-        :return: log likelihood given the single lens analysis for a single (random) realization of the hyper parameter
-         distribution
+        :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion
+            measurement
+        :return: log likelihood given the single lens analysis for a single (random)
+            realization of the hyper parameter distribution
         """
         lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
         # draw intrinsic source magnitude
@@ -234,8 +234,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return np.nan_to_num(lnlikelihood)
 
     def angular_diameter_distances(self, cosmo):
-        """
-        time-delay distance Ddt, angular diameter distance to the lens (dd)
+        """Time-delay distance Ddt, angular diameter distance to the lens (dd)
 
         :param cosmo: astropy.cosmology instance (or equivalent with interpolation)
         :return: ddt, dd, ds in units physical Mpc
@@ -251,9 +250,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         )
 
     def luminosity_distance_modulus(self, cosmo, z_apparent_m_anchor):
-        """
-        the difference in luminosity distance between a pivot redshift (z_apparent_m_anchor) and the source redshift
-        (effectively the ratio as this is the magnitude transform)
+        """The difference in luminosity distance between a pivot redshift
+        (z_apparent_m_anchor) and the source redshift (effectively the ratio as this is
+        the magnitude transform)
 
         :param cosmo: astropy.cosmology instance (or equivalent with interpolation)
         :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
@@ -278,9 +277,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return delta_lum_dist
 
     def check_dist(self, kwargs_lens, kwargs_kin, kwargs_source):
-        """
-        checks if the provided keyword arguments describe a distribution function of hyper parameters or are single
-        values
+        """Checks if the provided keyword arguments describe a distribution function of
+        hyper parameters or are single values.
 
         :param kwargs_lens: lens model hyper-parameter keywords
         :param kwargs_kin: kinematic model hyper-parameter keywords
@@ -315,20 +313,22 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         alpha_lambda=0,
         beta_lambda=0,
     ):
-        """
-        draws a realization of a specific model from the hyper-parameter distribution
+        """Draws a realization of a specific model from the hyper-parameter
+        distribution.
 
         :param lambda_mst: MST transform
         :param lambda_mst_sigma: spread in the distribution
         :param kappa_ext: external convergence mean in distribution
         :param kappa_ext_sigma: spread in the distribution
         :param gamma_ppn: Post-Newtonian parameter
-        :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified for
-        :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of lenses specified for
-        :param alpha_lambda: float, linear slope of the lambda_int scaling relation with lens quantity
-         self._lambda_scaling_property
-        :param beta_lambda: float, a second linear slope of the lambda_int scaling relation with lens quantity
-         self._lambda_scaling_property_beta
+        :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified
+            for
+        :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of
+            lenses specified for
+        :param alpha_lambda: float, linear slope of the lambda_int scaling relation with
+            lens quantity self._lambda_scaling_property
+        :param beta_lambda: float, a second linear slope of the lambda_int scaling
+            relation with lens quantity self._lambda_scaling_property_beta
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
@@ -355,13 +355,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
 
     @staticmethod
     def draw_source(mu_sne=1, sigma_sne=0, lum_dist=0, **kwargs):
-        """
-        draws a source magnitude from a distribution specified by population parameters
+        """Draws a source magnitude from a distribution specified by population
+        parameters.
 
         :param mu_sne: mean magnitude of SNe
-        :param sigma_sne: std of magnitude distribution of SNe relative to the mean magnitude
-        :param lum_dist: luminosity distance
-         (astronomical magnitude scaling of defined brightness to the source redshift)
+        :param sigma_sne: std of magnitude distribution of SNe relative to the mean
+            magnitude
+        :param lum_dist: luminosity distance (astronomical magnitude scaling of defined
+            brightness to the source redshift)
         :return: realization of source amplitude given distribution
         """
         # draw apparent magnitude at pivot luminosity distance (z=0.1)
@@ -372,14 +373,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         return mag_source
 
     def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens=None, kwargs_kin=None):
-        """
-        mean and error covariance of velocity dispersion measurement
-        mean and error covariance of velocity dispersion predictions
+        """Mean and error covariance of velocity dispersion measurement mean and error
+        covariance of velocity dispersion predictions.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
-        :return: sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean, cov_error_predict
+        :return: sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean,
+            cov_error_predict
         """
         # if no kinematics is provided, return None's
         if self.likelihood_type not in ["DdtHistKin", "IFUKinCov", "DdtGaussKin"]:
@@ -426,8 +427,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         )
 
     def ddt_dd_model_prediction(self, cosmo, kwargs_lens=None):
-        """
-        predicts the model uncertainty corrected ddt prediction of the applied model (e.g. power-law)
+        """Predicts the model uncertainty corrected ddt prediction of the applied model
+        (e.g. power-law)
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyper parameters of the lens model
