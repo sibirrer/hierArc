@@ -5,16 +5,37 @@ from hierarc.LensPosterior.base_config import BaseLensConfig
 
 
 class KinConstraints(BaseLensConfig):
-    """
-    class that manages constraints from Integral Field Unit spectral observations.
-    """
-    def __init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
-                 sigma_v_measured, kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin, anisotropy_model,
-                 sigma_v_error_independent=None, sigma_v_error_covariant=None, sigma_v_error_cov_matrix=None,
-                 kwargs_lens_light=None, lens_light_model_list=['HERNQUIST'],
-                 lens_model_list=None,
-                 MGE_light=False, kwargs_mge_light=None, hernquist_approx=True, sampling_number=1000,
-                 num_psf_sampling=100, num_kin_sampling=1000, multi_observations=False):
+    """Class that manages constraints from Integral Field Unit spectral observations."""
+
+    def __init__(
+        self,
+        z_lens,
+        z_source,
+        theta_E,
+        theta_E_error,
+        gamma,
+        gamma_error,
+        r_eff,
+        r_eff_error,
+        sigma_v_measured,
+        kwargs_aperture,
+        kwargs_seeing,
+        kwargs_numerics_galkin,
+        anisotropy_model,
+        sigma_v_error_independent=None,
+        sigma_v_error_covariant=None,
+        sigma_v_error_cov_matrix=None,
+        kwargs_lens_light=None,
+        lens_light_model_list=["HERNQUIST"],
+        lens_model_list=None,
+        MGE_light=False,
+        kwargs_mge_light=None,
+        hernquist_approx=True,
+        sampling_number=1000,
+        num_psf_sampling=100,
+        num_kin_sampling=1000,
+        multi_observations=False,
+    ):
         """
 
         :param z_lens: lens redshift
@@ -52,15 +73,31 @@ class KinConstraints(BaseLensConfig):
         self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
 
-        BaseLensConfig.__init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
-                                kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
-                                anisotropy_model,
-                                lens_model_list=lens_model_list,
-                                kwargs_lens_light=kwargs_lens_light,
-                                lens_light_model_list=lens_light_model_list, MGE_light=MGE_light,
-                                kwargs_mge_light=kwargs_mge_light, hernquist_approx=hernquist_approx,
-                                sampling_number=sampling_number, num_psf_sampling=num_psf_sampling,
-                                num_kin_sampling=num_kin_sampling, multi_observations=multi_observations)
+        BaseLensConfig.__init__(
+            self,
+            z_lens,
+            z_source,
+            theta_E,
+            theta_E_error,
+            gamma,
+            gamma_error,
+            r_eff,
+            r_eff_error,
+            kwargs_aperture,
+            kwargs_seeing,
+            kwargs_numerics_galkin,
+            anisotropy_model,
+            lens_model_list=lens_model_list,
+            kwargs_lens_light=kwargs_lens_light,
+            lens_light_model_list=lens_light_model_list,
+            MGE_light=MGE_light,
+            kwargs_mge_light=kwargs_mge_light,
+            hernquist_approx=hernquist_approx,
+            sampling_number=sampling_number,
+            num_psf_sampling=num_psf_sampling,
+            num_kin_sampling=num_kin_sampling,
+            multi_observations=multi_observations,
+        )
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):
         """One simple sampling realization of the dimensionless kinematics of the model.

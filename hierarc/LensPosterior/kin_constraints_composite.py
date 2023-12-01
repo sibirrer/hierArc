@@ -110,8 +110,7 @@ class KinConstraintsComposite(KinConstraints):
         self._kwargs_lens_stars = kwargs_lens_stars
 
     def get_kappa_s(self, m200, r_scale):
-        """
-        computes the surface mass density of the NFW halo at the scale radius
+        """Computes the surface mass density of the NFW halo at the scale radius.
 
         :param m200: halo mass in M_sun
         :param r_scale: halo scale radius in arc seconds
@@ -120,13 +119,13 @@ class KinConstraintsComposite(KinConstraints):
         return m200 * r_scale  # placeholder, To-do
 
     def j_kin_draw_composite(self, kwargs_anisotropy, gamma_in, m2l, no_error=False):
-        """
-        one simple sampling realization of the dimensionless kinematics of the model
+        """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param gamma_in: power-law slope of the mass model
         :param m2l: mass-to-light ratio of the stellar component
-        :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :param no_error: bool, if True, does not render from the uncertainty but uses
+            the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         m200_draw, r_scale_draw, r_eff_draw, delta_r_eff = self.draw_lens(
@@ -163,7 +162,7 @@ class KinConstraintsComposite(KinConstraints):
                 "center_x": 0,
                 "center_y": 0,
             },
-            kwargs_lens_stars
+            kwargs_lens_stars,
         ]
 
         j_kin = self.velocity_dispersion_map_dimension_less(
@@ -175,15 +174,14 @@ class KinConstraintsComposite(KinConstraints):
         return j_kin
 
     def hierarchy_configuration(self, num_sample_model=20):
-        """
-        Routine to configure the likelihood to be used in the hierarchical sampling.
+        """Routine to configure the likelihood to be used in the hierarchical sampling.
         In particular, a default configuration is set to compute the Gaussian
-        approximation of Ds/Dds by sampling the posterior and the estimate
-        of the variance of the sample. The anisotropy scaling is then performed. Different anisotropy models are
-        supported.
+        approximation of Ds/Dds by sampling the posterior and the estimate of the
+        variance of the sample. The anisotropy scaling is then performed. Different
+        anisotropy models are supported.
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the
-         dimensionless kinematic component J()
+        :param num_sample_model: number of samples drawn from the lens and light model
+            posterior to compute the dimensionless kinematic component J()
         :return: keyword arguments
         """
 
@@ -209,11 +207,11 @@ class KinConstraintsComposite(KinConstraints):
         return kwargs_likelihood
 
     def _anisotropy_scaling_relative(self, j_ani_0):
-        """
-        anisotropy scaling relative to a default J prediction
+        """Anisotropy scaling relative to a default J prediction.
 
         :param j_ani_0: default J() prediction for default anisotropy
-        :return: list of arrays (for the number of measurements) according to anisotropy scaling
+        :return: list of arrays (for the number of measurements) according to anisotropy
+            scaling
         """
         num_data = len(self._sigma_v_measured)
 
