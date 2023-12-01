@@ -1,16 +1,38 @@
-__author__ = 'sibirrer'
+__author__ = "sibirrer"
 
 
-LIKELIHOOD_TYPES = ['DdtGaussian', 'DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian', 'DdtLogNorm', 'IFUKinCov', 'DdtHist',
-                    'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin', 'Mag', 'TDMag', 'TDMagMagnitude']
+LIKELIHOOD_TYPES = [
+    "DdtGaussian",
+    "DdtDdKDE",
+    "DdtDdGaussian",
+    "DsDdsGaussian",
+    "DdtLogNorm",
+    "IFUKinCov",
+    "DdtHist",
+    "DdtHistKDE",
+    "DdtHistKin",
+    "DdtGaussKin",
+    "Mag",
+    "TDMag",
+    "TDMagMagnitude",
+]
 
 
 class LensLikelihoodBase(object):
     """
     master class containing the likelihood definitions of different analysis
     """
-    def __init__(self, z_lens, z_source, likelihood_type, name='name', normalized=False,
-                 kwargs_lens_properties=None, **kwargs_likelihood):
+
+    def __init__(
+        self,
+        z_lens,
+        z_source,
+        likelihood_type,
+        name="name",
+        normalized=False,
+        kwargs_lens_properties=None,
+        **kwargs_likelihood
+    ):
         """
 
         :param z_lens: lens redshift
@@ -30,47 +52,101 @@ class LensLikelihoodBase(object):
         if kwargs_lens_properties is None:
             kwargs_lens_properties = {}
         self.kwargs_lens_properties = kwargs_lens_properties
-        if likelihood_type in ['DdtGaussian']:
-            from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import DdtGaussianLikelihood
-            self._lens_type = DdtGaussianLikelihood(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type in ['DdtDdKDE']:
-            from hierarc.Likelihood.LensLikelihood.ddt_dd_kde_likelihood import DdtDdKDELikelihood
+        if likelihood_type in ["DdtGaussian"]:
+            from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import (
+                DdtGaussianLikelihood,
+            )
+
+            self._lens_type = DdtGaussianLikelihood(
+                z_lens, z_source, **kwargs_likelihood
+            )
+        elif likelihood_type in ["DdtDdKDE"]:
+            from hierarc.Likelihood.LensLikelihood.ddt_dd_kde_likelihood import (
+                DdtDdKDELikelihood,
+            )
+
             self._lens_type = DdtDdKDELikelihood(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'DdtDdGaussian':
-            from hierarc.Likelihood.LensLikelihood.ddt_dd_gauss_likelihood import DdtDdGaussian
+        elif likelihood_type == "DdtDdGaussian":
+            from hierarc.Likelihood.LensLikelihood.ddt_dd_gauss_likelihood import (
+                DdtDdGaussian,
+            )
+
             self._lens_type = DdtDdGaussian(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type in ['DsDdsGaussian']:
-            from hierarc.Likelihood.LensLikelihood.ds_dds_gauss_likelihood import DsDdsGaussianLikelihood
-            self._lens_type = DsDdsGaussianLikelihood(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'DdtLogNorm':
-            from hierarc.Likelihood.LensLikelihood.ddt_lognorm_likelihood import DdtLogNormLikelihood
-            self._lens_type = DdtLogNormLikelihood(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'IFUKinCov':
+        elif likelihood_type in ["DsDdsGaussian"]:
+            from hierarc.Likelihood.LensLikelihood.ds_dds_gauss_likelihood import (
+                DsDdsGaussianLikelihood,
+            )
+
+            self._lens_type = DsDdsGaussianLikelihood(
+                z_lens, z_source, **kwargs_likelihood
+            )
+        elif likelihood_type == "DdtLogNorm":
+            from hierarc.Likelihood.LensLikelihood.ddt_lognorm_likelihood import (
+                DdtLogNormLikelihood,
+            )
+
+            self._lens_type = DdtLogNormLikelihood(
+                z_lens, z_source, **kwargs_likelihood
+            )
+        elif likelihood_type == "IFUKinCov":
             from hierarc.Likelihood.LensLikelihood.kin_likelihood import KinLikelihood
-            self._lens_type = KinLikelihood(z_lens, z_source, normalized=normalized, **kwargs_likelihood)
-        elif likelihood_type == 'DdtHist':
-            from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistLikelihood
+
+            self._lens_type = KinLikelihood(
+                z_lens, z_source, normalized=normalized, **kwargs_likelihood
+            )
+        elif likelihood_type == "DdtHist":
+            from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import (
+                DdtHistLikelihood,
+            )
+
             self._lens_type = DdtHistLikelihood(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'DdtHistKDE':
-            from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import DdtHistKDELikelihood
-            self._lens_type = DdtHistKDELikelihood(z_lens, z_source, **kwargs_likelihood)
-        elif likelihood_type == 'DdtHistKin':
-            from hierarc.Likelihood.LensLikelihood.ddt_hist_kin_likelihood import DdtHistKinLikelihood
-            self._lens_type = DdtHistKinLikelihood(z_lens, z_source, normalized=normalized, **kwargs_likelihood)
-        elif likelihood_type == 'DdtGaussKin':
-            from hierarc.Likelihood.LensLikelihood.ddt_gauss_kin_likelihood import DdtGaussKinLikelihood
-            self._lens_type = DdtGaussKinLikelihood(z_lens, z_source, normalized=normalized, **kwargs_likelihood)
-        elif likelihood_type == 'Mag':
-            from hierarc.Likelihood.LensLikelihood.mag_likelihood import MagnificationLikelihood
+        elif likelihood_type == "DdtHistKDE":
+            from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import (
+                DdtHistKDELikelihood,
+            )
+
+            self._lens_type = DdtHistKDELikelihood(
+                z_lens, z_source, **kwargs_likelihood
+            )
+        elif likelihood_type == "DdtHistKin":
+            from hierarc.Likelihood.LensLikelihood.ddt_hist_kin_likelihood import (
+                DdtHistKinLikelihood,
+            )
+
+            self._lens_type = DdtHistKinLikelihood(
+                z_lens, z_source, normalized=normalized, **kwargs_likelihood
+            )
+        elif likelihood_type == "DdtGaussKin":
+            from hierarc.Likelihood.LensLikelihood.ddt_gauss_kin_likelihood import (
+                DdtGaussKinLikelihood,
+            )
+
+            self._lens_type = DdtGaussKinLikelihood(
+                z_lens, z_source, normalized=normalized, **kwargs_likelihood
+            )
+        elif likelihood_type == "Mag":
+            from hierarc.Likelihood.LensLikelihood.mag_likelihood import (
+                MagnificationLikelihood,
+            )
+
             self._lens_type = MagnificationLikelihood(**kwargs_likelihood)
-        elif likelihood_type == 'TDMag':
-            from hierarc.Likelihood.LensLikelihood.td_mag_likelihood import TDMagLikelihood
+        elif likelihood_type == "TDMag":
+            from hierarc.Likelihood.LensLikelihood.td_mag_likelihood import (
+                TDMagLikelihood,
+            )
+
             self._lens_type = TDMagLikelihood(**kwargs_likelihood)
-        elif likelihood_type == 'TDMagMagnitude':
-            from hierarc.Likelihood.LensLikelihood.td_mag_magnitude_likelihood import TDMagMagnitudeLikelihood
+        elif likelihood_type == "TDMagMagnitude":
+            from hierarc.Likelihood.LensLikelihood.td_mag_magnitude_likelihood import (
+                TDMagMagnitudeLikelihood,
+            )
+
             self._lens_type = TDMagMagnitudeLikelihood(**kwargs_likelihood)
         else:
-            raise ValueError('likelihood_type %s not supported! Supported are %s.' % (likelihood_type, LIKELIHOOD_TYPES))
+            raise ValueError(
+                "likelihood_type %s not supported! Supported are %s."
+                % (likelihood_type, LIKELIHOOD_TYPES)
+            )
 
     def num_data(self):
         """
@@ -80,7 +156,9 @@ class LensLikelihoodBase(object):
         """
         return self._lens_type.num_data
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None):
+    def log_likelihood(
+        self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None
+    ):
         """
 
         :param ddt: time-delay distance [physical Mpc]
@@ -92,19 +170,30 @@ class LensLikelihoodBase(object):
         :param mu_intrinsic: float, intrinsic source brightness (in magnitude)
         :return: natural logarithm of the likelihood of the data given the model
         """
-        if self.likelihood_type in ['DdtGaussian', 'DdtLogNorm', 'DdtHist', 'DdtHistKDE']:
+        if self.likelihood_type in [
+            "DdtGaussian",
+            "DdtLogNorm",
+            "DdtHist",
+            "DdtHistKDE",
+        ]:
             return self._lens_type.log_likelihood(ddt, dd)
-        elif self.likelihood_type in ['DdtDdKDE', 'DdtDdGaussian', 'DsDdsGaussian']:
+        elif self.likelihood_type in ["DdtDdKDE", "DdtDdGaussian", "DsDdsGaussian"]:
             return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling)
-        elif self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
-            return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling,
-                                                  sigma_v_sys_error=sigma_v_sys_error)
-        elif self.likelihood_type in ['Mag']:
+        elif self.likelihood_type in ["DdtHistKin", "IFUKinCov", "DdtGaussKin"]:
+            return self._lens_type.log_likelihood(
+                ddt,
+                dd,
+                aniso_scaling=aniso_scaling,
+                sigma_v_sys_error=sigma_v_sys_error,
+            )
+        elif self.likelihood_type in ["Mag"]:
             return self._lens_type.log_likelihood(mu_intrinsic=mu_intrinsic)
-        elif self.likelihood_type in ['TDMag', 'TDMagMagnitude']:
+        elif self.likelihood_type in ["TDMag", "TDMagMagnitude"]:
             return self._lens_type.log_likelihood(ddt=ddt, mu_intrinsic=mu_intrinsic)
         else:
-            raise ValueError('likelihood type %s not fully supported.' % self.likelihood_type)
+            raise ValueError(
+                "likelihood type %s not fully supported." % self.likelihood_type
+            )
 
     def ddt_measurement(self):
         """
@@ -113,7 +202,13 @@ class LensLikelihoodBase(object):
 
         :return: ddt measurement median, 1-sigma (without lambda correction factor)
         """
-        if self.likelihood_type in ['DdtGaussian', 'DdtHist', 'DdtHistKDE', 'DdtHistKin', 'DdtGaussKin']:
+        if self.likelihood_type in [
+            "DdtGaussian",
+            "DdtHist",
+            "DdtHistKDE",
+            "DdtHistKin",
+            "DdtGaussKin",
+        ]:
             return self._lens_type.ddt_measurement()
         return None, None
 
@@ -123,8 +218,10 @@ class LensLikelihoodBase(object):
 
         :return: data vector, measurement covariance matrix for velocity dispersion
         """
-        if self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
-            return self._lens_type.sigma_v_measurement(sigma_v_sys_error=sigma_v_sys_error)
+        if self.likelihood_type in ["DdtHistKin", "IFUKinCov", "DdtGaussKin"]:
+            return self._lens_type.sigma_v_measurement(
+                sigma_v_sys_error=sigma_v_sys_error
+            )
         return None, None
 
     def sigma_v_prediction(self, ddt, dd, aniso_scaling=None):
@@ -135,6 +232,6 @@ class LensLikelihoodBase(object):
         :param aniso_scaling: anisotropy scaling in J
         :return: model predicted velocity dispersion (vector) and model covariance matrix thereof
         """
-        if self.likelihood_type in ['DdtHistKin', 'IFUKinCov', 'DdtGaussKin']:
+        if self.likelihood_type in ["DdtHistKin", "IFUKinCov", "DdtGaussKin"]:
             return self._lens_type.sigma_v_prediction(ddt, dd, aniso_scaling)
         return None, None

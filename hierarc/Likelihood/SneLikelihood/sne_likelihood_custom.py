@@ -28,7 +28,9 @@ class CustomSneLikelihood(object):
         self.num_sne = len(mag_mean)
         self._no_intrinsic_scatter = no_intrinsic_scatter
 
-    def log_likelihood_lum_dist(self, lum_dists, estimated_scriptm=None, sigma_m_z=None):
+    def log_likelihood_lum_dist(
+        self, lum_dists, estimated_scriptm=None, sigma_m_z=None
+    ):
         """
 
         :param lum_dists: numpy array of luminosity distances to the measured supernovae bins
@@ -48,9 +50,9 @@ class CustomSneLikelihood(object):
             estimated_scriptm = np.sum((self.mag - lum_dists) * invvars) / wtval
         diffmag = self.mag - lum_dists - estimated_scriptm
 
-        lnlikelihood = -diffmag.dot(inv_cov.dot(diffmag)) / 2.
+        lnlikelihood = -diffmag.dot(inv_cov.dot(diffmag)) / 2.0
         sign_det, lndet = np.linalg.slogdet(cov_mag)
-        lnlikelihood -= 1 / 2. * (self.num_sne * np.log(2 * np.pi) + lndet)
+        lnlikelihood -= 1 / 2.0 * (self.num_sne * np.log(2 * np.pi) + lndet)
         return lnlikelihood
 
     def _inverse_covariance_matrix(self, sigma_m_z=None):

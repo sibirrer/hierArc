@@ -1,4 +1,4 @@
-__author__ = 'martin-millon'
+__author__ = "martin-millon"
 
 import glob
 import os
@@ -11,7 +11,16 @@ class Chain(object):
     Chain class to have a convenient way to manipulate posteriors distributions of some experiments.
     """
 
-    def __init__(self, kw, probe, params, default_weights, cosmology, loglsamples=None, rescale=True):
+    def __init__(
+        self,
+        kw,
+        probe,
+        params,
+        default_weights,
+        cosmology,
+        loglsamples=None,
+        rescale=True,
+    ):
         """
 
         :param kw: (str). Planck base cosmology keyword. For example, "base" or "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
@@ -30,7 +39,7 @@ class Chain(object):
         self.loglsamples = loglsamples
         self.rescale = rescale
         if self.rescale:
-            self.rescale_dic = {'rescaled': False}
+            self.rescale_dic = {"rescaled": False}
             self.rescale_to_unity()
 
     def __str__(self):
@@ -63,10 +72,10 @@ class Chain(object):
         :param nsamples: (int). Number of samples in the Chain. If None, it will take the same number of samples as for the other parameters
         :param verbose: (bool).
         """
-        assert (len(self.params[param]) == 0)
+        assert len(self.params[param]) == 0
         if nsamples is None:
             lp = self.list_params()
-            assert (len(lp) > 0)
+            assert len(lp) > 0
             nsamples = len(self.params[lp[0]])
 
         self.params[param] = np.ones(nsamples) * default_val
@@ -83,13 +92,13 @@ class Chain(object):
         """
 
         lp = self.list_params()
-        assert (len(lp) > 0)
+        assert len(lp) > 0
         nsamples = len(self.params[lp[0]])
-        assert (len(default_array) == nsamples)
+        assert len(default_array) == nsamples
 
         if param not in self.params.keys():
             if verbose:
-                print('Creating a new parameter.')
+                print("Creating a new parameter.")
 
         self.params[param] = default_array
         if verbose:
@@ -109,17 +118,17 @@ class Chain(object):
 
         :param verbose: (bool).
         """
-        if self.rescale_dic['rescaled']:
-            raise RuntimeError('Your data are already rescaled!')
+        if self.rescale_dic["rescaled"]:
+            raise RuntimeError("Your data are already rescaled!")
         else:
             for p in self.params.keys():
                 max, min = np.max(self.params[p]), np.min(self.params[p])
-                self.params[p] = ((self.params[p] - min) / (max - min))
+                self.params[p] = (self.params[p] - min) / (max - min)
                 self.rescale_dic[p] = [max, min]
 
                 if verbose:
                     print("Rescaled parameter %s between 0 and 1" % p)
-            self.rescale_dic['rescaled'] = True
+            self.rescale_dic["rescaled"] = True
 
     def rescale_from_unity(self, verbose=False):
         """
@@ -127,8 +136,10 @@ class Chain(object):
 
         :param verbose: (bool).
         """
-        if not self.rescale_dic['rescaled']:
-            raise RuntimeError('Your data are not rescaled, call rescale_to_unity() first')
+        if not self.rescale_dic["rescaled"]:
+            raise RuntimeError(
+                "Your data are not rescaled, call rescale_to_unity() first"
+            )
         else:
             for p in self.params.keys():
                 max, min = self.rescale_dic[p]
@@ -136,7 +147,7 @@ class Chain(object):
                 if verbose:
                     print("Rescaled parameter %s to original scale." % p)
 
-            self.rescale_dic['rescaled'] = False
+            self.rescale_dic["rescaled"] = False
 
 
 def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
@@ -152,11 +163,15 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
     :return: Chain object.
     """
     # the planck chains are usually split in four files
-    chainspaths = glob.glob("%s/%s_%s_?.txt" % (os.path.join(datapath, kw, probe), kw, probe))
+    chainspaths = glob.glob(
+        "%s/%s_%s_?.txt" % (os.path.join(datapath, kw, probe), kw, probe)
+    )
     allchainspath = "%s/%s_%s-all.txt" % (os.path.join(datapath, kw, probe), kw, probe)
 
     # read paramfiles and collect indexes of the interesting cosmological parameters
-    params_all = open("%s/%s_%s.paramnames" % (os.path.join(datapath, kw, probe), kw, probe)).readlines()
+    params_all = open(
+        "%s/%s_%s.paramnames" % (os.path.join(datapath, kw, probe), kw, probe)
+    ).readlines()
 
     params_values, params_index = {}, {}
     for p in params:
@@ -167,35 +182,37 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
     # Here, we browse the chains params, looking for the parameters of interest.
     # We corresponding index is +2, since the first two parameters of each sample (weights ) are not in params
     for ind, line in enumerate(params_all):
-        if 'omegal*\t\\Omega_\\Lambda\n' in line:
+        if "omegal*\t\\Omega_\\Lambda\n" in line:
             params_index["ol"] = ind + 2
 
-        elif 'ns\tn_s\n' in line:
+        elif "ns\tn_s\n" in line:
             params_index["ns"] = ind + 2
 
-        elif 'H0*\tH_0\n' in line:
+        elif "H0*\tH_0\n" in line:
             params_index["h0"] = ind + 2
 
-        elif 'omegam*\t\\Omega_m\n' in line:
+        elif "omegam*\t\\Omega_m\n" in line:
             params_index["om"] = ind + 2
 
-        elif 'mnu\t\\Sigma m_\\nu\n' in line:  # pragma: no cover
+        elif "mnu\t\\Sigma m_\\nu\n" in line:  # pragma: no cover
             params_index["mnu"] = ind + 2
 
-        elif 'nnu\tN_{eff}\n' in line:  # pragma: no cover
+        elif "nnu\tN_{eff}\n" in line:  # pragma: no cover
             params_index["nnu"] = ind + 2
 
-        elif 'omegak\t\\Omega_K\n' in line:  # pragma: no cover
+        elif "omegak\t\\Omega_K\n" in line:  # pragma: no cover
             params_index["ok"] = ind + 2
 
-        elif 'w\tw\n' in line:  # pragma: no cover
+        elif "w\tw\n" in line:  # pragma: no cover
             params_index["w"] = ind + 2
             params_index["w0"] = ind + 2
 
-        elif 'wa\tw_a\n' in line:  # pragma: no cover
+        elif "wa\tw_a\n" in line:  # pragma: no cover
             params_index["wa"] = ind + 2
 
-        elif 'meffsterile\tm_{\\nu,{\\rm{sterile}}}^{\\rm{eff}}\n' in line:  # pragma: no cover
+        elif (
+            "meffsterile\tm_{\\nu,{\\rm{sterile}}}^{\\rm{eff}}\n" in line
+        ):  # pragma: no cover
             params_index["meffsterile"] = ind + 2
 
     default_weights = []
@@ -206,8 +223,12 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
             for p in params:
                 if params_index[p] is not None:
                     params_values[p] += [s[params_index[p]] for s in samples]
-            default_weights += [s[0] for s in samples]  # weights are always the first element of a chain
-            logl_samples += [s[1] for s in samples]  # loglikelihood is the second element
+            default_weights += [
+                s[0] for s in samples
+            ]  # weights are always the first element of a chain
+            logl_samples += [
+                s[1] for s in samples
+            ]  # loglikelihood is the second element
 
     # fallback to numpy arrays with floats...should be default but is not...?
     for p in params:
@@ -216,8 +237,15 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
     default_weights = np.array([float(v) for v in default_weights])
     logl_samples = np.array([float(v) for v in logl_samples])
 
-    return Chain(kw=kw, probe=probe, params=params_values, default_weights=default_weights, cosmology=cosmology,
-                 loglsamples=logl_samples, rescale=rescale)
+    return Chain(
+        kw=kw,
+        probe=probe,
+        params=params_values,
+        default_weights=default_weights,
+        cosmology=cosmology,
+        loglsamples=logl_samples,
+        rescale=rescale,
+    )
 
 
 def rescale_vector_from_unity(vector, rescale_dic, keys):
@@ -246,5 +274,5 @@ def rescale_vector_to_unity(vector, rescale_dic, keys):
     """
     for i, key in enumerate(keys):
         max, min = rescale_dic[key]
-        vector[:, i] = ((vector[:, i] - min) / (max - min))
+        vector[:, i] = (vector[:, i] - min) / (max - min)
     return vector

@@ -7,6 +7,7 @@ class MCMCSampler(object):
     """
     class which executes the different sampling  methods
     """
+
     def __init__(self, *args, **kwargs):
         """
         initialise the classes of the chain and for parameter options
@@ -17,8 +18,16 @@ class MCMCSampler(object):
         self.chain = CosmoLikelihood(*args, **kwargs)
         self.param = self.chain.param
 
-    def mcmc_emcee(self, n_walkers, n_burn, n_run, kwargs_mean_start, kwargs_sigma_start, continue_from_backend=False,
-                   **kwargs_emcee):
+    def mcmc_emcee(
+        self,
+        n_walkers,
+        n_burn,
+        n_run,
+        kwargs_mean_start,
+        kwargs_sigma_start,
+        continue_from_backend=False,
+        **kwargs_emcee
+    ):
         """
         runs the EMCEE MCMC sampling
 
@@ -33,17 +42,19 @@ class MCMCSampler(object):
         """
 
         num_param = self.param.num_param
-        sampler = emcee.EnsembleSampler(n_walkers, num_param, self.chain.likelihood, args=(), **kwargs_emcee)
+        sampler = emcee.EnsembleSampler(
+            n_walkers, num_param, self.chain.likelihood, args=(), **kwargs_emcee
+        )
         mean_start = self.param.kwargs2args(**kwargs_mean_start)
         sigma_start = self.param.kwargs2args(**kwargs_sigma_start)
         p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
-        backend = kwargs_emcee.get('backend', None)
+        backend = kwargs_emcee.get("backend", None)
         if backend is not None:
             if continue_from_backend:
                 p0 = None
             else:
                 backend.reset(n_walkers, num_param)
-        sampler.run_mcmc(p0, n_burn+n_run, progress=True)
+        sampler.run_mcmc(p0, n_burn + n_run, progress=True)
         flat_samples = sampler.get_chain(discard=n_burn, thin=1, flat=True)
         log_prob = sampler.get_log_prob(discard=n_burn, thin=1, flat=True)
         return flat_samples, log_prob

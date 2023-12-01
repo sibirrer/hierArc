@@ -1,4 +1,4 @@
-__author__ = 'sibirrer'
+__author__ = "sibirrer"
 import numpy as np
 
 
@@ -17,7 +17,9 @@ class TransformedCosmography(object):
         self._z_lens = z_lens
         self._z_source = z_source
 
-    def displace_prediction(self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0):
+    def displace_prediction(
+        self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0
+    ):
         """
         here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         displace the predicted angular diameter distances in the opposite direction
@@ -34,9 +36,10 @@ class TransformedCosmography(object):
         :returns: ddt, dd, mag_source
         """
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
-        #TODO scale source with ds, make sure definition is either linear or magnitudes (log) consistently
-        ddt_, dd_, mag_source_ = self._displace_lambda_mst(ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
-                                                           mag_source=mag_source)
+        # TODO scale source with ds, make sure definition is either linear or magnitudes (log) consistently
+        ddt_, dd_, mag_source_ = self._displace_lambda_mst(
+            ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext, mag_source=mag_source
+        )
         return ddt_, dd_, mag_source_
 
     @staticmethod
@@ -50,7 +53,7 @@ class TransformedCosmography(object):
         :param gamma_ppn: post-newtonian gravity parameter (=1 is GR)
         :return: ddt_, dd_
         """
-        dd_ = dd * (1 + gamma_ppn) / 2.
+        dd_ = dd * (1 + gamma_ppn) / 2.0
         return ddt, dd_
 
     @staticmethod
@@ -66,7 +69,7 @@ class TransformedCosmography(object):
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
         :return: ddt_, dd_
         """
-        ddt_ = ddt * (1. - kappa_ext)
+        ddt_ = ddt * (1.0 - kappa_ext)
         return ddt_, dd
 
     @staticmethod
@@ -87,12 +90,20 @@ class TransformedCosmography(object):
         :return: ddt_, dd_, mag_source
         """
         lambda_tot = lambda_mst * (1 - kappa_ext)  # combine internal and external MST
-        lambda_tot = np.maximum(lambda_tot, 0.0001)  # lambda can not get negative and zero is leading to infinite magnitudes
-        ddt_ = ddt * lambda_tot  # the actual posteriors needed to be corrected by Ddt_true = Ddt_mst / (1-kappa_ext)
+        lambda_tot = np.maximum(
+            lambda_tot, 0.0001
+        )  # lambda can not get negative and zero is leading to infinite magnitudes
+        ddt_ = (
+            ddt * lambda_tot
+        )  # the actual posteriors needed to be corrected by Ddt_true = Ddt_mst / (1-kappa_ext)
         # this line can be changed in case the physical 3-d approximation of the chosen profile does scale differently with the kinematics
         sigma_v2_scaling = lambda_mst
-        dd_ = dd * sigma_v2_scaling / lambda_mst  # the kinematics constrain Dd/Dds and thus the constraints on Dd is not affected by lambda
+        dd_ = (
+            dd * sigma_v2_scaling / lambda_mst
+        )  # the kinematics constrain Dd/Dds and thus the constraints on Dd is not affected by lambda
 
         # amp_source_ = amp_source / lambda_tot ** 2  # inverse MST transform of magnification
-        mag_source_ = mag_source + 5 * np.log10(lambda_tot)  # inverse MST transform of magnification in magnitude
+        mag_source_ = mag_source + 5 * np.log10(
+            lambda_tot
+        )  # inverse MST transform of magnification in magnitude
         return ddt_, dd_, mag_source_

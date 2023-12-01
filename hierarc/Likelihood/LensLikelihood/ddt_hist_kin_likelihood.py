@@ -8,9 +8,23 @@ class DdtHistKinLikelihood(object):
     class for joint kinematics and time delay likelihood assuming that they are independent
     Uses KinLikelihood and DdtHistLikelihood combined
     """
-    def __init__(self, z_lens, z_source, ddt_samples, sigma_v_measurement, j_model, error_cov_measurement,
-                 error_cov_j_sqrt, ddt_weights=None, kde_kernel='gaussian', bandwidth=20, nbins_hist=200,
-                 sigma_sys_error_include=False, normalized=True):
+
+    def __init__(
+        self,
+        z_lens,
+        z_source,
+        ddt_samples,
+        sigma_v_measurement,
+        j_model,
+        error_cov_measurement,
+        error_cov_j_sqrt,
+        ddt_weights=None,
+        kde_kernel="gaussian",
+        bandwidth=20,
+        nbins_hist=200,
+        sigma_sys_error_include=False,
+        normalized=True,
+    ):
         """
 
         :param z_lens: lens redshift
@@ -29,11 +43,25 @@ class DdtHistKinLikelihood(object):
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         """
-        self._tdLikelihood = DdtHistKDELikelihood(z_lens, z_source, ddt_samples, ddt_weights=ddt_weights,
-                                                  kde_kernel=kde_kernel, bandwidth=bandwidth, nbins_hist=nbins_hist)
-        self._kinlikelihood = KinLikelihood(z_lens, z_source, sigma_v_measurement, j_model, error_cov_measurement,
-                                            error_cov_j_sqrt, sigma_sys_error_include=sigma_sys_error_include,
-                                            normalized=normalized)
+        self._tdLikelihood = DdtHistKDELikelihood(
+            z_lens,
+            z_source,
+            ddt_samples,
+            ddt_weights=ddt_weights,
+            kde_kernel=kde_kernel,
+            bandwidth=bandwidth,
+            nbins_hist=nbins_hist,
+        )
+        self._kinlikelihood = KinLikelihood(
+            z_lens,
+            z_source,
+            sigma_v_measurement,
+            j_model,
+            error_cov_measurement,
+            error_cov_j_sqrt,
+            sigma_sys_error_include=sigma_sys_error_include,
+            normalized=normalized,
+        )
         self.num_data = self._tdLikelihood.num_data + self._kinlikelihood.num_data
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None):
@@ -44,7 +72,11 @@ class DdtHistKinLikelihood(object):
         :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
         :return: log likelihood given the single lens analysis
         """
-        lnlikelihood = self._tdLikelihood.log_likelihood(ddt) + self._kinlikelihood.log_likelihood(ddt, dd, aniso_scaling, sigma_v_sys_error=sigma_v_sys_error)
+        lnlikelihood = self._tdLikelihood.log_likelihood(
+            ddt
+        ) + self._kinlikelihood.log_likelihood(
+            ddt, dd, aniso_scaling, sigma_v_sys_error=sigma_v_sys_error
+        )
         return lnlikelihood
 
     def sigma_v_prediction(self, ddt, dd, aniso_scaling=1):
@@ -68,8 +100,9 @@ class DdtHistKinLikelihood(object):
          such that sigma_v = sigma_v_measured * (1 + sigma_v_sys_offset)
         :return: measurement mean (vector), measurement covariance matrix
         """
-        return self._kinlikelihood.sigma_v_measurement(sigma_v_sys_error=sigma_v_sys_error,
-                                                       sigma_v_sys_offset=sigma_v_sys_offset)
+        return self._kinlikelihood.sigma_v_measurement(
+            sigma_v_sys_error=sigma_v_sys_error, sigma_v_sys_offset=sigma_v_sys_offset
+        )
 
     def ddt_measurement(self):
         """

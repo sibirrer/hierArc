@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import hierarc
 
-_PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'SNe')
+_PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), "Data", "SNe")
 
 
 class PantheonPlusData(object):
@@ -21,17 +21,23 @@ class PantheonPlusData(object):
     """
 
     def __init__(self):
-        self._data_file = os.path.join(_PATH_2_DATA, 'Pantheon+SH0ES', 'Pantheon+SH0ES.dat')
-        self._cov_file = os.path.join(_PATH_2_DATA, 'Pantheon+SH0ES', 'Pantheon+SH0ES_STAT+SYS.cov')
+        self._data_file = os.path.join(
+            _PATH_2_DATA, "Pantheon+SH0ES", "Pantheon+SH0ES.dat"
+        )
+        self._cov_file = os.path.join(
+            _PATH_2_DATA, "Pantheon+SH0ES", "Pantheon+SH0ES_STAT+SYS.cov"
+        )
 
         data = pd.read_csv(self._data_file, delim_whitespace=True)
         self.origlen = len(data)
 
-        self.ww = (data['zHD'] > 0.01)
+        self.ww = data["zHD"] > 0.01
 
-        self.zCMB = data['zHD'][self.ww].to_numpy()  # use the vpec corrected redshift for zCMB
-        self.zHEL = data['zHEL'][self.ww].to_numpy()
-        self.m_obs = data['m_b_corr'][self.ww].to_numpy()
+        self.zCMB = data["zHD"][
+            self.ww
+        ].to_numpy()  # use the vpec corrected redshift for zCMB
+        self.zHEL = data["zHEL"][self.ww].to_numpy()
+        self.m_obs = data["m_b_corr"][self.ww].to_numpy()
 
         self.cov_mag_b = self.build_covariance()
 

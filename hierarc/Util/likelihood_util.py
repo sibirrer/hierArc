@@ -12,7 +12,7 @@ def log_likelihood_cov(data, model, cov_error):
     :return: log likelihood
     """
     delta = data - model
-    return -delta.dot(cov_error.dot(delta)) / 2.
+    return -delta.dot(cov_error.dot(delta)) / 2.0
 
 
 def cov_error_create(error_independent, error_covariance):
@@ -25,7 +25,9 @@ def cov_error_create(error_independent, error_covariance):
     :return: error covariance matrix
     """
     error_covariance_array = np.ones_like(error_independent) * error_covariance
-    error = np.outer(error_covariance_array, error_covariance_array) + np.diag(error_independent**2)
+    error = np.outer(error_covariance_array, error_covariance_array) + np.diag(
+        error_independent**2
+    )
     return np.linalg.inv(error)
 
 
@@ -38,5 +40,4 @@ def get_truncated_normal(mean=0, sd=1, low=0, upp=10, size=1):
     :param upp: upper bound
     :return: float, draw of distribution
     """
-    return truncnorm(
-        (low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd).rvs(size)
+    return truncnorm((low - mean) / sd, (upp - mean) / sd, loc=mean, scale=sd).rvs(size)

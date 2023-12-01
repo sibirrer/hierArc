@@ -12,17 +12,38 @@ class CosmoLikelihood(object):
     this class contains the likelihood function of the Strong lensing analysis
     """
 
-    def __init__(self, kwargs_likelihood_list, cosmology, kwargs_bounds, sne_likelihood=None,
-                 kwargs_sne_likelihood=None, KDE_likelihood_chain=None, kwargs_kde_likelihood=None,
-                 ppn_sampling=False,
-                 lambda_mst_sampling=False, lambda_mst_distribution='delta', anisotropy_sampling=False,
-                 kappa_ext_sampling=False, kappa_ext_distribution='NONE',
-                 alpha_lambda_sampling=False, beta_lambda_sampling=False,
-                 lambda_ifu_sampling=False, lambda_ifu_distribution='NONE', sigma_v_systematics=False,
-                 sne_apparent_m_sampling=False, sne_distribution='GAUSSIAN', z_apparent_m_anchor=0.1,
-                 log_scatter=False, normalized=False,
-                 anisotropy_model='OM', anisotropy_distribution='NONE', custom_prior=None, interpolate_cosmo=True,
-                 num_redshift_interp=100, cosmo_fixed=None):
+    def __init__(
+        self,
+        kwargs_likelihood_list,
+        cosmology,
+        kwargs_bounds,
+        sne_likelihood=None,
+        kwargs_sne_likelihood=None,
+        KDE_likelihood_chain=None,
+        kwargs_kde_likelihood=None,
+        ppn_sampling=False,
+        lambda_mst_sampling=False,
+        lambda_mst_distribution="delta",
+        anisotropy_sampling=False,
+        kappa_ext_sampling=False,
+        kappa_ext_distribution="NONE",
+        alpha_lambda_sampling=False,
+        beta_lambda_sampling=False,
+        lambda_ifu_sampling=False,
+        lambda_ifu_distribution="NONE",
+        sigma_v_systematics=False,
+        sne_apparent_m_sampling=False,
+        sne_distribution="GAUSSIAN",
+        z_apparent_m_anchor=0.1,
+        log_scatter=False,
+        normalized=False,
+        anisotropy_model="OM",
+        anisotropy_distribution="NONE",
+        custom_prior=None,
+        interpolate_cosmo=True,
+        num_redshift_interp=100,
+        cosmo_fixed=None,
+    ):
         """
 
         :param kwargs_likelihood_list: keyword argument list specifying the arguments of the LensLikelihood class
@@ -76,20 +97,30 @@ class CosmoLikelihood(object):
         self._kwargs_lens_list = kwargs_likelihood_list
         if sigma_v_systematics is True:
             normalized = True
-        self._likelihoodLensSample = LensSampleLikelihood(kwargs_likelihood_list, normalized=normalized)
-        self.param = ParamManager(cosmology, ppn_sampling=ppn_sampling, lambda_mst_sampling=lambda_mst_sampling,
-                                  lambda_mst_distribution=lambda_mst_distribution,
-                                  lambda_ifu_sampling=lambda_ifu_sampling,
-                                  lambda_ifu_distribution=lambda_ifu_distribution,
-                                  alpha_lambda_sampling=alpha_lambda_sampling,
-                                  beta_lambda_sampling=beta_lambda_sampling,
-                                  sne_apparent_m_sampling=sne_apparent_m_sampling,
-                                  sne_distribution=sne_distribution, z_apparent_m_anchor=z_apparent_m_anchor,
-                                  sigma_v_systematics=sigma_v_systematics,
-                                  kappa_ext_sampling=kappa_ext_sampling, kappa_ext_distribution=kappa_ext_distribution,
-                                  anisotropy_sampling=anisotropy_sampling, anisotropy_model=anisotropy_model,
-                                  anisotropy_distribution=anisotropy_distribution, log_scatter=log_scatter,
-                                  **kwargs_bounds)
+        self._likelihoodLensSample = LensSampleLikelihood(
+            kwargs_likelihood_list, normalized=normalized
+        )
+        self.param = ParamManager(
+            cosmology,
+            ppn_sampling=ppn_sampling,
+            lambda_mst_sampling=lambda_mst_sampling,
+            lambda_mst_distribution=lambda_mst_distribution,
+            lambda_ifu_sampling=lambda_ifu_sampling,
+            lambda_ifu_distribution=lambda_ifu_distribution,
+            alpha_lambda_sampling=alpha_lambda_sampling,
+            beta_lambda_sampling=beta_lambda_sampling,
+            sne_apparent_m_sampling=sne_apparent_m_sampling,
+            sne_distribution=sne_distribution,
+            z_apparent_m_anchor=z_apparent_m_anchor,
+            sigma_v_systematics=sigma_v_systematics,
+            kappa_ext_sampling=kappa_ext_sampling,
+            kappa_ext_distribution=kappa_ext_distribution,
+            anisotropy_sampling=anisotropy_sampling,
+            anisotropy_model=anisotropy_model,
+            anisotropy_distribution=anisotropy_distribution,
+            log_scatter=log_scatter,
+            **kwargs_bounds
+        )
         self._lower_limit, self._upper_limit = self.param.param_bounds
         self._prior_add = False
         if custom_prior is not None:
@@ -102,7 +133,9 @@ class CosmoLikelihood(object):
         if sne_likelihood is not None:
             if kwargs_sne_likelihood is None:
                 kwargs_sne_likelihood = {}
-            self._sne_likelihood = SneLikelihood(sample_name=sne_likelihood, **kwargs_sne_likelihood)
+            self._sne_likelihood = SneLikelihood(
+                sample_name=sne_likelihood, **kwargs_sne_likelihood
+            )
             z_max = np.max(self._sne_likelihood.zcmb)
             self._sne_evaluate = True
         else:
@@ -111,19 +144,21 @@ class CosmoLikelihood(object):
         if KDE_likelihood_chain is not None:
             if kwargs_kde_likelihood is None:
                 kwargs_kde_likelihood = {}
-            self._kde_likelihood = KDELikelihood(KDE_likelihood_chain, **kwargs_kde_likelihood)
+            self._kde_likelihood = KDELikelihood(
+                KDE_likelihood_chain, **kwargs_kde_likelihood
+            )
             self._kde_evaluate = True
             self._chain_params = self._kde_likelihood.chain.list_params()
         else:
             self._kde_evaluate = False
 
         for kwargs_lens in kwargs_likelihood_list:
-            if 'z_source' in kwargs_lens:
-                if kwargs_lens['z_source'] > z_max:
-                    z_max = kwargs_lens['z_source']
-            if 'z_source_2' in kwargs_lens:
-                if kwargs_lens['z_source_2'] > z_max:
-                    z_max = kwargs_lens['z_source_2']
+            if "z_source" in kwargs_lens:
+                if kwargs_lens["z_source"] > z_max:
+                    z_max = kwargs_lens["z_source"]
+            if "z_source_2" in kwargs_lens:
+                if kwargs_lens["z_source_2"] > z_max:
+                    z_max = kwargs_lens["z_source_2"]
         self._z_max = z_max
 
     def likelihood(self, args, kwargs_cosmo_interp=None):
@@ -139,15 +174,17 @@ class CosmoLikelihood(object):
             if args[i] < self._lower_limit[i] or args[i] > self._upper_limit[i]:
                 return -np.inf
 
-        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source = self.param.args2kwargs(args)
+        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source = self.param.args2kwargs(
+            args
+        )
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
-            h0, ok, om = kwargs_cosmo['h0'], kwargs_cosmo['ok'], kwargs_cosmo['om']
+            h0, ok, om = kwargs_cosmo["h0"], kwargs_cosmo["ok"], kwargs_cosmo["om"]
             for lens in self._kwargs_lens_list:
-                if 'z_source' in lens:
-                    z = lens['z_source']
-                elif 'z_source_2' in lens:
-                    z = lens['z_source_2']
+                if "z_source" in lens:
+                    z = lens["z_source"]
+                elif "z_source_2" in lens:
+                    z = lens["z_source_2"]
                 else:
                     z = 1100
                 cut = ok * (1.0 + z) ** 2 + om * (1.0 + z) ** 3 + (1.0 - om - ok)
@@ -159,23 +196,34 @@ class CosmoLikelihood(object):
         if kwargs_cosmo_interp is not None:
             kwargs_cosmo = {**kwargs_cosmo, **kwargs_cosmo_interp}
         cosmo = self.cosmo_instance(kwargs_cosmo)
-        log_l = self._likelihoodLensSample.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
-                                                          kwargs_source=kwargs_source)
+        log_l = self._likelihoodLensSample.log_likelihood(
+            cosmo=cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_source=kwargs_source,
+        )
 
         if self._sne_evaluate is True:
-            apparent_m_z = kwargs_source.get('mu_sne', None)
-            z_apparent_m_anchor = kwargs_source['z_apparent_m_anchor']
-            sigma_m_z = kwargs_source.get('sigma_sne', None)
-            log_l += self._sne_likelihood.log_likelihood(cosmo=cosmo, apparent_m_z=apparent_m_z,
-                                                         z_anchor=z_apparent_m_anchor, sigma_m_z=sigma_m_z)
+            apparent_m_z = kwargs_source.get("mu_sne", None)
+            z_apparent_m_anchor = kwargs_source["z_apparent_m_anchor"]
+            sigma_m_z = kwargs_source.get("sigma_sne", None)
+            log_l += self._sne_likelihood.log_likelihood(
+                cosmo=cosmo,
+                apparent_m_z=apparent_m_z,
+                z_anchor=z_apparent_m_anchor,
+                sigma_m_z=sigma_m_z,
+            )
         if self._kde_evaluate is True:
             # all chain_params must be in the kwargs_cosmo
             cosmo_params = np.array([[kwargs_cosmo[k] for k in self._chain_params]])
-            cosmo_params = rescale_vector_to_unity(cosmo_params, self._kde_likelihood.chain.rescale_dic,
-                                                   self._chain_params)
+            cosmo_params = rescale_vector_to_unity(
+                cosmo_params, self._kde_likelihood.chain.rescale_dic, self._chain_params
+            )
             log_l += self._kde_likelihood.kdelikelihood_samples(cosmo_params)[0]
         if self._prior_add is True:
-            log_l += self._custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source)
+            log_l += self._custom_prior(
+                kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source
+            )
         return log_l
 
     def cosmo_instance(self, kwargs_cosmo):
@@ -184,22 +232,33 @@ class CosmoLikelihood(object):
         :param kwargs_cosmo: cosmology parameter keyword argument list
         :return: astropy.cosmology (or equivalent interpolation scheme class)
         """
-        if hasattr(kwargs_cosmo, 'ang_diameter_distances') and hasattr(kwargs_cosmo, 'redshifts'):
+        if hasattr(kwargs_cosmo, "ang_diameter_distances") and hasattr(
+            kwargs_cosmo, "redshifts"
+        ):
             # in that case we use directly the interpolation mode to approximate angular diameter distances
-            cosmo = CosmoInterp(ang_dist_list=kwargs_cosmo['ang_diameter_distances'],
-                                z_list=kwargs_cosmo['redshifts'],
-                                Ok0=kwargs_cosmo.get('ok', 0),
-                                K=kwargs_cosmo.get('K', None))
+            cosmo = CosmoInterp(
+                ang_dist_list=kwargs_cosmo["ang_diameter_distances"],
+                z_list=kwargs_cosmo["redshifts"],
+                Ok0=kwargs_cosmo.get("ok", 0),
+                K=kwargs_cosmo.get("K", None),
+            )
             return cosmo
         if self._cosmo_fixed is None:
             cosmo = self.param.cosmo(kwargs_cosmo)
             if self._interpolate_cosmo is True:
-                cosmo = CosmoInterp(cosmo=cosmo, z_stop=self._z_max, num_interp=self._num_redshift_interp)
+                cosmo = CosmoInterp(
+                    cosmo=cosmo,
+                    z_stop=self._z_max,
+                    num_interp=self._num_redshift_interp,
+                )
         else:
             if self._interpolate_cosmo is True:
-                if not hasattr(self, '_cosmo_fixed_interp'):
-                    self._cosmo_fixed_interp = CosmoInterp(cosmo=self._cosmo_fixed, z_stop=self._z_max,
-                                                           num_interp=self._num_redshift_interp)
+                if not hasattr(self, "_cosmo_fixed_interp"):
+                    self._cosmo_fixed_interp = CosmoInterp(
+                        cosmo=self._cosmo_fixed,
+                        z_stop=self._z_max,
+                        num_interp=self._num_redshift_interp,
+                    )
                 cosmo = self._cosmo_fixed_interp
             else:
                 cosmo = self._cosmo_fixed

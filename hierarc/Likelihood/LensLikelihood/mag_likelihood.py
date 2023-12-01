@@ -8,8 +8,15 @@ class MagnificationLikelihood(object):
     This can i.e. be applied to lensed SNIa on the population level
 
     """
-    def __init__(self, amp_measured, cov_amp_measured, magnification_model, cov_magnification_model,
-                 magnitude_zero_point=20):
+
+    def __init__(
+        self,
+        amp_measured,
+        cov_amp_measured,
+        magnification_model,
+        cov_magnification_model,
+        magnitude_zero_point=20,
+    ):
         """
 
         :param amp_measured: array, amplitudes of measured fluxes of image positions
@@ -46,9 +53,9 @@ class MagnificationLikelihood(object):
         # difference to data vector
         delta = self._amp_measured - model_vector
         # evaluate likelihood
-        lnlikelihood = -delta.dot(cov_tot_inv.dot(delta)) / 2.
+        lnlikelihood = -delta.dot(cov_tot_inv.dot(delta)) / 2.0
         sign_det, lndet = np.linalg.slogdet(cov_tot)
-        lnlikelihood -= 1 / 2. * (self.num_data * np.log(2 * np.pi) + lndet)
+        lnlikelihood -= 1 / 2.0 * (self.num_data * np.log(2 * np.pi) + lndet)
         return lnlikelihood
 
     def _scale_model(self, mu_intrinsic):
@@ -57,12 +64,13 @@ class MagnificationLikelihood(object):
         :param mu_intrinsic: intrinsic brightness of the source (already incorporating the inverse MST transform)
         :return:
         """
-        amp_intrinsic = magnitude2cps(magnitude=mu_intrinsic, magnitude_zero_point=self._magnitude_zero_point)
+        amp_intrinsic = magnitude2cps(
+            magnitude=mu_intrinsic, magnitude_zero_point=self._magnitude_zero_point
+        )
         # compute model predicted magnified image amplitude and time delay
         model_vector = amp_intrinsic * self._mean_magnification_model
         # scale model covariance matrix with model_scale vector (in quadrature)
-        cov_model = self._cov_magnification_model * amp_intrinsic ** 2
+        cov_model = self._cov_magnification_model * amp_intrinsic**2
         # combine data and model covariance matrix
         cov_tot = self._cov_amp_measured + cov_model
         return model_vector, cov_tot
-
