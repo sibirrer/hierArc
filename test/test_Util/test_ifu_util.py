@@ -7,7 +7,6 @@ from hierarc.Util import ifu_util
 
 
 class TestIFUUtil(object):
-
     def setup(self):
         pass
 
@@ -25,10 +24,18 @@ class TestIFUUtil(object):
 
         flux_map = np.ones((num, num))
 
-        disp_r, error_r = ifu_util.binned_total(dispersion_map, weight_map_disp, velocity_map, weight_map_v, flux_map, fiber_scale, r_bins)
+        disp_r, error_r = ifu_util.binned_total(
+            dispersion_map,
+            weight_map_disp,
+            velocity_map,
+            weight_map_v,
+            flux_map,
+            fiber_scale,
+            r_bins,
+        )
         assert len(disp_r) == len(r_bins) - 1
         npt.assert_almost_equal(disp_r, 1, decimal=6)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

@@ -2,12 +2,17 @@ import numpy as np
 
 
 class DSPLikelihood(object):
-    """
-    likelihood for Einstein ratios in double source plane lenses
+    """Likelihood for Einstein ratios in double source plane lenses."""
 
-    """
-
-    def __init__(self, z_lens, z_source_1, z_source_2, beta_dspl, sigma_beta_dspl, normalized=False):
+    def __init__(
+        self,
+        z_lens,
+        z_source_1,
+        z_source_2,
+        beta_dspl,
+        sigma_beta_dspl,
+        normalized=False,
+    ):
         """
         :param z_lens: lens redshift
         :param z_source_1: redshift of first source
@@ -24,9 +29,10 @@ class DSPLikelihood(object):
         self._sigma_beta_dspl = sigma_beta_dspl
         self._normalized = normalized
 
-    def lens_log_likelihood(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None):
-        """
-        log likelihood of the data given a model
+    def lens_log_likelihood(
+        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
+    ):
+        """Log likelihood of the data given a model.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keyword arguments of lens
@@ -35,9 +41,9 @@ class DSPLikelihood(object):
         :return: log likelihood of data given model
         """
         beta_model = self._beta_model(cosmo)
-        log_l = - 0.5 * ((beta_model - self._beta_dspl) / self._sigma_beta_dspl)**2
+        log_l = -0.5 * ((beta_model - self._beta_dspl) / self._sigma_beta_dspl) ** 2
         if self._normalized:
-            log_l -= 1 / 2. * np.log(2 * np.pi * self._sigma_beta_dspl**2)
+            log_l -= 1 / 2.0 * np.log(2 * np.pi * self._sigma_beta_dspl**2)
         return log_l
 
     def num_data(self):
@@ -48,19 +54,21 @@ class DSPLikelihood(object):
         return 1
 
     def _beta_model(self, cosmo):
-        """
-        model prediction of ratio of Einstein radii theta_E_1 / theta_E_2 or scaled deflection angles
+        """Model prediction of ratio of Einstein radii theta_E_1 / theta_E_2 or scaled
+        deflection angles.
 
         :param cosmo: astropy.cosmology instance
         :return: beta
         """
-        beta = beta_double_source_plane(self._z_lens, self._z_source_1, self._z_source_2, cosmo=cosmo)
+        beta = beta_double_source_plane(
+            self._z_lens, self._z_source_1, self._z_source_2, cosmo=cosmo
+        )
         return beta
 
 
 def beta_double_source_plane(z_lens, z_source_1, z_source_2, cosmo):
-    """
-    model prediction of ratio of Einstein radii theta_E_1 / theta_E_2 or scaled deflection angles
+    """Model prediction of ratio of Einstein radii theta_E_1 / theta_E_2 or scaled
+    deflection angles.
 
     :param z_lens: lens redshift
     :param z_source_1: source_1 redshift

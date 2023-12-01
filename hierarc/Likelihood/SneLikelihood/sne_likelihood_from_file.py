@@ -18,7 +18,7 @@ This likelihood does NOT include systematics!
 :Author: Alex Conley, Marc Betoule, Antony Lewis (see source for more specific authorship)
 
 """
-__author__ = 'sibirrer'
+__author__ = "sibirrer"
 
 # Global
 import numpy as np
@@ -28,50 +28,75 @@ import os
 import hierarc
 
 _twopi = 2 * np.pi
-_SAMPLE_NAME_SUPPORTED = ['Pantheon_binned', 'Pantheon', 'Roman_forecast']
-_PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), 'Data', 'SNe')
+_SAMPLE_NAME_SUPPORTED = ["Pantheon_binned", "Pantheon", "Roman_forecast"]
+_PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), "Data", "SNe")
 
 
 class SneLikelihoodFromFile(object):
-    """
-    Base likelihood class for evaluating Sne likelihoods
-    """
-    def __init__(self, sample_name='Pantheon_binned', pec_z=0.001):
+    """Base likelihood class for evaluating Sne likelihoods."""
+
+    def __init__(self, sample_name="Pantheon_binned", pec_z=0.001):
         """
 
         :param sample_name: string, name of data sample
         :param pec_z: float, peculiar velocity in units of redshift (ignored when binned data products are used)
         """
         if sample_name not in _SAMPLE_NAME_SUPPORTED:
-            raise ValueError('Sample name %s not supported. Please chose the Sne sample name among %s.'
-                             % (sample_name, _SAMPLE_NAME_SUPPORTED))
-        if sample_name == 'Pantheon_binned':
-            self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_binned_lcparam_DS17f.txt')
+            raise ValueError(
+                "Sample name %s not supported. Please chose the Sne sample name among %s."
+                % (sample_name, _SAMPLE_NAME_SUPPORTED)
+            )
+        if sample_name == "Pantheon_binned":
+            self._data_file = os.path.join(
+                _PATH_2_DATA, "pantheon_binned_lcparam_DS17f.txt"
+            )
             self._cov_file = None
             pec_z = 0
-        elif sample_name == 'Pantheon':
-            self._data_file = os.path.join(_PATH_2_DATA, 'pantheon_lcparam_full_long_zhel.txt')
-            self._cov_file = os.path.join(_PATH_2_DATA, 'pantheon_sys_full_long.txt')
-        elif sample_name == 'Roman_forecast':
-            self._data_file = os.path.join(_PATH_2_DATA, 'RomanWFIRST', 'lcparam_WFIRST_G10.txt')
-            self._cov_file = os.path.join(_PATH_2_DATA, 'RomanWFIRST', 'sys_WFIRST_G10_0.txt')
+        elif sample_name == "Pantheon":
+            self._data_file = os.path.join(
+                _PATH_2_DATA, "pantheon_lcparam_full_long_zhel.txt"
+            )
+            self._cov_file = os.path.join(_PATH_2_DATA, "pantheon_sys_full_long.txt")
+        elif sample_name == "Roman_forecast":
+            self._data_file = os.path.join(
+                _PATH_2_DATA, "RomanWFIRST", "lcparam_WFIRST_G10.txt"
+            )
+            self._cov_file = os.path.join(
+                _PATH_2_DATA, "RomanWFIRST", "sys_WFIRST_G10_0.txt"
+            )
 
         self._pec_z = pec_z
         cols = None
 
         self.names = []
         ix = 0
-        with open(self._data_file, 'r') as f:
+        with open(self._data_file, "r") as f:
             lines = f.readlines()
             for line in lines:
-                if '#' in line:
+                if "#" in line:
                     cols = line[1:].split()
                     for rename, new in zip(
-                            ['mb', 'color', 'x1', '3rdvar', 'd3rdvar',
-                             'cov_m_s', 'cov_m_c', 'cov_s_c'],
-                            ['mag', 'colour', 'stretch', 'third_var',
-                             'dthird_var', 'cov_mag_stretch',
-                             'cov_mag_colour', 'cov_stretch_colour']):
+                        [
+                            "mb",
+                            "color",
+                            "x1",
+                            "3rdvar",
+                            "d3rdvar",
+                            "cov_m_s",
+                            "cov_m_c",
+                            "cov_s_c",
+                        ],
+                        [
+                            "mag",
+                            "colour",
+                            "stretch",
+                            "third_var",
+                            "dthird_var",
+                            "cov_mag_stretch",
+                            "cov_mag_colour",
+                            "cov_stretch_colour",
+                        ],
+                    ):
                         if rename in cols:
                             cols[cols.index(rename)] = new
 
@@ -80,22 +105,23 @@ class SneLikelihoodFromFile(object):
                     for col in cols:
                         setattr(self, col, zeros.copy())
                 elif line.strip():
-                    if cols is None: raise ImportError('Data file must have comment header')
+                    if cols is None:
+                        raise ImportError("Data file must have comment header")
                     vals = line.split()
                     for i, (col, val) in enumerate(zip(cols, vals)):
-                        if col == 'name':
+                        if col == "name":
                             self.names.append(val)
                         else:
                             getattr(self, col)[ix] = np.float64(val)
                     ix += 1
         # Check whether required instances are read in
-        assert hasattr(self, 'dz')
+        assert hasattr(self, "dz")
         # TODO: make read-in such that the arguments required are explicitly matched ('zcmb', 'zhel', 'dz', 'mag', 'dmb')
         # spectroscopic redshift error. ATTENTION! This value =0 for binned data. In this code the value is not used.
         # Cobaya also does not use it!
-        self.z_var = self.dz ** 2
+        self.z_var = self.dz**2
         # variance in the bolometric magnitude distribution of the same for the redshift and type of the SNe
-        self.mag_var = self.dmb ** 2
+        self.mag_var = self.dmb**2
 
         self.nsn = ix
         self._cov = read_covariance_matrix(self._cov_file, self.nsn)
@@ -103,28 +129,36 @@ class SneLikelihoodFromFile(object):
         # jla_prep
         zfacsq = 25.0 / np.log(10.0) ** 2
         # adding peculiar redshift uncertainties to be added to the diagonal variance elements of the covariance matrix
-        self.diag_uncorr_errors = self.mag_var + zfacsq * self._pec_z ** 2 * (
-                (1.0 + self.zcmb) / (self.zcmb * (1 + 0.5 * self.zcmb))) ** 2
+        self.diag_uncorr_errors = (
+            self.mag_var
+            + zfacsq
+            * self._pec_z**2
+            * ((1.0 + self.zcmb) / (self.zcmb * (1 + 0.5 * self.zcmb))) ** 2
+        )
 
         self._inv_cov = self._inverse_covariance_matrix()
 
     def _inverse_covariance_matrix(self):
-        """
-        inverse error covariance matrix. Combines redshift uncertainties (to first order) and magnitude uncertainties
+        """Inverse error covariance matrix. Combines redshift uncertainties (to first
+        order) and magnitude uncertainties.
 
         :return: inverse covariance matrix (2d numpy array)
         """
         # here is the option for adding an additional covariance matrix term of the calibration and/or systematic
         # errors in the evolution of the Sne population
         cov = self._cov
-        cov_diag = cov.diagonal()  # if invcovmat is a matrix, then this is invcovmat.diagonal()
+        cov_diag = (
+            cov.diagonal()
+        )  # if invcovmat is a matrix, then this is invcovmat.diagonal()
 
         delta = self.diag_uncorr_errors
         np.fill_diagonal(cov, cov_diag + delta)
         invcov = np.linalg.inv(cov)
         return invcov
 
-    def log_likelihood_lum_dist(self, lum_dists, estimated_scriptm=None, sigma_m_z=None):
+    def log_likelihood_lum_dist(
+        self, lum_dists, estimated_scriptm=None, sigma_m_z=None
+    ):
         """
 
         :param lum_dists: numpy array of luminosity distances to the measured supernovae bins
@@ -150,12 +184,11 @@ class SneLikelihoodFromFile(object):
         amarg_E = np.sum(invcovmat)
         chi2 = amarg_A + np.log(amarg_E / _twopi)  # - amarg_B ** 2 / amarg_E
 
-        return - chi2 / 2
+        return -chi2 / 2
 
 
 def read_covariance_matrix(filename, nsn):
-    """
-    reads in covariance matrix file and returns it as a numpy matrix
+    """Reads in covariance matrix file and returns it as a numpy matrix.
 
     :param filename: string, absolute path of covariance matrix file
     :param nsn: number of supernovae (or bins)

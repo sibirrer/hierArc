@@ -2,12 +2,21 @@ import numpy as np
 
 
 class LensParam(object):
-    """
-    manages the lens model covariant parameters
-    """
-    def __init__(self, lambda_mst_sampling=False, lambda_mst_distribution='NONE', kappa_ext_sampling=False,
-                 kappa_ext_distribution='NONE', lambda_ifu_sampling=False, lambda_ifu_distribution='NONE',
-                 alpha_lambda_sampling=False, beta_lambda_sampling=False, kwargs_fixed=None, log_scatter=False):
+    """Manages the lens model covariant parameters."""
+
+    def __init__(
+        self,
+        lambda_mst_sampling=False,
+        lambda_mst_distribution="NONE",
+        kappa_ext_sampling=False,
+        kappa_ext_distribution="NONE",
+        lambda_ifu_sampling=False,
+        lambda_ifu_distribution="NONE",
+        alpha_lambda_sampling=False,
+        beta_lambda_sampling=False,
+        kwargs_fixed=None,
+        log_scatter=False,
+    ):
         """
 
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
@@ -45,59 +54,59 @@ class LensParam(object):
         """
         list = []
         if self._lambda_mst_sampling is True:
-            if 'lambda_mst' not in self._kwargs_fixed:
+            if "lambda_mst" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\overline{\lambda}_{\rm int}$')
+                    list.append(r"$\overline{\lambda}_{\rm int}$")
                 else:
-                    list.append('lambda_mst')
-            if self._lambda_mst_distribution == 'GAUSSIAN':
-                if 'lambda_mst_sigma' not in self._kwargs_fixed:
+                    list.append("lambda_mst")
+            if self._lambda_mst_distribution == "GAUSSIAN":
+                if "lambda_mst_sigma" not in self._kwargs_fixed:
                     if latex_style is True:
                         if self._log_scatter is True:
-                            list.append(r'$\log_{10}\sigma(\lambda_{\rm int})$')
+                            list.append(r"$\log_{10}\sigma(\lambda_{\rm int})$")
                         else:
-                            list.append(r'$\sigma(\lambda_{\rm int})$')
+                            list.append(r"$\sigma(\lambda_{\rm int})$")
                     else:
-                        list.append('lambda_mst_sigma')
+                        list.append("lambda_mst_sigma")
         if self._lambda_ifu_sampling is True:
-            if 'lambda_ifu' not in self._kwargs_fixed:
+            if "lambda_ifu" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\lambda_{\rm ifu}$')
+                    list.append(r"$\lambda_{\rm ifu}$")
                 else:
-                    list.append('lambda_ifu')
-            if self._lambda_ifu_distribution == 'GAUSSIAN':
-                if 'lambda_ifu_sigma' not in self._kwargs_fixed:
+                    list.append("lambda_ifu")
+            if self._lambda_ifu_distribution == "GAUSSIAN":
+                if "lambda_ifu_sigma" not in self._kwargs_fixed:
                     if latex_style is True:
                         if self._log_scatter is True:
-                            list.append(r'$\log_{10}\sigma(\lambda_{\rm ifu})$')
+                            list.append(r"$\log_{10}\sigma(\lambda_{\rm ifu})$")
                         else:
-                            list.append(r'$\sigma(\lambda_{\rm ifu})$')
+                            list.append(r"$\sigma(\lambda_{\rm ifu})$")
                     else:
-                        list.append('lambda_ifu_sigma')
+                        list.append("lambda_ifu_sigma")
         if self._kappa_ext_sampling is True:
-            if 'kappa_ext' not in self._kwargs_fixed:
+            if "kappa_ext" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\overline{\kappa}_{\rm ext}$')
+                    list.append(r"$\overline{\kappa}_{\rm ext}$")
                 else:
-                    list.append('kappa_ext')
-            if self._kappa_ext_distribution == 'GAUSSIAN':
-                if 'kappa_ext_sigma' not in self._kwargs_fixed:
+                    list.append("kappa_ext")
+            if self._kappa_ext_distribution == "GAUSSIAN":
+                if "kappa_ext_sigma" not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r'$\sigma(\kappa_{\rm ext})$')
+                        list.append(r"$\sigma(\kappa_{\rm ext})$")
                     else:
-                        list.append('kappa_ext_sigma')
+                        list.append("kappa_ext_sigma")
         if self._alpha_lambda_sampling is True:
-            if 'alpha_lambda' not in self._kwargs_fixed:
+            if "alpha_lambda" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\alpha_{\lambda}$')
+                    list.append(r"$\alpha_{\lambda}$")
                 else:
-                    list.append('alpha_lambda')
+                    list.append("alpha_lambda")
         if self._beta_lambda_sampling is True:
-            if 'beta_lambda' not in self._kwargs_fixed:
+            if "beta_lambda" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r'$\beta_{\lambda}$')
+                    list.append(r"$\beta_{\lambda}$")
                 else:
-                    list.append('beta_lambda')
+                    list.append("beta_lambda")
         return list
 
     def args2kwargs(self, args, i=0):
@@ -108,58 +117,58 @@ class LensParam(object):
         """
         kwargs = {}
         if self._lambda_mst_sampling is True:
-            if 'lambda_mst' in self._kwargs_fixed:
-                kwargs['lambda_mst'] = self._kwargs_fixed['lambda_mst']
+            if "lambda_mst" in self._kwargs_fixed:
+                kwargs["lambda_mst"] = self._kwargs_fixed["lambda_mst"]
             else:
-                kwargs['lambda_mst'] = args[i]
+                kwargs["lambda_mst"] = args[i]
                 i += 1
-            if self._lambda_mst_distribution == 'GAUSSIAN':
-                if 'lambda_mst_sigma' in self._kwargs_fixed:
-                    kwargs['lambda_mst_sigma'] = self._kwargs_fixed['lambda_mst_sigma']
+            if self._lambda_mst_distribution == "GAUSSIAN":
+                if "lambda_mst_sigma" in self._kwargs_fixed:
+                    kwargs["lambda_mst_sigma"] = self._kwargs_fixed["lambda_mst_sigma"]
                 else:
                     if self._log_scatter is True:
-                        kwargs['lambda_mst_sigma'] = 10**(args[i])
+                        kwargs["lambda_mst_sigma"] = 10 ** (args[i])
                     else:
-                        kwargs['lambda_mst_sigma'] = args[i]
+                        kwargs["lambda_mst_sigma"] = args[i]
                     i += 1
         if self._lambda_ifu_sampling is True:
-            if 'lambda_ifu' in self._kwargs_fixed:
-                kwargs['lambda_ifu'] = self._kwargs_fixed['lambda_ifu']
+            if "lambda_ifu" in self._kwargs_fixed:
+                kwargs["lambda_ifu"] = self._kwargs_fixed["lambda_ifu"]
             else:
-                kwargs['lambda_ifu'] = args[i]
+                kwargs["lambda_ifu"] = args[i]
                 i += 1
-            if self._lambda_ifu_distribution == 'GAUSSIAN':
-                if 'lambda_ifu_sigma' in self._kwargs_fixed:
-                    kwargs['lambda_ifu_sigma'] = self._kwargs_fixed['lambda_ifu_sigma']
+            if self._lambda_ifu_distribution == "GAUSSIAN":
+                if "lambda_ifu_sigma" in self._kwargs_fixed:
+                    kwargs["lambda_ifu_sigma"] = self._kwargs_fixed["lambda_ifu_sigma"]
                 else:
                     if self._log_scatter is True:
-                        kwargs['lambda_ifu_sigma'] = 10**(args[i])
+                        kwargs["lambda_ifu_sigma"] = 10 ** (args[i])
                     else:
-                        kwargs['lambda_ifu_sigma'] = args[i]
+                        kwargs["lambda_ifu_sigma"] = args[i]
                     i += 1
         if self._kappa_ext_sampling is True:
-            if 'kappa_ext' in self._kwargs_fixed:
-                kwargs['kappa_ext'] = self._kwargs_fixed['kappa_ext']
+            if "kappa_ext" in self._kwargs_fixed:
+                kwargs["kappa_ext"] = self._kwargs_fixed["kappa_ext"]
             else:
-                kwargs['kappa_ext'] = args[i]
+                kwargs["kappa_ext"] = args[i]
                 i += 1
-            if self._kappa_ext_distribution == 'GAUSSIAN':
-                if 'kappa_ext_sigma' in self._kwargs_fixed:
-                    kwargs['kappa_ext_sigma'] = self._kwargs_fixed['kappa_ext_sigma']
+            if self._kappa_ext_distribution == "GAUSSIAN":
+                if "kappa_ext_sigma" in self._kwargs_fixed:
+                    kwargs["kappa_ext_sigma"] = self._kwargs_fixed["kappa_ext_sigma"]
                 else:
-                    kwargs['kappa_ext_sigma'] = args[i]
+                    kwargs["kappa_ext_sigma"] = args[i]
                     i += 1
         if self._alpha_lambda_sampling is True:
-            if 'alpha_lambda' in self._kwargs_fixed:
-                kwargs['alpha_lambda'] = self._kwargs_fixed['alpha_lambda']
+            if "alpha_lambda" in self._kwargs_fixed:
+                kwargs["alpha_lambda"] = self._kwargs_fixed["alpha_lambda"]
             else:
-                kwargs['alpha_lambda'] = args[i]
+                kwargs["alpha_lambda"] = args[i]
                 i += 1
         if self._beta_lambda_sampling is True:
-            if 'beta_lambda' in self._kwargs_fixed:
-                kwargs['beta_lambda'] = self._kwargs_fixed['beta_lambda']
+            if "beta_lambda" in self._kwargs_fixed:
+                kwargs["beta_lambda"] = self._kwargs_fixed["beta_lambda"]
             else:
-                kwargs['beta_lambda'] = args[i]
+                kwargs["beta_lambda"] = args[i]
                 i += 1
         return kwargs, i
 
@@ -171,33 +180,33 @@ class LensParam(object):
         """
         args = []
         if self._lambda_mst_sampling is True:
-            if 'lambda_mst' not in self._kwargs_fixed:
-                args.append(kwargs['lambda_mst'])
-            if self._lambda_mst_distribution == 'GAUSSIAN':
-                if 'lambda_mst_sigma' not in self._kwargs_fixed:
+            if "lambda_mst" not in self._kwargs_fixed:
+                args.append(kwargs["lambda_mst"])
+            if self._lambda_mst_distribution == "GAUSSIAN":
+                if "lambda_mst_sigma" not in self._kwargs_fixed:
                     if self._log_scatter is True:
-                        args.append(np.log10(kwargs['lambda_mst_sigma']))
+                        args.append(np.log10(kwargs["lambda_mst_sigma"]))
                     else:
-                        args.append(kwargs['lambda_mst_sigma'])
+                        args.append(kwargs["lambda_mst_sigma"])
         if self._lambda_ifu_sampling is True:
-            if 'lambda_ifu' not in self._kwargs_fixed:
-                args.append(kwargs['lambda_ifu'])
-            if self._lambda_ifu_distribution == 'GAUSSIAN':
-                if 'lambda_ifu_sigma' not in self._kwargs_fixed:
+            if "lambda_ifu" not in self._kwargs_fixed:
+                args.append(kwargs["lambda_ifu"])
+            if self._lambda_ifu_distribution == "GAUSSIAN":
+                if "lambda_ifu_sigma" not in self._kwargs_fixed:
                     if self._log_scatter is True:
-                        args.append(np.log10(kwargs['lambda_ifu_sigma']))
+                        args.append(np.log10(kwargs["lambda_ifu_sigma"]))
                     else:
-                        args.append(kwargs['lambda_ifu_sigma'])
+                        args.append(kwargs["lambda_ifu_sigma"])
         if self._kappa_ext_sampling is True:
-            if 'kappa_ext' not in self._kwargs_fixed:
-                args.append(kwargs['kappa_ext'])
-            if self._kappa_ext_distribution == 'GAUSSIAN':
-                if 'kappa_ext_sigma' not in self._kwargs_fixed:
-                    args.append(kwargs['kappa_ext_sigma'])
+            if "kappa_ext" not in self._kwargs_fixed:
+                args.append(kwargs["kappa_ext"])
+            if self._kappa_ext_distribution == "GAUSSIAN":
+                if "kappa_ext_sigma" not in self._kwargs_fixed:
+                    args.append(kwargs["kappa_ext_sigma"])
         if self._alpha_lambda_sampling is True:
-            if 'alpha_lambda' not in self._kwargs_fixed:
-                args.append(kwargs['alpha_lambda'])
+            if "alpha_lambda" not in self._kwargs_fixed:
+                args.append(kwargs["alpha_lambda"])
         if self._beta_lambda_sampling is True:
-            if 'beta_lambda' not in self._kwargs_fixed:
-                args.append(kwargs['beta_lambda'])
+            if "beta_lambda" not in self._kwargs_fixed:
+                args.append(kwargs["beta_lambda"])
         return args

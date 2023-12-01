@@ -36,6 +36,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         """
         self._z_lens, self._z_source = z_lens, z_source
+
         if lens_model_list is None:
             kwargs_model = {'lens_model_list': ['SPP'], 'lens_light_model_list': lens_light_model_list}
         else:
@@ -47,11 +48,20 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
                                multi_observations=multi_observations)
 
         analytic_kinematics = False
-        self.kinematics_modeling_settings(anisotropy_model, kwargs_numerics_galkin,
-                                          analytic_kinematics=analytic_kinematics,
-                                          Hernquist_approx=hernquist_approx, MGE_light=MGE_light, MGE_mass=False,
-                                          kwargs_mge_light=kwargs_mge_light, sampling_number=sampling_number,
-                                          num_psf_sampling=num_psf_sampling, num_kin_sampling=num_kin_sampling)
+        self.kinematics_modeling_settings(
+            anisotropy_model,
+            kwargs_numerics_galkin,
+            analytic_kinematics=analytic_kinematics,
+            Hernquist_approx=hernquist_approx,
+            MGE_light=MGE_light,
+            MGE_mass=False,
+            kwargs_mge_light=kwargs_mge_light,
+            sampling_number=sampling_number,
+            num_psf_sampling=num_psf_sampling,
+            num_kin_sampling=num_kin_sampling,
+        )
         self._kwargs_lens_light = kwargs_lens_light
-        ImageModelPosterior.__init__(self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error)
+        ImageModelPosterior.__init__(
+            self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error
+        )
         AnisotropyConfig.__init__(self, anisotropy_model, r_eff)

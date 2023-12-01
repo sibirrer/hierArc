@@ -2,10 +2,12 @@ from hierarc.Likelihood.LensLikelihood.ddt_gauss_likelihood import DdtGaussianLi
 
 
 class DdtDdGaussian(object):
-    """
-    class for joint kinematics and time delay likelihood assuming independent Gaussian likelihoods in Ddt and Dd.
+    """Class for joint kinematics and time delay likelihood assuming independent
+    Gaussian likelihoods in Ddt and Dd.
+
     Attention: Gaussian errors in the velocity dispersion do not translate into Gaussian uncertainties in Dd.
     """
+
     def __init__(self, z_lens, z_source, ddt_mean, ddt_sigma, dd_mean, dd_sigma):
         """
 
@@ -17,8 +19,10 @@ class DdtDdGaussian(object):
         :param dd_sigma: 1-sigma uncertainty in the Dd distance
         """
         self._dd_mean = dd_mean
-        self._dd_sigma2 = dd_sigma ** 2
-        self._tdLikelihood = DdtGaussianLikelihood(z_lens, z_source, ddt_mean=ddt_mean, ddt_sigma=ddt_sigma)
+        self._dd_sigma2 = dd_sigma**2
+        self._tdLikelihood = DdtGaussianLikelihood(
+            z_lens, z_source, ddt_mean=ddt_mean, ddt_sigma=ddt_sigma
+        )
         self.num_data = 2
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
@@ -35,7 +39,10 @@ class DdtDdGaussian(object):
             dd_ = dd * aniso_scaling[0]
         else:
             dd_ = dd
-        lnlikelihood = self._tdLikelihood.log_likelihood(ddt, dd_) - (dd_ - self._dd_mean) ** 2 / self._dd_sigma2 / 2
+        lnlikelihood = (
+            self._tdLikelihood.log_likelihood(ddt, dd_)
+            - (dd_ - self._dd_mean) ** 2 / self._dd_sigma2 / 2
+        )
         return lnlikelihood
 
     def ddt_measurement(self):

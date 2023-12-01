@@ -7,7 +7,6 @@ from hierarc.Util import likelihood_util
 
 
 class TestLikelihoodUtil(object):
-
     def setup(self):
         pass
 
@@ -16,7 +15,9 @@ class TestLikelihoodUtil(object):
         draw = likelihood_util.get_truncated_normal(mean=0, sd=1, low=0, upp=10, size=1)
         npt.assert_almost_equal(draw, 0.48812700907868467, decimal=3)
 
-        draw = likelihood_util.get_truncated_normal(mean=0, sd=1, low=0, upp=10, size=10)
+        draw = likelihood_util.get_truncated_normal(
+            mean=0, sd=1, low=0, upp=10, size=10
+        )
         assert len(draw) == 10
 
     def test_log_likelihood_cov(self):
@@ -42,5 +43,5 @@ class TestLikelihoodUtil(object):
         npt.assert_almost_equal(logl, -1, decimal=1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

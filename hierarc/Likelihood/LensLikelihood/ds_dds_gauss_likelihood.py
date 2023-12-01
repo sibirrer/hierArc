@@ -1,10 +1,11 @@
-
 class DsDdsGaussianLikelihood(object):
-    """
-    class to handle cosmographic likelihood coming from modeling lenses with imaging and kinematic data but no time delays.
+    """Class to handle cosmographic likelihood coming from modeling lenses with imaging
+    and kinematic data but no time delays.
+
     Thus Ddt is not constrained but the kinematics can constrain Ds/Dds. The likelihood in Ds/Dds is assumed Gaussian.
     Attention: Gaussian uncertainties in velocity dispersion do not translate into Gaussian uncertainties in Ds/Dds.
     """
+
     def __init__(self, z_lens, z_source, ds_dds_mean, ds_dds_sigma):
         """
 
@@ -15,7 +16,7 @@ class DsDdsGaussianLikelihood(object):
         """
         self._z_lens = z_lens
         self._ds_dds_mean = ds_dds_mean
-        self._ds_dds_sigma2 = ds_dds_sigma ** 2
+        self._ds_dds_sigma2 = ds_dds_sigma**2
         self.num_data = 1
 
     def log_likelihood(self, ddt, dd, aniso_scaling=None):
@@ -35,4 +36,4 @@ class DsDdsGaussianLikelihood(object):
         else:
             scaling = 1
         ds_dds_ = ds_dds / scaling
-        return - (ds_dds_ - self._ds_dds_mean) ** 2 / self._ds_dds_sigma2 / 2
+        return -((ds_dds_ - self._ds_dds_mean) ** 2) / self._ds_dds_sigma2 / 2

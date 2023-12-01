@@ -51,6 +51,7 @@ class KinConstraints(BaseLensConfig):
 
         self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
+
         BaseLensConfig.__init__(self, z_lens, z_source, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error,
                                 kwargs_aperture, kwargs_seeing, kwargs_numerics_galkin,
                                 anisotropy_model,
@@ -62,38 +63,47 @@ class KinConstraints(BaseLensConfig):
                                 num_kin_sampling=num_kin_sampling, multi_observations=multi_observations)
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):
-        """
-        one simple sampling realization of the dimensionless kinematics of the model
+        """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
-        :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :param no_error: bool, if True, does not render from the uncertainty but uses
+            the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(no_error=no_error)
-        kwargs_lens = [{'theta_E': theta_E_draw, 'gamma': gamma_draw, 'center_x': 0, 'center_y': 0}]
+        theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(
+            no_error=no_error
+        )
+        kwargs_lens = [
+            {"theta_E": theta_E_draw, "gamma": gamma_draw, "center_x": 0, "center_y": 0}
+        ]
         if self._kwargs_lens_light is None:
-            kwargs_light = [{'Rs': r_eff_draw * 0.551, 'amp': 1.}]
+            kwargs_light = [{"Rs": r_eff_draw * 0.551, "amp": 1.0}]
         else:
             kwargs_light = copy.deepcopy(self._kwargs_lens_light)
             for kwargs in kwargs_light:
-                if 'Rs' in kwargs:
-                    kwargs['Rs'] *= delta_r_eff
-                if 'R_sersic' in kwargs:
-                    kwargs['R_sersic'] *= delta_r_eff
-        j_kin = self.velocity_dispersion_map_dimension_less(kwargs_lens=kwargs_lens, kwargs_lens_light=kwargs_light,
-                                                            kwargs_anisotropy=kwargs_anisotropy, r_eff=r_eff_draw,
-                                                            theta_E=theta_E_draw, gamma=gamma_draw)
+                if "Rs" in kwargs:
+                    kwargs["Rs"] *= delta_r_eff
+                if "R_sersic" in kwargs:
+                    kwargs["R_sersic"] *= delta_r_eff
+        j_kin = self.velocity_dispersion_map_dimension_less(
+            kwargs_lens=kwargs_lens,
+            kwargs_lens_light=kwargs_light,
+            kwargs_anisotropy=kwargs_anisotropy,
+            r_eff=r_eff_draw,
+            theta_E=theta_E_draw,
+            gamma=gamma_draw,
+        )
         return j_kin
 
     def hierarchy_configuration(self, num_sample_model=20):
-        """
-        routine to configure the likelihood to be used in the hierarchical sampling. In particular, a default
-        configuration is set to compute the Gaussian approximation of Ds/Dds by sampling the posterior and the estimate
-        of the variance of the sample. The anisotropy scaling is then performed. Different anisotropy models are
-        supported.
+        """Routine to configure the likelihood to be used in the hierarchical sampling.
+        In particular, a default configuration is set to compute the Gaussian
+        approximation of Ds/Dds by sampling the posterior and the estimate of the
+        variance of the sample. The anisotropy scaling is then performed. Different
+        anisotropy models are supported.
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the
-         dimensionless kinematic component J()
+        :param num_sample_model: number of samples drawn from the lens and light model
+            posterior to compute the dimensionless kinematic component J()
         :return: keyword arguments
         """
 
@@ -101,11 +111,18 @@ class KinConstraints(BaseLensConfig):
         ani_scaling_array_list = self.anisotropy_scaling()
         error_cov_measurement = self.error_cov_measurement
         # configuration keyword arguments for the hierarchical sampling
-        kwargs_likelihood = {'z_lens': self._z_lens, 'z_source': self._z_source, 'likelihood_type': 'IFUKinCov',
-                             'sigma_v_measurement': self._sigma_v_measured, 'anisotropy_model': self._anisotropy_model,
-                             'j_model': j_model_list,  'error_cov_measurement': error_cov_measurement,
-                             'error_cov_j_sqrt': error_cov_j_sqrt, 'ani_param_array': self.ani_param_array,
-                             'ani_scaling_array_list': ani_scaling_array_list}
+        kwargs_likelihood = {
+            "z_lens": self._z_lens,
+            "z_source": self._z_source,
+            "likelihood_type": "IFUKinCov",
+            "sigma_v_measurement": self._sigma_v_measured,
+            "anisotropy_model": self._anisotropy_model,
+            "j_model": j_model_list,
+            "error_cov_measurement": error_cov_measurement,
+            "error_cov_j_sqrt": error_cov_j_sqrt,
+            "ani_param_array": self.ani_param_array,
+            "ani_scaling_array_list": ani_scaling_array_list,
+        }
         return kwargs_likelihood
 
     def model_marginalization(self, num_sample_model=20):
@@ -116,7 +133,9 @@ class KinConstraints(BaseLensConfig):
         :return: J() as array for each measurement prediction, covariance matrix in sqrt(J)
         """
         num_data = len(self._sigma_v_measured)
-        j_kin_matrix = np.zeros((num_sample_model, num_data))  # matrix that contains the sampled J() distribution
+        j_kin_matrix = np.zeros(
+            (num_sample_model, num_data)
+        )  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
             j_kin = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=False)
             j_kin_matrix[i, :] = j_kin
@@ -127,20 +146,30 @@ class KinConstraints(BaseLensConfig):
 
     @property
     def error_cov_measurement(self):
-        """
-        error covariance matrix of the measured velocity dispersion data points
-        This is either calculated from the diagonal 'sigma_v_error_independent' and the off-diagonal
-        'sigma_v_error_covariant' terms, or directly from the 'sigma_v_error_cov_matrix' if provided.
+        """Error covariance matrix of the measured velocity dispersion data points This
+        is either calculated from the diagonal 'sigma_v_error_independent' and the off-
+        diagonal 'sigma_v_error_covariant' terms, or directly from the
+        'sigma_v_error_cov_matrix' if provided.
 
-        :return: nxn matrix of the error covariances in the velocity dispersion measurements (km/s)^2
+        :return: nxn matrix of the error covariances in the velocity dispersion
+            measurements (km/s)^2
         """
         if self._sigma_v_error_cov_matrix is None:
-            if self._sigma_v_error_independent is None or self._sigma_v_error_covariant is None:
-                raise ValueError('sigma_v_error_independent and sigma_v_error_covariant need to be provided as arrays '
-                                 'of the same length as sigma_v_measurement.')
-            error_covariance_array = np.ones_like(self._sigma_v_error_independent) * self._sigma_v_error_covariant
-            error_cov_measurement = np.outer(error_covariance_array, error_covariance_array) + np.diag(
-                self._sigma_v_error_independent ** 2)
+            if (
+                self._sigma_v_error_independent is None
+                or self._sigma_v_error_covariant is None
+            ):
+                raise ValueError(
+                    "sigma_v_error_independent and sigma_v_error_covariant need to be provided as arrays "
+                    "of the same length as sigma_v_measurement."
+                )
+            error_covariance_array = (
+                np.ones_like(self._sigma_v_error_independent)
+                * self._sigma_v_error_covariant
+            )
+            error_cov_measurement = np.outer(
+                error_covariance_array, error_covariance_array
+            ) + np.diag(self._sigma_v_error_independent**2)
             return error_cov_measurement
         else:
             return self._sigma_v_error_cov_matrix
@@ -154,24 +183,30 @@ class KinConstraints(BaseLensConfig):
         return self._anisotropy_scaling_relative(j_ani_0)
 
     def _anisotropy_scaling_relative(self, j_ani_0):
-        """
-        anisotropy scaling relative to a default J prediction
+        """Anisotropy scaling relative to a default J prediction.
 
         :param j_ani_0: default J() prediction for default anisotropy
-        :return: list of arrays (for the number of measurements) according to anisotropy scaling
+        :return: list of arrays (for the number of measurements) according to anisotropy
+            scaling
         """
         num_data = len(self._sigma_v_measured)
 
-        if self._anisotropy_model == 'GOM':
-            ani_scaling_array_list = [np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1]))) for _ in
-                                      range(num_data)]
+        if self._anisotropy_model == "GOM":
+            ani_scaling_array_list = [
+                np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1])))
+                for _ in range(num_data)
+            ]
             for i, a_ani in enumerate(self.ani_param_array[0]):
                 for j, beta_inf in enumerate(self.ani_param_array[1]):
-                    kwargs_anisotropy = self.anisotropy_kwargs(a_ani=a_ani, beta_inf=beta_inf)
+                    kwargs_anisotropy = self.anisotropy_kwargs(
+                        a_ani=a_ani, beta_inf=beta_inf
+                    )
                     j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                     for k, j_kin in enumerate(j_kin_ani):
-                        ani_scaling_array_list[k][i, j] = j_kin / j_ani_0[k]  # perhaps change the order
-        elif self._anisotropy_model in ['OM', 'const']:
+                        ani_scaling_array_list[k][i, j] = (
+                            j_kin / j_ani_0[k]
+                        )  # perhaps change the order
+        elif self._anisotropy_model in ["OM", "const"]:
             ani_scaling_array_list = [[] for _ in range(num_data)]
             for a_ani in self.ani_param_array:
                 kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
@@ -179,5 +214,5 @@ class KinConstraints(BaseLensConfig):
                 for i, j_kin in enumerate(j_kin_ani):
                     ani_scaling_array_list[i].append(j_kin / j_ani_0[i])
         else:
-            raise ValueError('anisotropy model %s not valid.' % self._anisotropy_model)
+            raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
         return ani_scaling_array_list

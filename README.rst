@@ -20,6 +20,15 @@ hierArc
         :target: http://www.astropy.org
         :alt: Powered by Astropy Badge
 
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+
+.. image:: https://img.shields.io/badge/%20formatter-docformatter-fedcba.svg
+    :target: https://github.com/PyCQA/docformatter
+
+.. image:: https://img.shields.io/badge/%20style-sphinx-0a507a.svg
+    :target: https://www.sphinx-doc.org/en/master/usage/index.html
+
 
 
 Hierarchical analysis of strong lensing systems to infer lens properties and cosmological parameters simultaneously.
