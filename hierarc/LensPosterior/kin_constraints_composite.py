@@ -141,8 +141,12 @@ class KinConstraintsComposite(KinConstraints):
             the mean values instead
         """
         if no_error is True:
-            return (np.mean(self._rho_s_array), np.mean(self._r_scale_array),
-                    self._r_eff, 1)
+            return (
+                np.mean(self._rho_s_array),
+                np.mean(self._r_scale_array),
+                self._r_eff,
+                1,
+            )
 
         kappa_s_draw = np.random.choice(self._kappa_s_array)
         r_scale_angle_draw = np.random.choice(self._r_scale_angle_array)
