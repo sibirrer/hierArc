@@ -151,28 +151,8 @@ def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
 
     :param datapath: (str). Path to the Planck chain
     :param kw: (str). Planck base cosmology keyword. For example, "base" or
-        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-    :param datapath: (str). Path to the Planck chain :param kw: (str). Planck base
-        cosmology keyword. For example, "base" or "base_omegak". See
-        https://wiki.cosmos.esa.int/planck-legacy-
-    :param datapath: (str). Path to the Planck chain :param kw: (str). Planck base
-        cosmology keyword. For example, "base" or "base_omegak". See
+        "base_omegak". See
         https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-    :param datapath: (str). Path to the Planck chain
-    :param kw: (str). Planck base cosmology keyword. For example, "base" or
-        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-
-    :param datapath: (str). Path to the Planck chain
-    :param kw: (str). Planck base cosmology keyword. For example, "base" or
-        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-    :param datapath: (str). Path to the Planck chain
-    :param kw: (str). Planck base cosmology keyword. For example, "base" or
-        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-
-    :param datapath: (str). Path to the Planck chain
-    :param kw: (str). Planck base cosmology keyword. For example, "base" or
-        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-    :param datapath: (str). Path to the Planck chain
-    :param kw: (str). Planck base cosmology keyword. For example, "base" or
-        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
     :param probe: (str). Planck probe combination. For example,
         "plikHM_TTTEEE_lowl_lowE" for default Planck results
     :param params: (list). List of cosmological parameters. ["h0", "om"] for FLCDM.

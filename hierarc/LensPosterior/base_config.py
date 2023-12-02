@@ -22,6 +22,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         kwargs_seeing,
         kwargs_numerics_galkin,
         anisotropy_model,
+        lens_model_list=None,
         kwargs_lens_light=None,
         lens_light_model_list=["HERNQUIST"],
         MGE_light=False,
@@ -52,6 +53,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
+        :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
@@ -59,10 +61,17 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
             light profile
         """
         self._z_lens, self._z_source = z_lens, z_source
-        kwargs_model = {
-            "lens_model_list": ["SPP"],
-            "lens_light_model_list": lens_light_model_list,
-        }
+
+        if lens_model_list is None:
+            kwargs_model = {
+                "lens_model_list": ["SPP"],
+                "lens_light_model_list": lens_light_model_list,
+            }
+        else:
+            kwargs_model = {
+                "lens_model_list": lens_model_list,
+                "lens_light_model_list": lens_light_model_list,
+            }
         TDCosmography.__init__(
             self,
             z_lens,
