@@ -35,6 +35,7 @@ class KinConstraints(BaseLensConfig):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        cosmo_fiducial=None
     ):
         """
 
@@ -74,6 +75,8 @@ class KinConstraints(BaseLensConfig):
             light profile
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
+        :param cosmo_fiducial: astropy.cosmology instance, if None,
+            uses astropy's default
         """
         self._sigma_v_measured = np.array(sigma_v_measured)
         self._sigma_v_error_independent = np.array(sigma_v_error_independent)
@@ -107,6 +110,7 @@ class KinConstraints(BaseLensConfig):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
+            cosmo_fiducial=cosmo_fiducial
         )
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):

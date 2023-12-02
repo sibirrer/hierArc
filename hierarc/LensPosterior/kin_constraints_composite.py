@@ -2,6 +2,7 @@ import copy
 
 import numpy as np
 from hierarc.LensPosterior.kin_constraints import KinConstraints
+from lenstronomy.Util import constants as const
 
 
 class KinConstraintsComposite(KinConstraints):
@@ -11,8 +12,8 @@ class KinConstraintsComposite(KinConstraints):
         z_source,
         gamma_in_array,
         m2l_array,
+        rho_s_array,
         r_scale_array,
-        m200_array,
         theta_E,
         theta_E_error,
         gamma,
@@ -45,8 +46,8 @@ class KinConstraintsComposite(KinConstraints):
         :param z_source: source redshift
         :param gamma_in_array: array of power-law slopes of the mass model
         :param m2l_array: array of mass-to-light ratios of the stellar component
+        :param rho_s_array: array of halo mass normalizations in M_sun / Mpc^3
         :param r_scale_array: array of halo scale radii in arc seconds
-        :param m200_array: array of halo masses in M_sun
         :param theta_E: Einstein radius (in arc seconds)
         :param theta_E_error: 1-sigma error on Einstein radius
         :param gamma: power-law slope (2 = isothermal) estimated from imaging data
@@ -82,8 +83,11 @@ class KinConstraintsComposite(KinConstraints):
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
         """
-        self._m200_array = m200_array
+        self._rho_s_array = rho_s_array
         self._r_scale_array = r_scale_array
+        self._kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
+            rho_s_array, r_scale_array
+        )
         self.gamma_in_array = gamma_in_array
         self.m2l_array = m2l_array
 
@@ -118,14 +122,38 @@ class KinConstraintsComposite(KinConstraints):
 
         self._kwargs_lens_stars = kwargs_lens_stars
 
-    def get_kappa_s(self, m200, r_scale):
+    def get_kappa_s_r_s_angle(self, rho_s, r_scale):
         """Computes the surface mass density of the NFW halo at the scale radius.
 
-        :param m200: halo mass in M_sun
+        :param rho_s: halo mass normalization in M_sun / Mpc^3
         :param r_scale: halo scale radius in arc seconds
         :return: surface mass density divided by the critical density
         """
-        return m200 * r_scale  # placeholder, To-do
+        r_s_angle = r_scale / self._lens_cosmo.dd / const.arcsec  # Rs in arcsec
+        kappa_s = rho_s * r_scale / self._lens_cosmo.sigma_crit
+
+        return kappa_s, r_s_angle
+
+    def draw_lens(self, no_error=False):
+        """Draws a lens model from the posterior.
+
+        :param no_error: bool, if True, does not render from the uncertainty but uses
+            the mean values instead
+        """
+        if no_error is True:
+            return (np.mean(self._rho_s_array), np.mean(self._r_scale_array),
+                    self._r_eff, 1)
+
+        kappa_s_draw = np.random.choice(self._kappa_s_array)
+        r_scale_angle_draw = np.random.choice(self._r_scale_angle_array)
+
+        # we make sure no negative r_eff are being sampled
+        delta_r_eff = np.maximum(
+            np.random.normal(loc=1, scale=self._r_eff_error / self._r_eff), 0.001
+        )
+        r_eff_draw = delta_r_eff * self._r_eff
+
+        return kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
 
     def j_kin_draw_composite(self, kwargs_anisotropy, gamma_in, m2l, no_error=False):
         """One simple sampling realization of the dimensionless kinematics of the model.
@@ -137,10 +165,9 @@ class KinConstraintsComposite(KinConstraints):
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        m200_draw, r_scale_draw, r_eff_draw, delta_r_eff = self.draw_lens(
+        kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = self.draw_lens(
             no_error=no_error
         )
-        kappa_s = self.get_kappa_s(m200_draw, r_scale_draw)
 
         kwargs_lens_stars = copy.deepcopy(self._kwargs_lens_stars)
         for kwargs in kwargs_lens_stars:
@@ -165,9 +192,9 @@ class KinConstraintsComposite(KinConstraints):
 
         kwargs_lens = [
             {
-                "Rs": r_scale_draw,
+                "Rs": r_scale_angle_draw,
                 "gamma_in": gamma_in,
-                "kappa_s": kappa_s,
+                "kappa_s": kappa_s_draw,
                 "center_x": 0,
                 "center_y": 0,
             },

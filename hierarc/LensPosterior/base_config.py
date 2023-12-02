@@ -32,6 +32,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        cosmo_fiducial=None,
     ):
         """
 
@@ -59,6 +60,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
             routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
             light profile
+        :param cosmo_fiducial: astropy.cosmology instance, if None,
+            uses astropy's default cosmology
         """
         self._z_lens, self._z_source = z_lens, z_source
 
@@ -77,7 +80,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
             z_lens,
             z_source,
             kwargs_model,
-            cosmo_fiducial=None,
+            cosmo_fiducial=cosmo_fiducial,
             lens_model_kinematics_bool=None,
             light_model_kinematics_bool=None,
             kwargs_seeing=kwargs_seeing,
