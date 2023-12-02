@@ -42,15 +42,21 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         :param gamma_error: 1-sigma uncertainty on power-law slope
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
-        :param kwargs_aperture: spectroscopic aperture keyword arguments, see lenstronomy.Galkin.aperture for options
-        :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
-        :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
-        :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
-        :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
-         observations
+        :param kwargs_aperture: spectroscopic aperture keyword arguments, see
+        lenstronomy.Galkin.aperture for options
+        :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
+            to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param anisotropy_model: type of stellar anisotropy model. See details in
+            MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param multi_observations: bool, if True, interprets kwargs_aperture and
+            kwargs_seeing as lists of multiple observations
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
-        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
-        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
+        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
+            routine
+        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
+            light profile
         """
         self._z_lens, self._z_source = z_lens, z_source
         kwargs_model = {
