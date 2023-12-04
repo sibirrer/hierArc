@@ -332,7 +332,7 @@ class KinConstraintsComposite(KinConstraints):
                             )
 
                             for m, j_kin in enumerate(j_kin_ani):
-                                ani_scaling_grid_list[m][k, l, i, j] = (
+                                ani_scaling_grid_list[m][i, j, k, l] = (
                                     j_kin / j_ani_0[m]
                                 )
                                 # perhaps change the order
@@ -355,7 +355,7 @@ class KinConstraintsComposite(KinConstraints):
                             kwargs_anisotropy, g_in, m2l, no_error=True
                         )
                         for m, j_kin in enumerate(j_kin_ani):
-                            ani_scaling_grid_list[m][k, l, i] = j_kin / j_ani_0[m]
+                            ani_scaling_grid_list[m][i, k, l] = j_kin / j_ani_0[m]
         else:
             raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
         return ani_scaling_grid_list
