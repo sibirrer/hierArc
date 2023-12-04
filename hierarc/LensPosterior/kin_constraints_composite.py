@@ -45,7 +45,9 @@ class KinConstraintsComposite(KinConstraints):
         :param z_lens: lens redshift
         :param z_source: source redshift
         :param gamma_in_array: array of power-law slopes of the mass model
-        :param m2l_array: array of mass-to-light ratios of the stellar component
+        :param m2l_array: array of mass-to-light ratios of the stellar component,
+            needs to be in the unit/scaling such that m2l * amp in the
+            kwargs_lens_light provides the convergence amplitude of the stars
         :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
         :param r_s_array: array of halo scale radii in arc seconds
         :param theta_E: Einstein radius (in arc seconds)

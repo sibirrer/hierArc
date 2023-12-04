@@ -159,6 +159,3 @@ class ParameterScalingIFU(object):
                 )
             return np.array([a_ani_draw, beta_inf_draw])
         return None
-
-    def ani_scaling(self, arr):
-        return self.param_scaling(arr)
