@@ -320,12 +320,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :return: draw from the distributions
         """
         if self._gamma_in_array is not None and self._m2l_array is not None:
-            gamma_in_draw = np.random.normal(
+            gamma_in_draw, m2l_draw = self.draw_lens_parameters(
                 gamma_in + alpha_gamma_in * self._lambda_scaling_property,
                 gamma_in_sigma,
-            )
-            m2l_draw = np.random.normal(
-                m2l + alpha_m2l * self._lambda_scaling_property, m2l_sigma
+                m2l + alpha_m2l * self._lambda_scaling_property,
+                m2l_sigma
             )
             return gamma_in_draw, m2l_draw
         else:
