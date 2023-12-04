@@ -20,15 +20,21 @@ class Chain(object):
         loglsamples=None,
         rescale=True,
     ):
-        """
+        """For keywords in the `kw` parameter, see
+        https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters
 
-        :param kw: (str). Planck base cosmology keyword. For example, "base" or "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
-        :param probe: (str). Planck probe combination. For example, "plikHM_TTTEEE_lowl_lowE" for default Planck results
+        :param kw: (str). Planck base cosmology keyword. For example, "base" or
+            "base_omegak".
+        :param probe: (str). Planck probe combination. For example,
+            "plikHM_TTTEEE_lowl_lowE" for default Planck results
         :param params: (dictionnary). Dictionnary containing the samples.
         :param default_weights: (numpy array). Default weights associated to the samples.
         :param cosmology: (str). Astropy cosmology
-        :param loglsamples: (numpy array). Corresponding Loglikelihood of the samples (optionnal).
-        :param rescale: (bool). Rescale the chains between 0 and 1 for all parameters. This is absolutely necessary if you want to evaluate a KDE on these chains.
+        :param loglsamples: (numpy array). Corresponding Loglikelihood of the samples
+            (optionnal).
+        :param rescale: (bool). Rescale the chains between 0 and 1 for all
+            parameters. This is absolutely necessary if you want to evaluate a KDE on
+            these chains.
         """
         self.kw = kw
         self.probe = probe
@@ -142,15 +148,12 @@ class Chain(object):
 
 
 def import_Planck_chain(datapath, kw, probe, params, cosmology, rescale=True):
-    """Special function to parse Planck files. Return a Chain object.
+    """Special function to parse Planck files. Return a Chain object. For keywords in
+    the `kw` parameter, see https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters
 
-    :param datapath: (str). Path to the Planck chain :param kw: (str). Planck base
-    cosmology keyword. For example, "base" or "base_omegak". See
-    https://wiki.cosmos.esa.int/planck-legacy-archive/index.php/Cosmological_Parameters.
     :param datapath: (str). Path to the Planck chain
     :param kw: (str). Planck base cosmology keyword. For example, "base" or
-        "base_omegak". See https://wiki.cosmos.esa.int/planck-legacy-
-        archive/index.php/Cosmological_Parameters.
+        "base_omegak".
     :param probe: (str). Planck probe combination. For example,
         "plikHM_TTTEEE_lowl_lowE" for default Planck results
     :param params: (list). List of cosmological parameters. ["h0", "om"] for FLCDM.
