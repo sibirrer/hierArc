@@ -84,6 +84,7 @@ class KinLikelihood(object):
                     "error covariance matrix needs to be positive definite"
                 )
             lnlikelihood -= 1 / 2.0 * (self.num_data * np.log(2 * np.pi) + lndet)
+        print(lnlikelihood)
         return lnlikelihood
 
     def sigma_v_measurement_mean(self, sigma_v_sys_offset=None):

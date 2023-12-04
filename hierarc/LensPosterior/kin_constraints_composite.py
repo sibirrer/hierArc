@@ -312,10 +312,10 @@ class KinConstraintsComposite(KinConstraints):
             ani_scaling_grid_list = [
                 np.zeros(
                     (
-                        len(self.gamma_in_array),
-                        len(self.m2l_array),
                         len(self.ani_param_array[0]),
                         len(self.ani_param_array[1]),
+                        len(self.gamma_in_array),
+                        len(self.m2l_array),
                     )
                 )
                 for _ in range(num_data)
@@ -340,9 +340,9 @@ class KinConstraintsComposite(KinConstraints):
             ani_scaling_grid_list = [
                 np.zeros(
                     (
+                        len(self.ani_param_array),
                         len(self.gamma_in_array),
                         len(self.m2l_array),
-                        len(self.ani_param_array),
                     )
                 )
                 for _ in range(num_data)

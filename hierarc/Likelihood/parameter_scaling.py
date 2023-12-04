@@ -22,10 +22,8 @@ class ParameterScalingSingleAperture(object):
                 self._dim_scaling = len(param_arrays)
             else:
                 self._dim_scaling = 1
-            print(param_arrays, len(param_arrays))
-            print(self._dim_scaling)
+
             if self._dim_scaling == 1:
-                print(param_arrays)
                 self._f_ani = interp1d(param_arrays, scaling_grid, kind="linear")
             elif self._dim_scaling == 2:
                 self._f_ani = interp2d(param_arrays[0], param_arrays[1], scaling_grid.T)
@@ -49,7 +47,7 @@ class ParameterScalingSingleAperture(object):
         elif self._dim_scaling == 2:
             return self._f_ani(param_array[0], param_array[1])[0]
         else:
-            return self._f_ani(param_array)
+            return self._f_ani(param_array)[0]
 
 
 class ParameterScalingIFU(object):
@@ -87,8 +85,12 @@ class ParameterScalingIFU(object):
                 self._dim_scaling = 1
 
             if anisotropy_model in ["OM", "const"]:
-                self._ani_param_min = np.min(param_arrays)
-                self._ani_param_max = np.max(param_arrays)
+                if self._dim_scaling == 1:
+                    self._ani_param_min = np.min(param_arrays)
+                    self._ani_param_max = np.max(param_arrays)
+                else:
+                    self._ani_param_min = np.min(param_arrays[0])
+                    self._ani_param_max = np.max(param_arrays[0])
             elif anisotropy_model == "GOM":
                 self._ani_param_min = [min(param_arrays[0]), min(param_arrays[1])]
                 self._ani_param_max = [max(param_arrays[0]), max(param_arrays[1])]
