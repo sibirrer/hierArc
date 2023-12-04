@@ -35,7 +35,7 @@ class KinConstraints(BaseLensConfig):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
-        cosmo_fiducial=None
+        cosmo_fiducial=None,
     ):
         """
 
@@ -110,7 +110,7 @@ class KinConstraints(BaseLensConfig):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
-            cosmo_fiducial=cosmo_fiducial
+            cosmo_fiducial=cosmo_fiducial,
         )
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):

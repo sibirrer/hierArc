@@ -89,9 +89,7 @@ class KinConstraintsComposite(KinConstraints):
             center_x,
             center_y,
         ) = self._light_profile_analysis.multi_gaussian_decomposition(
-            kwargs_lens_light,
-            r_h=r_eff,
-            **kwargs_mge_light
+            kwargs_lens_light, r_h=r_eff, **kwargs_mge_light
         )
 
         lens_light_model_list = ["MULTI_GAUSSIAN"]
@@ -119,7 +117,7 @@ class KinConstraintsComposite(KinConstraints):
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             lens_model_list=lens_model_list,
-            MGE_light=False, # set False, as MGE is already done as default
+            MGE_light=False,  # set False, as MGE is already done as default
             kwargs_mge_light=None,
             hernquist_approx=False,
             sampling_number=sampling_number,
@@ -186,10 +184,12 @@ class KinConstraintsComposite(KinConstraints):
             (num_sample_model, num_data)
         )  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
-            j_kin = self.j_kin_draw_composite(self.kwargs_anisotropy_base,
-                                              np.mean(self.gamma_in_array),
-                                              np.mean(self.m2l_array),
-                                              no_error=False)
+            j_kin = self.j_kin_draw_composite(
+                self.kwargs_anisotropy_base,
+                np.mean(self.gamma_in_array),
+                np.mean(self.m2l_array),
+                no_error=False,
+            )
             j_kin_matrix[i, :] = j_kin
 
         error_cov_j_sqrt = np.cov(np.sqrt(j_kin_matrix.T))
@@ -246,8 +246,8 @@ class KinConstraintsComposite(KinConstraints):
             kwargs_lens_light=kwargs_light,
             kwargs_anisotropy=kwargs_anisotropy,
             r_eff=r_eff_draw,
-            theta_E=self._theta_E, # send this to avoid unnecessary recomputation
-            gamma=self._gamma, # send this to avoid unnecessary recomputation
+            theta_E=self._theta_E,  # send this to avoid unnecessary recomputation
+            gamma=self._gamma,  # send this to avoid unnecessary recomputation
         )
         return j_kin
 
@@ -289,10 +289,12 @@ class KinConstraintsComposite(KinConstraints):
 
         :return: anisotropy scaling grid along the axes defined by ani_param_array
         """
-        j_ani_0 = self.j_kin_draw_composite(self.kwargs_anisotropy_base,
-                                            np.mean(self.gamma_in_array),
-                                            np.mean(self.m2l_array),
-                                            no_error=True)
+        j_ani_0 = self.j_kin_draw_composite(
+            self.kwargs_anisotropy_base,
+            np.mean(self.gamma_in_array),
+            np.mean(self.m2l_array),
+            no_error=True,
+        )
         return self._anisotropy_scaling_relative(j_ani_0)
 
     def _anisotropy_scaling_relative(self, j_ani_0):
