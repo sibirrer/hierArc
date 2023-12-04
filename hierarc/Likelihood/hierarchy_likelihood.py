@@ -142,7 +142,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         delta_lum_dist = self.luminosity_distance_modulus(cosmo, z_apparent_m_anchor)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
-        return self.hyper_param_likelihood(
+        a = self.hyper_param_likelihood(
             ddt,
             dd,
             delta_lum_dist,
@@ -151,6 +151,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             kwargs_source=kwargs_source,
             cosmo=cosmo,
         )
+        return a
 
     def hyper_param_likelihood(
         self,
@@ -258,7 +259,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             sigma_v_sys_error=sigma_v_sys_error,
             mu_intrinsic=mag_source_,
         )
-        print(scaling_param_array, kin_scaling, lnlikelihood)
         return np.nan_to_num(lnlikelihood)
 
     def draw_scaling_params(self, kwargs_lens=None, **kwargs_kin):
