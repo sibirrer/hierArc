@@ -9,7 +9,7 @@ class MCMCSampler(object):
     def __init__(self, *args, **kwargs):
         """Initialise the classes of the chain and for parameter options
 
-        positional arguments for the CosmoLikelihood() instance
+        :param args: positional arguments for the CosmoLikelihood() instance
         :param kwargs: keyword arguments for the CosmoLikelihood() instance.
         """
         self.chain = CosmoLikelihood(*args, **kwargs)
