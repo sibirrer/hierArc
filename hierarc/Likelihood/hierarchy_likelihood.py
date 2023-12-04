@@ -324,7 +324,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                 gamma_in + alpha_gamma_in * self._lambda_scaling_property,
                 gamma_in_sigma,
                 m2l + alpha_m2l * self._lambda_scaling_property,
-                m2l_sigma
+                m2l_sigma,
             )
             return gamma_in_draw, m2l_draw
         else:
