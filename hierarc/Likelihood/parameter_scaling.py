@@ -177,10 +177,10 @@ class ParameterScalingIFU(object):
             return np.array([a_ani_draw, beta_inf_draw])
         return None
 
-    def draw_lens_parameters(self, gamma_in=None, gamma_in_sigma=0, m2l=None,
-                             m2l_sigma=0):
-        """
-        Draw Gaussian distribution and re-sample if outside bounds.
+    def draw_lens_parameters(
+        self, gamma_in=None, gamma_in_sigma=0, m2l=None, m2l_sigma=0
+    ):
+        """Draw Gaussian distribution and re-sample if outside bounds.
 
         :param gamma_in: mean of the distribution
         :param gamma_in_sigma: std of the distribution
@@ -200,8 +200,12 @@ class ParameterScalingIFU(object):
         gamma_in_draw = np.random.normal(gamma_in, gamma_in_sigma)
         m2l_draw = np.random.normal(m2l, m2l_sigma)
 
-        if (gamma_in_draw < self._gamma_in_min or gamma_in_draw > self._gamma_in_max
-            or m2l_draw < self._m2l_min or m2l_draw > self._m2l_max):
+        if (
+            gamma_in_draw < self._gamma_in_min
+            or gamma_in_draw > self._gamma_in_max
+            or m2l_draw < self._m2l_min
+            or m2l_draw > self._m2l_max
+        ):
             return self.draw_lens_parameters(gamma_in, gamma_in_sigma, m2l, m2l_sigma)
 
         return gamma_in_draw, m2l_draw
