@@ -26,13 +26,9 @@ class ParameterScalingSingleAperture(object):
             print(self._dim_scaling)
             if self._dim_scaling == 1:
                 print(param_arrays)
-                self._f_ani = interp1d(
-                    param_arrays, scaling_grid, kind="linear"
-                )
+                self._f_ani = interp1d(param_arrays, scaling_grid, kind="linear")
             elif self._dim_scaling == 2:
-                self._f_ani = interp2d(
-                    param_arrays[0], param_arrays[1], scaling_grid.T
-                )
+                self._f_ani = interp2d(param_arrays[0], param_arrays[1], scaling_grid.T)
             else:
                 self._f_ani = RegularGridInterpolator(
                     (arr for arr in param_arrays),
@@ -82,9 +78,7 @@ class ParameterScalingIFU(object):
             self._f_ani_list = []
             for scaling_grid in scaling_grid_list:
                 self._anisotropy_scaling_list.append(
-                    ParameterScalingSingleAperture(
-                        param_arrays, scaling_grid
-                    )
+                    ParameterScalingSingleAperture(param_arrays, scaling_grid)
                 )
 
             if isinstance(param_arrays, list):

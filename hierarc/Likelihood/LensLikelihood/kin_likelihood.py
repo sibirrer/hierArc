@@ -105,9 +105,7 @@ class KinLikelihood(object):
         :param kin_scaling: scaling of the anisotropy affecting sigma_v^2
         :return: array of predicted velocity dispersions
         """
-        sigma_v_predict = (
-            np.sqrt(self._j_model * ds_dds * kin_scaling) * const.c / 1000
-        )
+        sigma_v_predict = np.sqrt(self._j_model * ds_dds * kin_scaling) * const.c / 1000
         return sigma_v_predict
 
     def cov_error_model(self, ds_dds, kin_scaling=1):

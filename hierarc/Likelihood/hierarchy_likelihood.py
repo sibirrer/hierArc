@@ -90,7 +90,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                 self,
                 anisotropy_model=anisotropy_model,
                 param_arrays=ani_param_array,
-                scaling_grid_list=ani_scaling_array_list
+                scaling_grid_list=ani_scaling_array_list,
             )
 
         LensLikelihoodBase.__init__(
@@ -269,8 +269,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         return ani_param
 
     def draw_lens_scaling_params(self, kwargs_lens):
-        """
-        Draws a realization of the anisotropy parameter scaling from the distribution
+        """Draws a realization of the anisotropy parameter scaling from the
+        distribution.
 
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :return: array of anisotropy parameter scaling
@@ -447,7 +447,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
             )
             scaling_param_array = self.draw_scaling_params(
-                kwargs_lens=kwargs_lens, **kwargs_kin_copy)
+                kwargs_lens=kwargs_lens, **kwargs_kin_copy
+            )
             kin_scaling = self.param_scaling(scaling_param_array)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(
                 ddt_, dd_, kin_scaling=kin_scaling
