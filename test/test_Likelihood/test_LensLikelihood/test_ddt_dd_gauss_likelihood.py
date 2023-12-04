@@ -37,7 +37,7 @@ class TestDdtDdGaussianLikelihood(object):
 
         aniso_scaling = [1 + self.dd_sigma / self.dd_mean]
         lnlog = likelihood.log_likelihood(
-            ddt=self.ddt_mean, dd=self.dd_mean, aniso_scaling=aniso_scaling
+            ddt=self.ddt_mean, dd=self.dd_mean, kin_scaling=aniso_scaling
         )
         npt.assert_almost_equal(lnlog, -0.5, decimal=5)
 

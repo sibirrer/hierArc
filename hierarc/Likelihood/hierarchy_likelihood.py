@@ -1,12 +1,12 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.LensLikelihood.base_lens_likelihood import LensLikelihoodBase
-from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
+from hierarc.Likelihood.parameter_scaling import ParameterScalingIFU
 from hierarc.Util.distribution_util import PDFSampling
 import numpy as np
 import copy
 
 
-class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScalingIFU):
+class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalingIFU):
     """Master class containing the likelihood definitions of different analysis for s
     single lens."""
 
@@ -19,7 +19,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         anisotropy_model="NONE",
         ani_param_array=None,
         ani_scaling_array_list=None,
+        ani_scaling_grid_list=None,
         ani_scaling_array=None,
+        gamma_in_array=None,
+        m2l_array=None,
         num_distribution_draws=50,
         kappa_ext_bias=False,
         kappa_pdf=None,
@@ -43,6 +46,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
          (to generate an interpolation function). A value =1 in ani_scaling_array results in the value stored in the
          provided J() predictions.
         :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
+        :param ani_scaling_grid_list: list of 3d arrays with the scalings of J() for each IFU
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
@@ -65,12 +69,30 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
         if ani_scaling_array_list is None and ani_scaling_array is not None:
             ani_scaling_array_list = [ani_scaling_array]
-        AnisotropyScalingIFU.__init__(
-            self,
-            anisotropy_model=anisotropy_model,
-            ani_param_array=ani_param_array,
-            ani_scaling_array_list=ani_scaling_array_list,
-        )
+
+        # AnisotropyScalingIFU.__init__(
+        #     self,
+        #     anisotropy_model=anisotropy_model,
+        #     ani_param_array=ani_param_array,
+        #     ani_scaling_array_list=ani_scaling_array_list,
+        # )
+        if gamma_in_array is not None and m2l_array is not None:
+            if isinstance(ani_param_array, list):
+                param_arrays = ani_param_array + [gamma_in_array, m2l_array]
+            ParameterScalingIFU.__init__(
+                self,
+                anisotropy_model=anisotropy_model,
+                param_arrays=param_arrays,
+                scaling_grid_list=ani_scaling_grid_list,
+            )
+        else:
+            ParameterScalingIFU.__init__(
+                self,
+                anisotropy_model=anisotropy_model,
+                param_arrays=ani_param_array,
+                scaling_grid_list=ani_scaling_array_list
+            )
+
         LensLikelihoodBase.__init__(
             self,
             z_lens=z_lens,
@@ -93,6 +115,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             self._draw_kappa = False
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
+        self._gamma_in_array = gamma_in_array
+        self._m2l_array = m2l_array
 
     def lens_log_likelihood(
         self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
@@ -221,17 +245,36 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             kappa_ext=kappa_ext,
             mag_source=mag_source,
         )
-        aniso_param_array = self.draw_anisotropy(**kwargs_kin)
-        aniso_scaling = self.ani_scaling(aniso_param_array)
+        scaling_param_array = self.draw_scaling_params(**kwargs_kin)
+        kin_scaling = self.param_scaling(scaling_param_array)
 
         lnlikelihood = self.log_likelihood(
             ddt_,
             dd_,
-            aniso_scaling=aniso_scaling,
+            kin_scaling=kin_scaling,
             sigma_v_sys_error=sigma_v_sys_error,
             mu_intrinsic=mag_source_,
         )
         return np.nan_to_num(lnlikelihood)
+
+    def draw_scaling_params(self, kwargs_lens=None, **kwargs_kin):
+        """Draws a realization of the anisotropy parameter scaling from the distribution
+        function.
+
+        :return: array of anisotropy parameter scaling
+        """
+        ani_param = self.draw_anisotropy(**kwargs_kin)
+        if self._gamma_in_array is not None and self._m2l_array is not None:
+            gamma_in, m2l = self.draw_lens_scaling_params(**kwargs_lens)
+        return ani_param
+
+    def draw_lens_scaling_params(self, kwargs_lens):
+        """
+        Draws a realization of the anisotropy parameter scaling from the distribution
+
+        :param kwargs_lens: keywords of the hyper parameters of the lens model
+        :return: array of anisotropy parameter scaling
+        """
 
     def angular_diameter_distances(self, cosmo):
         """Time-delay distance Ddt, angular diameter distance to the lens (dd)
@@ -403,10 +446,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
             )
-            aniso_param_array = self.draw_anisotropy(**kwargs_kin_copy)
-            aniso_scaling = self.ani_scaling(aniso_param_array)
+            scaling_param_array = self.draw_scaling_params(
+                kwargs_lens=kwargs_lens, **kwargs_kin_copy)
+            kin_scaling = self.param_scaling(scaling_param_array)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(
-                ddt_, dd_, aniso_scaling=aniso_scaling
+                ddt_, dd_, kin_scaling=kin_scaling
             )
             sigma_v_predict_mean += sigma_v_predict_i
             cov_error_predict += cov_error_predict_i

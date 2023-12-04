@@ -8,12 +8,18 @@ class LensParam(object):
         self,
         lambda_mst_sampling=False,
         lambda_mst_distribution="NONE",
-        kappa_ext_sampling=False,
-        kappa_ext_distribution="NONE",
         lambda_ifu_sampling=False,
         lambda_ifu_distribution="NONE",
+        gamma_in_sampling=False,
+        gamma_in_distribution="NONE",
+        m2l_sampling=False,
+        m2l_distribution="NONE",
+        kappa_ext_sampling=False,
+        kappa_ext_distribution="NONE",
         alpha_lambda_sampling=False,
         beta_lambda_sampling=False,
+        alpha_gamma_in_sampling=False,
+        alpha_m2l_sampling=False,
         kwargs_fixed=None,
         log_scatter=False,
     ):
@@ -21,15 +27,26 @@ class LensParam(object):
 
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
         :param lambda_mst_distribution: string, distribution function of the MST transform
-        :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
-        :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
-        :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
-        independently
+        :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a
+            second (e.g. IFU) data set independently
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
+        :param gamma_in_sampling: bool, if True samples the inner slope of the GNFW profile
+        :param gamma_in_distribution: string, distribution function of the inner
+            slope of the GNFW profile
+        :param m2l_sampling: bool, if True samples the mass to light ratio of
+            the stars
+        :param m2l_distribution: string, distribution function of the mass to
+            light ratio of the lens
+        :param kappa_ext_sampling: bool, if True samples a global external convergence
+            parameter
+        :param kappa_ext_distribution: string, distribution function of the kappa_ext
+            parameter
         :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
-         according to a predefined quantity of the lens
+            according to a predefined quantity of the lens
         :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly
-         according to a predefined quantity of the lens
+            according to a predefined quantity of the lens
+        :param alpha_gamma_in_sampling: bool, if True samples a parameter alpha_gamma_in, which scales gamma_in linearly
+        :param alpha_m2l_sampling: bool, if True samples a parameter alpha_m2l, which scales m2l linearly
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
         :param kwargs_fixed: keyword arguments that are held fixed through the sampling
         """
@@ -37,10 +54,17 @@ class LensParam(object):
         self._lambda_mst_distribution = lambda_mst_distribution
         self._lambda_ifu_sampling = lambda_ifu_sampling
         self._lambda_ifu_distribution = lambda_ifu_distribution
+        self._gamma_in_sampling = gamma_in_sampling
+        self._gamma_in_distribution = gamma_in_distribution
+        self._m2l_sampling = m2l_sampling
+        self._m2l_distribution = m2l_distribution
         self._kappa_ext_sampling = kappa_ext_sampling
         self._kappa_ext_distribution = kappa_ext_distribution
         self._alpha_lambda_sampling = alpha_lambda_sampling
         self._beta_lambda_sampling = beta_lambda_sampling
+        self._alpha_gamma_in_sampling = alpha_gamma_in_sampling
+        self._alpha_m2l_sampling = alpha_m2l_sampling
+
         self._log_scatter = log_scatter
         if kwargs_fixed is None:
             kwargs_fixed = {}
@@ -83,6 +107,36 @@ class LensParam(object):
                             list.append(r"$\sigma(\lambda_{\rm ifu})$")
                     else:
                         list.append("lambda_ifu_sigma")
+        if self._gamma_in_sampling:
+            if "gamma_in" not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$\gamma_{\rm in}$")
+                else:
+                    list.append("gamma_in")
+            if self._gamma_in_distribution == "GAUSSIAN":
+                if "gamma_in_sigma" not in self._kwargs_fixed:
+                    if latex_style is True:
+                        if self._log_scatter is True:
+                            list.append(r"$\log_{10}\sigma(\gamma_{\rm in})$")
+                        else:
+                            list.append(r"$\sigma(\gamma_{\rm in})$")
+                    else:
+                        list.append("gamma_in_sigma")
+        if self._m2l_sampling is True:
+            if "m2l" not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$\Upsilon_{\rm stars}$")
+                else:
+                    list.append("m2l")
+            if self._m2l_distribution == "GAUSSIAN":
+                if "m2l_sigma" not in self._kwargs_fixed:
+                    if latex_style is True:
+                        if self._log_scatter is True:
+                            list.append(r"$\log_{10}\sigma(\Upsilon_{\rm stars})$")
+                        else:
+                            list.append(r"$\sigma(\Upsilon_{\rm stars})$")
+                    else:
+                        list.append("m2l_sigma")
         if self._kappa_ext_sampling is True:
             if "kappa_ext" not in self._kwargs_fixed:
                 if latex_style is True:
@@ -107,6 +161,18 @@ class LensParam(object):
                     list.append(r"$\beta_{\lambda}$")
                 else:
                     list.append("beta_lambda")
+        if self._alpha_gamma_in_sampling is True:
+            if "alpha_gamma_in" not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$\alpha_{\gamma_{\rm in}}$")
+                else:
+                    list.append("alpha_gamma_in")
+        if self._alpha_m2l_sampling is True:
+            if "alpha_m2l" not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$\alpha_{\Upsilon_{\rm stars}}$")
+                else:
+                    list.append("alpha_m2l")
         return list
 
     def args2kwargs(self, args, i=0):
@@ -146,6 +212,36 @@ class LensParam(object):
                     else:
                         kwargs["lambda_ifu_sigma"] = args[i]
                     i += 1
+        if self._gamma_in_sampling is True:
+            if "gamma_in" in self._kwargs_fixed:
+                kwargs["gamma_in"] = self._kwargs_fixed["gamma_in"]
+            else:
+                kwargs["gamma_in"] = args[i]
+                i += 1
+            if self._gamma_in_distribution == "GAUSSIAN":
+                if "gamma_in_sigma" in self._kwargs_fixed:
+                    kwargs["gamma_in_sigma"] = self._kwargs_fixed["gamma_in_sigma"]
+                else:
+                    if self._log_scatter is True:
+                        kwargs["gamma_in_sigma"] = 10 ** (args[i])
+                    else:
+                        kwargs["gamma_in_sigma"] = args[i]
+                    i += 1
+        if self._m2l_sampling is True:
+            if "m2l" in self._kwargs_fixed:
+                kwargs["m2l"] = self._kwargs_fixed["m2l"]
+            else:
+                kwargs["m2l"] = args[i]
+                i += 1
+            if self._m2l_distribution == "GAUSSIAN":
+                if "m2l_sigma" in self._kwargs_fixed:
+                    kwargs["m2l_sigma"] = self._kwargs_fixed["m2l_sigma"]
+                else:
+                    if self._log_scatter is True:
+                        kwargs["m2l_sigma"] = 10 ** (args[i])
+                    else:
+                        kwargs["m2l_sigma"] = args[i]
+                    i += 1
         if self._kappa_ext_sampling is True:
             if "kappa_ext" in self._kwargs_fixed:
                 kwargs["kappa_ext"] = self._kwargs_fixed["kappa_ext"]
@@ -170,6 +266,19 @@ class LensParam(object):
             else:
                 kwargs["beta_lambda"] = args[i]
                 i += 1
+        if self._alpha_gamma_in_sampling is True:
+            if "alpha_gamma_in" in self._kwargs_fixed:
+                kwargs["alpha_gamma_in"] = self._kwargs_fixed["alpha_gamma_in"]
+            else:
+                kwargs["alpha_gamma_in"] = args[i]
+                i += 1
+        if self._alpha_m2l_sampling is True:
+            if "alpha_m2l" in self._kwargs_fixed:
+                kwargs["alpha_m2l"] = self._kwargs_fixed["alpha_m2l"]
+            else:
+                kwargs["alpha_m2l"] = args[i]
+                i += 1
+
         return kwargs, i
 
     def kwargs2args(self, kwargs):
@@ -197,6 +306,24 @@ class LensParam(object):
                         args.append(np.log10(kwargs["lambda_ifu_sigma"]))
                     else:
                         args.append(kwargs["lambda_ifu_sigma"])
+        if self._gamma_in_sampling is True:
+            if "gamma_in" not in self._kwargs_fixed:
+                args.append(kwargs["gamma_in"])
+            if self._gamma_in_distribution == "GAUSSIAN":
+                if "gamma_in_sigma" not in self._kwargs_fixed:
+                    if self._log_scatter is True:
+                        args.append(np.log10(kwargs["gamma_in_sigma"]))
+                    else:
+                        args.append(kwargs["gamma_in_sigma"])
+        if self._m2l_sampling is True:
+            if "m2l" not in self._kwargs_fixed:
+                args.append(kwargs["m2l"])
+            if self._m2l_distribution == "GAUSSIAN":
+                if "m2l_sigma" not in self._kwargs_fixed:
+                    if self._log_scatter is True:
+                        args.append(np.log10(kwargs["m2l_sigma"]))
+                    else:
+                        args.append(kwargs["m2l_sigma"])
         if self._kappa_ext_sampling is True:
             if "kappa_ext" not in self._kwargs_fixed:
                 args.append(kwargs["kappa_ext"])
@@ -209,4 +336,10 @@ class LensParam(object):
         if self._beta_lambda_sampling is True:
             if "beta_lambda" not in self._kwargs_fixed:
                 args.append(kwargs["beta_lambda"])
+        if self._alpha_gamma_in_sampling is True:
+            if "alpha_gamma_in" not in self._kwargs_fixed:
+                args.append(kwargs["alpha_gamma_in"])
+        if self._alpha_m2l_sampling is True:
+            if "alpha_m2l" not in self._kwargs_fixed:
+                args.append(kwargs["alpha_m2l"])
         return args

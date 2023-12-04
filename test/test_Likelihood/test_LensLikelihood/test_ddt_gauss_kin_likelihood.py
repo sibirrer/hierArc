@@ -63,11 +63,11 @@ class TestDdtGaussKinLikelihood(object):
     def test_log_likelihood(self):
         ddt, dd = 9, 0.9
         lnlog_tot = self.ddt_gauss_kin_likelihood.log_likelihood(
-            ddt, dd, aniso_scaling=None, sigma_v_sys_error=None
+            ddt, dd, kin_scaling=None, sigma_v_sys_error=None
         )
         lnlog_ddt = self.ddt_gauss_likelihood.log_likelihood(ddt, dd)
         lnlog_kin = self.kin_likelihood.log_likelihood(
-            ddt, dd, aniso_scaling=None, sigma_v_sys_error=None
+            ddt, dd, kin_scaling=None, sigma_v_sys_error=None
         )
         npt.assert_almost_equal(lnlog_tot, lnlog_ddt + lnlog_kin, decimal=5)
 
@@ -88,7 +88,7 @@ class TestDdtGaussKinLikelihood(object):
             sigma_v_predict,
             error_cov_predict,
         ) = self.ddt_gauss_kin_likelihood.sigma_v_prediction(
-            self.ddt_mean, self.dd_mean, aniso_scaling=1
+            self.ddt_mean, self.dd_mean, kin_scaling=1
         )
         assert sigma_v_predict[0] == self.sigma_v_measurement[0]
         assert error_cov_predict[0, 0] == 0

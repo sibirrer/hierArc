@@ -16,6 +16,10 @@ class ParamManager(object):
         anisotropy_sampling=False,
         anisotropy_model="OM",
         anisotropy_distribution="NONE",
+        gamma_in_sampling=False,
+        gamma_in_distribution="NONE",
+        m2l_sampling=False,
+        m2l_distribution="NONE",
         kappa_ext_sampling=False,
         kappa_ext_distribution="NONE",
         lambda_ifu_sampling=False,
@@ -56,6 +60,10 @@ class ParamManager(object):
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
+        :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
+        :param gamma_in_distribution: string, distribution function of the gamma_in parameter
+        :param m2l_sampling: bool, if True samples the mass-to-light ratio of the stars
+        :param m2l_distribution: string, distribution function of the m2l parameter
         :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
          (not intrinsic magnitudes but apparent!)
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
@@ -83,6 +91,10 @@ class ParamManager(object):
             lambda_mst_distribution=lambda_mst_distribution,
             lambda_ifu_sampling=lambda_ifu_sampling,
             lambda_ifu_distribution=lambda_ifu_distribution,
+            gamma_in_sampling=gamma_in_sampling,
+            gamma_in_distribution=gamma_in_distribution,
+            m2l_sampling=m2l_sampling,
+            m2l_distribution=m2l_distribution,
             kappa_ext_sampling=kappa_ext_sampling,
             kappa_ext_distribution=kappa_ext_distribution,
             alpha_lambda_sampling=alpha_lambda_sampling,

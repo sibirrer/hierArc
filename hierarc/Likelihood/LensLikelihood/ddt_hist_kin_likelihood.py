@@ -61,28 +61,28 @@ class DdtHistKinLikelihood(object):
         )
         self.num_data = self._tdLikelihood.num_data + self._kinlikelihood.num_data
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None):
+    def log_likelihood(self, ddt, dd, kin_scaling=None, sigma_v_sys_error=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
+        :param kin_scaling: numpy array of anisotropy scaling on prediction of Ds/Dds
         :return: log likelihood given the single lens analysis
         """
         lnlikelihood = self._tdLikelihood.log_likelihood(
             ddt
         ) + self._kinlikelihood.log_likelihood(
-            ddt, dd, aniso_scaling, sigma_v_sys_error=sigma_v_sys_error
+            ddt, dd, kin_scaling, sigma_v_sys_error=sigma_v_sys_error
         )
         return lnlikelihood
 
-    def sigma_v_prediction(self, ddt, dd, aniso_scaling=1):
+    def sigma_v_prediction(self, ddt, dd, kin_scaling=1):
         """Model prediction mean velocity dispersion vector and model prediction
         covariance matrix.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or
+        :param kin_scaling: array of size of the velocity dispersion measurement or
             None, scaling of the predicted dimensionless quantity J (proportional to
             sigma_v^2) of the anisotropy model in the sampling relative to the
             anisotropy model used to derive the prediction and covariance matrix in the
@@ -90,7 +90,7 @@ class DdtHistKinLikelihood(object):
         :return: model prediction mean velocity dispersion vector and model prediction
             covariance matrix
         """
-        return self._kinlikelihood.sigma_v_prediction(ddt, dd, aniso_scaling)
+        return self._kinlikelihood.sigma_v_prediction(ddt, dd, kin_scaling)
 
     def sigma_v_measurement(self, sigma_v_sys_error=None, sigma_v_sys_offset=None):
         """

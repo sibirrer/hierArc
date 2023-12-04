@@ -1,3 +1,5 @@
+__author__ = "ajshjib"
+
 import copy
 
 import numpy as np
