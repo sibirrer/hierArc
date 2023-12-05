@@ -128,6 +128,9 @@ class KinConstraintsComposite(KinConstraints):
             multi_observations=multi_observations,
         )
 
+        if len(rho0_array) != len(r_s_array):
+            raise ValueError("rho0 and r_s must have the same length")
+
         self._rho_s_array = rho0_array
         self._r_scale_array = r_s_array
         self._kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
@@ -162,8 +165,9 @@ class KinConstraintsComposite(KinConstraints):
                 1,
             )
 
-        kappa_s_draw = np.random.choice(self._kappa_s_array)
-        r_scale_angle_draw = np.random.choice(self._r_scale_angle_array)
+        random_index = np.random.int(low=0, high=len(self._rho_s_array))
+        kappa_s_draw = self._kappa_s_array[random_index]
+        r_scale_angle_draw = self._r_scale_angle_array[random_index]
 
         # we make sure no negative r_eff are being sampled
         delta_r_eff = np.maximum(
