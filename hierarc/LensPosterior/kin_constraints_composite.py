@@ -129,7 +129,7 @@ class KinConstraintsComposite(KinConstraints):
         )
 
         if len(rho0_array) != len(r_s_array):
-            raise ValueError("rho0 and r_s must have the same length")
+            raise ValueError("rho0 and r_s must have the same length!")
 
         self._rho_s_array = rho0_array
         self._r_scale_array = r_s_array
