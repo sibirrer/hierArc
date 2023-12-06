@@ -92,6 +92,48 @@ class TestLensLikelihood(object):
             **kwargs_likelihood
         )
 
+        gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
+        m2l_array = np.linspace(start=1, stop=10, num=10)
+        param_scaling_array = np.multiply.outer(ani_param_array,
+                                                np.outer(gamma_in_array, m2l_array))
+        self.likelihood_gamma_in_m2l_list_ani = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtDdGaussian",
+            anisotropy_model="OM",
+            ani_param_array=[ani_param_array],
+            ani_scaling_array_list=None,
+            ani_scaling_grid_list=[param_scaling_array],
+            gamma_in_array=gamma_in_array,
+            m2l_array=m2l_array,
+            num_distribution_draws=200,
+            kappa_ext_bias=False,
+            kappa_pdf=None,
+            kappa_bin_edges=None,
+            mst_ifu=False,
+            **kwargs_likelihood
+        )
+
+        self.likelihood_gamma_in_m2l = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtDdGaussian",
+            anisotropy_model="OM",
+            ani_param_array=ani_param_array,
+            ani_scaling_array_list=None,
+            ani_scaling_grid_list=[param_scaling_array],
+            gamma_in_array=gamma_in_array,
+            m2l_array=m2l_array,
+            num_distribution_draws=200,
+            kappa_ext_bias=False,
+            kappa_pdf=None,
+            kappa_bin_edges=None,
+            mst_ifu=False,
+            **kwargs_likelihood
+        )
+
     def test_lens_log_likelihood(self):
         np.random.seed(42)
         kwargs_lens = {
@@ -132,8 +174,35 @@ class TestLensLikelihood(object):
         )
         assert ln_inf < -10000000
 
+        ln_inf = self.likelihood_single.lens_log_likelihood(
+            self.cosmo, kwargs_lens=None, kwargs_kin=kwargs_kin
+        )
+        npt.assert_almost_equal(ln_inf, 0.0, decimal=1)
+
+        ln_inf = self.likelihood_single.sigma_v_measured_vs_predict(
+            self.cosmo, kwargs_lens=None, kwargs_kin=None
+        )
+        assert np.all([x is None for x in ln_inf])
+
         kwargs_test = self.likelihood._kwargs_init(kwargs=None)
         assert type(kwargs_test) is dict
+
+        gamma_in_draw, m2l_draw = self.likelihood.draw_lens_scaling_params()
+        assert gamma_in_draw is None
+        assert m2l_draw is None
+
+        kwargs_lens = {
+            'gamma_in': 1,
+            'gamma_in_sigma': 0,
+            'alpha_gamma_in': 0,
+            'm2l': 1,
+            'm2l_sigma': 0,
+            'alpha_m2l': 0,
+        }
+        ln_likelihood = self.likelihood_gamma_in_m2l.lens_log_likelihood(
+            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+        )
+        npt.assert_almost_equal(ln_likelihood, -0.0, decimal=1)
 
 
 if __name__ == "__main__":
