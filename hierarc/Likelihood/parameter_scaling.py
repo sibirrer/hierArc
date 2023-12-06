@@ -29,7 +29,7 @@ class ParameterScalingSingleAperture(object):
                 self._f_ani = interp2d(param_arrays[0], param_arrays[1], scaling_grid.T)
             else:
                 self._f_ani = RegularGridInterpolator(
-                    tuple(arr for arr in param_arrays),
+                    tuple(param_arrays),
                     scaling_grid,
                 )
             self._evalute_scaling = True
