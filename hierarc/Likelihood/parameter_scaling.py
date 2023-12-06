@@ -61,8 +61,6 @@ class ParameterScalingIFU(object):
         :param anisotropy_model: string, either 'NONE', 'OM' or 'GOM'
         :param param_arrays: array of parameter values
         :param scaling_grid_list: list of array with the scalings of J() for each IFU
-        :param gamma_in_array: array of gamma_in values
-        :param m2l_array: array of M/L values
         """
         self._anisotropy_model = anisotropy_model
         self._evalute_ani = False
