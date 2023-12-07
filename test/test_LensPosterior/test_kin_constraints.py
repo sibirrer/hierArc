@@ -109,7 +109,6 @@ class TestIFUKinPosterior(object):
         )
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
-        print(kwargs_likelihood)
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(**kwargs_likelihood)
         kwargs_kin = {"a_ani": 1}
