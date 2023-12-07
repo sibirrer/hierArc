@@ -164,7 +164,8 @@ class TestParameterScalingIFU(object):
             )
         self.scaling._anisotropy_model = "const"
         param_draw = self.scaling.draw_anisotropy(
-            a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0)
+            a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0
+        )
         assert param_draw[0] == 1
 
         param_draw = self.scaling_2d.draw_anisotropy(
@@ -257,7 +258,7 @@ class TestRaise(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             scaling.draw_anisotropy(
-                a_ani=.5, a_ani_sigma=0, beta_inf=-1, beta_inf_sigma=0
+                a_ani=0.5, a_ani_sigma=0, beta_inf=-1, beta_inf_sigma=0
             )
 
         ani_param_array = np.linspace(start=0, stop=1, num=10)
