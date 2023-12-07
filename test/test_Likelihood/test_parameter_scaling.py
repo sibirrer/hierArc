@@ -10,7 +10,7 @@ from hierarc.Likelihood.parameter_scaling import (
 class TestParameterScalingSingleAperture(object):
     def setup(self):
         ani_param_array = np.linspace(start=0, stop=1, num=10)
-        param_scaling_array = ani_param_array * 2
+        param_scaling_array = np.ones_like(ani_param_array) * 2
         self.scaling = ParameterScalingSingleAperture(
             ani_param_array, param_scaling_array
         )
