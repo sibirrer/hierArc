@@ -135,7 +135,6 @@ class TestKinConstraintsComposite(object):
         z_source = 1.5
 
         # lens model
-        from astropy.cosmology import FlatLambdaCDM
 
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
