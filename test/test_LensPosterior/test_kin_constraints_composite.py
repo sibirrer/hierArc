@@ -7,6 +7,7 @@ import pytest
 import unittest
 from astropy.cosmology import FlatLambdaCDM
 
+
 class TestKinConstraintsComposite(object):
     def setup(self):
         pass
