@@ -112,7 +112,7 @@ class TestLensParamGammaInnerM2l(object):
             "m2l": 5,
             "m2l_sigma": 1,
             "alpha_gamma_in": 0.1,
-            "alpha_m2l": -0.5
+            "alpha_m2l": -0.5,
         }
         self._param_fixed = LensParam(
             gamma_in_sampling=True,
@@ -158,7 +158,7 @@ class TestLensParamGammaInnerM2l(object):
             "m2l": 5,
             "m2l_sigma": 1,
             "alpha_gamma_in": 0.1,
-            "alpha_m2l": -0.5
+            "alpha_m2l": -0.5,
         }
         args = self._param.kwargs2args(kwargs)
         kwargs_new, i = self._param.args2kwargs(args, i=0)

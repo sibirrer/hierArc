@@ -29,8 +29,9 @@ class TestParameterScalingSingleAperture(object):
         m2l_array = np.linspace(start=1, stop=10, num=10)
 
         param_arrays = [ani_param_array, gamma_in_array, m2l_array]
-        param_scaling_array = np.multiply.outer(ani_param_array,
-                                                np.outer(gamma_in_array, m2l_array))
+        param_scaling_array = np.multiply.outer(
+            ani_param_array, np.outer(gamma_in_array, m2l_array)
+        )
         self.scaling_nfw = ParameterScalingSingleAperture(
             param_arrays, param_scaling_array
         )
@@ -39,10 +40,16 @@ class TestParameterScalingSingleAperture(object):
             np.linspace(start=0, stop=1, num=10),
             np.linspace(start=1, stop=2, num=5),
         ]
-        param_arrays = [gom_param_array[0], gom_param_array[1], gamma_in_array, m2l_array]
-        param_scaling_array = np.multiply.outer(gom_param_array[0],
-                                                np.multiply.outer(gom_param_array[1],
-                                                                  np.outer(gamma_in_array, m2l_array)))
+        param_arrays = [
+            gom_param_array[0],
+            gom_param_array[1],
+            gamma_in_array,
+            m2l_array,
+        ]
+        param_scaling_array = np.multiply.outer(
+            gom_param_array[0],
+            np.multiply.outer(gom_param_array[1], np.outer(gamma_in_array, m2l_array)),
+        )
 
         self.scaling_nfw_2d = ParameterScalingSingleAperture(
             param_arrays, param_scaling_array
@@ -72,7 +79,7 @@ class TestParameterScalingIFU(object):
         self.scaling = ParameterScalingIFU(
             anisotropy_model="OM",
             param_arrays=ani_param_array,
-            scaling_grid_list=[param_scaling_array]
+            scaling_grid_list=[param_scaling_array],
         )
 
         ani_param_array = [
@@ -91,22 +98,29 @@ class TestParameterScalingIFU(object):
         m2l_array = np.linspace(start=1, stop=10, num=10)
 
         param_arrays = [ani_param_array, gamma_in_array, m2l_array]
-        param_scaling_array = np.multiply.outer(ani_param_array,
-                                                np.outer(gamma_in_array, m2l_array))
+        param_scaling_array = np.multiply.outer(
+            ani_param_array, np.outer(gamma_in_array, m2l_array)
+        )
         self.scaling_nfw = ParameterScalingIFU(
             anisotropy_model="OM",
             param_arrays=param_arrays,
-            scaling_grid_list=[param_scaling_array]
+            scaling_grid_list=[param_scaling_array],
         )
 
         gom_param_array = [
             np.linspace(start=0, stop=1, num=10),
             np.linspace(start=1, stop=2, num=5),
         ]
-        param_arrays = [gom_param_array[0], gom_param_array[1], gamma_in_array, m2l_array]
-        param_scaling_array = np.multiply.outer(gom_param_array[0],
-                                                np.multiply.outer(gom_param_array[1],
-                                                                  np.outer(gamma_in_array, m2l_array)))
+        param_arrays = [
+            gom_param_array[0],
+            gom_param_array[1],
+            gamma_in_array,
+            m2l_array,
+        ]
+        param_scaling_array = np.multiply.outer(
+            gom_param_array[0],
+            np.multiply.outer(gom_param_array[1], np.outer(gamma_in_array, m2l_array)),
+        )
         self.scaling_nfw_2d = ParameterScalingIFU(
             anisotropy_model="GOM",
             param_arrays=param_arrays,
@@ -200,7 +214,6 @@ class TestParameterScalingIFU(object):
 
 class TestRaise(unittest.TestCase):
     def test_raise(self):
-
         with self.assertRaises(ValueError):
             ParameterScalingIFU(
                 anisotropy_model="blabla",
@@ -241,8 +254,9 @@ class TestRaise(unittest.TestCase):
             m2l_array = np.linspace(start=1, stop=10, num=10)
 
             param_arrays = [ani_param_array, gamma_in_array, m2l_array]
-            param_scaling_array = np.multiply.outer(ani_param_array,
-                                                    np.outer(gamma_in_array, m2l_array))
+            param_scaling_array = np.multiply.outer(
+                ani_param_array, np.outer(gamma_in_array, m2l_array)
+            )
 
             scaling = ParameterScalingIFU(
                 anisotropy_model="OM",
@@ -259,8 +273,9 @@ class TestRaise(unittest.TestCase):
             m2l_array = np.linspace(start=1, stop=10, num=10)
 
             param_arrays = [ani_param_array, gamma_in_array, m2l_array]
-            param_scaling_array = np.multiply.outer(ani_param_array,
-                                                    np.outer(gamma_in_array, m2l_array))
+            param_scaling_array = np.multiply.outer(
+                ani_param_array, np.outer(gamma_in_array, m2l_array)
+            )
 
             scaling = ParameterScalingIFU(
                 anisotropy_model="OM",

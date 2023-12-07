@@ -94,8 +94,9 @@ class TestLensLikelihood(object):
 
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
         m2l_array = np.linspace(start=1, stop=10, num=10)
-        param_scaling_array = np.multiply.outer(ani_param_array,
-                                                np.outer(gamma_in_array, m2l_array))
+        param_scaling_array = np.multiply.outer(
+            ani_param_array, np.outer(gamma_in_array, m2l_array)
+        )
         self.likelihood_gamma_in_m2l_list_ani = LensLikelihood(
             z_lens,
             z_source,
@@ -192,12 +193,12 @@ class TestLensLikelihood(object):
         assert m2l_draw is None
 
         kwargs_lens = {
-            'gamma_in': 1,
-            'gamma_in_sigma': 0,
-            'alpha_gamma_in': 0,
-            'm2l': 1,
-            'm2l_sigma': 0,
-            'alpha_m2l': 0,
+            "gamma_in": 1,
+            "gamma_in_sigma": 0,
+            "alpha_gamma_in": 0,
+            "m2l": 1,
+            "m2l_sigma": 0,
+            "alpha_m2l": 0,
         }
         ln_likelihood = self.likelihood_gamma_in_m2l.lens_log_likelihood(
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin

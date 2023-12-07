@@ -74,7 +74,7 @@ class TestIFUKinPosterior(object):
         gamma_in_array = np.linspace(0.1, 2.9, 5)
         m2l_array = np.linspace(0.1, 10, 5)
 
-        rho0_array = 10**np.random.normal(8, 0, 100) / 1e6
+        rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
         r_s_array = np.random.normal(0.1, 0, 100)
 
         # compute likelihood
@@ -207,9 +207,7 @@ class TestIFUKinPosterior(object):
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(**kwargs_likelihood)
         kwargs_kin = {"a_ani": 1, "beta_inf": 0.5}
-        ln_class.lens_log_likelihood(
-            cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin
-        )
+        ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
 
 
 class TestRaise(unittest.TestCase):
