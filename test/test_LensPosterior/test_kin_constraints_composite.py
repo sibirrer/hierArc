@@ -132,8 +132,6 @@ class TestKinConstraintsComposite(object):
         z_lens = 0.5
         z_source = 1.5
 
-        # lens model
-
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
         r_eff = 1
