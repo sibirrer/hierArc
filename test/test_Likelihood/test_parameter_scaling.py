@@ -107,7 +107,8 @@ class TestParameterScalingIFU(object):
 
         param_arrays = [ani_param_array, gamma_in_array, m2l_array]
         param_scaling_array = np.multiply.outer(
-            np.ones_like(ani_param_array), np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array))
+            np.ones_like(ani_param_array),
+            np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
         )
         self.scaling_nfw = ParameterScalingIFU(
             anisotropy_model="OM",
