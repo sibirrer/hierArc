@@ -81,7 +81,7 @@ class TestParameterScalingSingleAperture(object):
 class TestParameterScalingIFU(object):
     def setup(self):
         ani_param_array = np.linspace(start=0, stop=1, num=10)
-        param_scaling_array = ani_param_array * 2
+        param_scaling_array = np.ones_like(ani_param_array) * 2
         self.scaling = ParameterScalingIFU(
             anisotropy_model="OM",
             param_arrays=ani_param_array,
