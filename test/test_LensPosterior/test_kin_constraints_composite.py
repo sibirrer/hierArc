@@ -74,7 +74,7 @@ class TestIFUKinPosterior(object):
         gamma_in_array = np.linspace(0.1, 2.9, 5)
         m2l_array = np.linspace(0.1, 10, 5)
 
-        rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
+        rho0_array = 10**np.random.normal(8, 0, 100) / 1e6
         r_s_array = np.random.normal(0.1, 0, 100)
 
         # compute likelihood
