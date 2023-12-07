@@ -109,8 +109,7 @@ class ParameterScalingIFU(object):
                     self._m2l_max = np.max(param_arrays[3])
             else:
                 raise ValueError(
-                    "anisotropy scaling with dimension %s does not match anisotropy model %s"
-                    % (self._dim_scaling, self._anisotropy_model)
+                    f"Anisotropy model {anisotropy_model} is not recognized!"
                 )
 
     def param_scaling(self, param_array):
