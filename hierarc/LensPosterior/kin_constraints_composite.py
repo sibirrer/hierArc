@@ -276,7 +276,7 @@ class KinConstraintsComposite(KinConstraints):
             "ani_param_array": self.ani_param_array,
             "gamma_in_array": self.gamma_in_array,
             "m2l_array": self.m2l_array,
-            "ani_scaling_grid_list": ani_scaling_grid_list,
+            "param_scaling_grid_list": ani_scaling_grid_list,
         }
         return kwargs_likelihood
 

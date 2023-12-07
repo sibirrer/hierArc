@@ -18,11 +18,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         likelihood_type="TDKin",
         anisotropy_model="NONE",
         ani_param_array=None,
-        ani_scaling_array_list=None,
-        ani_scaling_grid_list=None,
         ani_scaling_array=None,
+        ani_scaling_array_list=None,
         gamma_in_array=None,
         m2l_array=None,
+        param_scaling_grid_list=None,
         num_distribution_draws=50,
         kappa_ext_bias=False,
         kappa_pdf=None,
@@ -45,8 +45,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
          to default prediction. The scaling corresponds to the ani_param_array parameter spacing
          (to generate an interpolation function). A value =1 in ani_scaling_array results in the value stored in the
          provided J() predictions.
-        :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
-        :param ani_scaling_grid_list: list of 3d arrays with the scalings of J() for each IFU
+        :param param_scaling_grid_list: list of N-dimensional arrays with the
+            scalings of J() for each IFU. Needed when simultaneously scaling
+            anisotropy, gamma_in, and m2l. In that case, gamma_in_array and m2l_array need to be provided.
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
@@ -85,7 +86,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                 self,
                 anisotropy_model=anisotropy_model,
                 param_arrays=param_arrays,
-                scaling_grid_list=ani_scaling_grid_list,
+                scaling_grid_list=param_scaling_grid_list,
             )
         else:
             ParameterScalingIFU.__init__(
