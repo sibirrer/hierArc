@@ -10,7 +10,7 @@ from hierarc.Likelihood.parameter_scaling import (
 class TestParameterScalingSingleAperture(object):
     def setup(self):
         ani_param_array = np.linspace(start=0, stop=1, num=10)
-        param_scaling_array = np.ones_like(ani_param_array) * 2
+        param_scaling_array = ani_param_array * 2
         self.scaling = ParameterScalingSingleAperture(
             ani_param_array, param_scaling_array
         )
@@ -20,7 +20,7 @@ class TestParameterScalingSingleAperture(object):
             np.linspace(start=1, stop=2, num=5),
         ]
         param_scaling_array = np.outer(
-            np.ones_like(ani_param_array[0]), np.ones_like(ani_param_array[1])
+            ani_param_array[0], ani_param_array[1]
         )
         self.scaling_2d = ParameterScalingSingleAperture(
             ani_param_array, param_scaling_array
@@ -32,8 +32,8 @@ class TestParameterScalingSingleAperture(object):
 
         param_arrays = [ani_param_array, gamma_in_array, m2l_array]
         param_scaling_array = np.multiply.outer(
-            np.ones_like(ani_param_array),
-            np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
+            ani_param_array,
+            np.outer(gamma_in_array, m2l_array),
         )
         self.scaling_nfw = ParameterScalingSingleAperture(
             param_arrays, param_scaling_array
@@ -50,10 +50,10 @@ class TestParameterScalingSingleAperture(object):
             m2l_array,
         ]
         param_scaling_array = np.multiply.outer(
-            np.ones_like(gom_param_array[0]),
+            gom_param_array[0],
             np.multiply.outer(
-                np.ones_like(gom_param_array[1]),
-                np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
+                gom_param_array[1],
+                np.outer(gamma_in_array, m2l_array),
             ),
         )
 
@@ -63,7 +63,7 @@ class TestParameterScalingSingleAperture(object):
 
     def test_param_scaling(self):
         scaling = self.scaling.param_scaling(param_array=[1])
-        assert scaling == 2
+        assert scaling == np.array([2])
 
         scaling = self.scaling.param_scaling(param_array=None)
         assert scaling == 1
@@ -81,7 +81,7 @@ class TestParameterScalingSingleAperture(object):
 class TestParameterScalingIFU(object):
     def setup(self):
         ani_param_array = np.linspace(start=0, stop=1, num=10)
-        param_scaling_array = np.ones_like(ani_param_array) * 2
+        param_scaling_array = ani_param_array * 2
         self.scaling = ParameterScalingIFU(
             anisotropy_model="OM",
             param_arrays=ani_param_array,
@@ -93,7 +93,7 @@ class TestParameterScalingIFU(object):
             np.linspace(start=1, stop=2, num=5),
         ]
         param_scaling_array = np.outer(
-            np.ones_like(ani_param_array[0]), np.ones_like(ani_param_array[1])
+            ani_param_array[0], ani_param_array[1]
         )
         self.scaling_2d = ParameterScalingIFU(
             anisotropy_model="GOM",
@@ -107,8 +107,8 @@ class TestParameterScalingIFU(object):
 
         param_arrays = [ani_param_array, gamma_in_array, m2l_array]
         param_scaling_array = np.multiply.outer(
-            np.ones_like(ani_param_array),
-            np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
+            ani_param_array,
+            np.outer(gamma_in_array, m2l_array),
         )
         self.scaling_nfw = ParameterScalingIFU(
             anisotropy_model="OM",
@@ -127,10 +127,10 @@ class TestParameterScalingIFU(object):
             m2l_array,
         ]
         param_scaling_array = np.multiply.outer(
-            np.ones_like(gom_param_array[0]),
+            gom_param_array[0],
             np.multiply.outer(
-                np.ones_like(gom_param_array[1]),
-                np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
+                gom_param_array[1],
+                np.outer(gamma_in_array, m2l_array),
             ),
         )
         self.scaling_nfw_2d = ParameterScalingIFU(
@@ -267,8 +267,8 @@ class TestRaise(unittest.TestCase):
 
             param_arrays = [ani_param_array, gamma_in_array, m2l_array]
             param_scaling_array = np.multiply.outer(
-                np.ones_like(ani_param_array),
-                np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
+                ani_param_array,
+                np.outer(gamma_in_array, m2l_array),
             )
 
             scaling = ParameterScalingIFU(
@@ -287,8 +287,8 @@ class TestRaise(unittest.TestCase):
 
             param_arrays = [ani_param_array, gamma_in_array, m2l_array]
             param_scaling_array = np.multiply.outer(
-                np.ones_like(ani_param_array),
-                np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
+                ani_param_array,
+                np.outer(gamma_in_array, m2l_array),
             )
 
             scaling = ParameterScalingIFU(
