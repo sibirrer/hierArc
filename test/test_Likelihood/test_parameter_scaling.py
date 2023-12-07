@@ -19,7 +19,7 @@ class TestParameterScalingSingleAperture(object):
             np.linspace(start=0, stop=1, num=10),
             np.linspace(start=1, stop=2, num=5),
         ]
-        param_scaling_array = np.outer(ani_param_array[0], ani_param_array[1])
+        param_scaling_array = np.outer(np.ones_like(ani_param_array[0]), np.ones_like(ani_param_array[1]))
         self.scaling_2d = ParameterScalingSingleAperture(
             ani_param_array, param_scaling_array
         )
