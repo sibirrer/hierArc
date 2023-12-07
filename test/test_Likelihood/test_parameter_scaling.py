@@ -127,8 +127,8 @@ class TestParameterScalingIFU(object):
             m2l_array,
         ]
         param_scaling_array = np.multiply.outer(
-            gom_param_array[0],
-            np.multiply.outer(gom_param_array[1], np.outer(gamma_in_array, m2l_array)),
+            np.ones_like(gom_param_array[0]),
+            np.multiply.outer(np.ones_like(gom_param_array[1]), np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array))),
         )
         self.scaling_nfw_2d = ParameterScalingIFU(
             anisotropy_model="GOM",
