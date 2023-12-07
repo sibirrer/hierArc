@@ -29,7 +29,7 @@ class ParameterScalingSingleAperture(object):
                 self._f_ani = interp2d(param_arrays[0], param_arrays[1], scaling_grid.T)
             else:
                 self._f_ani = RegularGridInterpolator(
-                    (arr for arr in param_arrays),
+                    tuple(param_arrays),
                     scaling_grid,
                 )
             self._evalute_scaling = True
@@ -37,7 +37,7 @@ class ParameterScalingSingleAperture(object):
     def param_scaling(self, param_array):
         """
 
-        :param aniso_param_array: anisotropy parameter array
+        :param param_array: anisotropy parameter array
         :return: scaling J(a_ani) for single slit
         """
         if self._evalute_scaling is not True or param_array is None:
@@ -59,10 +59,8 @@ class ParameterScalingIFU(object):
         """
 
         :param anisotropy_model: string, either 'NONE', 'OM' or 'GOM'
-        :param param_array: array of parameter values
+        :param param_arrays: array of parameter values
         :param scaling_grid_list: list of array with the scalings of J() for each IFU
-        :param gamma_in_array: array of gamma_in values
-        :param m2l_array: array of M/L values
         """
         self._anisotropy_model = anisotropy_model
         self._evalute_ani = False
