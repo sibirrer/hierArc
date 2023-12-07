@@ -165,7 +165,7 @@ class KinConstraintsComposite(KinConstraints):
                 1,
             )
 
-        random_index = np.random.int(low=0, high=len(self._rho_s_array))
+        random_index = np.random.randint(low=0, high=len(self._rho_s_array))
         kappa_s_draw = self._kappa_s_array[random_index]
         r_scale_angle_draw = self._r_scale_angle_array[random_index]
 
