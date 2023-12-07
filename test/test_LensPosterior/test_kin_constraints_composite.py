@@ -5,7 +5,7 @@ import numpy.testing as npt
 import numpy as np
 import pytest
 import unittest
-
+from astropy.cosmology import FlatLambdaCDM
 
 class TestKinConstraintsComposite(object):
     def setup(self):
