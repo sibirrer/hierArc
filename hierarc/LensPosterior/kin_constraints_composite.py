@@ -216,21 +216,11 @@ class KinConstraintsComposite(KinConstraints):
 
         kwargs_lens_stars["amp"] *= m2l
 
-        if "sigma" in kwargs_lens_stars:
-            kwargs_lens_stars["sigma"] *= delta_r_eff
-        elif "Rs" in kwargs_lens_stars:
-            kwargs_lens_stars["Rs"] *= delta_r_eff
-        elif "R_sersic" in kwargs_lens_stars:
-            kwargs_lens_stars["R_sersic"] *= delta_r_eff
+        kwargs_lens_stars["sigma"] *= delta_r_eff
 
         kwargs_light = copy.deepcopy(self._kwargs_lens_light)
         for kwargs in kwargs_light:
-            if "sigma" in kwargs:
-                kwargs["sigma"] *= delta_r_eff
-            elif "Rs" in kwargs:
-                kwargs["Rs"] *= delta_r_eff
-            elif "R_sersic" in kwargs:
-                kwargs["R_sersic"] *= delta_r_eff
+            kwargs["sigma"] *= delta_r_eff
 
         kwargs_lens = [
             {
