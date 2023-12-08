@@ -91,3 +91,86 @@ class TestLensParam(object):
         kwargs_new, i = self._param_fixed.args2kwargs(args, i=0)
         args_new = self._param_fixed.kwargs2args(kwargs_new)
         npt.assert_almost_equal(args_new, args)
+
+
+class TestLensParamGammaInnerM2l(object):
+    def setup(self):
+        self._param = LensParam(
+            gamma_in_sampling=True,
+            gamma_in_distribution="GAUSSIAN",
+            m2l_sampling=True,
+            m2l_distribution="GAUSSIAN",
+            alpha_gamma_in_sampling=True,
+            alpha_m2l_sampling=True,
+            kwargs_fixed={},
+            log_scatter=False,
+        )
+
+        kwargs_fixed = {
+            "gamma_in": 1,
+            "gamma_in_sigma": 0.1,
+            "m2l": 5,
+            "m2l_sigma": 1,
+            "alpha_gamma_in": 0.1,
+            "alpha_m2l": -0.5,
+        }
+        self._param_fixed = LensParam(
+            gamma_in_sampling=True,
+            gamma_in_distribution="GAUSSIAN",
+            m2l_sampling=True,
+            m2l_distribution="GAUSSIAN",
+            alpha_gamma_in_sampling=True,
+            alpha_m2l_sampling=True,
+            kwargs_fixed=kwargs_fixed,
+            log_scatter=False,
+        )
+        self._param_log_scatter = LensParam(
+            gamma_in_sampling=True,
+            gamma_in_distribution="GAUSSIAN",
+            m2l_sampling=True,
+            m2l_distribution="GAUSSIAN",
+            alpha_gamma_in_sampling=True,
+            alpha_m2l_sampling=True,
+            kwargs_fixed={},
+            log_scatter=True,
+        )
+
+    def test_param_list(self):
+        param_list = self._param.param_list(latex_style=False)
+        assert len(param_list) == 6
+        param_list = self._param.param_list(latex_style=True)
+        assert len(param_list) == 6
+
+        param_list = self._param_log_scatter.param_list(latex_style=False)
+        assert len(param_list) == 6
+        param_list = self._param_log_scatter.param_list(latex_style=True)
+        assert len(param_list) == 6
+
+        param_list = self._param_fixed.param_list(latex_style=False)
+        assert len(param_list) == 0
+        param_list = self._param_fixed.param_list(latex_style=True)
+        assert len(param_list) == 0
+
+    def test_args2kwargs(self):
+        kwargs = {
+            "gamma_in": 1,
+            "gamma_in_sigma": 0.1,
+            "m2l": 5,
+            "m2l_sigma": 1,
+            "alpha_gamma_in": 0.1,
+            "alpha_m2l": -0.5,
+        }
+        args = self._param.kwargs2args(kwargs)
+        kwargs_new, i = self._param.args2kwargs(args, i=0)
+        args_new = self._param.kwargs2args(kwargs_new)
+        npt.assert_almost_equal(args_new, args)
+
+        args = self._param_log_scatter.kwargs2args(kwargs)
+        kwargs_new, i = self._param_log_scatter.args2kwargs(args, i=0)
+        args_new = self._param_log_scatter.kwargs2args(kwargs_new)
+        npt.assert_almost_equal(args_new, args)
+
+        args = self._param_fixed.kwargs2args(kwargs)
+        kwargs_new, i = self._param_fixed.args2kwargs(args, i=0)
+        args_new = self._param_fixed.kwargs2args(kwargs_new)
+        npt.assert_almost_equal(args_new, args)

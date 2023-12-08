@@ -33,12 +33,12 @@ class TestKinLikelihood(object):
             error_cov_j_sqrt,
             normalized=False,
         )
-        logl = kin_likelihood.log_likelihood(ddt, dd, aniso_scaling=None)
+        logl = kin_likelihood.log_likelihood(ddt, dd, kin_scaling=None)
         npt.assert_almost_equal(logl, 0, decimal=5)
-        logl = kin_likelihood.log_likelihood(ddt * (0.9**2), dd, aniso_scaling=None)
+        logl = kin_likelihood.log_likelihood(ddt * (0.9**2), dd, kin_scaling=None)
         npt.assert_almost_equal(logl, -num_ifu / 2, decimal=5)
         logl = kin_likelihood.log_likelihood(
-            ddt * (1 - np.sqrt(0.1**2 + 0.1**2)) ** 2, dd, aniso_scaling=None
+            ddt * (1 - np.sqrt(0.1**2 + 0.1**2)) ** 2, dd, kin_scaling=None
         )
         npt.assert_almost_equal(logl, -num_ifu, decimal=5)
 
@@ -50,7 +50,7 @@ class TestKinLikelihood(object):
         assert error_cov_measurement_[0, 0] == error_cov_measurement[0, 0]
 
         sigma_v_predict, error_cov_predict = kin_likelihood.sigma_v_prediction(
-            ddt, dd, aniso_scaling=1
+            ddt, dd, kin_scaling=1
         )
         assert sigma_v_predict[0] == sigma_v_measurement[0]
         assert error_cov_predict[0, 0] == 0
@@ -82,7 +82,7 @@ class TestKinLikelihood(object):
         logl = ifu_likelihood.log_likelihood(
             ddt * (1 - np.sqrt(0.1**2)) ** 2,
             dd,
-            aniso_scaling=1,
+            kin_scaling=1,
             sigma_v_sys_error=0.1,
         )
         npt.assert_almost_equal(logl, -1 / 2.0, decimal=5)
@@ -112,10 +112,10 @@ class TestKinLikelihood(object):
             normalized=True,
             sigma_sys_error_include=True,
         )
-        logl = ifu_likelihood.log_likelihood(ddt, dd, aniso_scaling=1)
+        logl = ifu_likelihood.log_likelihood(ddt, dd, kin_scaling=1)
         aniso_scaling = 0.8
         logl_ani = ifu_likelihood.log_likelihood(
-            ddt, dd * aniso_scaling, aniso_scaling=aniso_scaling
+            ddt, dd * aniso_scaling, kin_scaling=aniso_scaling
         )
         npt.assert_almost_equal(logl_ani - logl, 0, decimal=1)
 
@@ -123,14 +123,14 @@ class TestKinLikelihood(object):
         # analytical Gaussian calculation in the covariance matrix normalization
         sigma_v_sys_error = 0.1
         logl = ifu_likelihood.log_likelihood(
-            ddt, dd, aniso_scaling=1, sigma_v_sys_error=sigma_v_sys_error
+            ddt, dd, kin_scaling=1, sigma_v_sys_error=sigma_v_sys_error
         )
         l_sum = 0
         num_sample = 10000
         for i in range(num_sample):
             sigma_v_pert = np.random.normal(loc=0, scale=sigma_v_sys_error)
             logl_i = ifu_likelihood.log_likelihood(
-                ddt, dd, aniso_scaling=1, sigma_v_sys_offset=sigma_v_pert
+                ddt, dd, kin_scaling=1, sigma_v_sys_offset=sigma_v_pert
             )
             l_sum += np.exp(logl_i)
         logl_average = np.log(l_sum / num_sample)
@@ -149,7 +149,7 @@ class TestKinLikelihood(object):
             normalized=True,
             sigma_sys_error_include=True,
         )
-        logl = ifu_likelihood.log_likelihood(ddt=1, dd=1, aniso_scaling=1)
+        logl = ifu_likelihood.log_likelihood(ddt=1, dd=1, kin_scaling=1)
         assert logl == -np.inf
 
 

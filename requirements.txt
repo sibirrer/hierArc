@@ -7,7 +7,6 @@ mpmath
 h5py
 matplotlib
 pandas
-lenstronomy>=1.11.3
-# -e git://github.com/sibirrer/lenstronomy.git@main#egg=lenstronomy
+lenstronomy @ git+https://github.com/lenstronomy/lenstronomy@main
 scikit-learn>=0.22
 pandas

@@ -1,12 +1,12 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.LensLikelihood.base_lens_likelihood import LensLikelihoodBase
-from hierarc.Likelihood.anisotropy_scaling import AnisotropyScalingIFU
+from hierarc.Likelihood.parameter_scaling import ParameterScalingIFU
 from hierarc.Util.distribution_util import PDFSampling
 import numpy as np
 import copy
 
 
-class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScalingIFU):
+class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalingIFU):
     """Master class containing the likelihood definitions of different analysis for s
     single lens."""
 
@@ -18,8 +18,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         likelihood_type="TDKin",
         anisotropy_model="NONE",
         ani_param_array=None,
-        ani_scaling_array_list=None,
         ani_scaling_array=None,
+        ani_scaling_array_list=None,
+        gamma_in_array=None,
+        m2l_array=None,
+        param_scaling_grid_list=None,
         num_distribution_draws=50,
         kappa_ext_bias=False,
         kappa_pdf=None,
@@ -42,7 +45,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
          to default prediction. The scaling corresponds to the ani_param_array parameter spacing
          (to generate an interpolation function). A value =1 in ani_scaling_array results in the value stored in the
          provided J() predictions.
-        :param ani_scaling_array_list: list of array with the scalings of J() for each IFU
+        :param param_scaling_grid_list: list of N-dimensional arrays with the
+            scalings of J() for each IFU. Needed when simultaneously scaling
+            anisotropy, gamma_in, and m2l. In that case, gamma_in_array and m2l_array need to be provided.
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
@@ -65,12 +70,32 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
         if ani_scaling_array_list is None and ani_scaling_array is not None:
             ani_scaling_array_list = [ani_scaling_array]
-        AnisotropyScalingIFU.__init__(
-            self,
-            anisotropy_model=anisotropy_model,
-            ani_param_array=ani_param_array,
-            ani_scaling_array_list=ani_scaling_array_list,
-        )
+
+        # AnisotropyScalingIFU.__init__(
+        #     self,
+        #     anisotropy_model=anisotropy_model,
+        #     ani_param_array=ani_param_array,
+        #     ani_scaling_array_list=ani_scaling_array_list,
+        # )
+        if gamma_in_array is not None and m2l_array is not None:
+            if isinstance(ani_param_array, list):
+                param_arrays = ani_param_array + [gamma_in_array, m2l_array]
+            else:
+                param_arrays = [ani_param_array, gamma_in_array, m2l_array]
+            ParameterScalingIFU.__init__(
+                self,
+                anisotropy_model=anisotropy_model,
+                param_arrays=param_arrays,
+                scaling_grid_list=param_scaling_grid_list,
+            )
+        else:
+            ParameterScalingIFU.__init__(
+                self,
+                anisotropy_model=anisotropy_model,
+                param_arrays=ani_param_array,
+                scaling_grid_list=ani_scaling_array_list,
+            )
+
         LensLikelihoodBase.__init__(
             self,
             z_lens=z_lens,
@@ -93,6 +118,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             self._draw_kappa = False
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
+        self._gamma_in_array = gamma_in_array
+        self._m2l_array = m2l_array
 
     def lens_log_likelihood(
         self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
@@ -116,7 +143,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         delta_lum_dist = self.luminosity_distance_modulus(cosmo, z_apparent_m_anchor)
         # here we effectively change the posteriors of the lens, but rather than changing the instance of the KDE we
         # displace the predicted angular diameter distances in the opposite direction
-        return self.hyper_param_likelihood(
+        a = self.hyper_param_likelihood(
             ddt,
             dd,
             delta_lum_dist,
@@ -125,6 +152,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             kwargs_source=kwargs_source,
             cosmo=cosmo,
         )
+        return a
 
     def hyper_param_likelihood(
         self,
@@ -221,17 +249,87 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             kappa_ext=kappa_ext,
             mag_source=mag_source,
         )
-        aniso_param_array = self.draw_anisotropy(**kwargs_kin)
-        aniso_scaling = self.ani_scaling(aniso_param_array)
+        scaling_param_array = self.draw_scaling_params(
+            kwargs_lens=kwargs_lens, **kwargs_kin
+        )
+        kin_scaling = self.param_scaling(scaling_param_array)
 
         lnlikelihood = self.log_likelihood(
             ddt_,
             dd_,
-            aniso_scaling=aniso_scaling,
+            kin_scaling=kin_scaling,
             sigma_v_sys_error=sigma_v_sys_error,
             mu_intrinsic=mag_source_,
         )
         return np.nan_to_num(lnlikelihood)
+
+    def draw_scaling_params(self, kwargs_lens=None, **kwargs_kin):
+        """Draws a realization of the anisotropy parameter scaling from the distribution
+        function.
+
+        :return: array of anisotropy parameter scaling
+        """
+        ani_param = self.draw_anisotropy(**kwargs_kin)
+        if self._gamma_in_array is not None and self._m2l_array is not None:
+            gamma_in, m2l = self.draw_lens_scaling_params(**kwargs_lens)
+            return np.concatenate([ani_param, [gamma_in, m2l]])
+        else:
+            return ani_param
+
+    def draw_lens_scaling_params(
+        self,
+        lambda_mst=1,
+        lambda_mst_sigma=0,
+        kappa_ext=0,
+        kappa_ext_sigma=0,
+        gamma_ppn=1,
+        lambda_ifu=1,
+        lambda_ifu_sigma=0,
+        alpha_lambda=0,
+        beta_lambda=0,
+        gamma_in=1,
+        gamma_in_sigma=0,
+        alpha_gamma_in=0,
+        m2l=1,
+        m2l_sigma=0,
+        alpha_m2l=0,
+    ):
+        """Draws a realization of the anisotropy parameter scaling from the
+        distribution.
+
+        :param lambda_mst: MST transform
+        :param lambda_mst_sigma: spread in the distribution
+        :param kappa_ext: external convergence mean in distribution
+        :param kappa_ext_sigma: spread in the distribution
+        :param gamma_ppn: Post-Newtonian parameter
+        :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified
+            for
+        :param lambda_ifu_sigma: secondary lambda_mst_sigma parameter for subset of
+            lenses specified for
+        :param alpha_lambda: float, linear slope of the lambda_int scaling relation with
+            lens quantity self._lambda_scaling_property
+        :param beta_lambda: float, a second linear slope of the lambda_int scaling
+            relation with lens quantity self._lambda_scaling_property_beta
+        :param gamma_in: inner slope of the NFW profile
+        :param gamma_in_sigma: spread in the distribution
+        :param alpha_gamma_in: float, linear slope of the gamma_in scaling relation with
+            lens quantity self._lambda_scaling_property
+        :param m2l: mass-to-light ratio
+        :param m2l_sigma: spread in the distribution
+        :param alpha_m2l: float, linear slope of the m2l scaling relation with lens
+            quantity self._lambda_scaling_property
+        :return: draw from the distributions
+        """
+        if self._gamma_in_array is not None and self._m2l_array is not None:
+            gamma_in_draw, m2l_draw = self.draw_lens_parameters(
+                gamma_in + alpha_gamma_in * self._lambda_scaling_property,
+                gamma_in_sigma,
+                m2l + alpha_m2l * self._lambda_scaling_property,
+                m2l_sigma,
+            )
+            return gamma_in_draw, m2l_draw
+        else:
+            return None, None
 
     def angular_diameter_distances(self, cosmo):
         """Time-delay distance Ddt, angular diameter distance to the lens (dd)
@@ -312,6 +410,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
         lambda_ifu_sigma=0,
         alpha_lambda=0,
         beta_lambda=0,
+        gamma_in=1,
+        gamma_in_sigma=0,
+        alpha_gamma_in=0,
+        m2l=1,
+        m2l_sigma=0,
+        alpha_m2l=0,
     ):
         """Draws a realization of a specific model from the hyper-parameter
         distribution.
@@ -329,6 +433,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             lens quantity self._lambda_scaling_property
         :param beta_lambda: float, a second linear slope of the lambda_int scaling
             relation with lens quantity self._lambda_scaling_property_beta
+        :param gamma_in: inner slope of the NFW profile
+        :param gamma_in_sigma: spread in the distribution
+        :param alpha_gamma_in: float, linear slope of the gamma_in scaling relation with
+            lens quantity self._lambda_scaling_property
+        :param m2l: mass-to-light ratio
+        :param m2l_sigma: spread in the distribution
+        :param alpha_m2l: float, linear slope of the m2l scaling relation with lens
+            quantity self._lambda_scaling_property
         :return: draw from the distributions
         """
         if self._mst_ifu is True:
@@ -403,10 +515,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, AnisotropyScali
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
             )
-            aniso_param_array = self.draw_anisotropy(**kwargs_kin_copy)
-            aniso_scaling = self.ani_scaling(aniso_param_array)
+            scaling_param_array = self.draw_scaling_params(
+                kwargs_lens=kwargs_lens, **kwargs_kin_copy
+            )
+            kin_scaling = self.param_scaling(scaling_param_array)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(
-                ddt_, dd_, aniso_scaling=aniso_scaling
+                ddt_, dd_, kin_scaling=kin_scaling
             )
             sigma_v_predict_mean += sigma_v_predict_i
             cov_error_predict += cov_error_predict_i
