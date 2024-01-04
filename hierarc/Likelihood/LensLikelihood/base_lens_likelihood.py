@@ -154,13 +154,13 @@ class LensLikelihoodBase(object):
         return self._lens_type.num_data
 
     def log_likelihood(
-        self, ddt, dd, aniso_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None
+        self, ddt, dd, kin_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None
     ):
         """
 
         :param ddt: time-delay distance [physical Mpc]
         :param dd: angular diameter distance to the lens [physical Mpc]
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+        :param kin_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion measurement
@@ -175,12 +175,12 @@ class LensLikelihoodBase(object):
         ]:
             return self._lens_type.log_likelihood(ddt, dd)
         elif self.likelihood_type in ["DdtDdKDE", "DdtDdGaussian", "DsDdsGaussian"]:
-            return self._lens_type.log_likelihood(ddt, dd, aniso_scaling=aniso_scaling)
+            return self._lens_type.log_likelihood(ddt, dd, kin_scaling=kin_scaling)
         elif self.likelihood_type in ["DdtHistKin", "IFUKinCov", "DdtGaussKin"]:
             return self._lens_type.log_likelihood(
                 ddt,
                 dd,
-                aniso_scaling=aniso_scaling,
+                kin_scaling=kin_scaling,
                 sigma_v_sys_error=sigma_v_sys_error,
             )
         elif self.likelihood_type in ["Mag"]:
@@ -220,14 +220,14 @@ class LensLikelihoodBase(object):
             )
         return None, None
 
-    def sigma_v_prediction(self, ddt, dd, aniso_scaling=None):
+    def sigma_v_prediction(self, ddt, dd, kin_scaling=None):
         """
 
         :param ddt: ddt in physical Mpc
         :param dd: dd in physical Mpc
-        :param aniso_scaling: anisotropy scaling in J
+        :param kin_scaling: anisotropy scaling in J
         :return: model predicted velocity dispersion (vector) and model covariance matrix thereof
         """
         if self.likelihood_type in ["DdtHistKin", "IFUKinCov", "DdtGaussKin"]:
-            return self._lens_type.sigma_v_prediction(ddt, dd, aniso_scaling)
+            return self._lens_type.sigma_v_prediction(ddt, dd, kin_scaling)
         return None, None

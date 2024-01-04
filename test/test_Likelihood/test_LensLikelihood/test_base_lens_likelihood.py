@@ -101,7 +101,7 @@ class TestLensLikelihood(object):
             )
             print(likelihood_type)
             logl = likelihood.log_likelihood(
-                ddt=1, dd=1, aniso_scaling=None, sigma_v_sys_error=1, mu_intrinsic=1
+                ddt=1, dd=1, kin_scaling=None, sigma_v_sys_error=1, mu_intrinsic=1
             )
             print(logl)
             assert logl > -np.inf
@@ -116,7 +116,7 @@ class TestLensLikelihood(object):
             )
             ddt_measurement = likelihood.ddt_measurement()
             likelihood.sigma_v_measurement(sigma_v_sys_error=0)
-            likelihood.sigma_v_prediction(ddt=1, dd=1, aniso_scaling=1)
+            likelihood.sigma_v_prediction(ddt=1, dd=1, kin_scaling=1)
             assert len(ddt_measurement) == 2
 
 

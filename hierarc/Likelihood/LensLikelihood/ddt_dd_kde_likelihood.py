@@ -52,18 +52,18 @@ class DdtDdKDELikelihood(object):
         self._interpol = interpol
         self.num_data = 2
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None):
+    def log_likelihood(self, ddt, dd, kin_scaling=None):
         """
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+        :param kin_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :return: log likelihood given the single lens analysis
         """
-        if aniso_scaling is not None:
-            dd_ = dd * aniso_scaling[0]
+        if kin_scaling is not None:
+            dd_ = dd * kin_scaling[0]
         else:
             dd_ = dd
         if self._interpol is True:

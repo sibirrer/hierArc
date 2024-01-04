@@ -6,7 +6,7 @@ import pytest
 import unittest
 
 
-class TestIFUKinPosterior(object):
+class TestKinConstraints(object):
     def setup(self):
         pass
 

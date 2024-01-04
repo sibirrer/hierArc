@@ -35,6 +35,7 @@ class KinConstraints(BaseLensConfig):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        cosmo_fiducial=None,
     ):
         """
 
@@ -46,24 +47,36 @@ class KinConstraints(BaseLensConfig):
         :param gamma_error: 1-sigma uncertainty on power-law slope
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
-        :param sigma_v_measured: numpy array of IFU velocity dispersion of the main deflector in km/s
-        :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity dispersion of the IFU
+        :param sigma_v_measured: numpy array of IFU velocity dispersion of the main
+            deflector in km/s
+        :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity
+            dispersion of the IFU
          observation independent of each other
-        :param sigma_v_error_covariant: covariant error in the measured kinematics shared among all IFU measurements
-        :param sigma_v_error_cov_matrix: error covariance matrix in the sigma_v measurements (km/s)^2
-        :type sigma_v_error_cov_matrix: nxn matrix with n the length of the sigma_v_measured array
-        :param kwargs_aperture: spectroscopic aperture keyword arguments, see lenstronomy.Galkin.aperture for options
-        :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds to kwargs_psf in the GalKin
+        :param sigma_v_error_covariant: covariant error in the measured kinematics
+            shared among all IFU measurements
+        :param sigma_v_error_cov_matrix: error covariance matrix in the sigma_v
+            measurements (km/s)^2
+        :type sigma_v_error_cov_matrix: nxn matrix with n the length of the
+            sigma_v_measured array
+        :param kwargs_aperture: spectroscopic aperture keyword arguments, see
+            lenstronomy.Galkin.aperture for options
+        :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
+            to kwargs_psf in the GalKin
          module specified in lenstronomy.GalKin.psf
-        :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
-        :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of
-         lenstronomy.GalKin.anisotropy
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param anisotropy_model: type of stellar anisotropy model. See details in
+            MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
-        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
-        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
-        :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
-         observations
+        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
+            routine
+        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
+            light profile
+        :param multi_observations: bool, if True, interprets kwargs_aperture and
+            kwargs_seeing as lists of multiple observations
+        :param cosmo_fiducial: astropy.cosmology instance, if None,
+            uses astropy's default
         """
         self._sigma_v_measured = np.array(sigma_v_measured)
         self._sigma_v_error_independent = np.array(sigma_v_error_independent)
@@ -97,6 +110,7 @@ class KinConstraints(BaseLensConfig):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
+            cosmo_fiducial=cosmo_fiducial,
         )
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):
@@ -165,9 +179,10 @@ class KinConstraints(BaseLensConfig):
     def model_marginalization(self, num_sample_model=20):
         """
 
-        :param num_sample_model: number of samples drawn from the lens and light model posterior to compute the
-         dimensionless kinematic component J()
-        :return: J() as array for each measurement prediction, covariance matrix in sqrt(J)
+        :param num_sample_model: number of samples drawn from the lens and light model
+            posterior to compute the dimensionless kinematic component J()
+        :return: J() as array for each measurement prediction, covariance matrix in
+            sqrt(J)
         """
         num_data = len(self._sigma_v_measured)
         j_kin_matrix = np.zeros(

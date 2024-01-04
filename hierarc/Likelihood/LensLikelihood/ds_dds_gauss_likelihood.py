@@ -19,20 +19,20 @@ class DsDdsGaussianLikelihood(object):
         self._ds_dds_sigma2 = ds_dds_sigma**2
         self.num_data = 1
 
-    def log_likelihood(self, ddt, dd, aniso_scaling=None):
+    def log_likelihood(self, ddt, dd, kin_scaling=None):
         """
         Note: kinematics + imaging data can constrain Ds/Dds. The input of Ddt, Dd is transformed here to match Ds/Dds
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
-        :param aniso_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
+        :param kin_scaling: array of size of the velocity dispersion measurement or None, scaling of the predicted
          dimensionless quantity J (proportional to sigma_v^2) of the anisotropy model in the sampling relative to the
          anisotropy model used to derive the prediction and covariance matrix in the init of this class.
         :return: log likelihood given the single lens analysis
         """
         ds_dds = ddt / dd / (1 + self._z_lens)
-        if aniso_scaling is not None:
-            scaling = aniso_scaling[0]
+        if kin_scaling is not None:
+            scaling = kin_scaling[0]
         else:
             scaling = 1
         ds_dds_ = ds_dds / scaling
