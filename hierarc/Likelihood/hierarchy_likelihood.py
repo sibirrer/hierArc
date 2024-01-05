@@ -260,9 +260,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             kappa_ext=kappa_ext,
             mag_source=mag_source,
         )
-        scaling_param_array = self.draw_scaling_params(
-            kwargs_lens=kwargs_lens, **kwargs_kin
-        )
+        try:
+            scaling_param_array = self.draw_scaling_params(
+                kwargs_lens=kwargs_lens, **kwargs_kin
+            )
+        except ValueError:
+            return np.nan_to_num(-np.inf)
         kin_scaling = self.param_scaling(scaling_param_array)
 
         lnlikelihood = self.log_likelihood(
