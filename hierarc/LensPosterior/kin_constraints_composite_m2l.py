@@ -83,6 +83,7 @@ class KinConstraintsCompositeM2l(KinConstraintsComposite):
         :param r_s_angle_array: array of halo scale radii in arc seconds
         :param amp_2_luminosity: conversion from light profile amplitudes to luminosity
             (e.g. distance modulus, k-correction, zeropoint, unit conversion, etc)
+            should be so that amplitude * amp_2_luminosity = luminosity
         """
 
         super(KinConstraintsCompositeM2l, self).__init__(
