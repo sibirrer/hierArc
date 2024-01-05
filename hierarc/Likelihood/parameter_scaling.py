@@ -64,6 +64,7 @@ class ParameterScalingIFU(object):
         """
         self._anisotropy_model = anisotropy_model
         self._evalute_ani = False
+        self.log_m2l_population_lvl = False
         if (
             param_arrays is not None
             and scaling_grid_list is not None
@@ -94,8 +95,9 @@ class ParameterScalingIFU(object):
                     self._gamma_in_min = np.min(param_arrays[1])
                     self._gamma_in_max = np.max(param_arrays[1])
                 if self._dim_scaling > 2:
-                    self._m2l_min = np.min(param_arrays[2])
-                    self._m2l_max = np.max(param_arrays[2])
+                    self._log_m2l_min = np.min(param_arrays[2])
+                    self._log_m2l_max = np.max(param_arrays[2])
+                    self.log_m2l_population_lvl = True
 
             elif anisotropy_model == "GOM":
                 self._ani_param_min = [min(param_arrays[0]), min(param_arrays[1])]
@@ -105,8 +107,9 @@ class ParameterScalingIFU(object):
                     self._gamma_in_min = np.min(param_arrays[2])
                     self._gamma_in_max = np.max(param_arrays[2])
                 if self._dim_scaling > 3:
-                    self._m2l_min = np.min(param_arrays[3])
-                    self._m2l_max = np.max(param_arrays[3])
+                    self._log_m2l_min = np.min(param_arrays[3])
+                    self._log_m2l_max = np.max(param_arrays[3])
+                    self.log_m2l_population_lvl = True
             else:
                 raise ValueError(
                     f"Anisotropy model {anisotropy_model} is not recognized!"
@@ -175,34 +178,51 @@ class ParameterScalingIFU(object):
         return None
 
     def draw_lens_parameters(
-        self, gamma_in=None, gamma_in_sigma=0, m2l=None, m2l_sigma=0
+        self, gamma_in=None, gamma_in_sigma=0, log_m2l=None, log_m2l_sigma=0
     ):
         """Draw Gaussian distribution and re-sample if outside bounds.
 
         :param gamma_in: mean of the distribution
         :param gamma_in_sigma: std of the distribution
-        :param m2l: mean of the distribution
-        :param m2l_sigma: std of the distribution
+        :param log_m2l: mean of the distribution
+        :param log_m2l_sigma: std of the distribution
         :return: random draw from the distribution
         """
-        if gamma_in < self._gamma_in_min or gamma_in > self._gamma_in_max:
-            raise ValueError(
-                "gamma_in parameter is out of bounds of the interpolated range!"
-            )
-        if m2l < self._m2l_min or m2l > self._m2l_max:
-            raise ValueError(
-                "m2l parameter is out of bounds of the interpolated range!"
-            )
+        if self.log_m2l_population_lvl:
+            if gamma_in < self._gamma_in_min or gamma_in > self._gamma_in_max:
+                raise ValueError(
+                    "gamma_in parameter is out of bounds of the interpolated range!"
+                )
+            if log_m2l < self._log_m2l_min or log_m2l > self._log_m2l_max:
+                raise ValueError(
+                    "m2l parameter is out of bounds of the interpolated range!"
+                )
 
-        gamma_in_draw = np.random.normal(gamma_in, gamma_in_sigma)
-        m2l_draw = np.random.normal(m2l, m2l_sigma)
+            gamma_in_draw = np.random.normal(gamma_in, gamma_in_sigma)
+            log_m2l_draw = np.random.normal(log_m2l, log_m2l_sigma)
 
-        if (
-            gamma_in_draw < self._gamma_in_min
-            or gamma_in_draw > self._gamma_in_max
-            or m2l_draw < self._m2l_min
-            or m2l_draw > self._m2l_max
-        ):
-            return self.draw_lens_parameters(gamma_in, gamma_in_sigma, m2l, m2l_sigma)
+            if (
+                gamma_in_draw < self._gamma_in_min
+                or gamma_in_draw > self._gamma_in_max
+                or log_m2l_draw < self._log_m2l_min
+                or log_m2l_draw > self._log_m2l_max
+            ):
+                return self.draw_lens_parameters(gamma_in, gamma_in_sigma, log_m2l, log_m2l_sigma)
 
-        return gamma_in_draw, m2l_draw
+            return gamma_in_draw, log_m2l_draw
+
+        else:
+            if gamma_in < self._gamma_in_min or gamma_in > self._gamma_in_max:
+                raise ValueError(
+                    "gamma_in parameter is out of bounds of the interpolated range!"
+                )
+
+            gamma_in_draw = np.random.normal(gamma_in, gamma_in_sigma)
+
+            if (
+                gamma_in_draw < self._gamma_in_min
+                or gamma_in_draw > self._gamma_in_max
+            ):
+                return self.draw_lens_parameters(gamma_in, gamma_in_sigma)
+
+            return gamma_in_draw
