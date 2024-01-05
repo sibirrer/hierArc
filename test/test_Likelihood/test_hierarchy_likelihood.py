@@ -93,7 +93,7 @@ class TestLensLikelihood(object):
         )
 
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
-        log_m2l_array = np.linspace(start=1, stop=1, num=10)
+        log_m2l_array = np.linspace(start=0.1, stop=1, num=10)
         param_scaling_array = np.multiply.outer(
             np.ones_like(ani_param_array),
             np.outer(np.ones_like(gamma_in_array), np.ones_like(log_m2l_array)),
