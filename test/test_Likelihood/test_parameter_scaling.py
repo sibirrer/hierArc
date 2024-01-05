@@ -382,6 +382,36 @@ class TestRaise(unittest.TestCase):
                 gamma_in=1, gamma_in_sigma=0, log_m2l=0, log_m2l_sigma=0
             )
 
+        gom_param_array = [
+            np.linspace(start=0, stop=1, num=10),
+            np.linspace(start=1, stop=2, num=5),
+        ]
+
+        gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
+
+        param_arrays = [
+            gom_param_array[0],
+            gom_param_array[1],
+            gamma_in_array,
+        ]
+        param_scaling_array = np.multiply.outer(
+            gom_param_array[0],
+            np.multiply.outer(
+                gom_param_array[1],
+                gamma_in_array,
+            ),
+        )
+        self.scaling_nfw_2d_no_m2l = ParameterScalingIFU(
+            anisotropy_model="GOM",
+            param_arrays=param_arrays,
+            scaling_grid_list=[param_scaling_array],
+        )
+
+        with self.assertRaises(ValueError):
+            param_draw = self.scaling_nfw_2d_no_m2l.draw_lens_parameters(
+                gamma_in=-1, gamma_in_sigma=1, log_m2l=0.5, log_m2l_sigma=3
+            )
+
 
 if __name__ == "__main__":
     pytest.main()
