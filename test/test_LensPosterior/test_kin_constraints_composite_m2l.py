@@ -1,4 +1,4 @@
-from hierarc.LensPosterior.kin_constraints_composite import KinConstraintsComposite
+from hierarc.LensPosterior.kin_constraints_composite_m2l import KinConstraintsCompositeM2l
 from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 import numpy.testing as npt
@@ -70,13 +70,13 @@ class TestKinConstraintsComposite(object):
         lens_light_model_list = ["SERSIC"]
 
         gamma_in_array = np.linspace(0.1, 2.9, 5)
-        log_m2l_array = np.linspace(0.1, 1, 5)
 
+        log_m2l_array = np.random.uniform(0.1, 1, 100)
         rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
         r_s_array = np.random.normal(0.1, 0, 100)
 
         # compute likelihood
-        kin_constraints = KinConstraintsComposite(
+        kin_constraints = KinConstraintsCompositeM2l(
             z_lens=z_lens,
             z_source=z_source,
             gamma_in_array=gamma_in_array,
@@ -166,13 +166,13 @@ class TestKinConstraintsComposite(object):
         lens_light_model_list = ["SERSIC"]
 
         gamma_in_array = np.linspace(0.1, 2.9, 5)
-        log_m2l_array = np.linspace(0.1, 1, 5)
 
+        log_m2l_array = np.random.uniform(0.1, 1, 100)
         rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
         r_s_array = np.random.normal(0.1, 0, 100)
 
         # compute likelihood
-        kin_constraints = KinConstraintsComposite(
+        kin_constraints = KinConstraintsCompositeM2l(
             z_lens=z_lens,
             z_source=z_source,
             gamma_in_array=gamma_in_array,
@@ -252,11 +252,11 @@ class TestRaise(unittest.TestCase):
             kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
 
             gamma_in_array = np.linspace(0.1, 2.9, 5)
-            log_m2l_array = np.linspace(0.1, 1, 5)
+            log_m2l_array = np.random.uniform(0.1, 1, 100)
             rho0_array = 10 ** np.random.normal(8, 0.2, 100) / 1e6
             r_s_array = np.random.normal(0.1, 0.01, 100)
 
-            kin_constraints = KinConstraintsComposite(
+            kin_constraints = KinConstraintsCompositeM2l(
                 z_lens=z_lens,
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
@@ -328,12 +328,12 @@ class TestRaise(unittest.TestCase):
 
             kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
             gamma_in_array = np.linspace(0.1, 2.9, 5)
-            log_m2l_array = np.linspace(0.1, 1, 5)
 
+            log_m2l_array = np.random.uniform(0.1, 1, 6)
             rho0_array = 10 ** np.random.normal(8, 0.2, 5) / 1e6
-            r_s_array = np.random.normal(0.1, 0.01, 6)
+            r_s_array = np.random.normal(0.1, 0.01, 5)
 
-            KinConstraintsComposite(
+            KinConstraintsCompositeM2l(
                 z_lens=z_lens,
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,

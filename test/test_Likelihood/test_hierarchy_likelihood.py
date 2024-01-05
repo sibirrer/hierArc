@@ -93,12 +93,12 @@ class TestLensLikelihood(object):
         )
 
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
-        m2l_array = np.linspace(start=1, stop=10, num=10)
+        log_m2l_array = np.linspace(start=1, stop=1, num=10)
         param_scaling_array = np.multiply.outer(
             np.ones_like(ani_param_array),
-            np.outer(np.ones_like(gamma_in_array), np.ones_like(m2l_array)),
+            np.outer(np.ones_like(gamma_in_array), np.ones_like(log_m2l_array)),
         )
-        self.likelihood_gamma_in_m2l_list_ani = LensLikelihood(
+        self.likelihood_gamma_in_log_m2l_list_ani = LensLikelihood(
             z_lens,
             z_source,
             name="name",
@@ -108,7 +108,7 @@ class TestLensLikelihood(object):
             ani_scaling_array_list=None,
             param_scaling_grid_list=[param_scaling_array],
             gamma_in_array=gamma_in_array,
-            m2l_array=m2l_array,
+            log_m2l_array=log_m2l_array,
             num_distribution_draws=200,
             kappa_ext_bias=False,
             kappa_pdf=None,
@@ -117,7 +117,7 @@ class TestLensLikelihood(object):
             **kwargs_likelihood
         )
 
-        self.likelihood_gamma_in_m2l = LensLikelihood(
+        self.likelihood_gamma_in_log_m2l = LensLikelihood(
             z_lens,
             z_source,
             name="name",
@@ -127,7 +127,7 @@ class TestLensLikelihood(object):
             ani_scaling_array_list=None,
             param_scaling_grid_list=[param_scaling_array],
             gamma_in_array=gamma_in_array,
-            m2l_array=m2l_array,
+            log_m2l_array=log_m2l_array,
             num_distribution_draws=200,
             kappa_ext_bias=False,
             kappa_pdf=None,
@@ -189,19 +189,18 @@ class TestLensLikelihood(object):
         kwargs_test = self.likelihood._kwargs_init(kwargs=None)
         assert type(kwargs_test) is dict
 
-        gamma_in_draw, m2l_draw = self.likelihood.draw_lens_scaling_params()
+        gamma_in_draw = self.likelihood.draw_lens_scaling_params()
         assert gamma_in_draw is None
-        assert m2l_draw is None
 
         kwargs_lens = {
             "gamma_in": 1,
             "gamma_in_sigma": 0,
             "alpha_gamma_in": 0,
-            "m2l": 1,
-            "m2l_sigma": 0,
-            "alpha_m2l": 0,
+            "log_m2l": 1,
+            "log_m2l_sigma": 0,
+            "alpha_log_m2l": 0,
         }
-        ln_likelihood = self.likelihood_gamma_in_m2l.lens_log_likelihood(
+        ln_likelihood = self.likelihood_gamma_in_log_m2l.lens_log_likelihood(
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
         )
         npt.assert_almost_equal(ln_likelihood, -0.0, decimal=1)
