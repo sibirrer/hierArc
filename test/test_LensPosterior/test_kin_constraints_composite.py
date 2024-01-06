@@ -108,12 +108,7 @@ class TestKinConstraintsComposite(object):
         kwargs_kin = {"a_ani": 1}
         ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
 
-        kwargs_lens_light_test = [
-            {
-                "amp": [1, 1],
-                "sigma": [1, 2]
-            }
-        ]
+        kwargs_lens_light_test = [{"amp": [1, 1], "sigma": [1, 2]}]
         lens_light_model_list_test = ["MULTI_GAUSSIAN"]
 
         kin_constraints_test = KinConstraintsComposite(

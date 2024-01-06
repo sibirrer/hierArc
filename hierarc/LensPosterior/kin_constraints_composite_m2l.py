@@ -5,6 +5,7 @@ import copy
 import numpy as np
 from hierarc.LensPosterior.kin_constraints_composite import KinConstraintsComposite
 
+
 class KinConstraintsCompositeM2l(KinConstraintsComposite):
     def __init__(
         self,
@@ -116,12 +117,14 @@ class KinConstraintsCompositeM2l(KinConstraintsComposite):
             multi_observations=multi_observations,
             kappa_s_array=kappa_s_array,
             r_s_angle_array=r_s_angle_array,
-            amp_2_luminosity=amp_2_luminosity
+            amp_2_luminosity=amp_2_luminosity,
         )
 
         if len(rho0_array) != len(log_m2l_array):
             if kappa_s_array is None or len(kappa_s_array) != len(log_m2l_array):
-                raise ValueError("log_m2l_array must have the same length as rho0_array or kappa_s_array!")
+                raise ValueError(
+                    "log_m2l_array must have the same length as rho0_array or kappa_s_array!"
+                )
 
         self._log_m2l_array = log_m2l_array
 
@@ -186,13 +189,19 @@ class KinConstraintsCompositeM2l(KinConstraintsComposite):
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        kappa_s_draw, r_scale_angle_draw, log_m2l_draw, r_eff_draw, delta_r_eff = self.draw_lens(
-            no_error=no_error
-        )
+        (
+            kappa_s_draw,
+            r_scale_angle_draw,
+            log_m2l_draw,
+            r_eff_draw,
+            delta_r_eff,
+        ) = self.draw_lens(no_error=no_error)
 
         kwargs_lens_stars = copy.deepcopy(self._kwargs_lens_light[0])
 
-        kwargs_lens_stars["amp"] *= log_m2l_draw / self.lensCosmo.sigma_crit_angle * self.amp_2_luminosity
+        kwargs_lens_stars["amp"] *= (
+            log_m2l_draw / self.lensCosmo.sigma_crit_angle * self.amp_2_luminosity
+        )
 
         kwargs_lens_stars["sigma"] *= delta_r_eff
 
@@ -296,10 +305,8 @@ class KinConstraintsCompositeM2l(KinConstraintsComposite):
                         )
 
                         for m, j_kin in enumerate(j_kin_ani):
-                            ani_scaling_grid_list[m][i, j, k] = (
-                                j_kin / j_ani_0[m]
-                            )
-                                # perhaps change the order
+                            ani_scaling_grid_list[m][i, j, k] = j_kin / j_ani_0[m]
+                            # perhaps change the order
         elif self._anisotropy_model in ["OM", "const"]:
             ani_scaling_grid_list = [
                 np.zeros(

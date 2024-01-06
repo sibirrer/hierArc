@@ -333,8 +333,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             lens quantity self._lambda_scaling_property
         :param log_m2l: log(mass-to-light ratio)
         :param log_m2l_sigma: spread in the distribution
-        :param alpha_log_m2l: float, linear slope of the log(m2l) scaling relation with lens
-            quantity self._lambda_scaling_property
+        :param alpha_log_m2l: float, linear slope of the log(m2l) scaling relation with
+            lens quantity self._lambda_scaling_property
         :return: draw from the distributions
         """
         if self._gamma_in_array is not None and self._log_m2l_array is not None:
@@ -349,7 +349,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         elif self._gamma_in_array is not None and self._log_m2l_array is None:
             gamma_in_draw = self.draw_lens_parameters(
                 gamma_in + alpha_gamma_in * self._lambda_scaling_property,
-                gamma_in_sigma
+                gamma_in_sigma,
             )
             return gamma_in_draw
 
@@ -464,8 +464,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             lens quantity self._lambda_scaling_property
         :param log_m2l: log(mass-to-light ratio)
         :param log_m2l_sigma: spread in the distribution
-        :param alpha_log_m2l: float, linear slope of the log(m2l) scaling relation with lens
-            quantity self._lambda_scaling_property
+        :param alpha_log_m2l: float, linear slope of the log(m2l) scaling relation with
+            lens quantity self._lambda_scaling_property
         :return: draw from the distributions
         """
         if self._mst_ifu is True:

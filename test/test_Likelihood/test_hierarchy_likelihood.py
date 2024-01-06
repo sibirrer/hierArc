@@ -228,7 +228,9 @@ class TestLensLikelihood(object):
 
         kwargs_source = self.likelihood_gamma_in_fail_case._kwargs_init(None)
         z_apparent_m_anchor = kwargs_source.get("z_apparent_m_anchor", 0.1)
-        delta_lum_dist = self.likelihood_gamma_in_fail_case.luminosity_distance_modulus(self.cosmo, z_apparent_m_anchor)
+        delta_lum_dist = self.likelihood_gamma_in_fail_case.luminosity_distance_modulus(
+            self.cosmo, z_apparent_m_anchor
+        )
 
         z_lens = 0.5
         z_source = 1.5
@@ -247,8 +249,9 @@ class TestLensLikelihood(object):
         dds = self.cosmo.angular_diameter_distance_z1z2(z1=z_lens, z2=z_source).value
         ddt = (1.0 + z_lens) * dd * ds / dds
 
-        ln_likelihood = self.likelihood_gamma_in_fail_case.log_likelihood_single(ddt, dd, delta_lum_dist, kwargs_lens,
-                                                                                 kwargs_kin, kwargs_source)
+        ln_likelihood = self.likelihood_gamma_in_fail_case.log_likelihood_single(
+            ddt, dd, delta_lum_dist, kwargs_lens, kwargs_kin, kwargs_source
+        )
 
         assert ln_likelihood < -10000000
 

@@ -1,4 +1,6 @@
-from hierarc.LensPosterior.kin_constraints_composite_m2l import KinConstraintsCompositeM2l
+from hierarc.LensPosterior.kin_constraints_composite_m2l import (
+    KinConstraintsCompositeM2l,
+)
 from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 import numpy.testing as npt

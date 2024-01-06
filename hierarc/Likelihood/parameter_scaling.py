@@ -207,7 +207,9 @@ class ParameterScalingIFU(object):
                 or log_m2l_draw < self._log_m2l_min
                 or log_m2l_draw > self._log_m2l_max
             ):
-                return self.draw_lens_parameters(gamma_in, gamma_in_sigma, log_m2l, log_m2l_sigma)
+                return self.draw_lens_parameters(
+                    gamma_in, gamma_in_sigma, log_m2l, log_m2l_sigma
+                )
 
             return gamma_in_draw, log_m2l_draw
 
@@ -219,10 +221,7 @@ class ParameterScalingIFU(object):
 
             gamma_in_draw = np.random.normal(gamma_in, gamma_in_sigma)
 
-            if (
-                gamma_in_draw < self._gamma_in_min
-                or gamma_in_draw > self._gamma_in_max
-            ):
+            if gamma_in_draw < self._gamma_in_min or gamma_in_draw > self._gamma_in_max:
                 return self.draw_lens_parameters(gamma_in, gamma_in_sigma)
 
             return gamma_in_draw

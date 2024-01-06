@@ -91,7 +91,10 @@ class KinConstraintsComposite(KinConstraints):
             should be so that amplitude * amp_2_luminosity = luminosity
         """
 
-        if len(lens_light_model_list) == 1 and lens_light_model_list[0] == "MULTI_GAUSSIAN":
+        if (
+            len(lens_light_model_list) == 1
+            and lens_light_model_list[0] == "MULTI_GAUSSIAN"
+        ):
             kwargs_lens_light = kwargs_lens_light
         else:
             self._light_profile_analysis = LightProfileAnalysis(
@@ -224,7 +227,9 @@ class KinConstraintsComposite(KinConstraints):
         j_model_list = np.mean(j_kin_matrix, axis=0)
         return j_model_list, error_cov_j_sqrt
 
-    def j_kin_draw_composite(self, kwargs_anisotropy, gamma_in, log_m2l, no_error=False):
+    def j_kin_draw_composite(
+        self, kwargs_anisotropy, gamma_in, log_m2l, no_error=False
+    ):
         """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
@@ -240,7 +245,9 @@ class KinConstraintsComposite(KinConstraints):
 
         kwargs_lens_stars = copy.deepcopy(self._kwargs_lens_light[0])
 
-        kwargs_lens_stars["amp"] *= 10**log_m2l / self.lensCosmo.sigma_crit_angle * self.amp_2_luminosity
+        kwargs_lens_stars["amp"] *= (
+            10**log_m2l / self.lensCosmo.sigma_crit_angle * self.amp_2_luminosity
+        )
 
         kwargs_lens_stars["sigma"] *= delta_r_eff
 
