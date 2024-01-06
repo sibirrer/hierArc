@@ -224,7 +224,7 @@ class KinConstraintsComposite(KinConstraints):
             j_kin_matrix[i, :] = j_kin
 
         error_cov_j_sqrt = np.cov(np.sqrt(j_kin_matrix.T))
-        j_model_list = np.mean(j_kin_matrix, axis=0)
+        j_model_list = np.nanmean(j_kin_matrix, axis=0)
         return j_model_list, error_cov_j_sqrt
 
     def j_kin_draw_composite(
