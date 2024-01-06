@@ -1,6 +1,7 @@
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 from astropy.cosmology import FlatLambdaCDM
 import pytest
+import unittest
 import numpy as np
 import numpy.testing as npt
 
@@ -136,6 +137,26 @@ class TestLensLikelihood(object):
             **kwargs_likelihood
         )
 
+        self.likelihood_gamma_in_fail_case = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtDdGaussian",
+            anisotropy_model="OM",
+            ani_param_array=ani_param_array,
+            ani_scaling_array_list=None,
+            param_scaling_grid_list=[param_scaling_array],
+            gamma_in_array=gamma_in_array,
+            log_m2l_array=log_m2l_array,
+            num_distribution_draws=200,
+            kappa_ext_bias=False,
+            kappa_pdf=None,
+            kappa_bin_edges=None,
+            mst_ifu=False,
+            lambda_scaling_property=100,
+            **kwargs_likelihood
+        )
+
     def test_lens_log_likelihood(self):
         np.random.seed(42)
         kwargs_lens = {
@@ -204,6 +225,32 @@ class TestLensLikelihood(object):
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
         )
         npt.assert_almost_equal(ln_likelihood, -0.0, decimal=1)
+
+        kwargs_source = self.likelihood_gamma_in_fail_case._kwargs_init(None)
+        z_apparent_m_anchor = kwargs_source.get("z_apparent_m_anchor", 0.1)
+        delta_lum_dist = self.likelihood_gamma_in_fail_case.luminosity_distance_modulus(self.cosmo, z_apparent_m_anchor)
+
+        z_lens = 0.5
+        z_source = 1.5
+
+        kwargs_lens = {
+            "gamma_in": 1,
+            "gamma_in_sigma": 0,
+            "alpha_gamma_in": 0,
+            "log_m2l": 1,
+            "log_m2l_sigma": 0,
+            "alpha_log_m2l": 1000,
+        }
+
+        dd = self.cosmo.angular_diameter_distance(z=z_lens).value
+        ds = self.cosmo.angular_diameter_distance(z=z_source).value
+        dds = self.cosmo.angular_diameter_distance_z1z2(z1=z_lens, z2=z_source).value
+        ddt = (1.0 + z_lens) * dd * ds / dds
+
+        ln_likelihood = self.likelihood_gamma_in_fail_case.log_likelihood_single(ddt, dd, delta_lum_dist, kwargs_lens,
+                                                                                 kwargs_kin, kwargs_source)
+
+        assert ln_likelihood < -10000000
 
 
 if __name__ == "__main__":
