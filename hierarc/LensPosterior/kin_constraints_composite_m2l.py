@@ -169,7 +169,7 @@ class KinConstraintsCompositeM2l(KinConstraintsComposite):
             (num_sample_model, num_data)
         )  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
-            j_kin = None
+            j_kin = np.nan
             c = 0
             while np.isnan(j_kin) and c < 10:
                 j_kin = self.j_kin_draw_composite_m2l(
