@@ -886,7 +886,7 @@ class TestRaise(unittest.TestCase):
             kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
 
             gamma_in_array = np.linspace(0.1, 2.9, 5)
-            log_m2l_array = np.linspace(0.1, 1, 5)
+            log_m2l_array = np.linspace(0.1, 1, 100)
             rho0_array = 10 ** np.random.normal(8, 0.2, 100) / 1e6
             r_s_array = np.random.normal(0.1, 0.01, 100)
 
