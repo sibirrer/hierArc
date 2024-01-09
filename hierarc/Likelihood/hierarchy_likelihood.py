@@ -47,7 +47,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
          provided J() predictions.
         :param param_scaling_grid_list: list of N-dimensional arrays with the
             scalings of J() for each IFU. Needed when simultaneously scaling
-            anisotropy, gamma_in, and log(m2l). In that case, gamma_in_array and log_m2l_array need to be provided.
+            anisotropy, gamma_in, and log_m2l. In that case, gamma_in_array and log_m2l_array need to be provided.
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
         :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
