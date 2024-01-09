@@ -238,7 +238,7 @@ class KinConstraintsComposite(KinConstraints):
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param gamma_in: power-law slope of the mass model
-        :param log_m2l: log(mass-to-light ratio) of the stellar component
+        :param log_m2l: log10(mass-to-light ratio) of the stellar component
         :param no_error: bool, if True, does not render from the uncertainty but uses
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
