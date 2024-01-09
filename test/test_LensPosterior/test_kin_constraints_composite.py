@@ -840,7 +840,7 @@ class TestRaise(unittest.TestCase):
             )
 
         with self.assertRaises(ValueError):
-            anisotropy_model = "FAKE_MODEL"
+            anisotropy_model = "OM"
             kwargs_aperture = {
                 "aperture_type": "shell",
                 "r_in": 0,
@@ -852,7 +852,7 @@ class TestRaise(unittest.TestCase):
 
             # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
             kwargs_numerics_galkin = {
-                "interpol_grid_num": 100,  # numerical interpolation, should converge -> infinity
+                "interpol_grid_num": 50,  # numerical interpolation, should converge -> infinity
                 "log_integration": True,
                 # log or linear interpolation of surface brightness and mass models
                 "max_integrate": 100,
@@ -879,19 +879,18 @@ class TestRaise(unittest.TestCase):
                 "multi_observations": False,
                 "kwargs_numerics_galkin": kwargs_numerics_galkin,
                 "kwargs_mge_light": kwargs_mge_light,
-                "sampling_number": 50,
-                "num_kin_sampling": 50,
-                "num_psf_sampling": 50,
+                "sampling_number": 10,
+                "num_kin_sampling": 10,
+                "num_psf_sampling": 10,
             }
-
             kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
+
             gamma_in_array = np.linspace(0.1, 2.9, 5)
+            log_m2l_array = np.linspace(0.1, 1, 5)
+            rho0_array = 10 ** np.random.normal(8, 0.2, 100) / 1e6
+            r_s_array = np.random.normal(0.1, 0.01, 100)
 
-            log_m2l_array = np.random.uniform(0.1, 1, 5)
-            rho0_array = 10 ** np.random.normal(8, 0.2, 5) / 1e6
-            r_s_array = np.random.normal(0.1, 0.01, 5)
-
-            KinConstraintsComposite(
+            kin_constraints = KinConstraintsComposite(
                 z_lens=z_lens,
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
@@ -914,6 +913,8 @@ class TestRaise(unittest.TestCase):
                 is_m2l_population_level=False,
                 **kwargs_kin_api_settings
             )
+            kin_constraints._anisotropy_model = "BAD"
+            kin_constraints._anisotropy_scaling_relative(j_ani_0=1)
 
 
 if __name__ == "__main__":
