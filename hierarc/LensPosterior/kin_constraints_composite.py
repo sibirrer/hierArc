@@ -85,7 +85,7 @@ class KinConstraintsComposite(KinConstraints):
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
         :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
-        :param r_s_angle_array: array of halo scale radii in arc seconds
+        :param r_s_angle_array: array of halo scale radii in arcsecond
         :param amp_2_luminosity: conversion from light profile amplitudes to luminosity
             (e.g. distance modulus, k-correction, zeropoint, unit conversion, etc);
             should be so that amplitude * amp_2_luminosity = luminosity
