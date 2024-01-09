@@ -239,23 +239,19 @@ class KinConstraintsComposite(KinConstraints):
             (num_sample_model, num_data)
         )  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
-            j_kin = np.nan
-            c = 0
-            while np.isnan(j_kin) and c < 10:
-                if self._is_m2l_population_level:
-                    j_kin = self.j_kin_draw_composite(
-                        self.kwargs_anisotropy_base,
-                        np.mean(self.gamma_in_array),
-                        np.mean(self.log_m2l_array),
-                        no_error=False,
-                    )
-                else:
-                    j_kin = self.j_kin_draw_composite_m2l(
-                        self.kwargs_anisotropy_base,
-                        np.mean(self.gamma_in_array),
-                        no_error=False,
-                    )
-                c += 1
+            if self._is_m2l_population_level:
+                j_kin = self.j_kin_draw_composite(
+                    self.kwargs_anisotropy_base,
+                    np.mean(self.gamma_in_array),
+                    np.mean(self.log_m2l_array),
+                    no_error=False,
+                )
+            else:
+                j_kin = self.j_kin_draw_composite_m2l(
+                    self.kwargs_anisotropy_base,
+                    np.mean(self.gamma_in_array),
+                    no_error=False,
+                )
             j_kin_matrix[i, :] = j_kin
 
         error_cov_j_sqrt = np.cov(np.sqrt(j_kin_matrix.T))
