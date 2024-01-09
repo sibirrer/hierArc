@@ -64,7 +64,7 @@ class ParameterScalingIFU(object):
         """
         self._anisotropy_model = anisotropy_model
         self._evalute_ani = False
-        self.log_m2l_population_lvl = False
+        self._is_log_m2l_population_level = False
         if (
             param_arrays is not None
             and scaling_grid_list is not None
@@ -97,7 +97,7 @@ class ParameterScalingIFU(object):
                 if self._dim_scaling > 2:
                     self._log_m2l_min = np.min(param_arrays[2])
                     self._log_m2l_max = np.max(param_arrays[2])
-                    self.log_m2l_population_lvl = True
+                    self._is_log_m2l_population_level = True
 
             elif anisotropy_model == "GOM":
                 self._ani_param_min = [min(param_arrays[0]), min(param_arrays[1])]
@@ -109,7 +109,7 @@ class ParameterScalingIFU(object):
                 if self._dim_scaling > 3:
                     self._log_m2l_min = np.min(param_arrays[3])
                     self._log_m2l_max = np.max(param_arrays[3])
-                    self.log_m2l_population_lvl = True
+                    self._is_log_m2l_population_level = True
             else:
                 raise ValueError(
                     f"Anisotropy model {anisotropy_model} is not recognized!"
@@ -188,7 +188,7 @@ class ParameterScalingIFU(object):
         :param log_m2l_sigma: std of the distribution
         :return: random draw from the distribution
         """
-        if self.log_m2l_population_lvl:
+        if self._is_log_m2l_population_level:
             if gamma_in < self._gamma_in_min or gamma_in > self._gamma_in_max:
                 raise ValueError(
                     "gamma_in parameter is out of bounds of the interpolated range!"
