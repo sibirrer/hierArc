@@ -87,7 +87,7 @@ class KinConstraintsComposite(KinConstraints):
         :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
         :param r_s_angle_array: array of halo scale radii in arcsecond
         :param amp_2_luminosity: conversion from light profile amplitudes to luminosity
-            (e.g. distance modulus, k-correction, zeropoint, unit conversion, etc);
+            (e.g., considering user-preferred distance modulus, k-correction, zero-point, unit conversion, etc.);
             should be so that amplitude * amp_2_luminosity = luminosity
         """
 
