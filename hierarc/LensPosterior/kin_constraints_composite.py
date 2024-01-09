@@ -50,10 +50,9 @@ class KinConstraintsComposite(KinConstraints):
         :param gamma_in_array: array of power-law slopes of the mass model
         :param log_m2l_array: array of log10(mass-to-light ratios) of the stellar component,
             needs to be in the unit/scaling such that m2l / sigma_crit * amp in the
-            kwargs_lens_light provides the convergence amplitude of the stars; alternatively,
-            the unit conversion can be applied via the amp_2_luminosity parameter
-        :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
-        :param r_s_array: array of halo scale radii in Mpc
+            kwargs_lens_light provides the convergence amplitude of the stars
+        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
+        :param r_s_angle_array: array of halo scale radii in arcsecond
         :param theta_E: Einstein radius (in arc seconds)
         :param theta_E_error: 1-sigma error on Einstein radius
         :param gamma: power-law slope (2 = isothermal) estimated from imaging data
@@ -84,8 +83,8 @@ class KinConstraintsComposite(KinConstraints):
             routine
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
-        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
-        :param r_s_angle_array: array of halo scale radii in arcsecond
+        :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
+        :param r_s_array: array of halo scale radii in Mpc
         """
 
         if (
@@ -157,7 +156,9 @@ class KinConstraintsComposite(KinConstraints):
         self.log_m2l_array = log_m2l_array
         self._is_m2l_population_level = is_m2l_population_level
 
-        if not is_m2l_population_level and not self.arrays_check(self._kappa_s_array, log_m2l_array):
+        if not is_m2l_population_level and not self.arrays_check(
+            self._kappa_s_array, log_m2l_array
+        ):
             raise ValueError(
                 "log_m2l_array must have the same length as rho0_array or kappa_s_array!"
             )
@@ -217,7 +218,13 @@ class KinConstraintsComposite(KinConstraints):
             return kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
         else:
             log_m2l_draw = self.log_m2l_array[random_index]
-            return kappa_s_draw, r_scale_angle_draw, log_m2l_draw, r_eff_draw, delta_r_eff
+            return (
+                kappa_s_draw,
+                r_scale_angle_draw,
+                log_m2l_draw,
+                r_eff_draw,
+                delta_r_eff,
+            )
 
     def model_marginalization(self, num_sample_model=20):
         """
@@ -273,9 +280,7 @@ class KinConstraintsComposite(KinConstraints):
 
         kwargs_lens_stars = copy.deepcopy(self._kwargs_lens_light[0])
 
-        kwargs_lens_stars["amp"] *= (
-            10**log_m2l / self.lensCosmo.sigma_crit_angle
-        )
+        kwargs_lens_stars["amp"] *= 10**log_m2l / self.lensCosmo.sigma_crit_angle
 
         kwargs_lens_stars["sigma"] *= delta_r_eff
 
@@ -307,7 +312,8 @@ class KinConstraintsComposite(KinConstraints):
         return j_kin
 
     def j_kin_draw_composite_m2l(self, kwargs_anisotropy, gamma_in, no_error=False):
-        """Similar function to j_kin_draw_composite, but now drawing from log_m2l distribution.
+        """Similar function to j_kin_draw_composite, but now drawing from log_m2l
+        distribution.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param gamma_in: power-law slope of the mass model
@@ -325,9 +331,7 @@ class KinConstraintsComposite(KinConstraints):
 
         kwargs_lens_stars = copy.deepcopy(self._kwargs_lens_light[0])
 
-        kwargs_lens_stars["amp"] *= (
-            log_m2l_draw / self.lensCosmo.sigma_crit_angle
-        )
+        kwargs_lens_stars["amp"] *= log_m2l_draw / self.lensCosmo.sigma_crit_angle
 
         kwargs_lens_stars["sigma"] *= delta_r_eff
 
@@ -475,7 +479,8 @@ class KinConstraintsComposite(KinConstraints):
         return ani_scaling_grid_list
 
     def _anisotropy_scaling_relative_m2l(self, j_ani_0):
-        """Similar function to _anisotropy_scaling_relative, but instead drawing log_m2l from a distribution.
+        """Similar function to _anisotropy_scaling_relative, but instead drawing log_m2l
+        from a distribution.
 
         :param j_ani_0: default J() prediction for default anisotropy
         :return: list of arrays (for the number of measurements) according to anisotropy
