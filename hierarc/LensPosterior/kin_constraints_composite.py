@@ -156,7 +156,7 @@ class KinConstraintsComposite(KinConstraints):
         self.log_m2l_array = log_m2l_array
         self._is_m2l_population_level = is_m2l_population_level
 
-        if not is_m2l_population_level and not self.arrays_check(
+        if not is_m2l_population_level and not self._arrays_check(
             self._kappa_s_array, log_m2l_array
         ):
             raise ValueError(
