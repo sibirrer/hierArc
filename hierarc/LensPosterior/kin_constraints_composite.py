@@ -29,6 +29,8 @@ class KinConstraintsComposite(KinConstraints):
         kwargs_seeing,
         kwargs_numerics_galkin,
         anisotropy_model,
+        gamma_in_prior=None,
+        gamma_in_error=None,
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
@@ -155,6 +157,9 @@ class KinConstraintsComposite(KinConstraints):
         self.gamma_in_array = gamma_in_array
         self.log_m2l_array = log_m2l_array
         self._is_m2l_population_level = is_m2l_population_level
+
+        self._gamma_in_prior = gamma_in_prior
+        self._gamma_in_error = gamma_in_error
 
         if not is_m2l_population_level and not self._check_arrays(
             self._kappa_s_array, log_m2l_array
@@ -391,6 +396,8 @@ class KinConstraintsComposite(KinConstraints):
             "gamma_in_array": self.gamma_in_array,
             "log_m2l_array": self.log_m2l_array,
             "param_scaling_grid_list": ani_scaling_grid_list,
+            "gamma_in_prior": self._gamma_in_prior,
+            "gamma_in_error": self.gamma_in_error,
         }
 
         if not self._is_m2l_population_level:
