@@ -914,7 +914,7 @@ class TestRaise(unittest.TestCase):
                 **kwargs_kin_api_settings
             )
             kin_constraints._anisotropy_model = "BAD"
-            kin_constraints._anisotropy_scaling_relative(j_ani_0=1)
+            kin_constraints._anisotropy_scaling_relative_m2l(j_ani_0=1)
 
 
 if __name__ == "__main__":
