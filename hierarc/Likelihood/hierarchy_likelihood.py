@@ -32,6 +32,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         lambda_scaling_property_beta=0,
         normalized=True,
         kwargs_lens_properties=None,
+        gamma_in_prior=None,
+        gamma_in_error=None,
         **kwargs_likelihood
     ):
         """
@@ -131,6 +133,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
         self._gamma_in_array = gamma_in_array
         self._log_m2l_array = log_m2l_array
+
+        self._gamma_in_prior = gamma_in_prior
+        self._gamma_in_error = gamma_in_error
 
     def lens_log_likelihood(
         self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
@@ -275,6 +280,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             sigma_v_sys_error=sigma_v_sys_error,
             mu_intrinsic=mag_source_,
         )
+
+        if self._gamma_in_prior is not None and self._gamma_in_error is not None:
+            if self._gamma_in_array is not None and self._log_m2l_array is not None:
+                lnlikelihood -= (self._gamma_in_prior - scaling_param_array[-2])**2 / (2 * self._gamma_in_error**2)
+            elif self._gamma_in_array is not None and self._log_m2l_array is None:
+                lnlikelihood -= (self._gamma_in_prior - scaling_param_array[-1])**2 / (2 * self._gamma_in_error**2)
+
         return np.nan_to_num(lnlikelihood)
 
     def draw_scaling_params(self, kwargs_lens=None, **kwargs_kin):
