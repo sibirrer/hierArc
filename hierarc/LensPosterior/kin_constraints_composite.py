@@ -164,7 +164,7 @@ class KinConstraintsComposite(KinConstraints):
             )
 
     @staticmethod
-    def _arrays_check(array0, array1):
+    def _check_arrays(array0, array1):
         if array0 is None or array1 is None:
             return False
         return len(array0) == len(array1) and len(array0) > 0
