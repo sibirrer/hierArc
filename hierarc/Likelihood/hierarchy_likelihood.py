@@ -283,9 +283,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
 
         if self._gamma_in_prior is not None and self._gamma_in_error is not None:
             if self._gamma_in_array is not None and self._log_m2l_array is not None:
-                lnlikelihood -= (self._gamma_in_prior - scaling_param_array[-2])**2 / (2 * self._gamma_in_error)
+                lnlikelihood -= (self._gamma_in_prior - scaling_param_array[-2])**2 / (2 * self._gamma_in_error**2)
             elif self._gamma_in_array is not None and self._log_m2l_array is None:
-                lnlikelihood -= (self._gamma_in_prior - scaling_param_array[-1])**2 / (2 * self._gamma_in_error)
+                lnlikelihood -= (self._gamma_in_prior - scaling_param_array[-1])**2 / (2 * self._gamma_in_error**2)
 
         return np.nan_to_num(lnlikelihood)
 
