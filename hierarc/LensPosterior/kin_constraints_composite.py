@@ -165,6 +165,11 @@ class KinConstraintsComposite(KinConstraints):
 
     @staticmethod
     def _check_arrays(array0, array1):
+        """Checks if two arrays are valid sample distributions for pairs of parameters
+
+        :param array0, array1: arrays representing samples from respective distributions
+        :return: bool, True if arrays are the same length and > 0; False otherwise
+        """
         if array0 is None or array1 is None:
             return False
         return len(array0) == len(array1) and len(array0) > 0
