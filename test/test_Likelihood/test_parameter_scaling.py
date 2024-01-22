@@ -26,12 +26,12 @@ class TestParameterScalingSingleAperture(object):
 
         ani_param_array = np.linspace(start=0, stop=1, num=10)
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
-        m2l_array = np.linspace(start=1, stop=10, num=10)
+        log_m2l_array = np.linspace(start=0.1, stop=1, num=10)
 
-        param_arrays = [ani_param_array, gamma_in_array, m2l_array]
+        param_arrays = [ani_param_array, gamma_in_array, log_m2l_array]
         param_scaling_array = np.multiply.outer(
             ani_param_array,
-            np.outer(gamma_in_array, m2l_array),
+            np.outer(gamma_in_array, log_m2l_array),
         )
         self.scaling_nfw = ParameterScalingSingleAperture(
             param_arrays, param_scaling_array
@@ -45,13 +45,13 @@ class TestParameterScalingSingleAperture(object):
             gom_param_array[0],
             gom_param_array[1],
             gamma_in_array,
-            m2l_array,
+            log_m2l_array,
         ]
         param_scaling_array = np.multiply.outer(
             gom_param_array[0],
             np.multiply.outer(
                 gom_param_array[1],
-                np.outer(gamma_in_array, m2l_array),
+                np.outer(gamma_in_array, log_m2l_array),
             ),
         )
 
@@ -69,11 +69,11 @@ class TestParameterScalingSingleAperture(object):
         scaling = self.scaling_2d.param_scaling(param_array=[1, 2])
         assert scaling == 2
 
-        scaling = self.scaling_nfw.param_scaling(param_array=[1, 2.9, 10])
-        assert scaling == 1 * 2.9 * 10
+        scaling = self.scaling_nfw.param_scaling(param_array=[1, 2.9, 0.5])
+        assert scaling == 1 * 2.9 * 0.5
 
-        scaling = self.scaling_nfw_2d.param_scaling(param_array=[1, 2, 2.9, 10])
-        assert scaling == 1 * 2 * 2.9 * 10
+        scaling = self.scaling_nfw_2d.param_scaling(param_array=[1, 2, 2.9, 0.5])
+        assert scaling == 1 * 2 * 2.9 * 0.5
 
 
 class TestParameterScalingIFU(object):
@@ -99,12 +99,12 @@ class TestParameterScalingIFU(object):
 
         ani_param_array = np.linspace(start=0, stop=1, num=10)
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
-        m2l_array = np.linspace(start=1, stop=10, num=10)
+        log_m2l_array = np.linspace(start=0.1, stop=1, num=10)
 
-        param_arrays = [ani_param_array, gamma_in_array, m2l_array]
+        param_arrays = [ani_param_array, gamma_in_array, log_m2l_array]
         param_scaling_array = np.multiply.outer(
             ani_param_array,
-            np.outer(gamma_in_array, m2l_array),
+            np.outer(gamma_in_array, log_m2l_array),
         )
         self.scaling_nfw = ParameterScalingIFU(
             anisotropy_model="OM",
@@ -120,16 +120,49 @@ class TestParameterScalingIFU(object):
             gom_param_array[0],
             gom_param_array[1],
             gamma_in_array,
-            m2l_array,
+            log_m2l_array,
         ]
         param_scaling_array = np.multiply.outer(
             gom_param_array[0],
             np.multiply.outer(
                 gom_param_array[1],
-                np.outer(gamma_in_array, m2l_array),
+                np.outer(gamma_in_array, log_m2l_array),
             ),
         )
         self.scaling_nfw_2d = ParameterScalingIFU(
+            anisotropy_model="GOM",
+            param_arrays=param_arrays,
+            scaling_grid_list=[param_scaling_array],
+        )
+
+        param_arrays = [ani_param_array, gamma_in_array]
+        param_scaling_array = np.multiply.outer(
+            ani_param_array,
+            gamma_in_array,
+        )
+        self.scaling_nfw_no_m2l = ParameterScalingIFU(
+            anisotropy_model="OM",
+            param_arrays=param_arrays,
+            scaling_grid_list=[param_scaling_array],
+        )
+
+        gom_param_array = [
+            np.linspace(start=0, stop=1, num=10),
+            np.linspace(start=1, stop=2, num=5),
+        ]
+        param_arrays = [
+            gom_param_array[0],
+            gom_param_array[1],
+            gamma_in_array,
+        ]
+        param_scaling_array = np.multiply.outer(
+            gom_param_array[0],
+            np.multiply.outer(
+                gom_param_array[1],
+                gamma_in_array,
+            ),
+        )
+        self.scaling_nfw_2d_no_m2l = ParameterScalingIFU(
             anisotropy_model="GOM",
             param_arrays=param_arrays,
             scaling_grid_list=[param_scaling_array],
@@ -145,11 +178,17 @@ class TestParameterScalingIFU(object):
         scaling = self.scaling_2d.param_scaling(param_array=[1, 2])
         assert scaling[0] == 2
 
-        scaling = self.scaling_nfw.param_scaling(param_array=[1, 2.9, 10])
-        assert scaling[0] == 1 * 2.9 * 10
+        scaling = self.scaling_nfw.param_scaling(param_array=[1, 2.9, 0.5])
+        assert scaling[0] == 1 * 2.9 * 0.5
 
-        scaling = self.scaling_nfw_2d.param_scaling(param_array=[1, 2, 2.9, 10])
-        assert scaling[0] == 1 * 2 * 2.9 * 10
+        scaling = self.scaling_nfw_2d.param_scaling(param_array=[1, 2, 2.9, 0.5])
+        assert scaling[0] == 1 * 2 * 2.9 * 0.5
+
+        scaling = self.scaling_nfw_no_m2l.param_scaling(param_array=[1, 2.9])
+        assert scaling[0] == 1 * 2.9
+
+        scaling = self.scaling_nfw_2d_no_m2l.param_scaling(param_array=[1, 2, 2.9])
+        assert scaling[0] == 1 * 2 * 2.9
 
     def test_draw_anisotropy(self):
         a_ani = 1
@@ -197,6 +236,25 @@ class TestParameterScalingIFU(object):
                 a_ani=1, a_ani_sigma=1, beta_inf=beta_inf, beta_inf_sigma=1
             )
 
+        param_draw = self.scaling_nfw_no_m2l.draw_anisotropy(
+            a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0
+        )
+        assert param_draw[0] == a_ani
+        for i in range(100):
+            param_draw = self.scaling_nfw_no_m2l.draw_anisotropy(
+                a_ani=1, a_ani_sigma=1, beta_inf=beta_inf, beta_inf_sigma=1
+            )
+
+        param_draw = self.scaling_nfw_2d_no_m2l.draw_anisotropy(
+            a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0
+        )
+        assert param_draw[0] == a_ani
+        assert param_draw[1] == beta_inf
+        for i in range(100):
+            param_draw = self.scaling_nfw_2d_no_m2l.draw_anisotropy(
+                a_ani=1, a_ani_sigma=1, beta_inf=beta_inf, beta_inf_sigma=1
+            )
+
         scaling = ParameterScalingIFU(anisotropy_model="NONE")
         param_draw = scaling.draw_anisotropy(
             a_ani=1, a_ani_sigma=0, beta_inf=beta_inf, beta_inf_sigma=0
@@ -205,23 +263,42 @@ class TestParameterScalingIFU(object):
 
     def test_draw_lens_parameters(self):
         param_draw = self.scaling_nfw.draw_lens_parameters(
-            gamma_in=1, gamma_in_sigma=0, m2l=5, m2l_sigma=0
+            gamma_in=1, gamma_in_sigma=0, log_m2l=0.5, log_m2l_sigma=0
         )
         assert param_draw[0] == 1
-        assert param_draw[1] == 5
+        assert param_draw[1] == 0.5
         for i in range(100):
             param_draw = self.scaling_nfw.draw_lens_parameters(
-                gamma_in=1, gamma_in_sigma=1, m2l=5, m2l_sigma=3
+                gamma_in=1, gamma_in_sigma=1, log_m2l=0.5, log_m2l_sigma=3
             )
 
         param_draw = self.scaling_nfw_2d.draw_lens_parameters(
-            gamma_in=1, gamma_in_sigma=0, m2l=5, m2l_sigma=0
+            gamma_in=1, gamma_in_sigma=0, log_m2l=0.5, log_m2l_sigma=0
         )
         assert param_draw[0] == 1
-        assert param_draw[1] == 5
+        assert param_draw[1] == 0.5
+
         for i in range(100):
             param_draw = self.scaling_nfw_2d.draw_lens_parameters(
-                gamma_in=1, gamma_in_sigma=1, m2l=5, m2l_sigma=3
+                gamma_in=1, gamma_in_sigma=1, log_m2l=0.5, log_m2l_sigma=3
+            )
+
+        param_draw = self.scaling_nfw_no_m2l.draw_lens_parameters(
+            gamma_in=1, gamma_in_sigma=0, log_m2l=0.5, log_m2l_sigma=0
+        )
+        assert param_draw == 1
+        for i in range(100):
+            param_draw = self.scaling_nfw_no_m2l.draw_lens_parameters(
+                gamma_in=1, gamma_in_sigma=1, log_m2l=0.5, log_m2l_sigma=3
+            )
+
+        param_draw = self.scaling_nfw_2d_no_m2l.draw_lens_parameters(
+            gamma_in=1, gamma_in_sigma=0, log_m2l=0.5, log_m2l_sigma=0
+        )
+        assert param_draw == 1
+        for i in range(100):
+            param_draw = self.scaling_nfw_2d_no_m2l.draw_lens_parameters(
+                gamma_in=1, gamma_in_sigma=1, log_m2l=0.5, log_m2l_sigma=3
             )
 
 
@@ -263,12 +340,12 @@ class TestRaise(unittest.TestCase):
 
         ani_param_array = np.linspace(start=0, stop=1, num=10)
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
-        m2l_array = np.linspace(start=1, stop=10, num=10)
+        log_m2l_array = np.linspace(start=0.1, stop=1, num=10)
 
-        param_arrays = [ani_param_array, gamma_in_array, m2l_array]
+        param_arrays = [ani_param_array, gamma_in_array, log_m2l_array]
         param_scaling_array = np.multiply.outer(
             ani_param_array,
-            np.multiply.outer(gamma_in_array, m2l_array),
+            np.multiply.outer(gamma_in_array, log_m2l_array),
         )
         print(param_scaling_array.shape)
         scaling = ParameterScalingIFU(
@@ -278,21 +355,21 @@ class TestRaise(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             scaling.draw_lens_parameters(
-                gamma_in=-1, gamma_in_sigma=0.1, m2l=5, m2l_sigma=0.1
+                gamma_in=-1, gamma_in_sigma=0.1, log_m2l=0.5, log_m2l_sigma=0.1
             )
         with self.assertRaises(ValueError):
             scaling.draw_lens_parameters(
-                gamma_in=1, gamma_in_sigma=0.1, m2l=-5, m2l_sigma=0.1
+                gamma_in=1, gamma_in_sigma=0.1, log_m2l=-0.5, log_m2l_sigma=0.1
             )
 
         ani_param_array = np.linspace(start=0, stop=1, num=10)
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
-        m2l_array = np.linspace(start=1, stop=10, num=10)
+        log_m2l_array = np.linspace(start=0.1, stop=1, num=10)
 
-        param_arrays = [ani_param_array, gamma_in_array, m2l_array]
+        param_arrays = [ani_param_array, gamma_in_array, log_m2l_array]
         param_scaling_array = np.multiply.outer(
             ani_param_array,
-            np.multiply.outer(gamma_in_array, m2l_array),
+            np.multiply.outer(gamma_in_array, log_m2l_array),
         )
 
         scaling = ParameterScalingIFU(
@@ -302,7 +379,37 @@ class TestRaise(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             scaling.draw_lens_parameters(
-                gamma_in=1, gamma_in_sigma=0, m2l=0, m2l_sigma=0
+                gamma_in=1, gamma_in_sigma=0, log_m2l=0, log_m2l_sigma=0
+            )
+
+        gom_param_array = [
+            np.linspace(start=0, stop=1, num=10),
+            np.linspace(start=1, stop=2, num=5),
+        ]
+
+        gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
+
+        param_arrays = [
+            gom_param_array[0],
+            gom_param_array[1],
+            gamma_in_array,
+        ]
+        param_scaling_array = np.multiply.outer(
+            gom_param_array[0],
+            np.multiply.outer(
+                gom_param_array[1],
+                gamma_in_array,
+            ),
+        )
+        self.scaling_nfw_2d_no_m2l = ParameterScalingIFU(
+            anisotropy_model="GOM",
+            param_arrays=param_arrays,
+            scaling_grid_list=[param_scaling_array],
+        )
+
+        with self.assertRaises(ValueError):
+            param_draw = self.scaling_nfw_2d_no_m2l.draw_lens_parameters(
+                gamma_in=-1, gamma_in_sigma=1, log_m2l=0.5, log_m2l_sigma=3
             )
 
 
