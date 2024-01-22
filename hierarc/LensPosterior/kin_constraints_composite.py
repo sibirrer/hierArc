@@ -140,10 +140,10 @@ class KinConstraintsComposite(KinConstraints):
             multi_observations=multi_observations,
         )
 
-        if self._arrays_check(kappa_s_array, r_s_angle_array):
+        if self._check_arrays(kappa_s_array, r_s_angle_array):
             self._kappa_s_array = kappa_s_array
             self._r_scale_angle_array = r_s_angle_array
-        elif self._arrays_check(rho0_array, r_s_array):
+        elif self._check_arrays(rho0_array, r_s_array):
             self._kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
                 rho0_array, r_s_array
             )
