@@ -397,7 +397,7 @@ class KinConstraintsComposite(KinConstraints):
             "log_m2l_array": self.log_m2l_array,
             "param_scaling_grid_list": ani_scaling_grid_list,
             "gamma_in_prior": self._gamma_in_prior,
-            "gamma_in_error": self.gamma_in_error,
+            "gamma_in_error": self._gamma_in_error,
         }
 
         if not self._is_m2l_population_level:
