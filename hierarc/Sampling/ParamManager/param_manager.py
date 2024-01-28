@@ -18,8 +18,8 @@ class ParamManager(object):
         anisotropy_distribution="NONE",
         gamma_in_sampling=False,
         gamma_in_distribution="NONE",
-        m2l_sampling=False,
-        m2l_distribution="NONE",
+        log_m2l_sampling=False,
+        log_m2l_distribution="NONE",
         kappa_ext_sampling=False,
         kappa_ext_distribution="NONE",
         lambda_ifu_sampling=False,
@@ -27,7 +27,7 @@ class ParamManager(object):
         alpha_lambda_sampling=False,
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
-        alpha_m2l_sampling=False,
+        alpha_log_m2l_sampling=False,
         sigma_v_systematics=False,
         sne_apparent_m_sampling=False,
         sne_distribution="GAUSSIAN",
@@ -64,11 +64,11 @@ class ParamManager(object):
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
         :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
         :param gamma_in_distribution: string, distribution function of the gamma_in parameter
-        :param m2l_sampling: bool, if True samples the mass-to-light ratio of the stars
-        :param m2l_distribution: string, distribution function of the m2l parameter
+        :param log_m2l_sampling: bool, if True samples the mass-to-light ratio of the stars
+        :param log_m2l_distribution: string, distribution function of the log_m2l parameter
         :param alpha_gamma_in_sampling: bool, if True samples a parameter alpha_gamma_in, which scales gamma_in linearly
             according to a predefined quantity of the lens
-        :param alpha_m2l_sampling: bool, if True samples a parameter alpha_m2l, which scales m2l linearly
+        :param alpha_log_m2l_sampling: bool, if True samples a parameter alpha_log_m2l, which scales log_m2l linearly
             according to a predefined quantity of the lens
         :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
          (not intrinsic magnitudes but apparent!)
@@ -99,14 +99,14 @@ class ParamManager(object):
             lambda_ifu_distribution=lambda_ifu_distribution,
             gamma_in_sampling=gamma_in_sampling,
             gamma_in_distribution=gamma_in_distribution,
-            m2l_sampling=m2l_sampling,
-            m2l_distribution=m2l_distribution,
+            log_m2l_sampling=log_m2l_sampling,
+            log_m2l_distribution=log_m2l_distribution,
             kappa_ext_sampling=kappa_ext_sampling,
             kappa_ext_distribution=kappa_ext_distribution,
             alpha_lambda_sampling=alpha_lambda_sampling,
             beta_lambda_sampling=beta_lambda_sampling,
             alpha_gamma_in_sampling=alpha_gamma_in_sampling,
-            alpha_m2l_sampling=alpha_m2l_sampling,
+            alpha_log_m2l_sampling=alpha_log_m2l_sampling,
             log_scatter=log_scatter,
             kwargs_fixed=kwargs_fixed_lens,
         )
