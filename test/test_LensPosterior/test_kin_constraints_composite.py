@@ -9,7 +9,7 @@ from astropy.cosmology import FlatLambdaCDM
 
 
 class TestKinConstraintsComposite(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_likelihoodconfiguration_om(self):
@@ -260,7 +260,7 @@ class TestKinConstraintsComposite(object):
 
 
 class TestKinConstraintsCompositeM2l(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_likelihoodconfiguration_om(self):

@@ -10,7 +10,7 @@ from hierarc.Likelihood.cosmo_likelihood import CosmoLikelihood
 
 
 class TestCosmoLikelihood(object):
-    def setup(self):
+    def setup_method(self):
         np.random.seed(seed=41)
         self.z_L = 0.8
         self.z_S = 3.0

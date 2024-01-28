@@ -5,7 +5,7 @@ import unittest
 
 
 class TestSourceParam(object):
-    def setup(self):
+    def setup_method(self):
         self._param = SourceParam(
             sne_distribution="GAUSSIAN", sne_apparent_m_sampling=True, kwargs_fixed=None
         )

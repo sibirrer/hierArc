@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 
 
 class TestGoodnessOfFit(object):
-    def setup(self):
+    def setup_method(self):
         np.random.seed(seed=41)
         z_lens = 0.8
         z_source = 3.0

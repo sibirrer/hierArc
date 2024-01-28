@@ -10,7 +10,7 @@ import pytest
 
 
 class TestDdtGaussKinLikelihood(object):
-    def setup(self):
+    def setup_method(self):
         self.z_lens = 0.8
         self.z_source = 3.0
 

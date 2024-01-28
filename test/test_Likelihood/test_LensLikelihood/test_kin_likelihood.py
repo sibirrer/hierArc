@@ -7,7 +7,7 @@ from lenstronomy.Util import constants as const
 
 
 class TestKinLikelihood(object):
-    def setup(self):
+    def setup_method(self):
         np.random.seed(seed=41)
 
     def test_log_likelihood(self):

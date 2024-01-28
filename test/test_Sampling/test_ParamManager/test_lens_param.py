@@ -3,7 +3,7 @@ import numpy.testing as npt
 
 
 class TestLensParam(object):
-    def setup(self):
+    def setup_method(self):
         self._param = LensParam(
             lambda_mst_sampling=True,
             lambda_mst_distribution="GAUSSIAN",
@@ -94,7 +94,7 @@ class TestLensParam(object):
 
 
 class TestLensParamGammaInnerM2l(object):
-    def setup(self):
+    def setup_method(self):
         self._param = LensParam(
             gamma_in_sampling=True,
             gamma_in_distribution="GAUSSIAN",

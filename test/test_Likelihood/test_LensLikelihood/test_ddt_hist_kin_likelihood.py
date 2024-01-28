@@ -10,7 +10,7 @@ import pytest
 
 
 class TestDdtHistKinHist(object):
-    def setup(self):
+    def setup_method(self):
         self._ddt, self._dd = 2000.0, 1000.0
 
         self._sigma = 0.1

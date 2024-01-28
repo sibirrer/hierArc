@@ -5,7 +5,7 @@ from hierarc.Sampling.ParamManager.param_manager import ParamManager
 
 
 class TestParamManager(object):
-    def setup(self):
+    def setup_method(self):
         cosmology_list = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]
         kwargs_lower_cosmo = {
             "h0": 10,

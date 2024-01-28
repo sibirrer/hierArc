@@ -5,7 +5,7 @@ import numpy.testing as npt
 
 
 class TestTransformedCoismography(object):
-    def setup(self):
+    def setup_method(self):
         z_lens = 0.5
         z_source = 1.5
         self.transform = TransformedCosmography(z_lens=z_lens, z_source=z_source)

@@ -7,7 +7,7 @@ from hierarc.Util import ifu_util
 
 
 class TestIFUUtil(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_radial_dispersion(self):
