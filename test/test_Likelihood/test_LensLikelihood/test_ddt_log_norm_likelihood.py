@@ -8,7 +8,7 @@ import pytest
 
 
 class TestTDLikelihoodLogNorm(object):
-    def setup(self):
+    def setup_method(self):
         self.z_L = 0.8
         self.z_S = 3.0
         self.ddt_mu = 3.5

@@ -7,7 +7,7 @@ import pytest
 
 
 class TestDdtDdGaussianLikelihood(object):
-    def setup(self):
+    def setup_method(self):
         np.random.seed(seed=41)
         self.z_lens = 0.8
         self.z_source = 3.0

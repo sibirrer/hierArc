@@ -4,7 +4,7 @@ import pytest
 
 
 class TestAnisotropyConfig(object):
-    def setup(self):
+    def setup_method(self):
         self.r_eff = 2
         self.config_om = AnisotropyConfig(anisotropy_model="OM", r_eff=self.r_eff)
         self.config_gom = AnisotropyConfig(anisotropy_model="GOM", r_eff=self.r_eff)

@@ -10,7 +10,7 @@ from hierarc.Likelihood.LensLikelihood.double_source_plane import (
 class TestDSPLikelihood(object):
     """"""
 
-    def setup(self):
+    def setup_method(self):
         self.cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)
         self.zl = 0.5
         self.zs1 = 1

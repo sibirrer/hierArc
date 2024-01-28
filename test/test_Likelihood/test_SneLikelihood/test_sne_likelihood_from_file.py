@@ -11,7 +11,7 @@ from hierarc.Likelihood.SneLikelihood.sne_likelihood import SneLikelihood
 
 
 class TestSneLikelihoodFromFile(object):
-    def setup(self):
+    def setup_method(self):
         self.pantheon_binned_likelihood = SneLikelihoodFromFile(
             sample_name="Pantheon_binned"
         )

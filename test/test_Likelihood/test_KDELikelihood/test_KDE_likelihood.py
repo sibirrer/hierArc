@@ -16,7 +16,7 @@ from hierarc.Likelihood.KDELikelihood.kde_likelihood import (
 
 
 class TestKDELikelihood(object):
-    def setup(self):
+    def setup_method(self):
         self.cosmo_params = ["h0", "om"]
         self.cosmology = "FLCDM"
         self.chain = import_Planck_chain(

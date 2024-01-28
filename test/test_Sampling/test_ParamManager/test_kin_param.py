@@ -4,7 +4,7 @@ import pytest
 
 
 class TestKinParam(object):
-    def setup(self):
+    def setup_method(self):
         self._param = KinParam(
             anisotropy_sampling=True,
             anisotropy_model="GOM",
