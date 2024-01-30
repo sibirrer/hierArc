@@ -305,8 +305,6 @@ class KinConstraintsComposite(KinConstraints):
             kwargs_lens_stars,
         ]
 
-        print(kwargs_lens)
-
         j_kin = self.velocity_dispersion_map_dimension_less(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_light,
