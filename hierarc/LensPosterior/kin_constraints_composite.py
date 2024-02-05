@@ -29,8 +29,8 @@ class KinConstraintsComposite(KinConstraints):
         kwargs_seeing,
         kwargs_numerics_galkin,
         anisotropy_model,
-        gamma_in_prior=None,
-        gamma_in_error=None,
+        gamma_in_prior_mean=None,
+        gamma_in_prior_std=None,
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
@@ -80,6 +80,8 @@ class KinConstraintsComposite(KinConstraints):
             line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param gamma_in_prior_mean: inner power-law slope of the NFW profile, if available
+        :param gamma_in_prior_std: 1-sigma error gamma_in
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
@@ -158,8 +160,8 @@ class KinConstraintsComposite(KinConstraints):
         self.log_m2l_array = log_m2l_array
         self._is_m2l_population_level = is_m2l_population_level
 
-        self._gamma_in_prior = gamma_in_prior
-        self._gamma_in_error = gamma_in_error
+        self._gamma_in_prior_mean = gamma_in_prior_mean
+        self._gamma_in_prior_std = gamma_in_prior_std
 
         if not is_m2l_population_level and not self._check_arrays(
             self._kappa_s_array, log_m2l_array
@@ -394,8 +396,8 @@ class KinConstraintsComposite(KinConstraints):
             "gamma_in_array": self.gamma_in_array,
             "log_m2l_array": self.log_m2l_array,
             "param_scaling_grid_list": ani_scaling_grid_list,
-            "gamma_in_prior": self._gamma_in_prior,
-            "gamma_in_error": self._gamma_in_error,
+            "gamma_in_prior_mean": self._gamma_in_prior_mean,
+            "gamma_in_prior_std": self._gamma_in_prior_std,
         }
 
         if not self._is_m2l_population_level:
