@@ -283,7 +283,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             mu_intrinsic=mag_source_,
         )
 
-        if self._gamma_in_prior_mean is not None and self._gamma_in_prior_std is not None:
+        if (
+            self._gamma_in_prior_mean is not None
+            and self._gamma_in_prior_std is not None
+        ):
             if self._gamma_in_array is not None and self._log_m2l_array is not None:
                 lnlikelihood -= (
                     self._gamma_in_prior_mean - scaling_param_array[-2]
