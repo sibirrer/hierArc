@@ -32,6 +32,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         lambda_scaling_property_beta=0,
         normalized=True,
         kwargs_lens_properties=None,
+        gamma_in_prior_mean=None,
+        gamma_in_prior_std=None,
         **kwargs_likelihood
     ):
         """
@@ -64,6 +66,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
+        :param gamma_in_prior_mean: prior mean for inner power-law slope of the NFW profile, if available
+        :param gamma_in_prior_std: standard deviation of the Gaussian prior for gamma_in
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
@@ -131,6 +135,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
         self._gamma_in_array = gamma_in_array
         self._log_m2l_array = log_m2l_array
+
+        self._gamma_in_prior_mean = gamma_in_prior_mean
+        self._gamma_in_prior_std = gamma_in_prior_std
 
     def lens_log_likelihood(
         self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
@@ -275,6 +282,20 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             sigma_v_sys_error=sigma_v_sys_error,
             mu_intrinsic=mag_source_,
         )
+
+        if (
+            self._gamma_in_prior_mean is not None
+            and self._gamma_in_prior_std is not None
+        ):
+            if self._gamma_in_array is not None and self._log_m2l_array is not None:
+                lnlikelihood -= (
+                    self._gamma_in_prior_mean - scaling_param_array[-2]
+                ) ** 2 / (2 * self._gamma_in_prior_std**2)
+            elif self._gamma_in_array is not None and self._log_m2l_array is None:
+                lnlikelihood -= (
+                    self._gamma_in_prior_mean - scaling_param_array[-1]
+                ) ** 2 / (2 * self._gamma_in_prior_std**2)
+
         return np.nan_to_num(lnlikelihood)
 
     def draw_scaling_params(self, kwargs_lens=None, **kwargs_kin):
