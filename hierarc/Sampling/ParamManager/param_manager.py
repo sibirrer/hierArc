@@ -64,7 +64,7 @@ class ParamManager(object):
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
         :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
         :param gamma_in_distribution: string, distribution function of the gamma_in parameter
-        :param log_m2l_sampling: bool, if True samples the mass-to-light ratio of the stars
+        :param log_m2l_sampling: bool, if True samples the mass-to-light ratio of the stars in logarithmic scale
         :param log_m2l_distribution: string, distribution function of the log_m2l parameter
         :param alpha_gamma_in_sampling: bool, if True samples a parameter alpha_gamma_in, which scales gamma_in linearly
             according to a predefined quantity of the lens
