@@ -81,7 +81,7 @@ class CosmoLikelihood(object):
         :param anisotropy_distribution: string, distribution of the anisotropy parameters
         :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
         :param gamma_in_distribution: string, distribution function of the gamma_in parameter
-        :param log_m2l_sampling: bool, if True samples a global mass-to-light ratio parameter
+        :param log_m2l_sampling: bool, if True samples a global mass-to-light ratio parameter in logarithmic scale
         :param log_m2l_distribution: string, distribution function of the log_m2l parameter
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
