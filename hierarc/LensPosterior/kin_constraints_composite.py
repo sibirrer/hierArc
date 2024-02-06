@@ -81,7 +81,7 @@ class KinConstraintsComposite(KinConstraints):
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param gamma_in_prior_mean: prior mean for inner power-law slope of the NFW profile, if available
-        :param gamma_in_prior_std: 1-sigma error gamma_in
+        :param gamma_in_prior_std: prior standard deviation for `gamma_in`
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
