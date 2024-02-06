@@ -35,7 +35,7 @@ class LensParam(object):
             slope of the GNFW profile
         :param log_m2l_sampling: bool, if True samples the mass to light ratio of
             the stars
-        :param log_m2l_distribution: string, distribution function of the mass to
+        :param log_m2l_distribution: string, distribution function of the logarithm of mass to
             light ratio of the lens
         :param kappa_ext_sampling: bool, if True samples a global external convergence
             parameter
