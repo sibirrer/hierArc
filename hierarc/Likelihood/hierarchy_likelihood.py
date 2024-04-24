@@ -27,6 +27,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         kappa_ext_bias=False,
         kappa_pdf=None,
         kappa_bin_edges=None,
+        kappa_alt_population=False,
+        kappa_marginalize_pdf=False,
         mst_ifu=False,
         lambda_scaling_property=0,
         lambda_scaling_property_beta=0,
@@ -123,6 +125,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         )
         self._num_distribution_draws = int(num_distribution_draws)
         self._kappa_ext_bias = kappa_ext_bias
+        self._kappa_alt_population = kappa_alt_population
+        self._kappa_marginalize_pdf = kappa_marginalize_pdf
         self._mst_ifu = mst_ifu
         if kappa_pdf is not None and kappa_bin_edges is not None:
             self._kappa_dist = PDFSampling(
@@ -131,6 +135,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             self._draw_kappa = True
         else:
             self._draw_kappa = False
+
+        kappa_pdf_indices_trunc = kappa_pdf > 0
+        self._kappa_pdf_trunc = np.array([i for i, j in zip(kappa_pdf, kappa_pdf_indices_trunc)])
+        self._kappa_bin_edges_trunc = np.array([i for i, j in zip(kappa_bin_edges, kappa_pdf_indices_trunc)])
+
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
         self._gamma_in_array = gamma_in_array
@@ -290,11 +299,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             if self._gamma_in_array is not None and self._log_m2l_array is not None:
                 lnlikelihood -= (
                     self._gamma_in_prior_mean - scaling_param_array[-2]
-                ) ** 2 / (2 * self._gamma_in_prior_std**2)
+                ) ** 2 / (2 * self._gamma_in_prior_std**2) + np.log(self._gamma_in_prior_std * (2 * np.pi)**0.5)
             elif self._gamma_in_array is not None and self._log_m2l_array is None:
                 lnlikelihood -= (
                     self._gamma_in_prior_mean - scaling_param_array[-1]
-                ) ** 2 / (2 * self._gamma_in_prior_std**2)
+                ) ** 2 / (2 * self._gamma_in_prior_std**2) + np.log(self._gamma_in_prior_std * (2 * np.pi)**0.5)
+
+        if self._kappa_marginalize_pdf is True:
+            lnlikelihood += np.log(np.interp(kappa_ext, self._kappa_bin_edges_trunc, self._kappa_pdf_trunc))
 
         return np.nan_to_num(lnlikelihood)
 
@@ -451,6 +463,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         lambda_mst_sigma=0,
         kappa_ext=0,
         kappa_ext_sigma=0,
+        kappa_ext_alt=0,
+        kappa_ext_alt_sigma=0,
         gamma_ppn=1,
         lambda_ifu=1,
         lambda_ifu_sigma=0,
@@ -503,10 +517,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                 + beta_lambda * self._lambda_scaling_property_beta
             )
             lambda_mst_draw = np.random.normal(lambda_lens, lambda_mst_sigma)
-        if self._draw_kappa is True:
+        if self._kappa_ext_bias is True:
+            if self._kappa_alt_population is True:
+                kappa_ext_draw = np.random.normal(kappa_ext_alt, kappa_ext_alt_sigma)
+            else:
+                kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
+        elif self._draw_kappa is True:
             kappa_ext_draw = self._kappa_dist.draw_one
-        elif self._kappa_ext_bias is True:
-            kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
         else:
             kappa_ext_draw = 0
         return lambda_mst_draw, kappa_ext_draw, gamma_ppn
