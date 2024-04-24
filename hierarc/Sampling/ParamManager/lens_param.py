@@ -156,7 +156,7 @@ class LensParam(object):
                     if latex_style is True:
                         list.append(r"$\overline{\kappa}_{\rm ext, alt}$")
                     else:
-                       list.append("kappa_ext_alt")
+                        list.append("kappa_ext_alt")
                 if self._kappa_ext_distribution == "GAUSSIAN":
                     if "kappa_ext_alt_sigma" not in self._kwargs_fixed:
                         if latex_style is True:
@@ -276,7 +276,9 @@ class LensParam(object):
                     i += 1
                 if self._kappa_ext_distribution == "GAUSSIAN":
                     if "kappa_ext_alt_sigma" in self._kwargs_fixed:
-                        kwargs["kappa_ext_alt_sigma"] = self._kwargs_fixed["kappa_ext_alt_sigma"]
+                        kwargs["kappa_ext_alt_sigma"] = self._kwargs_fixed[
+                            "kappa_ext_alt_sigma"
+                        ]
                     else:
                         kwargs["kappa_ext_alt_sigma"] = args[i]
                         i += 1

@@ -72,7 +72,10 @@ class DdtKinConstraints(KinConstraints):
         """
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
-        self._kappa_ext_alt_mean, self._kappa_ext_alt_sigma = kappa_ext_alt, kappa_ext_alt_sigma
+        self._kappa_ext_alt_mean, self._kappa_ext_alt_sigma = (
+            kappa_ext_alt,
+            kappa_ext_alt_sigma,
+        )
         super(DdtKinConstraints, self).__init__(
             z_lens=z_lens,
             z_source=z_source,
