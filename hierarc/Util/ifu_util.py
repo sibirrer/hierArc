@@ -1,5 +1,6 @@
 """This file contains routines to process the data format of the SLACS IFU data set to
 be binned in radial annuli and for error estimates."""
+
 import numpy as np
 import astropy.io.fits as fits
 
