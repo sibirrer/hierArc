@@ -136,9 +136,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         else:
             self._draw_kappa = False
 
-        kappa_pdf_indices_trunc = kappa_pdf > 0
-        self._kappa_pdf_trunc = np.array([i for i, j in zip(kappa_pdf, kappa_pdf_indices_trunc)])
-        self._kappa_bin_edges_trunc = np.array([i for i, j in zip(kappa_bin_edges, kappa_pdf_indices_trunc)])
+        if kappa_pdf is not None:
+            kappa_pdf_indices_trunc = kappa_pdf > 0
+            self._kappa_pdf_trunc = np.array([i for i, j in zip(kappa_pdf, kappa_pdf_indices_trunc)])
+            self._kappa_bin_edges_trunc = np.array([i for i, j in zip(kappa_bin_edges, kappa_pdf_indices_trunc)])
+        else:
+            self._kappa_pdf_trunc = None
+            self._kappa_bin_edges_trunc = None
 
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
@@ -305,7 +309,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                     self._gamma_in_prior_mean - scaling_param_array[-1]
                 ) ** 2 / (2 * self._gamma_in_prior_std**2) + np.log(self._gamma_in_prior_std * (2 * np.pi)**0.5)
 
-        if self._kappa_marginalize_pdf is True:
+        if self._kappa_marginalize_pdf is True and self._kappa_pdf_trunc is not None:
             lnlikelihood += np.log(np.interp(kappa_ext, self._kappa_bin_edges_trunc, self._kappa_pdf_trunc))
 
         return np.nan_to_num(lnlikelihood)
