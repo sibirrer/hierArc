@@ -76,6 +76,8 @@ class CosmoLikelihood(object):
          according to the lens posterior kwargs 'lambda_scaling_property_beta'
         :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
         :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
+        :param kappa_ext_alt: bool, if True samples kappa_ext with the kappa_ext_alt and/or kappa_ext_alt_sigma
+        distribution
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_model: string, specifies the stellar anisotropy model

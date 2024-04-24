@@ -59,6 +59,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param kappa_pdf: array of probability density function of the external convergence distribution
          binned according to kappa_bin_edges
         :param kappa_bin_edges: array of length (len(kappa_pdf)+1), bin edges of the kappa PDF
+        :param kappa_alt_population: bool, if True samples kappa_ext with the alternative (_alt) kappa_ext distribution
+        :param kappa_marginalize_pdf: bool, if True uses the kappa_pdf and kappa_bin_edges as a prior to constrain
+         population-sampled kappa_ext
         :param mst_ifu: bool, if True replaces the lambda_mst parameter by the lambda_ifu parameter (and distribution)
          in sampling this lens.
         :param lambda_scaling_property: float (optional), scaling of
@@ -346,6 +349,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         lambda_mst_sigma=0,
         kappa_ext=0,
         kappa_ext_sigma=0,
+        kappa_ext_alt=0,
+        kappa_ext_alt_sigma=0,
         gamma_ppn=1,
         lambda_ifu=1,
         lambda_ifu_sigma=0,
@@ -365,6 +370,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param lambda_mst_sigma: spread in the distribution
         :param kappa_ext: external convergence mean in distribution
         :param kappa_ext_sigma: spread in the distribution
+        :param kappa_ext_alt: external convergence mean in alternative distribution
+        :param kappa_ext_alt_sigma: spread in the alternative distribution
         :param gamma_ppn: Post-Newtonian parameter
         :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified
             for
@@ -498,6 +505,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param lambda_mst_sigma: spread in the distribution
         :param kappa_ext: external convergence mean in distribution
         :param kappa_ext_sigma: spread in the distribution
+        :param kappa_ext_alt: external convergence mean in alternative distribution
+        :param kappa_ext_alt_sigma: spread in the alternative distribution
         :param gamma_ppn: Post-Newtonian parameter
         :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified
             for

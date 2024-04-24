@@ -42,6 +42,8 @@ class LensParam(object):
             parameter
         :param kappa_ext_distribution: string, distribution function of the kappa_ext
             parameter
+        :param kappa_ext_alt: bool, if True samples kappa_ext with the kappa_ext_alt and/or kappa_ext_alt_sigma
+            distribution
         :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
             according to a predefined quantity of the lens
         :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly

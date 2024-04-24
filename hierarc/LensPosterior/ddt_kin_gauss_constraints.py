@@ -66,6 +66,8 @@ class DdtGaussKinConstraints(KinConstraints):
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         :param kappa_ext: mean of the external convergence from which the ddt constraints are coming from
         :param kappa_ext_sigma: 1-sigma distribution uncertainty from which the ddt constraints are coming from
+        :param kappa_ext_alt: mean of the alternative external convergence from which the ddt constraints are coming from
+        :param kappa_ext_alt_sigma: 1-sigma distribution uncertainty of alternative distribution from which the ddt constraints are coming from
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
         """
