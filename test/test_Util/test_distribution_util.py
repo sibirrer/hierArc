@@ -7,7 +7,7 @@ from lenstronomy.Util import prob_density
 
 
 class TestProbDensity(object):
-    def setup(self):
+    def setup_method(self):
         np.random.seed(seed=42)
 
     def gauss(self, x, simga):

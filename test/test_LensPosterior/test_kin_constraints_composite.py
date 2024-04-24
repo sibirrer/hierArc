@@ -9,7 +9,7 @@ from astropy.cosmology import FlatLambdaCDM
 
 
 class TestKinConstraintsComposite(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_likelihoodconfiguration_om(self):
@@ -249,6 +249,8 @@ class TestKinConstraintsComposite(object):
             anisotropy_model=anisotropy_model,
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
+            gamma_in_prior_mean=2,
+            gamma_in_prior_std=0.5,
             **kwargs_kin_api_settings
         )
 
@@ -260,7 +262,7 @@ class TestKinConstraintsComposite(object):
 
 
 class TestKinConstraintsCompositeM2l(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_likelihoodconfiguration_om(self):
@@ -349,6 +351,8 @@ class TestKinConstraintsCompositeM2l(object):
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             is_m2l_population_level=False,
+            gamma_in_prior_mean=2,
+            gamma_in_prior_std=0.5,
             **kwargs_kin_api_settings
         )
 

@@ -5,7 +5,7 @@ from hierarc.Likelihood.SneLikelihood.sne_pantheon_plus import PantheonPlusData
 
 
 class TestPantheonPlusData(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_import(self):

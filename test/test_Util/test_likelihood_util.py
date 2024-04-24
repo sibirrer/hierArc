@@ -7,7 +7,7 @@ from hierarc.Util import likelihood_util
 
 
 class TestLikelihoodUtil(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_get_truncated_normal(self):

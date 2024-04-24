@@ -8,7 +8,7 @@ import pytest
 
 
 class TestDdtKinGaussConstraints(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_likelihoodconfiguration_om(self):

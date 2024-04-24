@@ -25,14 +25,14 @@ class CosmoLikelihood(object):
         anisotropy_sampling=False,
         gamma_in_sampling=False,
         gamma_in_distribution="NONE",
-        m2l_sampling=False,
-        m2l_distribution="NONE",
+        log_m2l_sampling=False,
+        log_m2l_distribution="NONE",
         kappa_ext_sampling=False,
         kappa_ext_distribution="NONE",
         alpha_lambda_sampling=False,
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
-        alpha_m2l_sampling=False,
+        alpha_log_m2l_sampling=False,
         lambda_ifu_sampling=False,
         lambda_ifu_distribution="NONE",
         sigma_v_systematics=False,
@@ -81,8 +81,8 @@ class CosmoLikelihood(object):
         :param anisotropy_distribution: string, distribution of the anisotropy parameters
         :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
         :param gamma_in_distribution: string, distribution function of the gamma_in parameter
-        :param m2l_sampling: bool, if True samples a global mass-to-light ratio parameter
-        :param m2l_distribution: string, distribution function of the m2l parameter
+        :param log_m2l_sampling: bool, if True samples a global mass-to-light ratio parameter in logarithmic scale
+        :param log_m2l_distribution: string, distribution function of the log_m2l parameter
         :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
          measurement
         :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
@@ -119,10 +119,10 @@ class CosmoLikelihood(object):
             beta_lambda_sampling=beta_lambda_sampling,
             gamma_in_sampling=gamma_in_sampling,
             gamma_in_distribution=gamma_in_distribution,
-            m2l_sampling=m2l_sampling,
-            m2l_distribution=m2l_distribution,
+            log_m2l_sampling=log_m2l_sampling,
+            log_m2l_distribution=log_m2l_distribution,
             alpha_gamma_in_sampling=alpha_gamma_in_sampling,
-            alpha_m2l_sampling=alpha_m2l_sampling,
+            alpha_log_m2l_sampling=alpha_log_m2l_sampling,
             sne_apparent_m_sampling=sne_apparent_m_sampling,
             sne_distribution=sne_distribution,
             z_apparent_m_anchor=z_apparent_m_anchor,

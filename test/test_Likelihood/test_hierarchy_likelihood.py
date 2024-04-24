@@ -7,7 +7,7 @@ import numpy.testing as npt
 
 
 class TestLensLikelihood(object):
-    def setup(self):
+    def setup_method(self):
         z_lens = 0.5
         z_source = 1.5
         self.cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)

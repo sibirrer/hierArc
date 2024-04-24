@@ -5,7 +5,7 @@ import pytest
 
 
 class TestCustomSneLikelihood(object):
-    def setup(self):
+    def setup_method(self):
         np.random.seed(42)
         # define redshifts
         num = 30  # number of Sne

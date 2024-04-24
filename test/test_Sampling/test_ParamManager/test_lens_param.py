@@ -3,7 +3,7 @@ import numpy.testing as npt
 
 
 class TestLensParam(object):
-    def setup(self):
+    def setup_method(self):
         self._param = LensParam(
             lambda_mst_sampling=True,
             lambda_mst_distribution="GAUSSIAN",
@@ -94,14 +94,14 @@ class TestLensParam(object):
 
 
 class TestLensParamGammaInnerM2l(object):
-    def setup(self):
+    def setup_method(self):
         self._param = LensParam(
             gamma_in_sampling=True,
             gamma_in_distribution="GAUSSIAN",
-            m2l_sampling=True,
-            m2l_distribution="GAUSSIAN",
+            log_m2l_sampling=True,
+            log_m2l_distribution="GAUSSIAN",
             alpha_gamma_in_sampling=True,
-            alpha_m2l_sampling=True,
+            alpha_log_m2l_sampling=True,
             kwargs_fixed={},
             log_scatter=False,
         )
@@ -109,28 +109,28 @@ class TestLensParamGammaInnerM2l(object):
         kwargs_fixed = {
             "gamma_in": 1,
             "gamma_in_sigma": 0.1,
-            "m2l": 5,
-            "m2l_sigma": 1,
+            "log_m2l": 5,
+            "log_m2l_sigma": 1,
             "alpha_gamma_in": 0.1,
-            "alpha_m2l": -0.5,
+            "alpha_log_m2l": -0.5,
         }
         self._param_fixed = LensParam(
             gamma_in_sampling=True,
             gamma_in_distribution="GAUSSIAN",
-            m2l_sampling=True,
-            m2l_distribution="GAUSSIAN",
+            log_m2l_sampling=True,
+            log_m2l_distribution="GAUSSIAN",
             alpha_gamma_in_sampling=True,
-            alpha_m2l_sampling=True,
+            alpha_log_m2l_sampling=True,
             kwargs_fixed=kwargs_fixed,
             log_scatter=False,
         )
         self._param_log_scatter = LensParam(
             gamma_in_sampling=True,
             gamma_in_distribution="GAUSSIAN",
-            m2l_sampling=True,
-            m2l_distribution="GAUSSIAN",
+            log_m2l_sampling=True,
+            log_m2l_distribution="GAUSSIAN",
             alpha_gamma_in_sampling=True,
-            alpha_m2l_sampling=True,
+            alpha_log_m2l_sampling=True,
             kwargs_fixed={},
             log_scatter=True,
         )
@@ -155,10 +155,10 @@ class TestLensParamGammaInnerM2l(object):
         kwargs = {
             "gamma_in": 1,
             "gamma_in_sigma": 0.1,
-            "m2l": 5,
-            "m2l_sigma": 1,
+            "log_m2l": 5,
+            "log_m2l_sigma": 1,
             "alpha_gamma_in": 0.1,
-            "alpha_m2l": -0.5,
+            "alpha_log_m2l": -0.5,
         }
         args = self._param.kwargs2args(kwargs)
         kwargs_new, i = self._param.args2kwargs(args, i=0)

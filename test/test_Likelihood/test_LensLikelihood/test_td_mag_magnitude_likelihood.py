@@ -10,7 +10,7 @@ from lenstronomy.Util.data_util import magnitude2cps
 
 
 class TestMagnificationLikelihood(object):
-    def setup(self):
+    def setup_method(self):
         pass
 
     def test_log_likelihood(self):

@@ -5,7 +5,7 @@ import unittest
 
 
 class TestCosmoParamFLCDM(object):
-    def setup(self):
+    def setup_method(self):
         cosmology_list = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "NONE"]
         kwargs_fixed = {
             "h0": 70,
