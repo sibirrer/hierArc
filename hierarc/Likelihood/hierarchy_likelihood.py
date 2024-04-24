@@ -68,8 +68,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
-        :param gamma_in_prior_mean: inner power-law slope of the NFW profile, if available
-        :param gamma_in_prior_std: 1-sigma error gamma_in
+        :param gamma_in_prior_mean: prior mean for inner power-law slope of the NFW profile, if available
+        :param gamma_in_prior_std: standard deviation of the Gaussian prior for gamma_in
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
