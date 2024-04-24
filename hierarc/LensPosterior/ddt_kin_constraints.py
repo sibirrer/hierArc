@@ -45,7 +45,7 @@ class DdtKinConstraints(KinConstraints):
         :param z_source: source redshift
         :param ddt_samples: numpy array with a sample reflecting the likelihood density in Ddt given imaging data and
          time delays.
-        :param ddt_weights: None or lenght of ddt_samples, weights of individual ddt_samples
+        :param ddt_weights: None or length of ddt_samples, weights of individual ddt_samples
         :param sigma_v_measured: numpy array of IFU velocity dispersion of the main deflector in km/s
         :param sigma_v_error_independent: numpy array of 1-sigma uncertainty in velocity dispersion of the IFU
          observation independent of each other
