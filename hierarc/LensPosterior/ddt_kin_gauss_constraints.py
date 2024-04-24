@@ -32,6 +32,8 @@ class DdtGaussKinConstraints(KinConstraints):
         hernquist_approx=True,
         kappa_ext=0,
         kappa_ext_sigma=0,
+        kappa_ext_alt=0,
+        kappa_ext_alt_sigma=0,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
@@ -69,6 +71,7 @@ class DdtGaussKinConstraints(KinConstraints):
         """
         self._ddt_mean, self._ddt_sigma = ddt_mean, ddt_sigma
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
+        self._kappa_ext_alt_mean, self._kappa_ext_alt_sigma = kappa_ext_alt, kappa_ext_alt_sigma
         super(DdtGaussKinConstraints, self).__init__(
             z_lens,
             z_source,

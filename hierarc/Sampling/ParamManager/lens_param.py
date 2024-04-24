@@ -16,6 +16,7 @@ class LensParam(object):
         log_m2l_distribution="NONE",
         kappa_ext_sampling=False,
         kappa_ext_distribution="NONE",
+        kappa_ext_alt=False,
         alpha_lambda_sampling=False,
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
@@ -60,6 +61,7 @@ class LensParam(object):
         self._log_m2l_distribution = log_m2l_distribution
         self._kappa_ext_sampling = kappa_ext_sampling
         self._kappa_ext_distribution = kappa_ext_distribution
+        self._kappa_ext_alt = kappa_ext_alt
         self._alpha_lambda_sampling = alpha_lambda_sampling
         self._beta_lambda_sampling = beta_lambda_sampling
         self._alpha_gamma_in_sampling = alpha_gamma_in_sampling
@@ -149,6 +151,18 @@ class LensParam(object):
                         list.append(r"$\sigma(\kappa_{\rm ext})$")
                     else:
                         list.append("kappa_ext_sigma")
+            if self._kappa_ext_alt is True:
+                if "kappa_ext_alt" not in self._kwargs_fixed:
+                    if latex_style is True:
+                        list.append(r"$\overline{\kappa}_{\rm ext, alt}$")
+                    else:
+                       list.append("kappa_ext_alt")
+                if self._kappa_ext_distribution == "GAUSSIAN":
+                    if "kappa_ext_alt_sigma" not in self._kwargs_fixed:
+                        if latex_style is True:
+                            list.append(r"$\sigma(\kappa_{\rm ext, alt})$")
+                        else:
+                            list.append("kappa_ext_alt_sigma")
         if self._alpha_lambda_sampling is True:
             if "alpha_lambda" not in self._kwargs_fixed:
                 if latex_style is True:
@@ -254,6 +268,18 @@ class LensParam(object):
                 else:
                     kwargs["kappa_ext_sigma"] = args[i]
                     i += 1
+            if self._kappa_ext_alt is True:
+                if "kappa_ext_alt" in self._kwargs_fixed:
+                    kwargs["kappa_ext_alt"] = self._kwargs_fixed["kappa_ext_alt"]
+                else:
+                    kwargs["kappa_ext_alt"] = args[i]
+                    i += 1
+                if self._kappa_ext_distribution == "GAUSSIAN":
+                    if "kappa_ext_alt_sigma" in self._kwargs_fixed:
+                        kwargs["kappa_ext_alt_sigma"] = self._kwargs_fixed["kappa_ext_alt_sigma"]
+                    else:
+                        kwargs["kappa_ext_alt_sigma"] = args[i]
+                        i += 1
         if self._alpha_lambda_sampling is True:
             if "alpha_lambda" in self._kwargs_fixed:
                 kwargs["alpha_lambda"] = self._kwargs_fixed["alpha_lambda"]
@@ -330,6 +356,12 @@ class LensParam(object):
             if self._kappa_ext_distribution == "GAUSSIAN":
                 if "kappa_ext_sigma" not in self._kwargs_fixed:
                     args.append(kwargs["kappa_ext_sigma"])
+            if self._kappa_ext_alt is True:
+                if "kappa_ext_alt" not in self._kwargs_fixed:
+                    args.append(kwargs["kappa_ext_alt"])
+                if self._kappa_ext_distribution == "GAUSSIAN":
+                    if "kappa_ext_alt_sigma" not in self._kwargs_fixed:
+                        args.append(kwargs["kappa_ext_alt_sigma"])
         if self._alpha_lambda_sampling is True:
             if "alpha_lambda" not in self._kwargs_fixed:
                 args.append(kwargs["alpha_lambda"])
