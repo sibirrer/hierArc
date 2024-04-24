@@ -29,7 +29,6 @@ class CosmoLikelihood(object):
         log_m2l_distribution="NONE",
         kappa_ext_sampling=False,
         kappa_ext_distribution="NONE",
-        use_kappa_ext_alt=False,
         alpha_lambda_sampling=False,
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
@@ -76,8 +75,6 @@ class CosmoLikelihood(object):
          according to the lens posterior kwargs 'lambda_scaling_property_beta'
         :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
         :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
-        :param use_kappa_ext_alt: bool, if True samples kappa_ext with the kappa_ext_alt and/or kappa_ext_alt_sigma
-        distribution
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_model: string, specifies the stellar anisotropy model
@@ -132,7 +129,6 @@ class CosmoLikelihood(object):
             sigma_v_systematics=sigma_v_systematics,
             kappa_ext_sampling=kappa_ext_sampling,
             kappa_ext_distribution=kappa_ext_distribution,
-            use_kappa_ext_alt=use_kappa_ext_alt,
             anisotropy_sampling=anisotropy_sampling,
             anisotropy_model=anisotropy_model,
             anisotropy_distribution=anisotropy_distribution,
