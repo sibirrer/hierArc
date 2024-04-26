@@ -41,6 +41,23 @@ class TestLensLikelihood(object):
             mst_ifu=True,
             **kwargs_likelihood
         )
+        self.likelihood_alternate = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtDdGaussian",
+            anisotropy_model="OM",
+            ani_param_array=ani_param_array,
+            ani_scaling_array_list=None,
+            ani_scaling_array=ani_scaling_array,
+            num_distribution_draws=200,
+            kappa_ext_bias=True,
+            kappa_pdf=None,
+            kappa_bin_edges=None,
+            kappa_alt_population=True,
+            mst_ifu=True,
+            **kwargs_likelihood
+        )
         self.likelihood_single = LensLikelihood(
             z_lens,
             z_source,
@@ -86,9 +103,29 @@ class TestLensLikelihood(object):
             ani_scaling_array_list=None,
             ani_scaling_array=ani_scaling_array,
             num_distribution_draws=200,
-            kappa_ext_bias=True,
+            kappa_ext_bias=False,
             kappa_pdf=kappa_pdf,
             kappa_bin_edges=kappa_bin_edges,
+            mst_ifu=False,
+            **kwargs_likelihood
+        )
+
+        kappa_pdf_mar = np.ones(100000)
+        kappa_bin_edges_mar = np.linspace(-100, 100, 100001)
+        self.likelihood_kappa_ext_marginalize = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtDdGaussian",
+            anisotropy_model="OM",
+            ani_param_array=ani_param_array,
+            ani_scaling_array_list=None,
+            ani_scaling_array=ani_scaling_array,
+            num_distribution_draws=200,
+            kappa_ext_bias=True,
+            kappa_pdf=kappa_pdf_mar,
+            kappa_bin_edges=kappa_bin_edges_mar,
+            kappa_marginalize_pdf=True,
             mst_ifu=False,
             **kwargs_likelihood
         )
@@ -164,6 +201,8 @@ class TestLensLikelihood(object):
             "lambda_mst_sigma": 0.01,
             "kappa_ext": 0,
             "kappa_ext_sigma": 0.03,
+            "kappa_ext_alt": 0,
+            "kappa_ext_alt_sigma": 0.03,
             "lambda_ifu": 1,
             "lambda_ifu_sigma": 0.01,
         }
@@ -172,6 +211,11 @@ class TestLensLikelihood(object):
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
         )
         npt.assert_almost_equal(ln_likelihood, -0.5, decimal=1)
+
+        ln_likelihood_alt = self.likelihood_alternate.lens_log_likelihood(
+            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+        )
+        npt.assert_almost_equal(ln_likelihood_alt, -0.5, decimal=1)
 
         ln_likelihood_zero = self.likelihood_zero_dist.lens_log_likelihood(
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
@@ -182,6 +226,11 @@ class TestLensLikelihood(object):
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
         )
         npt.assert_almost_equal(ln_likelihood, ln_likelihood_kappa_ext, decimal=1)
+
+        ln_likelihood_kappa_ext_marginalize = self.likelihood_kappa_ext_marginalize.lens_log_likelihood(
+            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+        )
+        npt.assert_almost_equal(ln_likelihood, ln_likelihood_kappa_ext_marginalize, decimal=1)
 
         kwargs_lens = {
             "lambda_mst": 1000000,
