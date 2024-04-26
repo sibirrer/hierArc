@@ -227,10 +227,14 @@ class TestLensLikelihood(object):
         )
         npt.assert_almost_equal(ln_likelihood, ln_likelihood_kappa_ext, decimal=1)
 
-        ln_likelihood_kappa_ext_marginalize = self.likelihood_kappa_ext_marginalize.lens_log_likelihood(
-            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+        ln_likelihood_kappa_ext_marginalize = (
+            self.likelihood_kappa_ext_marginalize.lens_log_likelihood(
+                self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+            )
         )
-        npt.assert_almost_equal(ln_likelihood, ln_likelihood_kappa_ext_marginalize, decimal=1)
+        npt.assert_almost_equal(
+            ln_likelihood, ln_likelihood_kappa_ext_marginalize, decimal=1
+        )
 
         kwargs_lens = {
             "lambda_mst": 1000000,
