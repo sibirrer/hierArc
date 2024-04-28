@@ -28,6 +28,7 @@ class GoodnessOfFit(object):
         cosmo,
         kwargs_lens,
         kwargs_kin,
+        kwargs_los,
         color_measurement=None,
         color_prediction=None,
         redshift_trend=False,
@@ -64,7 +65,7 @@ class GoodnessOfFit(object):
                     ddt_model_sigma,
                     dd_model_mean,
                     dd_model_sigma,
-                ) = likelihood.ddt_dd_model_prediction(cosmo, kwargs_lens=kwargs_lens)
+                ) = likelihood.ddt_dd_model_prediction(cosmo, kwargs_lens=kwargs_lens, kwargs_los=kwargs_los)
 
                 ddt_name_list.append(name)
                 ddt_model_mean_list.append(ddt_model_mean)
@@ -134,13 +135,14 @@ class GoodnessOfFit(object):
         ax.legend()
         return f, ax
 
-    def kin_fit(self, cosmo, kwargs_lens, kwargs_kin):
+    def kin_fit(self, cosmo, kwargs_lens, kwargs_kin, kwargs_los):
         """Plots the prediction and the uncorrelated error bars on the individual lenses
         currently works for likelihood classes 'TDKinGaussian', 'KinGaussian'.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
+        :param kwargs_los: line of sight list of dictionaries
         :return: list of name, measurement, measurement errors, model prediction, model
             prediction error
         """
@@ -160,7 +162,7 @@ class GoodnessOfFit(object):
                 sigma_v_predict_mean,
                 cov_error_predict,
             ) = likelihood.sigma_v_measured_vs_predict(
-                cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+                cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
             )
 
             if sigma_v_measurement is not None:
@@ -188,6 +190,7 @@ class GoodnessOfFit(object):
         cosmo,
         kwargs_lens,
         kwargs_kin,
+        kwargs_los,
         color_measurement=None,
         color_prediction=None,
     ):
@@ -197,11 +200,12 @@ class GoodnessOfFit(object):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
+        :param kwargs_los: line of sight list of dictionaries
         :param color_measurement: color of measurement
         :param color_prediction: color of model prediction
         :return: fig, axes of matplotlib instance
         """
-        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
+        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin, kwargs_los=kwargs_los)
         print(logL, "log likelihood")
         (
             sigma_v_name_list,
@@ -209,7 +213,7 @@ class GoodnessOfFit(object):
             sigma_v_measurement_error_list,
             sigma_v_model_list,
             sigma_v_model_error_list,
-        ) = self.kin_fit(cosmo, kwargs_lens, kwargs_kin)
+        ) = self.kin_fit(cosmo, kwargs_lens, kwargs_kin, kwargs_los)
 
         f, ax = plt.subplots(1, 1, figsize=(int(len(sigma_v_name_list) / 2), 4))
         ax.errorbar(
@@ -256,6 +260,7 @@ class GoodnessOfFit(object):
         cosmo,
         kwargs_lens,
         kwargs_kin,
+        kwargs_los,
         lens_index,
         bin_edges,
         show_legend=True,
@@ -268,6 +273,7 @@ class GoodnessOfFit(object):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: lens model parameter keyword arguments
         :param kwargs_kin: kinematics model keyword arguments
+        :param kwargs_los: line of sight list of dictionaries
         :param lens_index: int, index in kwargs_lens to be plotted (needs to be of type
             'IFUKinCov')
         :param bin_edges: radial bin edges in arc seconds. If number, then uniform
@@ -293,7 +299,7 @@ class GoodnessOfFit(object):
             sigma_v_predict_mean,
             cov_error_predict,
         ) = likelihood.sigma_v_measured_vs_predict(
-            cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+            cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
         )
 
         if len(np.atleast_1d(bin_edges)) < 2:

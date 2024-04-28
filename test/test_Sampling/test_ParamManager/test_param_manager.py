@@ -19,9 +19,8 @@ class TestParamManager(object):
         kwargs_lower_lens = {
             "lambda_mst": 0,
             "lambda_mst_sigma": 0.1,
-            "kappa_ext": -0.2,
-            "kappa_ext_sigma": 0,
         }
+        kwargs_lower_los = [{"mean": -0.2, "sigma": 0.0}]
         kwargs_lower_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1}
         kwargs_lower_source = {"mu_sne": 0, "sigma_sne": 0}
 
@@ -37,9 +36,8 @@ class TestParamManager(object):
         kwargs_upper_lens = {
             "lambda_mst": 2,
             "lambda_mst_sigma": 0.1,
-            "kappa_ext": 0.2,
-            "kappa_ext_sigma": 1,
         }
+        kwargs_upper_los = [{"mean": 0.2, "sigma": 0.5}]
         kwargs_upper_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1}
         kwargs_upper_source = {"mu_sne": 100, "sigma_sne": 10}
 
@@ -55,9 +53,8 @@ class TestParamManager(object):
         kwargs_fixed_lens = {
             "lambda_mst": 1,
             "lambda_mst_sigma": 0.1,
-            "kappa_ext": 0,
-            "kappa_ext_sigma": 0,
         }
+        kwargs_fixed_los = [{"mean": 0, "sigma": 0.0}]
         kwargs_fixed_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1}
         kwargs_fixed_source = {"mu_sne": 1, "sigma_sne": 0.1}
 
@@ -73,8 +70,8 @@ class TestParamManager(object):
                     anisotropy_sampling=True,
                     anisotropy_model="OM",
                     kwargs_lower_cosmo=kwargs_lower_cosmo,
-                    kappa_ext_sampling=True,
-                    kappa_ext_distribution="GAUSSIAN",
+                    los_sampling=True,
+                    los_distributions=["GAUSSIAN"],
                     sne_apparent_m_sampling=True,
                     sne_distribution="GAUSSIAN",
                     kwargs_upper_cosmo=kwargs_upper_cosmo,
@@ -88,6 +85,9 @@ class TestParamManager(object):
                     kwargs_fixed_source=kwargs_fixed_source,
                     kwargs_lower_source=kwargs_lower_source,
                     kwargs_upper_source=kwargs_upper_source,
+                    kwargs_fixed_los=kwargs_fixed_los,
+                    kwargs_lower_los=kwargs_lower_los,
+                    kwargs_upper_los=kwargs_upper_los
                 )
             )
 
@@ -100,8 +100,8 @@ class TestParamManager(object):
                     anisotropy_distribution="GAUSSIAN",
                     anisotropy_sampling=True,
                     anisotropy_model="OM",
-                    kappa_ext_sampling=True,
-                    kappa_ext_distribution="GAUSSIAN",
+                    los_sampling=True,
+                    los_distributions=["GAUSSIAN"],
                     sne_apparent_m_sampling=True,
                     sne_distribution="GAUSSIAN",
                     kwargs_lower_cosmo=kwargs_lower_cosmo,
@@ -116,6 +116,9 @@ class TestParamManager(object):
                     kwargs_lower_source=kwargs_lower_source,
                     kwargs_upper_source=kwargs_upper_source,
                     kwargs_fixed_source=None,
+                    kwargs_lower_los=kwargs_lower_los,
+                    kwargs_upper_los=kwargs_upper_los,
+                    kwargs_fixed_los=None
                 )
             )
         self.param_list = param_list
@@ -142,9 +145,9 @@ class TestParamManager(object):
         kwargs_lens = {
             "lambda_mst": 1,
             "lambda_mst_sigma": 0,
-            "kappa_ext": 0,
-            "kappa_ext_sigma": 0,
+
         }
+        kwargs_los = [{"mean": 0, "sigma": 0.05}]
         kwargs_kin = {"a_ani": 1, "a_ani_sigma": 0.3}
         kwargs_source = {"mu_sne": 2, "sigma_sne": 0.2}
         for param in self.param_list:
@@ -153,15 +156,17 @@ class TestParamManager(object):
                 kwargs_lens=kwargs_lens,
                 kwargs_kin=kwargs_kin,
                 kwargs_source=kwargs_source,
+                kwargs_los=kwargs_los
             )
             (
                 kwargs_cosmo_new,
                 kwargs_lens_new,
                 kwargs_kin_new,
                 kwargs_source_new,
+                kwargs_los_new
             ) = param.args2kwargs(args)
             args_new = param.kwargs2args(
-                kwargs_cosmo_new, kwargs_lens_new, kwargs_kin_new, kwargs_source_new
+                kwargs_cosmo_new, kwargs_lens_new, kwargs_kin_new, kwargs_source_new, kwargs_los_new
             )
             npt.assert_almost_equal(args_new, args)
 

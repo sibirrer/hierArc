@@ -54,7 +54,7 @@ class TestLensLikelihood(object):
         self.likelihood = LensSampleLikelihood(kwargs_lens_list=self.kwargs_lens_list)
 
     def test_log_likelihood(self):
-        kwargs_lens = {"kappa_ext": 0, "gamma_ppn": 1}
+        kwargs_lens = {"gamma_ppn": 1}
         kwargs_kin = {"a_ani": 1}
         logl = self.likelihood.log_likelihood(
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin

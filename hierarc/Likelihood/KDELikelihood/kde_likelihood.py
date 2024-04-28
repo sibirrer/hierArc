@@ -64,9 +64,9 @@ class KDELikelihood(object):
             )
             self.loglikelihood = self.kdelikelihood()
         else:
-            raise ValueError(
+            raise NameError(
                 "likelihood_type %s not supported! Supported are %s."
-                % (likelihood_type, LIKELIHOOD_TYPES)
+                % (self.loglikelihood_type, LIKELIHOOD_TYPES)
             )
 
     def kdelikelihood(self):
