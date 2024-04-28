@@ -30,7 +30,12 @@ class DSPLikelihood(object):
         self._normalized = normalized
 
     def lens_log_likelihood(
-        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None, kwargs_los=None
+        self,
+        cosmo,
+        kwargs_lens=None,
+        kwargs_kin=None,
+        kwargs_source=None,
+        kwargs_los=None,
     ):
         """Log likelihood of the data given a model.
 

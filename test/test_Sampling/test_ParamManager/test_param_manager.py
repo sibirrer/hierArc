@@ -87,7 +87,7 @@ class TestParamManager(object):
                     kwargs_upper_source=kwargs_upper_source,
                     kwargs_fixed_los=kwargs_fixed_los,
                     kwargs_lower_los=kwargs_lower_los,
-                    kwargs_upper_los=kwargs_upper_los
+                    kwargs_upper_los=kwargs_upper_los,
                 )
             )
 
@@ -118,7 +118,7 @@ class TestParamManager(object):
                     kwargs_fixed_source=None,
                     kwargs_lower_los=kwargs_lower_los,
                     kwargs_upper_los=kwargs_upper_los,
-                    kwargs_fixed_los=None
+                    kwargs_fixed_los=None,
                 )
             )
         self.param_list = param_list
@@ -145,7 +145,6 @@ class TestParamManager(object):
         kwargs_lens = {
             "lambda_mst": 1,
             "lambda_mst_sigma": 0,
-
         }
         kwargs_los = [{"mean": 0, "sigma": 0.05}]
         kwargs_kin = {"a_ani": 1, "a_ani_sigma": 0.3}
@@ -156,17 +155,21 @@ class TestParamManager(object):
                 kwargs_lens=kwargs_lens,
                 kwargs_kin=kwargs_kin,
                 kwargs_source=kwargs_source,
-                kwargs_los=kwargs_los
+                kwargs_los=kwargs_los,
             )
             (
                 kwargs_cosmo_new,
                 kwargs_lens_new,
                 kwargs_kin_new,
                 kwargs_source_new,
-                kwargs_los_new
+                kwargs_los_new,
             ) = param.args2kwargs(args)
             args_new = param.kwargs2args(
-                kwargs_cosmo_new, kwargs_lens_new, kwargs_kin_new, kwargs_source_new, kwargs_los_new
+                kwargs_cosmo_new,
+                kwargs_lens_new,
+                kwargs_kin_new,
+                kwargs_source_new,
+                kwargs_los_new,
             )
             npt.assert_almost_equal(args_new, args)
 

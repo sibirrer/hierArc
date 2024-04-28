@@ -65,7 +65,9 @@ class GoodnessOfFit(object):
                     ddt_model_sigma,
                     dd_model_mean,
                     dd_model_sigma,
-                ) = likelihood.ddt_dd_model_prediction(cosmo, kwargs_lens=kwargs_lens, kwargs_los=kwargs_los)
+                ) = likelihood.ddt_dd_model_prediction(
+                    cosmo, kwargs_lens=kwargs_lens, kwargs_los=kwargs_los
+                )
 
                 ddt_name_list.append(name)
                 ddt_model_mean_list.append(ddt_model_mean)
@@ -162,7 +164,10 @@ class GoodnessOfFit(object):
                 sigma_v_predict_mean,
                 cov_error_predict,
             ) = likelihood.sigma_v_measured_vs_predict(
-                cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
+                cosmo,
+                kwargs_lens=kwargs_lens,
+                kwargs_kin=kwargs_kin,
+                kwargs_los=kwargs_los,
             )
 
             if sigma_v_measurement is not None:
@@ -205,7 +210,9 @@ class GoodnessOfFit(object):
         :param color_prediction: color of model prediction
         :return: fig, axes of matplotlib instance
         """
-        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin, kwargs_los=kwargs_los)
+        logL = self._sample_likelihood.log_likelihood(
+            cosmo, kwargs_lens, kwargs_kin, kwargs_los=kwargs_los
+        )
         print(logL, "log likelihood")
         (
             sigma_v_name_list,

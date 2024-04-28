@@ -27,36 +27,46 @@ class TestLOSDistribution(object):
 
         los_distribution = ["GAUSSIAN", "GEV"]
 
-        kwargs_los = [{"mean": mean_gauss, "sigma": sigma_gauss},
-                      {"mean": mean_gev, "sigma": sigma_gev, "xi": xi}]
+        kwargs_los = [
+            {"mean": mean_gauss, "sigma": sigma_gauss},
+            {"mean": mean_gev, "sigma": sigma_gev, "xi": xi},
+        ]
 
         # here we draw from the scipy function
-        dist_gev = LOSDistribution(kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges,
-                                        global_los_distribution=1,
-                                        los_distributions=los_distribution)
+        dist_gev = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=1,
+            los_distributions=los_distribution,
+        )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
         npt.assert_almost_equal(np.mean(kappa_dist_drawn), mean_gev, decimal=2)
         npt.assert_almost_equal(np.std(kappa_dist_drawn), sigma_gev, decimal=2)
 
         # here we draw from the distribution
-        dist_gev = LOSDistribution(kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges,
-                                   global_los_distribution=False,
-                                   los_distributions=los_distribution)
+        dist_gev = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=False,
+            los_distributions=los_distribution,
+        )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
         npt.assert_almost_equal(np.mean(kappa_dist_drawn), mean_gev, decimal=2)
         npt.assert_almost_equal(np.std(kappa_dist_drawn), sigma_gev, decimal=2)
 
         # draw from Gaussian
-        dist_gev = LOSDistribution(kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges,
-                                   global_los_distribution=0,
-                                   los_distributions=los_distribution)
+        dist_gev = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=0,
+            los_distributions=los_distribution,
+        )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
         npt.assert_almost_equal(np.mean(kappa_dist_drawn), mean_gauss, decimal=2)
         npt.assert_almost_equal(np.std(kappa_dist_drawn), sigma_gauss, decimal=2)
-
 
     def test_draw_bool(self):
         xi = -0.1
@@ -75,29 +85,34 @@ class TestLOSDistribution(object):
 
         los_distribution = ["GAUSSIAN", "GEV"]
 
-        kwargs_los = [{"mean": mean_gauss, "sigma": sigma_gauss},
-                      {"mean": mean_gev, "sigma": sigma_gev, "xi": xi}]
+        kwargs_los = [
+            {"mean": mean_gauss, "sigma": sigma_gauss},
+            {"mean": mean_gev, "sigma": sigma_gev, "xi": xi},
+        ]
 
-        dist = LOSDistribution(kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges,
-                                   global_los_distribution=1,
-                                   los_distributions=los_distribution)
+        dist = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=1,
+            los_distributions=los_distribution,
+        )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is True
 
-        dist = LOSDistribution(kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges,
-                               global_los_distribution=0,
-                               los_distributions=los_distribution)
+        dist = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=0,
+            los_distributions=los_distribution,
+        )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is False
 
-        dist = LOSDistribution(kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges,
-                               global_los_distribution=False,
-                               los_distributions=los_distribution)
+        dist = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=False,
+            los_distributions=los_distribution,
+        )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is True
-
-
-
-
-
-

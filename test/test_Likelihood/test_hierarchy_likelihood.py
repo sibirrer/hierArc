@@ -169,17 +169,26 @@ class TestLensLikelihood(object):
 
         kwargs_kin = {"a_ani": 1, "a_ani_sigma": 0.1}
         ln_likelihood = self.likelihood.lens_log_likelihood(
-            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_los=kwargs_los,
         )
         npt.assert_almost_equal(ln_likelihood, -0.5, decimal=1)
 
         ln_likelihood_zero = self.likelihood_zero_dist.lens_log_likelihood(
-            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_los=kwargs_los,
         )
         assert ln_likelihood_zero == -np.inf
 
         ln_likelihood_kappa_ext = self.likelihood_kappa_ext.lens_log_likelihood(
-            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_los=kwargs_los,
         )
         npt.assert_almost_equal(ln_likelihood, ln_likelihood_kappa_ext, decimal=1)
 
@@ -192,7 +201,10 @@ class TestLensLikelihood(object):
         kwargs_los = [{"mean": 0, "sigma": 0}]
         kwargs_kin = {"a_ani": 1, "a_ani_sigma": 0}
         ln_inf = self.likelihood_single.lens_log_likelihood(
-            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_los=kwargs_los,
         )
         assert ln_inf < -10000000
 

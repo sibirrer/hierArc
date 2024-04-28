@@ -10,7 +10,6 @@ class LOSParam(object):
         los_sampling=False,
         los_distributions=None,
         kwargs_fixed=None,
-
     ):
         """
 
@@ -47,21 +46,21 @@ class LOSParam(object):
                 if los_distribution in ["GEV", "GAUSSIAN"]:
                     if "mean" not in self._kwargs_fixed[i]:
                         if latex_style is True:
-                            name_list.append(r"$\mu_{\rm los %s}$" %i)
+                            name_list.append(r"$\mu_{\rm los %s}$" % i)
                         else:
-                            name_list.append(str("mean_los_"+str(i)))
+                            name_list.append(str("mean_los_" + str(i)))
                     if "sigma" not in self._kwargs_fixed[i]:
                         if latex_style is True:
-                            name_list.append(r"$\sigma_{\rm los %s}$" %i)
+                            name_list.append(r"$\sigma_{\rm los %s}$" % i)
                         else:
-                            name_list.append(str("sigma_los_"+str(i)))
+                            name_list.append(str("sigma_los_" + str(i)))
                 if los_distribution in ["GEV"]:
                     if "xi" not in self._kwargs_fixed[i]:
                         if latex_style is True:
-                            name_list.append(r"$\xi_{\rm los} %s$" %i)
+                            name_list.append(r"$\xi_{\rm los} %s$" % i)
                         else:
                             name_list.append(str("xi_los_" + str(i)))
-        #str(name + "_" + type + str(k))
+        # str(name + "_" + type + str(k))
         return name_list
 
     def args2kwargs(self, args, i=0):
