@@ -1,13 +1,13 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.LensLikelihood.base_lens_likelihood import LensLikelihoodBase
 from hierarc.Likelihood.parameter_scaling import ParameterScalingIFU
-from hierarc.Util.distribution_util import PDFSampling
+from hierarc.Likelihood.los_distributions import LOSDistribution
 import numpy as np
 import copy
 
 
 class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalingIFU):
-    """Master class containing the likelihood definitions of different analysis for s
+    """Master class containing the likelihood definitions of different analysis for a
     single lens."""
 
     def __init__(
@@ -24,7 +24,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         log_m2l_array=None,
         param_scaling_grid_list=None,
         num_distribution_draws=50,
-        kappa_ext_bias=False,
+        global_los_distribution=False,
         kappa_pdf=None,
         kappa_bin_edges=None,
         mst_ifu=False,
@@ -34,6 +34,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         kwargs_lens_properties=None,
         gamma_in_prior_mean=None,
         gamma_in_prior_std=None,
+        los_distributions=None,
         **kwargs_likelihood
     ):
         """
@@ -52,8 +53,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             anisotropy, gamma_in, and log_m2l. In that case, gamma_in_array and log_m2l_array need to be provided.
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
-        :param kappa_ext_bias: bool, if True incorporates the global external selection function into the likelihood.
-        If False, the likelihood needs to incorporate the individual selection function with sufficient accuracy.
+        :param global_los_distribution: if integer, will draw from the global kappa distribution specified in that
+         integer. If False, will instead draw from the distribution specified in kappa_pdf.
+        :type global_los_distribution: bool or integer
         :param kappa_pdf: array of probability density function of the external convergence distribution
          binned according to kappa_bin_edges
         :param kappa_bin_edges: array of length (len(kappa_pdf)+1), bin edges of the kappa PDF
@@ -69,7 +71,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param gamma_in_prior_mean: prior mean for inner power-law slope of the NFW profile, if available
         :param gamma_in_prior_std: standard deviation of the Gaussian prior for gamma_in
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
-        see individual classes for their use
+         see individual classes for their use
+        :param los_distributions: list of all line of sight distributions parameterized
+        :type los_distributions: list of str or None
         """
         TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
         if ani_scaling_array_list is None and ani_scaling_array is not None:
@@ -122,15 +126,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             **kwargs_likelihood
         )
         self._num_distribution_draws = int(num_distribution_draws)
-        self._kappa_ext_bias = kappa_ext_bias
+
+        self._los = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=global_los_distribution,
+            los_distributions=los_distributions,
+        )
         self._mst_ifu = mst_ifu
-        if kappa_pdf is not None and kappa_bin_edges is not None:
-            self._kappa_dist = PDFSampling(
-                bin_edges=kappa_bin_edges, pdf_array=kappa_pdf
-            )
-            self._draw_kappa = True
-        else:
-            self._draw_kappa = False
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
         self._gamma_in_array = gamma_in_array
@@ -140,7 +143,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         self._gamma_in_prior_std = gamma_in_prior_std
 
     def lens_log_likelihood(
-        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
+        self,
+        cosmo,
+        kwargs_lens=None,
+        kwargs_kin=None,
+        kwargs_source=None,
+        kwargs_los=None,
     ):
         """Log likelihood of the data of a lens given a model (defined with hyper-
         parameters) and cosmology.
@@ -149,6 +157,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
+        :param kwargs_los: list of keyword arguments of global line of sight
+            distributions
         :return: log likelihood of the data given the model
         """
 
@@ -168,6 +178,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
             kwargs_source=kwargs_source,
+            kwargs_los=kwargs_los,
             cosmo=cosmo,
         )
         return a
@@ -180,6 +191,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         kwargs_lens=None,
         kwargs_kin=None,
         kwargs_source=None,
+        kwargs_los=None,
         cosmo=None,
     ):
         """Log likelihood of the data of a lens given a model (defined with hyper-
@@ -191,6 +203,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
+        :param kwargs_los: list of keyword arguments of global line of sight
+            distributions
         :param cosmo: astropy.cosmology instance
         :return: log likelihood given the single lens analysis for the given hyper
             parameter
@@ -202,7 +216,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         sigma_v_sys_error = kwargs_kin_copy.pop("sigma_v_sys_error", None)
 
         if self.check_dist(
-            kwargs_lens, kwargs_kin, kwargs_source
+            kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
         ):  # sharp distributions
             return self.log_likelihood_single(
                 ddt,
@@ -211,6 +225,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                 kwargs_lens,
                 kwargs_kin_copy,
                 kwargs_source,
+                kwargs_los,
                 sigma_v_sys_error=sigma_v_sys_error,
             )
         else:
@@ -223,6 +238,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                     kwargs_lens,
                     kwargs_kin_copy,
                     kwargs_source,
+                    kwargs_los,
                     sigma_v_sys_error=sigma_v_sys_error,
                 )
                 exp_logl = np.exp(logl)
@@ -240,6 +256,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         kwargs_lens,
         kwargs_kin,
         kwargs_source,
+        kwargs_los=None,
         sigma_v_sys_error=None,
     ):
         """Log likelihood of the data of a lens given a specific model (as a draw from
@@ -251,12 +268,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword arguments of source brightness
+        :param kwargs_los: line of sight list of dictionaries
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion
             measurement
         :return: log likelihood given the single lens analysis for a single (random)
             realization of the hyper parameter distribution
         """
-        lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+        lambda_mst, gamma_ppn = self.draw_lens(**kwargs_lens)
+        kappa_ext = self._los.draw_los(kwargs_los)
         # draw intrinsic source magnitude
         mag_source = self.draw_source(lum_dist=delta_lum_dist, **kwargs_source)
         ddt_, dd_, mag_source_ = self.displace_prediction(
@@ -420,37 +439,35 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         delta_lum_dist = lum_dists - lum_dist_anchor
         return delta_lum_dist
 
-    def check_dist(self, kwargs_lens, kwargs_kin, kwargs_source):
+    def check_dist(self, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los):
         """Checks if the provided keyword arguments describe a distribution function of
         hyper parameters or are single values.
 
         :param kwargs_lens: lens model hyper-parameter keywords
         :param kwargs_kin: kinematic model hyper-parameter keywords
         :param kwargs_source: source brightness hyper-parameter keywords
+        :param kwargs_los: list of dictionaries for line of sight hyper-parameters
         :return: bool, True if delta function, else False
         """
         lambda_mst_sigma = kwargs_lens.get("lambda_mst_sigma", 0)  # scatter in MST
-        kappa_ext_sigma = kwargs_lens.get("kappa_ext_sigma", 0)
+        draw_kappa_bool = self._los.draw_bool(kwargs_los)
         a_ani_sigma = kwargs_kin.get("a_ani_sigma", 0)
         beta_inf_sigma = kwargs_kin.get("beta_inf_sigma", 0)
         sne_sigma = kwargs_source.get("sigma_sne", 0)
         if (
             a_ani_sigma == 0
             and lambda_mst_sigma == 0
-            and kappa_ext_sigma == 0
             and beta_inf_sigma == 0
             and sne_sigma == 0
+            and not draw_kappa_bool
         ):
-            if self._draw_kappa is False:
-                return True
+            return True
         return False
 
     def draw_lens(
         self,
         lambda_mst=1,
         lambda_mst_sigma=0,
-        kappa_ext=0,
-        kappa_ext_sigma=0,
         gamma_ppn=1,
         lambda_ifu=1,
         lambda_ifu_sigma=0,
@@ -468,8 +485,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
 
         :param lambda_mst: MST transform
         :param lambda_mst_sigma: spread in the distribution
-        :param kappa_ext: external convergence mean in distribution
-        :param kappa_ext_sigma: spread in the distribution
         :param gamma_ppn: Post-Newtonian parameter
         :param lambda_ifu: secondary lambda_mst parameter for subset of lenses specified
             for
@@ -503,13 +518,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
                 + beta_lambda * self._lambda_scaling_property_beta
             )
             lambda_mst_draw = np.random.normal(lambda_lens, lambda_mst_sigma)
-        if self._draw_kappa is True:
-            kappa_ext_draw = self._kappa_dist.draw_one
-        elif self._kappa_ext_bias is True:
-            kappa_ext_draw = np.random.normal(kappa_ext, kappa_ext_sigma)
-        else:
-            kappa_ext_draw = 0
-        return lambda_mst_draw, kappa_ext_draw, gamma_ppn
+        return lambda_mst_draw, gamma_ppn
 
     @staticmethod
     def draw_source(mu_sne=1, sigma_sne=0, lum_dist=0, **kwargs):
@@ -530,13 +539,16 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         # return linear amplitude with base log 10
         return mag_source
 
-    def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens=None, kwargs_kin=None):
+    def sigma_v_measured_vs_predict(
+        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_los=None
+    ):
         """Mean and error covariance of velocity dispersion measurement mean and error
         covariance of velocity dispersion predictions.
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyper parameters of the lens model
-        :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :param kwargs_kin: keyword arguments of the kinematic model hyper-parameters
+        :param kwargs_los: line of sight parapers
         :return: sigma_v_measurement, cov_error_measurement, sigma_v_predict_mean,
             cov_error_predict
         """
@@ -557,7 +569,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         sigma_v_predict_mean = np.zeros_like(sigma_v_measurement)
         cov_error_predict = np.zeros_like(cov_error_measurement)
         for i in range(self._num_distribution_draws):
-            lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+            lambda_mst, gamma_ppn = self.draw_lens(**kwargs_lens)
+            kappa_ext = self._los.draw_los(kwargs_los)
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
             )
@@ -586,12 +599,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
             cov_error_predict,
         )
 
-    def ddt_dd_model_prediction(self, cosmo, kwargs_lens=None):
+    def ddt_dd_model_prediction(self, cosmo, kwargs_lens=None, kwargs_los=None):
         """Predicts the model uncertainty corrected ddt prediction of the applied model
         (e.g. power-law)
 
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyper parameters of the lens model
+        :param kwargs_los: line of slight list of dictionaries
         :return: ddt_model mean, ddt_model sigma, dd_model mean, dd_model sigma
         """
         if kwargs_lens is None:
@@ -600,7 +614,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         ddt_draws = []
         dd_draws = []
         for i in range(self._num_distribution_draws):
-            lambda_mst, kappa_ext, gamma_ppn = self.draw_lens(**kwargs_lens)
+            lambda_mst, gamma_ppn = self.draw_lens(**kwargs_lens)
+            kappa_ext = self._los.draw_los(kwargs_los)
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
             )

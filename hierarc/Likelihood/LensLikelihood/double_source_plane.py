@@ -30,7 +30,12 @@ class DSPLikelihood(object):
         self._normalized = normalized
 
     def lens_log_likelihood(
-        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None
+        self,
+        cosmo,
+        kwargs_lens=None,
+        kwargs_kin=None,
+        kwargs_source=None,
+        kwargs_los=None,
     ):
         """Log likelihood of the data given a model.
 
@@ -38,6 +43,7 @@ class DSPLikelihood(object):
         :param kwargs_lens: keyword arguments of lens
         :param kwargs_kin: keyword arguments of kinematics
         :param kwargs_source: keyword argument of source
+        :param kwargs_los: keyword argument list of line of sight
         :return: log likelihood of data given model
         """
         beta_model = self._beta_model(cosmo)

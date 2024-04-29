@@ -7,8 +7,6 @@ class TestLensParam(object):
         self._param = LensParam(
             lambda_mst_sampling=True,
             lambda_mst_distribution="GAUSSIAN",
-            kappa_ext_sampling=True,
-            kappa_ext_distribution="GAUSSIAN",
             lambda_ifu_sampling=True,
             lambda_ifu_distribution="GAUSSIAN",
             alpha_lambda_sampling=True,
@@ -21,16 +19,12 @@ class TestLensParam(object):
             "lambda_mst_sigma": 0.1,
             "lambda_ifu": 1.1,
             "lambda_ifu_sigma": 0.2,
-            "kappa_ext": 0.01,
-            "kappa_ext_sigma": 0.03,
             "alpha_lambda": 0,
             "beta_lambda": 0,
         }
         self._param_fixed = LensParam(
             lambda_mst_sampling=True,
             lambda_mst_distribution="GAUSSIAN",
-            kappa_ext_sampling=True,
-            kappa_ext_distribution="GAUSSIAN",
             lambda_ifu_sampling=True,
             lambda_ifu_distribution="GAUSSIAN",
             alpha_lambda_sampling=True,
@@ -40,8 +34,6 @@ class TestLensParam(object):
         self._param_log_scatter = LensParam(
             lambda_mst_sampling=True,
             lambda_mst_distribution="GAUSSIAN",
-            kappa_ext_sampling=True,
-            kappa_ext_distribution="GAUSSIAN",
             lambda_ifu_sampling=True,
             lambda_ifu_distribution="GAUSSIAN",
             alpha_lambda_sampling=True,
@@ -52,14 +44,14 @@ class TestLensParam(object):
 
     def test_param_list(self):
         param_list = self._param.param_list(latex_style=False)
-        assert len(param_list) == 8
+        assert len(param_list) == 6
         param_list = self._param.param_list(latex_style=True)
-        assert len(param_list) == 8
+        assert len(param_list) == 6
 
         param_list = self._param_log_scatter.param_list(latex_style=False)
-        assert len(param_list) == 8
+        assert len(param_list) == 6
         param_list = self._param_log_scatter.param_list(latex_style=True)
-        assert len(param_list) == 8
+        assert len(param_list) == 6
 
         param_list = self._param_fixed.param_list(latex_style=False)
         assert len(param_list) == 0

@@ -27,8 +27,8 @@ class CosmoLikelihood(object):
         gamma_in_distribution="NONE",
         log_m2l_sampling=False,
         log_m2l_distribution="NONE",
-        kappa_ext_sampling=False,
-        kappa_ext_distribution="NONE",
+        los_sampling=False,
+        los_distributions=None,
         alpha_lambda_sampling=False,
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
@@ -73,8 +73,10 @@ class CosmoLikelihood(object):
          according to the lens posterior kwargs 'lambda_scaling_property'
         :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly
          according to the lens posterior kwargs 'lambda_scaling_property_beta'
-        :param kappa_ext_sampling: bool, if True samples a global external convergence parameter
-        :param kappa_ext_distribution: string, distribution function of the kappa_ext parameter
+        :param los_sampling: if sampling of the parameters should be done
+        :type los_sampling: bool
+        :param los_distributions: what distribution to be sampled
+        :type los_distributions: list of str
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
         kinematic prediction
         :param anisotropy_model: string, specifies the stellar anisotropy model
@@ -106,7 +108,9 @@ class CosmoLikelihood(object):
         if sigma_v_systematics is True:
             normalized = True
         self._likelihoodLensSample = LensSampleLikelihood(
-            kwargs_likelihood_list, normalized=normalized
+            kwargs_likelihood_list,
+            normalized=normalized,
+            los_distributions=los_distributions,
         )
         self.param = ParamManager(
             cosmology,
@@ -127,8 +131,8 @@ class CosmoLikelihood(object):
             sne_distribution=sne_distribution,
             z_apparent_m_anchor=z_apparent_m_anchor,
             sigma_v_systematics=sigma_v_systematics,
-            kappa_ext_sampling=kappa_ext_sampling,
-            kappa_ext_distribution=kappa_ext_distribution,
+            los_sampling=los_sampling,
+            los_distributions=los_distributions,
             anisotropy_sampling=anisotropy_sampling,
             anisotropy_model=anisotropy_model,
             anisotropy_distribution=anisotropy_distribution,
@@ -188,8 +192,8 @@ class CosmoLikelihood(object):
             if args[i] < self._lower_limit[i] or args[i] > self._upper_limit[i]:
                 return -np.inf
 
-        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source = self.param.args2kwargs(
-            args
+        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los = (
+            self.param.args2kwargs(args)
         )
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
@@ -215,6 +219,7 @@ class CosmoLikelihood(object):
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
             kwargs_source=kwargs_source,
+            kwargs_los=kwargs_los,
         )
 
         if self._sne_evaluate is True:
