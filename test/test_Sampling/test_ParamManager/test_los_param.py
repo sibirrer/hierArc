@@ -1,6 +1,7 @@
 from hierarc.Sampling.ParamManager.los_param import LOSParam
 import numpy.testing as npt
 import pytest
+import unittest
 
 
 class TestLOSParam(object):
@@ -69,6 +70,17 @@ class TestLOSParam(object):
         kwargs_new, i = self._param_fixed.args2kwargs(args, i=0)
         args_new = self._param_fixed.kwargs2args(kwargs_new)
         npt.assert_almost_equal(args_new, args)
+
+
+class TestRaise(unittest.TestCase):
+    def test_raise(self):
+        with self.assertRaises(ValueError):
+            LOSParam(
+                los_sampling=True,
+                los_distributions=["BAD"],
+                kwargs_fixed=[{}],
+            )
+
 
 
 if __name__ == "__main__":
