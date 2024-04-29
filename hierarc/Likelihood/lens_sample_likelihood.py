@@ -28,11 +28,19 @@ class LensSampleLikelihood(object):
                 )
             else:
                 self._lens_list.append(
-                    LensLikelihood(normalized=normalized, los_distributions=los_distributions, **kwargs_lens)
+                    LensLikelihood(
+                        normalized=normalized,
+                        los_distributions=los_distributions,
+                        **kwargs_lens
+                    )
                 )
 
     def log_likelihood(
-        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None,
+        self,
+        cosmo,
+        kwargs_lens=None,
+        kwargs_kin=None,
+        kwargs_source=None,
         kwargs_los=None,
     ):
         """

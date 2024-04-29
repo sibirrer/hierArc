@@ -18,11 +18,13 @@ class TestLOSParam(object):
             kwargs_fixed=None,
         )
 
-        kwargs_fixed = [{
-            "mean": 0,
-            "sigma": 0.05,
-            "xi": 0.1,
-        }]
+        kwargs_fixed = [
+            {
+                "mean": 0,
+                "sigma": 0.05,
+                "xi": 0.1,
+            }
+        ]
         self._param_fixed = LOSParam(
             los_sampling=True,
             los_distributions=["GEV"],
@@ -46,16 +48,20 @@ class TestLOSParam(object):
         assert len(param_list) == 0
 
     def test_args2kwargs(self):
-        kwargs = [{
-            "mean": 0.1,
-            "sigma": 0.1,
-            "xi": 0.2,
-        }]
+        kwargs = [
+            {
+                "mean": 0.1,
+                "sigma": 0.1,
+                "xi": 0.2,
+            }
+        ]
 
-        kwargs_gauss = [{
-            "mean": 0.1,
-            "sigma": 0.1,
-        }]
+        kwargs_gauss = [
+            {
+                "mean": 0.1,
+                "sigma": 0.1,
+            }
+        ]
         args = self._param.kwargs2args(kwargs)
         kwargs_new, i = self._param.args2kwargs(args, i=0)
         args_new = self._param.kwargs2args(kwargs_new)

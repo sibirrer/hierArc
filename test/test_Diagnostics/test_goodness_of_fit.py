@@ -115,7 +115,9 @@ class TestGoodnessOfFit(object):
     def test_plot_kin_fit(self):
         kwargs_lens = {"lambda_mst": 1}
         kwargs_kin = {}
-        f, ax = self.goodnessofFit.plot_kin_fit(self.cosmo, kwargs_lens, kwargs_kin, kwargs_los=None)
+        f, ax = self.goodnessofFit.plot_kin_fit(
+            self.cosmo, kwargs_lens, kwargs_kin, kwargs_los=None
+        )
         plt.close()
 
     def test_plot_ifu_fit(self):

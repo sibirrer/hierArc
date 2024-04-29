@@ -108,8 +108,9 @@ class CosmoLikelihood(object):
         if sigma_v_systematics is True:
             normalized = True
         self._likelihoodLensSample = LensSampleLikelihood(
-            kwargs_likelihood_list, normalized=normalized,
-            los_distributions=los_distributions
+            kwargs_likelihood_list,
+            normalized=normalized,
+            los_distributions=los_distributions,
         )
         self.param = ParamManager(
             cosmology,
@@ -191,8 +192,8 @@ class CosmoLikelihood(object):
             if args[i] < self._lower_limit[i] or args[i] > self._upper_limit[i]:
                 return -np.inf
 
-        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los = self.param.args2kwargs(
-            args
+        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los = (
+            self.param.args2kwargs(args)
         )
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral

@@ -127,9 +127,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         )
         self._num_distribution_draws = int(num_distribution_draws)
 
-        self._los = LOSDistribution(kappa_pdf=kappa_pdf, kappa_bin_edges=kappa_bin_edges,
-                                    global_los_distribution=global_los_distribution,
-                                    los_distributions=los_distributions)
+        self._los = LOSDistribution(
+            kappa_pdf=kappa_pdf,
+            kappa_bin_edges=kappa_bin_edges,
+            global_los_distribution=global_los_distribution,
+            los_distributions=los_distributions,
+        )
         self._mst_ifu = mst_ifu
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
@@ -140,7 +143,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         self._gamma_in_prior_std = gamma_in_prior_std
 
     def lens_log_likelihood(
-        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_source=None, kwargs_los=None,
+        self,
+        cosmo,
+        kwargs_lens=None,
+        kwargs_kin=None,
+        kwargs_source=None,
+        kwargs_los=None,
     ):
         """Log likelihood of the data of a lens given a model (defined with hyper-
         parameters) and cosmology.
@@ -149,7 +157,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
-        :param kwargs_los: list of keyword arguments of global line of sight distributions
+        :param kwargs_los: list of keyword arguments of global line of sight
+            distributions
         :return: log likelihood of the data given the model
         """
 
@@ -194,7 +203,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         :param kwargs_lens: keywords of the hyper parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
-        :param kwargs_los: list of keyword arguments of global line of sight distributions
+        :param kwargs_los: list of keyword arguments of global line of sight
+            distributions
         :param cosmo: astropy.cosmology instance
         :return: log likelihood given the single lens analysis for the given hyper
             parameter
@@ -529,7 +539,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, ParameterScalin
         # return linear amplitude with base log 10
         return mag_source
 
-    def sigma_v_measured_vs_predict(self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_los=None):
+    def sigma_v_measured_vs_predict(
+        self, cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_los=None
+    ):
         """Mean and error covariance of velocity dispersion measurement mean and error
         covariance of velocity dispersion predictions.
 

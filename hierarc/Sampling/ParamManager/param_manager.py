@@ -124,9 +124,11 @@ class ParamManager(object):
             z_apparent_m_anchor=z_apparent_m_anchor,
             kwargs_fixed=kwargs_fixed_source,
         )
-        self._los_param = LOSParam(los_sampling=los_sampling,
-                                   los_distributions=los_distributions,
-                                   kwargs_fixed=kwargs_fixed_los,)
+        self._los_param = LOSParam(
+            los_sampling=los_sampling,
+            los_distributions=los_distributions,
+            kwargs_fixed=kwargs_fixed_los,
+        )
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = (
             kwargs_upper_cosmo,
             kwargs_lower_cosmo,
@@ -185,8 +187,12 @@ class ParamManager(object):
         return kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
 
     def kwargs2args(
-        self, kwargs_cosmo=None, kwargs_lens=None, kwargs_kin=None, kwargs_source=None,
-        kwargs_los=None
+        self,
+        kwargs_cosmo=None,
+        kwargs_lens=None,
+        kwargs_kin=None,
+        kwargs_source=None,
+        kwargs_los=None,
     ):
         """
 
