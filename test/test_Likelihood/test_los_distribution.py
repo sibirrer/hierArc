@@ -122,7 +122,10 @@ class TestLOSDistribution(object):
 class TestRaise(unittest.TestCase):
     def test_raise(self):
         with self.assertRaises(ValueError):
-            los = LOSDistribution(kappa_pdf=None, kappa_bin_edges=None,
-                            global_los_distribution=0,
-                            los_distributions=["BAD"])
+            los = LOSDistribution(
+                kappa_pdf=None,
+                kappa_bin_edges=None,
+                global_los_distribution=0,
+                los_distributions=["BAD"],
+            )
             los.draw_los(kwargs_los=[{}])
