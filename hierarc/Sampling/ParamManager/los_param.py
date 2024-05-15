@@ -26,7 +26,7 @@ class LOSParam(object):
         for los_distribution in los_distributions:
             if los_distribution not in _LOS_DISTRIBUTIONS:
                 raise ValueError(
-                    "SNE distribution %s not supported. Please chose among %s."
+                    "LOS distribution %s not supported. Please chose among %s."
                     % (los_distribution, _LOS_DISTRIBUTIONS)
                 )
         self._los_distributions = los_distributions
