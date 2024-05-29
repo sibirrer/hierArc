@@ -241,7 +241,7 @@ class CosmoLikelihood(object):
             log_l += self._kde_likelihood.kdelikelihood_samples(cosmo_params)[0]
         if self._prior_add is True:
             log_l += self._custom_prior(
-                kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source
+                kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
             )
         return log_l
 

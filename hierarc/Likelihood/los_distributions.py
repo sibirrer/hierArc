@@ -38,7 +38,6 @@ class LOSDistribution(object):
             and kappa_bin_edges is not None
             and not self._draw_kappa_global
         ):
-            print("test kappa pdf sampling")
             self._kappa_dist = PDFSampling(
                 bin_edges=kappa_bin_edges, pdf_array=kappa_pdf
             )
