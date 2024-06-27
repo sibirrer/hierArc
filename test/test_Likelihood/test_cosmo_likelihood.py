@@ -78,7 +78,9 @@ class TestCosmoLikelihood(object):
             cosmo_fixed=None,
         )
 
-        def custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los):
+        def custom_prior(
+            kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
+        ):
             return -1
 
         cosmoL_prior = CosmoLikelihood(
