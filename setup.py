@@ -64,7 +64,7 @@ setup(
     test_suite="test",
     tests_require=test_requirements,
     url="https://github.com/sibirrer/hierarc",
-    version="1.1.2",
+    version="1.1.3",
     zip_safe=False,
     cmdclass={"test": PyTest},
 )
