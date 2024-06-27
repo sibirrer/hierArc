@@ -1,4 +1,4 @@
-from hierarc.Likelihood.los_distributions import LOSDistribution
+from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
 from scipy.stats import genextreme
 import numpy as np
 import numpy.testing as npt

@@ -124,7 +124,8 @@ class DdtKinConstraints(KinConstraints):
             "j_model": j_model_list,
             "error_cov_measurement": error_cov_measurement,
             "error_cov_j_sqrt": error_cov_j_sqrt,
-            "ani_param_array": self.ani_param_array,
-            "ani_scaling_array_list": ani_scaling_array_list,
+            "kin_scaling_param_list": self.param_name_list,
+            "j_kin_scaling_param_axes": self.kin_scaling_param_array,
+            "j_kin_scaling_grid_list": ani_scaling_array_list,
         }
         return kwargs_likelihood

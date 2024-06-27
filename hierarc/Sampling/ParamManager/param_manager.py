@@ -64,7 +64,7 @@ class ParamManager(object):
          according to a predefined quantity of the lens
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
-        kinematic prediction
+         kinematic prediction
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
         :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
         :param gamma_in_distribution: string, distribution function of the gamma_in parameter

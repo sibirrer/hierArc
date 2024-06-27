@@ -36,6 +36,8 @@ class KinConstraints(BaseLensConfig):
         num_kin_sampling=1000,
         multi_observations=False,
         cosmo_fiducial=None,
+        gamma_in_scaling=None,
+        log_m2l_scaling=None,
     ):
         """
 
@@ -77,6 +79,8 @@ class KinConstraints(BaseLensConfig):
             kwargs_seeing as lists of multiple observations
         :param cosmo_fiducial: astropy.cosmology instance, if None,
             uses astropy's default
+        :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
+        :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         """
         self._sigma_v_measured = np.array(sigma_v_measured)
         self._sigma_v_error_independent = np.array(sigma_v_error_independent)
@@ -111,6 +115,8 @@ class KinConstraints(BaseLensConfig):
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
             cosmo_fiducial=cosmo_fiducial,
+            gamma_in_scaling=gamma_in_scaling,
+            log_m2l_scaling=log_m2l_scaling,
         )
 
     def j_kin_draw(self, kwargs_anisotropy, no_error=False):
@@ -171,8 +177,10 @@ class KinConstraints(BaseLensConfig):
             "j_model": j_model_list,
             "error_cov_measurement": error_cov_measurement,
             "error_cov_j_sqrt": error_cov_j_sqrt,
-            "ani_param_array": self.ani_param_array,
-            "ani_scaling_array_list": ani_scaling_array_list,
+            "kin_scaling_param_list": self.param_name_list,
+            "j_kin_scaling_param_axes": self.kin_scaling_param_array,
+            "j_kin_scaling_grid_list": ani_scaling_array_list,
+
         }
         return kwargs_likelihood
 
@@ -245,11 +253,11 @@ class KinConstraints(BaseLensConfig):
 
         if self._anisotropy_model == "GOM":
             ani_scaling_array_list = [
-                np.zeros((len(self.ani_param_array[0]), len(self.ani_param_array[1])))
+                np.zeros((len(self.kin_scaling_param_array[0]), len(self.kin_scaling_param_array[1])))
                 for _ in range(num_data)
             ]
-            for i, a_ani in enumerate(self.ani_param_array[0]):
-                for j, beta_inf in enumerate(self.ani_param_array[1]):
+            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
+                for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
                     kwargs_anisotropy = self.anisotropy_kwargs(
                         a_ani=a_ani, beta_inf=beta_inf
                     )
@@ -260,7 +268,7 @@ class KinConstraints(BaseLensConfig):
                         )  # perhaps change the order
         elif self._anisotropy_model in ["OM", "const"]:
             ani_scaling_array_list = [[] for _ in range(num_data)]
-            for a_ani in self.ani_param_array:
+            for a_ani in self.kin_scaling_param_array[0]:
                 kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
                 j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                 for i, j_kin in enumerate(j_kin_ani):
