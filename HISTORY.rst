@@ -28,3 +28,8 @@ History
 * double source plane likelihood
 * Pantheon+ likelihood
 * improved API
+
+1.1.3 (2024-06-27)
+------------------
+
+* composite model likelihood and fitting
