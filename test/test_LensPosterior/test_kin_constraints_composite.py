@@ -104,9 +104,13 @@ class TestKinConstraintsComposite(object):
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(gamma_in_sampling=True, log_m2l_sampling=True, **kwargs_likelihood)
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=True, **kwargs_likelihood
+        )
         kwargs_kin = {"a_ani": 1}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 1}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 1}, kwargs_kin=kwargs_kin
+        )
 
         kwargs_lens_light_test = [{"amp": [1, 1], "sigma": [1, 2]}]
         lens_light_model_list_test = ["MULTI_GAUSSIAN"]
@@ -256,9 +260,13 @@ class TestKinConstraintsComposite(object):
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(gamma_in_sampling=True, log_m2l_sampling=True, **kwargs_likelihood)
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=True, **kwargs_likelihood
+        )
         kwargs_kin = {"a_ani": 1, "beta_inf": 0.5}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 1}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 1}, kwargs_kin=kwargs_kin
+        )
 
 
 class TestKinConstraintsCompositeM2l(object):
@@ -360,9 +368,13 @@ class TestKinConstraintsCompositeM2l(object):
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(gamma_in_sampling=True, log_m2l_sampling=False, **kwargs_likelihood)
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=False, **kwargs_likelihood
+        )
         kwargs_kin = {"a_ani": 1}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 0}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 0}, kwargs_kin=kwargs_kin
+        )
 
     def test_likelihoodconfiguration_gom(self):
         anisotropy_model = "GOM"
@@ -457,7 +469,9 @@ class TestKinConstraintsCompositeM2l(object):
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(gamma_in_sampling=True, **kwargs_likelihood)
         kwargs_kin = {"a_ani": 1, "beta_inf": 0.5}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={"gamma_in": 2}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2}, kwargs_kin=kwargs_kin
+        )
 
 
 class TestRaise(unittest.TestCase):

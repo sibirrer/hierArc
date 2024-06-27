@@ -29,11 +29,10 @@ class LensSampleLikelihood(object):
                     DSPLikelihood(normalized=normalized, **_kwargs_lens)
                 )
             else:
-                kwargs_lens_ = self._merge_global2local_settings(kwargs_global_model=kwargs_global_model,
-                                                                 kwargs_lens=kwargs_lens)
-                self._lens_list.append(
-                    LensLikelihood(**kwargs_lens_)
+                kwargs_lens_ = self._merge_global2local_settings(
+                    kwargs_global_model=kwargs_global_model, kwargs_lens=kwargs_lens
                 )
+                self._lens_list.append(LensLikelihood(**kwargs_lens_))
 
     def log_likelihood(
         self,
@@ -91,18 +90,19 @@ class LensSampleLikelihood(object):
         return {**kwargs_global_model_subset, **kwargs_lens}
 
 
-_input_param_list = ["anisotropy_model",
-                     "anisotropy_sampling",
-                     "anisotroy_distribution_function",
-                     "los_distributions",
-                     "lambda_mst_distribution",
-                     "gamma_in_sampling",
-                     "gamma_in_distribution",
-                     "log_m2l_sampling",
-                     "log_m2l_distribution",
-                     "alpha_lambda_sampling",
-                     "beta_lambda_sampling",
-                     "alpha_gamma_in_sampling",
-                     "alpha_log_m2l_sampling",
-                     "log_scatter"
-                     ]
+_input_param_list = [
+    "anisotropy_model",
+    "anisotropy_sampling",
+    "anisotroy_distribution_function",
+    "los_distributions",
+    "lambda_mst_distribution",
+    "gamma_in_sampling",
+    "gamma_in_distribution",
+    "log_m2l_sampling",
+    "log_m2l_distribution",
+    "alpha_lambda_sampling",
+    "beta_lambda_sampling",
+    "alpha_gamma_in_sampling",
+    "alpha_log_m2l_sampling",
+    "log_scatter",
+]

@@ -2,7 +2,9 @@ from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.LensLikelihood.base_lens_likelihood import LensLikelihoodBase
 from hierarc.Likelihood.kin_scaling import KinScaling
 from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
-from hierarc.Sampling.Distributions.anisotropy_distributions import AnisotropyDistribution
+from hierarc.Sampling.Distributions.anisotropy_distributions import (
+    AnisotropyDistribution,
+)
 from hierarc.Sampling.Distributions.lens_distribution import LensDistribution
 import numpy as np
 import copy
@@ -94,11 +96,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         """
         TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
 
-        KinScaling.__init__(self,
-                            j_kin_scaling_param_axes=j_kin_scaling_param_axes,
-                            j_kin_scaling_grid_list=j_kin_scaling_grid_list,
-                            j_kin_scaling_param_name_list=kin_scaling_param_list
-                            )
+        KinScaling.__init__(
+            self,
+            j_kin_scaling_param_axes=j_kin_scaling_param_axes,
+            j_kin_scaling_grid_list=j_kin_scaling_grid_list,
+            j_kin_scaling_param_name_list=kin_scaling_param_list,
+        )
 
         LensLikelihoodBase.__init__(
             self,
@@ -119,28 +122,32 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             los_distributions=los_distributions,
         )
         kwargs_min, kwargs_max = self.param_bounds_interpol()
-        self._lens_distribution = LensDistribution(lambda_mst_sampling=False,
-                                                   lambda_mst_distribution=lambda_mst_distribution,
-                                                   gamma_in_sampling=gamma_in_sampling,
-                                                   gamma_in_distribution=gamma_in_distribution,
-                                                   log_m2l_sampling=log_m2l_sampling,
-                                                   log_m2l_distribution=log_m2l_distribution,
-                                                   alpha_lambda_sampling=alpha_lambda_sampling,
-                                                   beta_lambda_sampling=beta_lambda_sampling,
-                                                   alpha_gamma_in_sampling=alpha_gamma_in_sampling,
-                                                   alpha_log_m2l_sampling=alpha_log_m2l_sampling,
-                                                   log_scatter=log_scatter,
-                                                   mst_ifu=mst_ifu,
-                                                   lambda_scaling_property=lambda_scaling_property,
-                                                   lambda_scaling_property_beta=lambda_scaling_property_beta,
-                                                   kwargs_min=kwargs_min,
-                                                   kwargs_max=kwargs_max,)
+        self._lens_distribution = LensDistribution(
+            lambda_mst_sampling=False,
+            lambda_mst_distribution=lambda_mst_distribution,
+            gamma_in_sampling=gamma_in_sampling,
+            gamma_in_distribution=gamma_in_distribution,
+            log_m2l_sampling=log_m2l_sampling,
+            log_m2l_distribution=log_m2l_distribution,
+            alpha_lambda_sampling=alpha_lambda_sampling,
+            beta_lambda_sampling=beta_lambda_sampling,
+            alpha_gamma_in_sampling=alpha_gamma_in_sampling,
+            alpha_log_m2l_sampling=alpha_log_m2l_sampling,
+            log_scatter=log_scatter,
+            mst_ifu=mst_ifu,
+            lambda_scaling_property=lambda_scaling_property,
+            lambda_scaling_property_beta=lambda_scaling_property_beta,
+            kwargs_min=kwargs_min,
+            kwargs_max=kwargs_max,
+        )
 
-        self._aniso_distribution = AnisotropyDistribution(anisotropy_model=anisotropy_model,
-                                                          anisotropy_sampling=anisotropy_sampling,
-                                                          distribution_function=anisotroy_distribution_function,
-                                                          kwargs_anisotropy_min=kwargs_min,
-                                                          kwargs_anisotropy_max=kwargs_max)
+        self._aniso_distribution = AnisotropyDistribution(
+            anisotropy_model=anisotropy_model,
+            anisotropy_sampling=anisotropy_sampling,
+            distribution_function=anisotroy_distribution_function,
+            kwargs_anisotropy_min=kwargs_min,
+            kwargs_anisotropy_max=kwargs_max,
+        )
 
         self._gamma_in_prior_mean = gamma_in_prior_mean
         self._gamma_in_prior_std = gamma_in_prior_std
@@ -278,7 +285,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             realization of the hyperparameter distribution
         """
         kwargs_lens_draw = self._lens_distribution.draw_lens(**kwargs_lens)
-        lambda_mst, gamma_ppn = kwargs_lens_draw["lambda_mst"], kwargs_lens_draw["gamma_ppn"]
+        lambda_mst, gamma_ppn = (
+            kwargs_lens_draw["lambda_mst"],
+            kwargs_lens_draw["gamma_ppn"],
+        )
         kappa_ext = self._los.draw_los(kwargs_los)
 
         # draw intrinsic source magnitude
@@ -309,9 +319,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             and "gamma_in" in kwargs_lens_draw
         ):
             gamma_in = kwargs_lens_draw["gamma_in"]
-            lnlikelihood -= (
-                self._gamma_in_prior_mean - gamma_in
-            ) ** 2 / (2 * self._gamma_in_prior_std**2)
+            lnlikelihood -= (self._gamma_in_prior_mean - gamma_in) ** 2 / (
+                2 * self._gamma_in_prior_std**2
+            )
 
         return np.nan_to_num(lnlikelihood)
 
@@ -433,7 +443,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         cov_error_predict = np.zeros_like(cov_error_measurement)
         for i in range(self._num_distribution_draws):
             kwargs_lens_draw = self._lens_distribution.draw_lens(**kwargs_lens)
-            lambda_mst, gamma_ppn = kwargs_lens_draw["lambda_mst"], kwargs_lens_draw["gamma_ppn"]
+            lambda_mst, gamma_ppn = (
+                kwargs_lens_draw["lambda_mst"],
+                kwargs_lens_draw["gamma_ppn"],
+            )
             kappa_ext = self._los.draw_los(kwargs_los)
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
@@ -478,7 +491,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         dd_draws = []
         for i in range(self._num_distribution_draws):
             kwargs_lens_draw = self._lens_distribution.draw_lens(**kwargs_lens)
-            lambda_mst, gamma_ppn = kwargs_lens_draw["lambda_mst"], kwargs_lens_draw["gamma_ppn"]
+            lambda_mst, gamma_ppn = (
+                kwargs_lens_draw["lambda_mst"],
+                kwargs_lens_draw["gamma_ppn"],
+            )
             kappa_ext = self._los.draw_los(kwargs_los)
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext

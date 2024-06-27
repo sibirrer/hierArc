@@ -2,9 +2,7 @@ import numpy as np
 
 
 class LensDistribution(object):
-    """
-    class to draw lens parameters of individual lens from distributions
-    """
+    """Class to draw lens parameters of individual lens from distributions."""
 
     def __init__(
         self,
@@ -74,8 +72,12 @@ class LensDistribution(object):
             kwargs_max = {}
         if kwargs_min is None:
             kwargs_min = {}
-        self._gamma_in_min, self._gamma_in_max = kwargs_min.get("gamma_in", -np.inf), kwargs_max.get("gamma_in", np.inf)
-        self._log_m2l_min, self._log_m2l_max = kwargs_min.get("log_m2l", -np.inf), kwargs_max.get("log_m2l", np.inf)
+        self._gamma_in_min, self._gamma_in_max = kwargs_min.get(
+            "gamma_in", -np.inf
+        ), kwargs_max.get("gamma_in", np.inf)
+        self._log_m2l_min, self._log_m2l_max = kwargs_min.get(
+            "log_m2l", -np.inf
+        ), kwargs_max.get("log_m2l", np.inf)
 
     def draw_lens(
         self,
@@ -93,8 +95,7 @@ class LensDistribution(object):
         log_m2l_sigma=0,
         alpha_log_m2l=0,
     ):
-        """Draws a realization of a specific model from the hyperparameter
-        distribution.
+        """Draws a realization of a specific model from the hyperparameter distribution.
 
         :param lambda_mst: MST transform
         :param lambda_mst_sigma: spread in the distribution
@@ -124,10 +125,11 @@ class LensDistribution(object):
         else:
             lambda_mst_mean_lens = lambda_mst
 
-        lambda_lens = (lambda_mst_mean_lens
-                       + alpha_lambda * self._lambda_scaling_property
-                       + beta_lambda * self._lambda_scaling_property_beta
-                       )
+        lambda_lens = (
+            lambda_mst_mean_lens
+            + alpha_lambda * self._lambda_scaling_property
+            + beta_lambda * self._lambda_scaling_property_beta
+        )
         lambda_mst_draw = lambda_lens
         if self._lambda_mst_sampling:
             if self._lambda_mst_distribution in ["GAUSSIAN"]:
@@ -142,24 +144,28 @@ class LensDistribution(object):
                     "gamma_in parameter is out of bounds of the interpolated range!"
                 )
             if self._gamma_in_distribution in ["GAUSSIAN"]:
-                gamma_in_lens = gamma_in + alpha_gamma_in * self._lambda_scaling_property
+                gamma_in_lens = (
+                    gamma_in + alpha_gamma_in * self._lambda_scaling_property
+                )
             else:
                 gamma_in_lens = gamma_in
             gamma_in_draw = np.random.normal(gamma_in_lens, gamma_in_sigma)
             if gamma_in_draw < self._gamma_in_min or gamma_in_draw > self._gamma_in_max:
-                return self.draw_lens(lambda_mst=lambda_mst,
-                                      lambda_mst_sigma=lambda_mst_sigma,
-                                      gamma_ppn=gamma_ppn,
-                                      lambda_ifu=lambda_ifu,
-                                      lambda_ifu_sigma=lambda_ifu_sigma,
-                                      alpha_lambda=alpha_lambda,
-                                      beta_lambda=beta_lambda,
-                                      gamma_in=gamma_in,
-                                      gamma_in_sigma=gamma_in_sigma,
-                                      alpha_gamma_in=alpha_gamma_in,
-                                      log_m2l=log_m2l,
-                                      log_m2l_sigma=log_m2l_sigma,
-                                      alpha_log_m2l=alpha_log_m2l)
+                return self.draw_lens(
+                    lambda_mst=lambda_mst,
+                    lambda_mst_sigma=lambda_mst_sigma,
+                    gamma_ppn=gamma_ppn,
+                    lambda_ifu=lambda_ifu,
+                    lambda_ifu_sigma=lambda_ifu_sigma,
+                    alpha_lambda=alpha_lambda,
+                    beta_lambda=beta_lambda,
+                    gamma_in=gamma_in,
+                    gamma_in_sigma=gamma_in_sigma,
+                    alpha_gamma_in=alpha_gamma_in,
+                    log_m2l=log_m2l,
+                    log_m2l_sigma=log_m2l_sigma,
+                    alpha_log_m2l=alpha_log_m2l,
+                )
             kwargs_return["gamma_in"] = gamma_in_draw
         if self._log_m2l_sampling:
 
@@ -172,18 +178,20 @@ class LensDistribution(object):
             log_m2l_draw = np.random.normal(log_m2l_lens, log_m2l_sigma)
 
             if log_m2l_draw < self._log_m2l_min or log_m2l_draw > self._log_m2l_max:
-                return self.draw_lens(lambda_mst=lambda_mst,
-                                      lambda_mst_sigma=lambda_mst_sigma,
-                                      gamma_ppn=gamma_ppn,
-                                      lambda_ifu=lambda_ifu,
-                                      lambda_ifu_sigma=lambda_ifu_sigma,
-                                      alpha_lambda=alpha_lambda,
-                                      beta_lambda=beta_lambda,
-                                      gamma_in=gamma_in,
-                                      gamma_in_sigma=gamma_in_sigma,
-                                      alpha_gamma_in=alpha_gamma_in,
-                                      log_m2l=log_m2l,
-                                      log_m2l_sigma=log_m2l_sigma,
-                                      alpha_log_m2l=alpha_log_m2l)
+                return self.draw_lens(
+                    lambda_mst=lambda_mst,
+                    lambda_mst_sigma=lambda_mst_sigma,
+                    gamma_ppn=gamma_ppn,
+                    lambda_ifu=lambda_ifu,
+                    lambda_ifu_sigma=lambda_ifu_sigma,
+                    alpha_lambda=alpha_lambda,
+                    beta_lambda=beta_lambda,
+                    gamma_in=gamma_in,
+                    gamma_in_sigma=gamma_in_sigma,
+                    alpha_gamma_in=alpha_gamma_in,
+                    log_m2l=log_m2l,
+                    log_m2l_sigma=log_m2l_sigma,
+                    alpha_log_m2l=alpha_log_m2l,
+                )
             kwargs_return["log_m2l"] = log_m2l_draw
         return kwargs_return

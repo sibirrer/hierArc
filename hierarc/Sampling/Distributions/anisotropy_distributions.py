@@ -2,11 +2,16 @@ import numpy as np
 
 
 class AnisotropyDistribution(object):
-    """
-    class to draw anisotropy parameters from hyperparameter distributions
-    """
-    def __init__(self, anisotropy_model, anisotropy_sampling,
-                 distribution_function, kwargs_anisotropy_min, kwargs_anisotropy_max):
+    """Class to draw anisotropy parameters from hyperparameter distributions."""
+
+    def __init__(
+        self,
+        anisotropy_model,
+        anisotropy_sampling,
+        distribution_function,
+        kwargs_anisotropy_min,
+        kwargs_anisotropy_max,
+    ):
         """
 
         :param anisotropy_model: string, name of anisotropy model to consider
@@ -25,11 +30,15 @@ class AnisotropyDistribution(object):
             kwargs_anisotropy_max = {}
         self._kwargs_min = kwargs_anisotropy_min
         self._kwargs_max = kwargs_anisotropy_max
-        self._a_ani_min, self._a_ani_max = self._kwargs_min.get("a_ani", -np.inf), self._kwargs_max.get("a_ani", np.inf)
+        self._a_ani_min, self._a_ani_max = self._kwargs_min.get(
+            "a_ani", -np.inf
+        ), self._kwargs_max.get("a_ani", np.inf)
         self._beta_inf_min = self._kwargs_min.get("beta_inf", -np.inf)
         self._beta_inf_max = self._kwargs_max.get("beta_inf", np.inf)
 
-    def draw_anisotropy(self, a_ani=None, a_ani_sigma=0, beta_inf=None, beta_inf_sigma=0):
+    def draw_anisotropy(
+        self, a_ani=None, a_ani_sigma=0, beta_inf=None, beta_inf_sigma=0
+    ):
         """Draw Gaussian distribution and re-sample if outside bounds.
 
         :param a_ani: mean of the distribution

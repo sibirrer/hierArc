@@ -60,11 +60,7 @@ class CosmoLikelihood(object):
             normalized=normalized,
             kwargs_global_model=kwargs_model,
         )
-        self.param = ParamManager(
-            cosmology,
-            **kwargs_model,
-            **kwargs_bounds
-        )
+        self.param = ParamManager(cosmology, **kwargs_model, **kwargs_bounds)
         self._lower_limit, self._upper_limit = self.param.param_bounds
         self._prior_add = False
         if custom_prior is not None:

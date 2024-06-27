@@ -67,13 +67,13 @@ class TestMCMCSampling(object):
 
         backend = emcee.backends.HDFBackend(backup_filename)
         kwargs_emcee = {"backend": backend}
-        kwargs_model = {"ppn_sampling": False,
-                        "lambda_mst_sampling": False,
-                        "lambda_mst_distribution": "delta",
-                        "anisotropy_sampling": False,
-                        "anisotropy_model": "OM",
-
-                        }
+        kwargs_model = {
+            "ppn_sampling": False,
+            "lambda_mst_sampling": False,
+            "lambda_mst_distribution": "delta",
+            "anisotropy_sampling": False,
+            "anisotropy_model": "OM",
+        }
 
         mcmc_sampler = MCMCSampler(
             kwargs_likelihood_list=kwargs_likelihood_list,
