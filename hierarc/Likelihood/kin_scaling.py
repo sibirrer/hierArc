@@ -26,9 +26,13 @@ class ParameterScalingSingleMeasurement(object):
                 param_grid_axes = [param_grid_axes]
 
             if self._dim_scaling == 1:
-                self._f_ani = interp1d(param_grid_axes[0], j_kin_scaling_grid, kind="linear")
+                self._f_ani = interp1d(
+                    param_grid_axes[0], j_kin_scaling_grid, kind="linear"
+                )
             elif self._dim_scaling == 2:
-                self._f_ani = interp2d(param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid.T)
+                self._f_ani = interp2d(
+                    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid.T
+                )
             else:
                 self._f_ani = RegularGridInterpolator(
                     tuple(param_grid_axes),
@@ -57,7 +61,10 @@ class KinScaling(object):
     """Class to manage model parameter and anisotropy scalings for IFU data."""
 
     def __init__(
-        self, j_kin_scaling_param_axes=None, j_kin_scaling_grid_list=None, j_kin_scaling_param_name_list=None
+        self,
+        j_kin_scaling_param_axes=None,
+        j_kin_scaling_grid_list=None,
+        j_kin_scaling_param_name_list=None,
     ):
         """
 
@@ -71,7 +78,10 @@ class KinScaling(object):
         else:
             self._param_list = j_kin_scaling_param_name_list
         self._param_arrays = j_kin_scaling_param_axes
-        if not isinstance(j_kin_scaling_param_axes, list) and j_kin_scaling_param_name_list is not None:
+        if (
+            not isinstance(j_kin_scaling_param_axes, list)
+            and j_kin_scaling_param_name_list is not None
+        ):
             self._param_arrays = [j_kin_scaling_param_axes]
         self._evaluate_scaling = False
         self._is_log_m2l_population_level = False
@@ -85,7 +95,9 @@ class KinScaling(object):
             self._f_ani_list = []
             for scaling_grid in j_kin_scaling_grid_list:
                 self._j_scaling_ifu.append(
-                    ParameterScalingSingleMeasurement(j_kin_scaling_param_axes, scaling_grid)
+                    ParameterScalingSingleMeasurement(
+                        j_kin_scaling_param_axes, scaling_grid
+                    )
                 )
 
         if isinstance(j_kin_scaling_param_axes, list):
@@ -94,22 +106,25 @@ class KinScaling(object):
             self._dim_scaling = 1
 
     def _kwargs2param_array(self, kwargs):
-        """
-        converts dictionary to sorted array in same order as interpolation grid
+        """Converts dictionary to sorted array in same order as interpolation grid.
 
-        :param kwargs: dictionary of all model components, must include the one that are interpolated
+        :param kwargs: dictionary of all model components, must include the one that are
+            interpolated
         :return: sorted list of parameters to interpolate
         """
         param_array = []
         for param in self._param_list:
             if param not in kwargs:
-                raise ValueError("key %s not in parameters and hence kinematic scaling not possible" % param)
+                raise ValueError(
+                    "key %s not in parameters and hence kinematic scaling not possible"
+                    % param
+                )
             param_array.append(kwargs.get(param))
         return param_array
 
     def param_bounds_interpol(self):
-        """
-        minimum and maximum bounds of parameters that are being used to call interpolation function
+        """Minimum and maximum bounds of parameters that are being used to call
+        interpolation function.
 
         :return: dictionaries of minimum and maximum bounds
         """

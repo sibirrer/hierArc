@@ -5,7 +5,9 @@ class KinScalingConfig(object):
     """Class to manage the anisotropy model and parameters for the Posterior
     processing."""
 
-    def __init__(self, anisotropy_model, r_eff, gamma_in_scaling=None, log_m2l_scaling=None):
+    def __init__(
+        self, anisotropy_model, r_eff, gamma_in_scaling=None, log_m2l_scaling=None
+    ):
         """
 
         :param anisotropy_model: type of stellar anisotropy model. Supported are 'OM' and 'GOM' or 'const', see details in lenstronomy.Galkin module
@@ -28,10 +30,12 @@ class KinScalingConfig(object):
             ]
             self._param_name_list = ["a_ani", "beta_inf"]
         elif self._anisotropy_model == "const":
-            self._ani_param_array = [np.linspace(-0.49, 1, 7)]  # used for constant anisotropy description
+            self._ani_param_array = [
+                np.linspace(-0.49, 1, 7)
+            ]  # used for constant anisotropy description
             self._param_name_list = ["a_ani"]
         elif self._anisotropy_model == "NONE":
-            self._param_name_list =[]
+            self._param_name_list = []
         else:
             raise ValueError(
                 "anisotropy model %s not supported." % self._anisotropy_model
@@ -77,8 +81,7 @@ class KinScalingConfig(object):
 
     @property
     def param_name_list(self):
-        """
-        list of parameters in same order as interpolated
+        """List of parameters in same order as interpolated.
 
         :return:
         """

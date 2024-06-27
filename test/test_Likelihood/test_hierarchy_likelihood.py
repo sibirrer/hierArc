@@ -24,16 +24,16 @@ class TestLensLikelihood(object):
             "dd_mean": dd,
             "dd_sigma": dd / 10,
         }
-        kwargs_model = {"anisotropy_model": "OM",
-                        "anisotropy_sampling": True,
-                        "anisotroy_distribution_function": "GAUSSIAN",
-                        "lambda_mst_distribution": "GAUSSIAN",
-                        }
+        kwargs_model = {
+            "anisotropy_model": "OM",
+            "anisotropy_sampling": True,
+            "anisotroy_distribution_function": "GAUSSIAN",
+            "lambda_mst_distribution": "GAUSSIAN",
+        }
         # "gamma_in_sampling" = False,
-        gamma_in_distribution = "NONE",
-        log_m2l_sampling = False,
-        log_m2l_distribution = "NONE",
-
+        gamma_in_distribution = ("NONE",)
+        log_m2l_sampling = (False,)
+        log_m2l_distribution = ("NONE",)
 
         self.likelihood = LensLikelihood(
             z_lens,
@@ -134,7 +134,9 @@ class TestLensLikelihood(object):
             **kwargs_model
         )
 
-        param_scaling_array = np.outer(np.ones_like(gamma_in_array), np.ones_like(log_m2l_array))
+        param_scaling_array = np.outer(
+            np.ones_like(gamma_in_array), np.ones_like(log_m2l_array)
+        )
 
         j_kin_scaling_param_axes = [gamma_in_array, log_m2l_array]
 
@@ -239,7 +241,6 @@ class TestLensLikelihood(object):
         kwargs_test = self.likelihood._kwargs_init(kwargs=None)
         assert type(kwargs_test) is dict
 
-
         kwargs_lens = {
             "gamma_in": 1,
             "gamma_in_sigma": 0,
@@ -276,11 +277,11 @@ class TestLensLikelihood(object):
         dds = self.cosmo.angular_diameter_distance_z1z2(z1=z_lens, z2=z_source).value
         ddt = (1.0 + z_lens) * dd * ds / dds
 
-        #ln_likelihood = self.likelihood_gamma_in_fail_case.log_likelihood_single(
+        # ln_likelihood = self.likelihood_gamma_in_fail_case.log_likelihood_single(
         #    ddt, dd, delta_lum_dist, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
-        #)
+        # )
 
-        #assert ln_likelihood < -10000000
+        # assert ln_likelihood < -10000000
 
 
 if __name__ == "__main__":

@@ -400,21 +400,18 @@ class KinConstraintsComposite(KinConstraints):
             "j_model": j_model_list,
             "error_cov_measurement": error_cov_measurement,
             "error_cov_j_sqrt": error_cov_j_sqrt,
-
-            #"ani_param_array": self.kin_scaling_param_array,
-            #"gamma_in_array": self.gamma_in_array,
-            #"log_m2l_array": self.log_m2l_array,
-            #"param_scaling_grid_list": ani_scaling_grid_list,
-
+            # "ani_param_array": self.kin_scaling_param_array,
+            # "gamma_in_array": self.gamma_in_array,
+            # "log_m2l_array": self.log_m2l_array,
+            # "param_scaling_grid_list": ani_scaling_grid_list,
             "gamma_in_prior_mean": self._gamma_in_prior_mean,
             "gamma_in_prior_std": self._gamma_in_prior_std,
-
             "kin_scaling_param_list": self.param_name_list,
             "j_kin_scaling_param_axes": self.kin_scaling_param_array,
             "j_kin_scaling_grid_list": ani_scaling_grid_list,
         }
 
-        #if not self._is_m2l_population_level:
+        # if not self._is_m2l_population_level:
         #    kwargs_likelihood["log_m2l_array"] = None
         return kwargs_likelihood
 

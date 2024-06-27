@@ -180,7 +180,6 @@ class KinConstraints(BaseLensConfig):
             "kin_scaling_param_list": self.param_name_list,
             "j_kin_scaling_param_axes": self.kin_scaling_param_array,
             "j_kin_scaling_grid_list": ani_scaling_array_list,
-
         }
         return kwargs_likelihood
 
@@ -253,7 +252,12 @@ class KinConstraints(BaseLensConfig):
 
         if self._anisotropy_model == "GOM":
             ani_scaling_array_list = [
-                np.zeros((len(self.kin_scaling_param_array[0]), len(self.kin_scaling_param_array[1])))
+                np.zeros(
+                    (
+                        len(self.kin_scaling_param_array[0]),
+                        len(self.kin_scaling_param_array[1]),
+                    )
+                )
                 for _ in range(num_data)
             ]
             for i, a_ani in enumerate(self.kin_scaling_param_array[0]):

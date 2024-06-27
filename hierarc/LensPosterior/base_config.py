@@ -109,6 +109,10 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
         ImageModelPosterior.__init__(
             self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error
         )
-        KinScalingConfig.__init__(self, anisotropy_model, r_eff,
-                                  gamma_in_scaling=gamma_in_scaling,
-                                  log_m2l_scaling=log_m2l_scaling)
+        KinScalingConfig.__init__(
+            self,
+            anisotropy_model,
+            r_eff,
+            gamma_in_scaling=gamma_in_scaling,
+            log_m2l_scaling=log_m2l_scaling,
+        )
