@@ -8,7 +8,12 @@ class TestKinScalingConfig(object):
         pass
 
     def test_init(self):
-        kin_scaling = KinScalingConfig(anisotropy_model="NONE", r_eff=None, gamma_in_scaling=None, log_m2l_scaling=None)
+        kin_scaling = KinScalingConfig(
+            anisotropy_model="NONE",
+            r_eff=None,
+            gamma_in_scaling=None,
+            log_m2l_scaling=None,
+        )
         kin_scaling._anisotropy_model = "BAD"
 
         with npt.assert_raises(ValueError):
