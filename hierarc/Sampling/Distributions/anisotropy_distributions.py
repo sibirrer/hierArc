@@ -24,16 +24,25 @@ class AnisotropyDistribution(object):
          description of the distribution function of the anisotropy model parameters
         """
         if anisotropy_model not in _SUPPORTED_MODELS:
-            raise ValueError("Anisotropy model %s not supported. Chose among %s."
-                             % (anisotropy_model, _SUPPORTED_MODELS))
+            raise ValueError(
+                "Anisotropy model %s not supported. Chose among %s."
+                % (anisotropy_model, _SUPPORTED_MODELS)
+            )
         self._anisotropy_model = anisotropy_model
         self._anisotropy_sampling = anisotropy_sampling
         if distribution_function not in _SUPPORTED_DISTRIBUTIONS:
-            raise ValueError("Anisotropy distribution function %s not supported. Chose among %s."
-                             % (distribution_function, _SUPPORTED_DISTRIBUTIONS))
-        if anisotropy_model not in ["OM", "GOM"] and distribution_function == "GAUSSIAN_SCALED":
-            raise ValueError("GAUSSIAN_SCALED distribution only supported for 'OM' and 'GOM' models, not for %s."
-                             % anisotropy_model)
+            raise ValueError(
+                "Anisotropy distribution function %s not supported. Chose among %s."
+                % (distribution_function, _SUPPORTED_DISTRIBUTIONS)
+            )
+        if (
+            anisotropy_model not in ["OM", "GOM"]
+            and distribution_function == "GAUSSIAN_SCALED"
+        ):
+            raise ValueError(
+                "GAUSSIAN_SCALED distribution only supported for 'OM' and 'GOM' models, not for %s."
+                % anisotropy_model
+            )
         self._distribution_function = distribution_function
         if kwargs_anisotropy_min is None:
             kwargs_anisotropy_min = {}
