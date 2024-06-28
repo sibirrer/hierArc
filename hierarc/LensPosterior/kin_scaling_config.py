@@ -87,7 +87,7 @@ class KinScalingConfig(object):
         """
         return self._param_name_list
 
-    def anisotropy_kwargs(self, a_ani, beta_inf=None):
+    def anisotropy_kwargs(self, a_ani=None, beta_inf=None):
         """
 
         :param a_ani: anisotropy parameter
