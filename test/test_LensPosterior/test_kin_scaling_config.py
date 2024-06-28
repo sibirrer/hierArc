@@ -1,6 +1,7 @@
 from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
 import numpy.testing as npt
 
+
 class TestKinScalingConfig(object):
 
     def setup_method(self):
