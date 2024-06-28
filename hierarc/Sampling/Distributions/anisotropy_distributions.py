@@ -1,5 +1,8 @@
 import numpy as np
 
+_SUPPORTED_DISTRIBUTIONS = ["GAUSSIAN", "GAUSSIAN_SCALED", "NONE"]
+_SUPPORTED_MODELS = ["OM", "GOM", "const", "NONE"]
+
 
 class AnisotropyDistribution(object):
     """Class to draw anisotropy parameters from hyperparameter distributions."""
@@ -17,12 +20,20 @@ class AnisotropyDistribution(object):
         :param anisotropy_model: string, name of anisotropy model to consider
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
          kinematic prediction
-        :param distribution_function: string, 'NONE', 'GAUSSIAN', description of the distribution function of the
-        anisotropy model parameters
+        :param distribution_function: string, 'NONE', 'GAUSSIAN', 'GAUSSIAN_SCALED',
+         description of the distribution function of the anisotropy model parameters
         """
-
+        if anisotropy_model not in _SUPPORTED_MODELS:
+            raise ValueError("Anisotropy model %s not supported. Chose among %s."
+                             % (anisotropy_model, _SUPPORTED_MODELS))
         self._anisotropy_model = anisotropy_model
         self._anisotropy_sampling = anisotropy_sampling
+        if distribution_function not in _SUPPORTED_DISTRIBUTIONS:
+            raise ValueError("Anisotropy distribution function %s not supported. Chose among %s."
+                             % (distribution_function, _SUPPORTED_DISTRIBUTIONS))
+        if anisotropy_model not in ["OM", "GOM"] and distribution_function == "GAUSSIAN_SCALED":
+            raise ValueError("GAUSSIAN_SCALED distribution only supported for 'OM' and 'GOM' models, not for %s."
+                             % anisotropy_model)
         self._distribution_function = distribution_function
         if kwargs_anisotropy_min is None:
             kwargs_anisotropy_min = {}
@@ -60,22 +71,24 @@ class AnisotropyDistribution(object):
                     "anisotropy parameter is out of bounds of the interpolated range!"
                 )
             # we draw a linear gaussian for 'const' anisotropy and a scaled proportional one for 'OM
-            if self._distribution_function in ["GAUSSIAN"]:
-                if self._anisotropy_model == "OM":
-                    a_ani_draw = np.random.normal(a_ani, a_ani_sigma * a_ani)
-                else:
+            if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
+                if self._distribution_function in ["GAUSSIAN"]:
                     a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
+                else:
+                    a_ani_draw = np.random.normal(a_ani, a_ani_sigma * a_ani)
+
                 if a_ani_draw < self._a_ani_min or a_ani_draw > self._a_ani_max:
                     return self.draw_anisotropy(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma)
                 kwargs_return["a_ani"] = a_ani_draw
             else:
                 kwargs_return["a_ani"] = a_ani
+
         if self._anisotropy_model in ["GOM"]:
             if beta_inf < self._beta_inf_min or beta_inf > self._beta_inf_max:
                 raise ValueError(
                     "anisotropy parameter is out of bounds of the interpolated range!"
                 )
-            if self._distribution_function in ["GAUSSIAN"]:
+            if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                 beta_inf_draw = np.random.normal(beta_inf, beta_inf_sigma)
             else:
                 beta_inf_draw = beta_inf

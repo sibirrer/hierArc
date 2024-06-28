@@ -20,10 +20,10 @@ class TestAnisotropyDistribution(object):
             kwargs_anisotropy_max=kwargs_anisotropy_max,
         )
 
-        ani_dist = AnisotropyDistribution(
+        self._ani_dist_scaled = AnisotropyDistribution(
             anisotropy_model=anisotropy_model,
             anisotropy_sampling=False,
-            distribution_function=distribution_function,
+            distribution_function="GAUSSIAN_SCALED",
             kwargs_anisotropy_min=kwargs_anisotropy_min,
             kwargs_anisotropy_max=kwargs_anisotropy_max,
         )
@@ -36,6 +36,10 @@ class TestAnisotropyDistribution(object):
             "beta_inf_sigma": 0.2,
         }
         kwargs_drawn = self._ani_dist.draw_anisotropy(**kwargs_anisotropy)
+        assert "a_ani" in kwargs_drawn
+        assert "beta_inf" in kwargs_drawn
+
+        kwargs_drawn = self._ani_dist_scaled.draw_anisotropy(**kwargs_anisotropy)
         assert "a_ani" in kwargs_drawn
         assert "beta_inf" in kwargs_drawn
 
@@ -89,3 +93,45 @@ class TestAnisotropyDistribution(object):
                 "beta_inf_sigma": 0.2,
             }
             kwargs_drawn = self._ani_dist.draw_anisotropy(**kwargs_anisotropy)
+
+        with npt.assert_raises(ValueError):
+            anisotropy_model = "const"
+            distribution_function = "GAUSSIAN_SCALED"
+            kwargs_anisotropy_min = {"a_ani": 0, "beta_inf": 0.1}
+            kwargs_anisotropy_max = {"a_ani": 5, "beta_inf": 1}
+
+            AnisotropyDistribution(
+                anisotropy_model=anisotropy_model,
+                anisotropy_sampling=True,
+                distribution_function=distribution_function,
+                kwargs_anisotropy_min=kwargs_anisotropy_min,
+                kwargs_anisotropy_max=kwargs_anisotropy_max,
+            )
+
+        with npt.assert_raises(ValueError):
+            anisotropy_model = "const"
+            distribution_function = "INVALID"
+            kwargs_anisotropy_min = {"a_ani": 0, "beta_inf": 0.1}
+            kwargs_anisotropy_max = {"a_ani": 5, "beta_inf": 1}
+
+            AnisotropyDistribution(
+                anisotropy_model=anisotropy_model,
+                anisotropy_sampling=True,
+                distribution_function=distribution_function,
+                kwargs_anisotropy_min=kwargs_anisotropy_min,
+                kwargs_anisotropy_max=kwargs_anisotropy_max,
+            )
+
+        with npt.assert_raises(ValueError):
+            anisotropy_model = "INVALID"
+            distribution_function = "GAUSSIAN"
+            kwargs_anisotropy_min = {"a_ani": 0, "beta_inf": 0.1}
+            kwargs_anisotropy_max = {"a_ani": 5, "beta_inf": 1}
+
+            AnisotropyDistribution(
+                anisotropy_model=anisotropy_model,
+                anisotropy_sampling=True,
+                distribution_function=distribution_function,
+                kwargs_anisotropy_min=kwargs_anisotropy_min,
+                kwargs_anisotropy_max=kwargs_anisotropy_max,
+            )
