@@ -78,7 +78,9 @@ class AnisotropyDistribution(object):
                     a_ani_draw = np.random.normal(a_ani, a_ani_sigma * a_ani)
 
                 if a_ani_draw < self._a_ani_min or a_ani_draw > self._a_ani_max:
-                    return self.draw_anisotropy(a_ani, a_ani_sigma, beta_inf, beta_inf_sigma)
+                    return self.draw_anisotropy(
+                        a_ani, a_ani_sigma, beta_inf, beta_inf_sigma
+                    )
                 kwargs_return["a_ani"] = a_ani_draw
             else:
                 kwargs_return["a_ani"] = a_ani
