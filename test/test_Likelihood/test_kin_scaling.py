@@ -80,6 +80,10 @@ class TestKinScaling(object):
         assert kwargs_max["b"] == 2
         assert kwargs_max["a"] == 1
 
+        with npt.assert_raises(ValueError):
+            kwargs_param = {"a": 0.5}  # remove parameter "b" and expect a raise
+            param_array = kin_scaling._kwargs2param_array(kwargs_param)
+
     def test_empty(self):
         kin_scaling = KinScaling(
             j_kin_scaling_param_axes=None,

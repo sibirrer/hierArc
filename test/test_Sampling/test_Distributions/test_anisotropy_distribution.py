@@ -22,7 +22,7 @@ class TestAnisotropyDistribution(object):
 
         self._ani_dist_scaled = AnisotropyDistribution(
             anisotropy_model=anisotropy_model,
-            anisotropy_sampling=False,
+            anisotropy_sampling=True,
             distribution_function="GAUSSIAN_SCALED",
             kwargs_anisotropy_min=kwargs_anisotropy_min,
             kwargs_anisotropy_max=kwargs_anisotropy_max,
