@@ -14,35 +14,13 @@ class CosmoLikelihood(object):
         self,
         kwargs_likelihood_list,
         cosmology,
+        kwargs_model,
         kwargs_bounds,
         sne_likelihood=None,
         kwargs_sne_likelihood=None,
         KDE_likelihood_chain=None,
         kwargs_kde_likelihood=None,
-        ppn_sampling=False,
-        lambda_mst_sampling=False,
-        lambda_mst_distribution="delta",
-        anisotropy_sampling=False,
-        gamma_in_sampling=False,
-        gamma_in_distribution="NONE",
-        log_m2l_sampling=False,
-        log_m2l_distribution="NONE",
-        los_sampling=False,
-        los_distributions=None,
-        alpha_lambda_sampling=False,
-        beta_lambda_sampling=False,
-        alpha_gamma_in_sampling=False,
-        alpha_log_m2l_sampling=False,
-        lambda_ifu_sampling=False,
-        lambda_ifu_distribution="NONE",
-        sigma_v_systematics=False,
-        sne_apparent_m_sampling=False,
-        sne_distribution="GAUSSIAN",
-        z_apparent_m_anchor=0.1,
-        log_scatter=False,
         normalized=False,
-        anisotropy_model="OM",
-        anisotropy_distribution="NONE",
         custom_prior=None,
         interpolate_cosmo=True,
         num_redshift_interp=100,
@@ -52,6 +30,8 @@ class CosmoLikelihood(object):
 
         :param kwargs_likelihood_list: keyword argument list specifying the arguments of the LensLikelihood class
         :param cosmology: string describing cosmological model
+        :param kwargs_model: model settings for ParamManager() class
+        :type kwargs_model: dict
         :param kwargs_bounds: keyword arguments of the lower and upper bounds and parameters that are held fixed.
         Includes:
         'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
@@ -63,38 +43,6 @@ class CosmoLikelihood(object):
         :param sne_likelihood: (string), optional. Sampling supernovae relative expansion history likelihood, see
          SneLikelihood module for options
         :param kwargs_sne_likelihood: keyword argument for the SNe likelihood, see SneLikelihood module for options
-        :param ppn_sampling:post-newtonian parameter sampling
-        :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
-        :param lambda_mst_distribution: string, defines the distribution function of lambda_mst
-        :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
-        independently
-        :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
-        :param alpha_lambda_sampling: bool, if True samples a parameter alpha_lambda, which scales lambda_mst linearly
-         according to the lens posterior kwargs 'lambda_scaling_property'
-        :param beta_lambda_sampling: bool, if True samples a parameter beta_lambda, which scales lambda_mst linearly
-         according to the lens posterior kwargs 'lambda_scaling_property_beta'
-        :param los_sampling: if sampling of the parameters should be done
-        :type los_sampling: bool
-        :param los_distributions: what distribution to be sampled
-        :type los_distributions: list of str
-        :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
-        kinematic prediction
-        :param anisotropy_model: string, specifies the stellar anisotropy model
-        :param anisotropy_distribution: string, distribution of the anisotropy parameters
-        :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
-        :param gamma_in_distribution: string, distribution function of the gamma_in parameter
-        :param log_m2l_sampling: bool, if True samples a global mass-to-light ratio parameter in logarithmic scale
-        :param log_m2l_distribution: string, distribution function of the log_m2l parameter
-        :param sigma_v_systematics: bool, if True samples paramaters relative to systematics in the velocity dispersion
-         measurement
-        :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
-         (not intrinsic magnitudes but apparent!)
-        :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
-         Currently supports:
-         'GAUSSIAN': Gaussian distribution
-        :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
-        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space
-         (and thus flat prior in log)
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
          log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
@@ -105,40 +53,14 @@ class CosmoLikelihood(object):
         """
         self._cosmology = cosmology
         self._kwargs_lens_list = kwargs_likelihood_list
-        if sigma_v_systematics is True:
+        if kwargs_model.get("sigma_v_systematics", False) is True:
             normalized = True
         self._likelihoodLensSample = LensSampleLikelihood(
             kwargs_likelihood_list,
             normalized=normalized,
-            los_distributions=los_distributions,
+            kwargs_global_model=kwargs_model,
         )
-        self.param = ParamManager(
-            cosmology,
-            ppn_sampling=ppn_sampling,
-            lambda_mst_sampling=lambda_mst_sampling,
-            lambda_mst_distribution=lambda_mst_distribution,
-            lambda_ifu_sampling=lambda_ifu_sampling,
-            lambda_ifu_distribution=lambda_ifu_distribution,
-            alpha_lambda_sampling=alpha_lambda_sampling,
-            beta_lambda_sampling=beta_lambda_sampling,
-            gamma_in_sampling=gamma_in_sampling,
-            gamma_in_distribution=gamma_in_distribution,
-            log_m2l_sampling=log_m2l_sampling,
-            log_m2l_distribution=log_m2l_distribution,
-            alpha_gamma_in_sampling=alpha_gamma_in_sampling,
-            alpha_log_m2l_sampling=alpha_log_m2l_sampling,
-            sne_apparent_m_sampling=sne_apparent_m_sampling,
-            sne_distribution=sne_distribution,
-            z_apparent_m_anchor=z_apparent_m_anchor,
-            sigma_v_systematics=sigma_v_systematics,
-            los_sampling=los_sampling,
-            los_distributions=los_distributions,
-            anisotropy_sampling=anisotropy_sampling,
-            anisotropy_model=anisotropy_model,
-            anisotropy_distribution=anisotropy_distribution,
-            log_scatter=log_scatter,
-            **kwargs_bounds
-        )
+        self.param = ParamManager(cosmology, **kwargs_model, **kwargs_bounds)
         self._lower_limit, self._upper_limit = self.param.param_bounds
         self._prior_add = False
         if custom_prior is not None:

@@ -1,36 +1,51 @@
 import numpy as np
 
 
-class AnisotropyConfig(object):
+class KinScalingConfig(object):
     """Class to manage the anisotropy model and parameters for the Posterior
     processing."""
 
-    def __init__(self, anisotropy_model, r_eff):
+    def __init__(
+        self, anisotropy_model, r_eff, gamma_in_scaling=None, log_m2l_scaling=None
+    ):
         """
 
         :param anisotropy_model: type of stellar anisotropy model. Supported are 'OM' and 'GOM' or 'const', see details in lenstronomy.Galkin module
         :param r_eff: half-light radius of the deflector galaxy
+        :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
+        :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         """
         self._r_eff = r_eff
         self._anisotropy_model = anisotropy_model
+        self._param_name_list = []
 
         if self._anisotropy_model == "OM":
-            self._ani_param_array = np.array(
-                [0.1, 0.2, 0.5, 1, 2, 5]
-            )  # used for r_ani OsipkovMerritt anisotropy description
+            self._ani_param_array = [np.array([0.1, 0.2, 0.5, 1, 2, 5])]
+            # used for r_ani OsipkovMerritt anisotropy description
+            self._param_name_list = ["a_ani"]
         elif self._anisotropy_model == "GOM":
             self._ani_param_array = [
                 np.array([0.1, 0.2, 0.5, 1, 2, 5]),
                 np.array([0, 0.5, 0.8, 1]),
             ]
+            self._param_name_list = ["a_ani", "beta_inf"]
         elif self._anisotropy_model == "const":
-            self._ani_param_array = np.linspace(
-                -0.49, 1, 7
-            )  # used for constant anisotropy description
+            self._ani_param_array = [
+                np.linspace(-0.49, 1, 7)
+            ]  # used for constant anisotropy description
+            self._param_name_list = ["a_ani"]
+        elif self._anisotropy_model == "NONE":
+            self._param_name_list = []
         else:
             raise ValueError(
                 "anisotropy model %s not supported." % self._anisotropy_model
             )
+        if gamma_in_scaling is not None:
+            self._param_name_list.append("gamma_in")
+            self._ani_param_array.append(np.array(gamma_in_scaling))
+        if log_m2l_scaling is not None:
+            self._param_name_list.append("log_m2l")
+            self._ani_param_array.append(np.array(log_m2l_scaling))
 
     @property
     def kwargs_anisotropy_base(self):
@@ -57,14 +72,22 @@ class AnisotropyConfig(object):
         return kwargs_anisotropy_0
 
     @property
-    def ani_param_array(self):
+    def kin_scaling_param_array(self):
         """
 
         :return: numpy array of anisotropy parameter values to be explored
         """
         return self._ani_param_array
 
-    def anisotropy_kwargs(self, a_ani, beta_inf=None):
+    @property
+    def param_name_list(self):
+        """List of parameters in same order as interpolated.
+
+        :return:
+        """
+        return self._param_name_list
+
+    def anisotropy_kwargs(self, a_ani=None, beta_inf=None):
         """
 
         :param a_ani: anisotropy parameter

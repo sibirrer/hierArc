@@ -222,7 +222,7 @@ class GoodnessOfFit(object):
             sigma_v_model_error_list,
         ) = self.kin_fit(cosmo, kwargs_lens, kwargs_kin, kwargs_los)
 
-        f, ax = plt.subplots(1, 1, figsize=(int(len(sigma_v_name_list) / 2), 4))
+        f, ax = plt.subplots(1, 1, figsize=(max(int(len(sigma_v_name_list) / 2), 1), 4))
         ax.errorbar(
             np.arange(len(sigma_v_name_list)),
             sigma_v_measurement_list,

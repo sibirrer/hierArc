@@ -9,15 +9,17 @@ class LensSampleLikelihood(object):
     diameter posteriors Currently this class does not include possible covariances
     between the lens samples."""
 
-    def __init__(self, kwargs_lens_list, normalized=False, los_distributions=None):
+    def __init__(self, kwargs_lens_list, normalized=False, kwargs_global_model=None):
         """
 
         :param kwargs_lens_list: keyword argument list specifying the arguments of the LensLikelihood class
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
-        :param los_distributions: list of all line of sight distributions parameterized
-        :type los_distributions: list of str or None
+        :param kwargs_global_model: arguments of global distribution parameters for initialization of
+         ParamManager() class
         """
+        if kwargs_global_model is None:
+            kwargs_global_model = {}
         self._lens_list = []
         for kwargs_lens in kwargs_lens_list:
             if kwargs_lens["likelihood_type"] == "DSPL":
@@ -27,13 +29,10 @@ class LensSampleLikelihood(object):
                     DSPLikelihood(normalized=normalized, **_kwargs_lens)
                 )
             else:
-                self._lens_list.append(
-                    LensLikelihood(
-                        normalized=normalized,
-                        los_distributions=los_distributions,
-                        **kwargs_lens
-                    )
+                kwargs_lens_ = self._merge_global2local_settings(
+                    kwargs_global_model=kwargs_global_model, kwargs_lens=kwargs_lens
                 )
+                self._lens_list.append(LensLikelihood(**kwargs_lens_))
 
     def log_likelihood(
         self,
@@ -72,3 +71,38 @@ class LensSampleLikelihood(object):
         for lens in self._lens_list:
             num += lens.num_data()
         return num
+
+    @staticmethod
+    def _merge_global2local_settings(kwargs_global_model, kwargs_lens):
+        """
+
+        :param kwargs_global_model: dictionary of global model settings and distribution functions
+        :param kwargs_lens: specific settings of an individual lens
+        :return: joint dictionary that overwrites global with local parameters (if needed) and only keeps the relevant
+         arguments that an individual lens likelihood needs
+        :rtype: dict
+        """
+        kwargs_global_model_ = {}
+        for key in _input_param_list:
+            if key in kwargs_global_model:
+                kwargs_global_model_[key] = kwargs_global_model[key]
+        kwargs_global_model_subset = copy.deepcopy(kwargs_global_model_)
+        return {**kwargs_global_model_subset, **kwargs_lens}
+
+
+_input_param_list = [
+    "anisotropy_model",
+    "anisotropy_sampling",
+    "anisotroy_distribution_function",
+    "los_distributions",
+    "lambda_mst_distribution",
+    "gamma_in_sampling",
+    "gamma_in_distribution",
+    "log_m2l_sampling",
+    "log_m2l_distribution",
+    "alpha_lambda_sampling",
+    "beta_lambda_sampling",
+    "alpha_gamma_in_sampling",
+    "alpha_log_m2l_sampling",
+    "log_scatter",
+]

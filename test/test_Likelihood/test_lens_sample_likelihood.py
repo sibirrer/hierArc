@@ -47,10 +47,13 @@ class TestLensLikelihood(object):
                 "likelihood_type": "DsDdsGaussian",
                 "ds_dds_mean": lensCosmo.ds / lensCosmo.dds,
                 "ds_dds_sigma": 1,
-                "ani_param_array": ani_param_array,
-                "ani_scaling_array": ani_scaling_array,
+                "kin_scaling_param_list": ["a_ani"],
+                "j_kin_scaling_param_axes": ani_param_array,
+                "j_kin_scaling_grid_list": [ani_scaling_array],
             },
         ]
+        kwargs_global_model = {"anisotropy_sampling": True}
+
         self.likelihood = LensSampleLikelihood(kwargs_lens_list=self.kwargs_lens_list)
 
     def test_log_likelihood(self):

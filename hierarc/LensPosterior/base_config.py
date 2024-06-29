@@ -1,9 +1,9 @@
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
-from hierarc.LensPosterior.anisotropy_config import AnisotropyConfig
+from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
 
 
-class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
+class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
     """This class contains and manages the base configurations of the lens posteriors
     and makes sure that they are universally applied consistently through the different
     likelihood definitions."""
@@ -33,6 +33,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         num_kin_sampling=1000,
         multi_observations=False,
         cosmo_fiducial=None,
+        gamma_in_scaling=None,
+        log_m2l_scaling=None,
     ):
         """
 
@@ -62,6 +64,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
             light profile
         :param cosmo_fiducial: astropy.cosmology instance, if None,
             uses astropy's default cosmology
+        :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
+        :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         """
         self._z_lens, self._z_source = z_lens, z_source
 
@@ -105,4 +109,10 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, AnisotropyConfig):
         ImageModelPosterior.__init__(
             self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error
         )
-        AnisotropyConfig.__init__(self, anisotropy_model, r_eff)
+        KinScalingConfig.__init__(
+            self,
+            anisotropy_model,
+            r_eff,
+            gamma_in_scaling=gamma_in_scaling,
+            log_m2l_scaling=log_m2l_scaling,
+        )

@@ -49,7 +49,7 @@ class KinParam(object):
                         list.append(r"$\langle a_{\rm ani}\rangle$")
                     else:
                         list.append("a_ani")
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "a_ani_sigma" not in self._kwargs_fixed:
                         if latex_style is True:
                             if self._log_scatter is True:
@@ -64,7 +64,7 @@ class KinParam(object):
                         list.append(r"$\beta_{\infty}$")
                     else:
                         list.append("beta_inf")
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "beta_inf_sigma" not in self._kwargs_fixed:
                         if latex_style is True:
                             if self._log_scatter is True:
