@@ -38,6 +38,7 @@ class KinConstraints(BaseLensConfig):
         cosmo_fiducial=None,
         gamma_in_scaling=None,
         log_m2l_scaling=None,
+        gamma_pl_scaling=None,
     ):
         """
 
@@ -81,6 +82,7 @@ class KinConstraints(BaseLensConfig):
             uses astropy's default
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
+        :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
         """
         self._sigma_v_measured = np.array(sigma_v_measured)
         self._sigma_v_error_independent = np.array(sigma_v_error_independent)
@@ -249,17 +251,10 @@ class KinConstraints(BaseLensConfig):
             scaling
         """
         num_data = len(self._sigma_v_measured)
+        len_list = [len(a) for a in self.kin_scaling_param_array]
+        ani_scaling_array_list = [np.zeros(len_list) for _ in range(num_data)]
 
         if self._anisotropy_model == "GOM":
-            ani_scaling_array_list = [
-                np.zeros(
-                    (
-                        len(self.kin_scaling_param_array[0]),
-                        len(self.kin_scaling_param_array[1]),
-                    )
-                )
-                for _ in range(num_data)
-            ]
             for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
                 for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
                     kwargs_anisotropy = self.anisotropy_kwargs(
@@ -271,12 +266,14 @@ class KinConstraints(BaseLensConfig):
                             j_kin / j_ani_0[k]
                         )  # perhaps change the order
         elif self._anisotropy_model in ["OM", "const"]:
-            ani_scaling_array_list = [[] for _ in range(num_data)]
-            for a_ani in self.kin_scaling_param_array[0]:
+            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
                 kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
                 j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
-                for i, j_kin in enumerate(j_kin_ani):
-                    ani_scaling_array_list[i].append(j_kin / j_ani_0[i])
+                for k, j_kin in enumerate(j_kin_ani):
+                    ani_scaling_array_list[k][i] = (
+                        j_kin / j_ani_0[k]
+                    )
+                    # ani_scaling_array_list[k].append(j_kin / j_ani_0[k])
         else:
             raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
         return ani_scaling_array_list
