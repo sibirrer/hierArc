@@ -256,26 +256,41 @@ class KinConstraints(BaseLensConfig):
         num_data = len(self._sigma_v_measured)
         len_list = [len(a) for a in self.kin_scaling_param_array]
         ani_scaling_array_list = [np.zeros(len_list) for _ in range(num_data)]
-
-        if self._anisotropy_model in ["OM", "const", "GOM"]:
-            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
-                if self._anisotropy_model == "GOM":
-                    for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
-                        kwargs_anisotropy = self.anisotropy_kwargs(
-                            a_ani=a_ani, beta_inf=beta_inf
+        num = self.num_scaling_dim
+        if num == 1:
+            for i, param in enumerate(self.kin_scaling_param_array[0]):
+                param_array = [param]
+                kwargs_ani, kwargs_lens = self.param_array2kwargs(param_array=param_array)
+                kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
+                j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True, **kwargs_lens)
+                for s, j_kin in enumerate(j_kin_ani):
+                    ani_scaling_array_list[s][i] = (
+                        j_kin / j_ani_0[s]
+                    )
+        elif num == 2:
+            for i, param_i in enumerate(self.kin_scaling_param_array[0]):
+                for j, param_j in enumerate(self.kin_scaling_param_array[1]):
+                    param_array = [param_i, param_j]
+                    kwargs_ani, kwargs_lens = self.param_array2kwargs(param_array=param_array)
+                    kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
+                    j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True, **kwargs_lens)
+                    for s, j_kin in enumerate(j_kin_ani):
+                        ani_scaling_array_list[s][i, j] = (
+                            j_kin / j_ani_0[s]
                         )
-                        j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
-                        for k, j_kin in enumerate(j_kin_ani):
-                            ani_scaling_array_list[k][i, j] = (
-                                j_kin / j_ani_0[k]
-                            )  # perhaps change the order
-                else:
-                    kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
-                    j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
-                    for k, j_kin in enumerate(j_kin_ani):
-                        ani_scaling_array_list[k][i] = (
-                            j_kin / j_ani_0[k]
-                        )
+        elif num == 3:
+            for i, param_i in enumerate(self.kin_scaling_param_array[0]):
+                for j, param_j in enumerate(self.kin_scaling_param_array[1]):
+                    for k, param_k in enumerate(self.kin_scaling_param_array[2]):
+                        param_array = [param_i, param_j, param_k]
+                        kwargs_ani, kwargs_lens = self.param_array2kwargs(param_array=param_array)
+                        kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
+                        j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True, **kwargs_lens)
+                        for s, j_kin in enumerate(j_kin_ani):
+                            ani_scaling_array_list[s][i, j, k] = (
+                                j_kin / j_ani_0[s]
+                            )
         else:
-            raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
+            ValueError("Kin scaling with parameter dimension %s not supported, chose between 1-3." % num)
+
         return ani_scaling_array_list
