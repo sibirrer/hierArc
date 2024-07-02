@@ -35,6 +35,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
         cosmo_fiducial=None,
         gamma_in_scaling=None,
         log_m2l_scaling=None,
+        gamma_pl_scaling=None,
     ):
         """
 
@@ -66,6 +67,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             uses astropy's default cosmology
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
+        :param gamma_pl_scaling: array of power-law density profile slopes to be interpolated (optional, otherwise None)
         """
         self._z_lens, self._z_source = z_lens, z_source
 
@@ -115,4 +117,5 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             r_eff,
             gamma_in_scaling=gamma_in_scaling,
             log_m2l_scaling=log_m2l_scaling,
+            gamma_pl_scaling=gamma_pl_scaling,
         )

@@ -119,17 +119,20 @@ class KinConstraints(BaseLensConfig):
             cosmo_fiducial=cosmo_fiducial,
             gamma_in_scaling=gamma_in_scaling,
             log_m2l_scaling=log_m2l_scaling,
+            gamma_pl_scaling=gamma_pl_scaling
         )
 
-    def j_kin_draw(self, kwargs_anisotropy, no_error=False):
+    def j_kin_draw(self, kwargs_anisotropy, gamma_pl=None, no_error=False):
         """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
+        :param gamma_pl: power law slope, if None, draws from measurement uncertainty, otherwise takes at fixed value
+        :type gamma_pl: float or None
         :param no_error: bool, if True, does not render from the uncertainty but uses
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(
+        theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(gamma_pl=gamma_pl,
             no_error=no_error
         )
         kwargs_lens = [
@@ -198,7 +201,7 @@ class KinConstraints(BaseLensConfig):
             (num_sample_model, num_data)
         )  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
-            j_kin = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=False)
+            j_kin = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=False, **self.kwargs_lens_base)
             j_kin_matrix[i, :] = j_kin
 
         error_cov_j_sqrt = np.cov(np.sqrt(j_kin_matrix.T))
@@ -240,7 +243,7 @@ class KinConstraints(BaseLensConfig):
 
         :return: anisotropy scaling grid along the axes defined by ani_param_array
         """
-        j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True)
+        j_ani_0 = self.j_kin_draw(self.kwargs_anisotropy_base, no_error=True, **self.kwargs_lens_base)
         return self._anisotropy_scaling_relative(j_ani_0)
 
     def _anisotropy_scaling_relative(self, j_ani_0):
@@ -254,26 +257,25 @@ class KinConstraints(BaseLensConfig):
         len_list = [len(a) for a in self.kin_scaling_param_array]
         ani_scaling_array_list = [np.zeros(len_list) for _ in range(num_data)]
 
-        if self._anisotropy_model == "GOM":
+        if self._anisotropy_model in ["OM", "const", "GOM"]:
             for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
-                for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
-                    kwargs_anisotropy = self.anisotropy_kwargs(
-                        a_ani=a_ani, beta_inf=beta_inf
-                    )
+                if self._anisotropy_model == "GOM":
+                    for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
+                        kwargs_anisotropy = self.anisotropy_kwargs(
+                            a_ani=a_ani, beta_inf=beta_inf
+                        )
+                        j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
+                        for k, j_kin in enumerate(j_kin_ani):
+                            ani_scaling_array_list[k][i, j] = (
+                                j_kin / j_ani_0[k]
+                            )  # perhaps change the order
+                else:
+                    kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
                     j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
                     for k, j_kin in enumerate(j_kin_ani):
-                        ani_scaling_array_list[k][i, j] = (
+                        ani_scaling_array_list[k][i] = (
                             j_kin / j_ani_0[k]
-                        )  # perhaps change the order
-        elif self._anisotropy_model in ["OM", "const"]:
-            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
-                kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
-                j_kin_ani = self.j_kin_draw(kwargs_anisotropy, no_error=True)
-                for k, j_kin in enumerate(j_kin_ani):
-                    ani_scaling_array_list[k][i] = (
-                        j_kin / j_ani_0[k]
-                    )
-                    # ani_scaling_array_list[k].append(j_kin / j_ani_0[k])
+                        )
         else:
             raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
         return ani_scaling_array_list

@@ -71,7 +71,7 @@ class TestKinScaling(object):
             j_kin_scaling_param_name_list=param_list,
         )
         kwargs_param = {"a": 0.5, "b": 0.3}
-        param_array = kin_scaling._kwargs2param_array(kwargs_param)
+        param_array = kin_scaling.kwargs2param_array(kwargs_param)
         assert param_array[0] == kwargs_param["a"]
         assert param_array[1] == kwargs_param["b"]
         kwargs_min, kwargs_max = kin_scaling.param_bounds_interpol()
@@ -82,7 +82,7 @@ class TestKinScaling(object):
 
         with npt.assert_raises(ValueError):
             kwargs_param = {"a": 0.5}  # remove parameter "b" and expect a raise
-            param_array = kin_scaling._kwargs2param_array(kwargs_param)
+            param_array = kin_scaling.kwargs2param_array(kwargs_param)
 
     def test_empty(self):
         kin_scaling = KinScaling(

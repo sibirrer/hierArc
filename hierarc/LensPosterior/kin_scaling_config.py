@@ -1,19 +1,22 @@
 import numpy as np
+from hierarc.Likelihood.kin_scaling import KinScalingParamManager
 
 
-class KinScalingConfig(object):
+class KinScalingConfig(KinScalingParamManager):
     """Class to manage the anisotropy model and parameters for the Posterior
     processing."""
 
     def __init__(
-        self, anisotropy_model, r_eff, gamma_in_scaling=None, log_m2l_scaling=None
+        self, anisotropy_model, r_eff, gamma_in_scaling=None, log_m2l_scaling=None, gamma_pl_scaling=None
     ):
         """
 
-        :param anisotropy_model: type of stellar anisotropy model. Supported are 'OM' and 'GOM' or 'const', see details in lenstronomy.Galkin module
+        :param anisotropy_model: type of stellar anisotropy model. Supported are 'OM' and 'GOM' or 'const',
+         see details in lenstronomy.Galkin module
         :param r_eff: half-light radius of the deflector galaxy
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
+        :param gamma_pl_scaling: array of power-law density profile slopes to be interpolated (optional, otherwise None)
         """
         self._r_eff = r_eff
         self._anisotropy_model = anisotropy_model
@@ -40,12 +43,20 @@ class KinScalingConfig(object):
             raise ValueError(
                 "anisotropy model %s not supported." % self._anisotropy_model
             )
+        self._gamma_in_scaling = gamma_in_scaling
+        self._log_m2l_scaling = log_m2l_scaling
+        self._gamma_pl_scaling = gamma_pl_scaling
+
         if gamma_in_scaling is not None:
             self._param_name_list.append("gamma_in")
             self._ani_param_array.append(np.array(gamma_in_scaling))
         if log_m2l_scaling is not None:
             self._param_name_list.append("log_m2l")
             self._ani_param_array.append(np.array(log_m2l_scaling))
+        if gamma_pl_scaling is not None:
+            self._param_name_list.append("gamma_pl")
+            self._ani_param_array.append(np.array(gamma_pl_scaling))
+        KinScalingParamManager.__init__(self, j_kin_scaling_param_name_list=self._param_name_list)
 
     @property
     def kwargs_anisotropy_base(self):
@@ -72,10 +83,25 @@ class KinScalingConfig(object):
         return kwargs_anisotropy_0
 
     @property
+    def kwargs_lens_base(self):
+        """
+
+        :return: keyword arguments of lens model parameters that are getting interpolated
+        """
+        kwargs_base = {}
+        if "gamma_in" in self._param_name_list:
+            kwargs_base["gamma_in"] = np.mean(self._gamma_in_scaling)
+        if "log_m2l" in self._param_name_list:
+            kwargs_base["log_m2l"] = np.mean(self._log_m2l_scaling)
+        if "gamma_pl" in self._param_name_list:
+            kwargs_base["gamma_pl"] = np.mean(self._gamma_pl_scaling)
+        return kwargs_base
+
+    @property
     def kin_scaling_param_array(self):
         """
 
-        :return: numpy array of anisotropy parameter values to be explored
+        :return: numpy array of kinematic scaling parameter values to be explored, list of 1D arrays
         """
         return self._ani_param_array
 
@@ -92,7 +118,7 @@ class KinScalingConfig(object):
 
         :param a_ani: anisotropy parameter
         :param beta_inf: anisotropy at infinity (only used for 'GOM' model)
-        :return: list of anisotropy keyword arguments, value of anisotropy parameter list
+        :return: list of anisotropy keyword arguments for GalKin module
         """
 
         if self._anisotropy_model == "OM":
