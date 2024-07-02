@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from hierarc.Likelihood.kin_scaling import KinScaling, ParameterScalingSingleMeasurement
+from hierarc.Likelihood.kin_scaling import KinScaling, ParameterScalingSingleMeasurement, KinScalingParamManager
 
 
 class TestKinScaling(object):
@@ -284,6 +284,19 @@ class TestParameterScalingIFU(object):
         kwargs_param = {"a": 1, "b": 2, "c": 2.9}
         scaling = self.scaling_nfw_2d_no_m2l.kin_scaling(kwargs_param=kwargs_param)
         assert scaling[0] == 1 * 2 * 2.9
+
+
+class TestKinScalingParamManager(object):
+
+    def test_(self):
+        kin_param_manager = KinScalingParamManager(j_kin_scaling_param_name_list=["gamma_pl", "a_ani", "beta_inf"])
+        param_array = [1, 2, 3]
+        kwargs_anisotropy, kwargs_deflector = kin_param_manager.param_array2kwargs(param_array=param_array)
+        assert kwargs_deflector["gamma_pl"] == param_array[0]
+
+        param_array_new = kin_param_manager.kwargs2param_array(kwargs={**kwargs_anisotropy, **kwargs_deflector})
+        for i, param in enumerate(param_array_new):
+            assert param == param_array[i]
 
 
 if __name__ == "__main__":
