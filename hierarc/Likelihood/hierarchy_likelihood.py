@@ -1,6 +1,7 @@
 from hierarc.Likelihood.transformed_cosmography import TransformedCosmography
 from hierarc.Likelihood.LensLikelihood.base_lens_likelihood import LensLikelihoodBase
 from hierarc.Likelihood.kin_scaling import KinScaling
+from hierarc.Likelihood.prior_likelihood import PriorLikelihood
 from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
 from hierarc.Sampling.Distributions.anisotropy_distributions import (
     AnisotropyDistribution,
@@ -53,8 +54,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         kappa_pdf=None,
         kappa_bin_edges=None,
         # priors
-        gamma_in_prior_mean=None,  # TODO: make a separate prior class with inputs
-        gamma_in_prior_std=None,
+        prior_list=None,
         # specifics for each lens
         **kwargs_likelihood
     ):
@@ -85,8 +85,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
-        :param gamma_in_prior_mean: prior mean for inner power-law slope of the NFW profile, if available
-        :param gamma_in_prior_std: standard deviation of the Gaussian prior for gamma_in
+        :param prior_list: list of [[name, mean, sigma], [],...] for priors on parameters being sampled for
+         individual lenses
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
          see individual classes for their use
         :param los_distributions: list of all line of sight distributions parameterized
@@ -148,9 +148,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_anisotropy_min=kwargs_min,
             kwargs_anisotropy_max=kwargs_max,
         )
-
-        self._gamma_in_prior_mean = gamma_in_prior_mean
-        self._gamma_in_prior_std = gamma_in_prior_std
+        self._prior = PriorLikelihood(prior_list=prior_list)
 
     def lens_log_likelihood(
         self,
@@ -312,17 +310,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             sigma_v_sys_error=sigma_v_sys_error,
             mu_intrinsic=mag_source_,
         )
-
-        if (
-            self._gamma_in_prior_mean is not None
-            and self._gamma_in_prior_std is not None
-            and "gamma_in" in kwargs_lens_draw
-        ):
-            gamma_in = kwargs_lens_draw["gamma_in"]
-            lnlikelihood -= (self._gamma_in_prior_mean - gamma_in) ** 2 / (
-                2 * self._gamma_in_prior_std**2
-            )
-
+        lnlikelihood += self._prior.log_likelihood(kwargs_param)
         return np.nan_to_num(lnlikelihood)
 
     def angular_diameter_distances(self, cosmo):

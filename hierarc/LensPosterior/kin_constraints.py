@@ -186,6 +186,13 @@ class KinConstraints(BaseLensConfig):
             "j_kin_scaling_param_axes": self.kin_scaling_param_array,
             "j_kin_scaling_grid_list": ani_scaling_array_list,
         }
+        prior_list = []
+        if "gamma_pl" in self._param_name_list:
+            prior_list.append(["gamma_pl", self._gamma, self._gamma_error])
+        # TODO: make sure to add other priors if needed or available
+        #if "gamma_in" in self._param_name_list:
+        #    prior_list.append(["gamma_in"])
+        kwargs_likelihood["prior_list"] = prior_list
         return kwargs_likelihood
 
     def model_marginalization(self, num_sample_model=20):
