@@ -7,7 +7,12 @@ class KinScalingConfig(KinScalingParamManager):
     processing."""
 
     def __init__(
-        self, anisotropy_model, r_eff, gamma_in_scaling=None, log_m2l_scaling=None, gamma_pl_scaling=None
+        self,
+        anisotropy_model,
+        r_eff,
+        gamma_in_scaling=None,
+        log_m2l_scaling=None,
+        gamma_pl_scaling=None,
     ):
         """
 
@@ -56,7 +61,9 @@ class KinScalingConfig(KinScalingParamManager):
         if gamma_pl_scaling is not None:
             self._param_name_list.append("gamma_pl")
             self._ani_param_array.append(np.array(gamma_pl_scaling))
-        KinScalingParamManager.__init__(self, j_kin_scaling_param_name_list=self._param_name_list)
+        KinScalingParamManager.__init__(
+            self, j_kin_scaling_param_name_list=self._param_name_list
+        )
 
     @property
     def kwargs_anisotropy_base(self):

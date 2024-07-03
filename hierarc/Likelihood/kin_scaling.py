@@ -7,9 +7,7 @@ import numpy as np
 
 
 class KinScalingParamManager(object):
-    """
-    class to handle the sorting of parameters in the kinematics scaling
-    """
+    """Class to handle the sorting of parameters in the kinematics scaling."""
 
     def __init__(self, j_kin_scaling_param_name_list):
         """
@@ -25,8 +23,7 @@ class KinScalingParamManager(object):
 
     @property
     def num_scaling_dim(self):
-        """
-        number of parameter dimensions for kinematic scaling
+        """Number of parameter dimensions for kinematic scaling.
 
         :return: number of scaling dimensions
         :rtype: int
@@ -51,9 +48,8 @@ class KinScalingParamManager(object):
         return param_array
 
     def param_array2kwargs(self, param_array):
-        """
-        inverse function of kwargs2param_array
-        for a given param_array returns the dictionary split in anisotropy and lens models
+        """Inverse function of kwargs2param_array for a given param_array returns the
+        dictionary split in anisotropy and lens models.
 
         :param param_array:
         :return: kwargs_anisotropy, kwargs_lens
@@ -162,7 +158,9 @@ class KinScaling(KinScalingParamManager):
             self._dim_scaling = len(j_kin_scaling_param_axes)
         else:
             self._dim_scaling = 1
-        KinScalingParamManager.__init__(self, j_kin_scaling_param_name_list=j_kin_scaling_param_name_list)
+        KinScalingParamManager.__init__(
+            self, j_kin_scaling_param_name_list=j_kin_scaling_param_name_list
+        )
 
     def param_bounds_interpol(self):
         """Minimum and maximum bounds of parameters that are being used to call
