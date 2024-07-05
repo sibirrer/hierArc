@@ -21,7 +21,14 @@ class LensSampleLikelihood(object):
         if kwargs_global_model is None:
             kwargs_global_model = {}
         self._lens_list = []
+        self._gamma_pl_num = 0
+        gamma_pl_index = 0
         for kwargs_lens in kwargs_lens_list:
+            gamma_pl_index_ = None
+            if kwargs_lens.get("gamma_pl_sampling", False) is True:
+                self._gamma_pl_num += 1
+                gamma_pl_index_ = copy.deepcopy(gamma_pl_index)
+                gamma_pl_index += 1
             if kwargs_lens["likelihood_type"] == "DSPL":
                 _kwargs_lens = copy.deepcopy(kwargs_lens)
                 _kwargs_lens.pop("likelihood_type")
@@ -32,7 +39,7 @@ class LensSampleLikelihood(object):
                 kwargs_lens_ = self._merge_global2local_settings(
                     kwargs_global_model=kwargs_global_model, kwargs_lens=kwargs_lens
                 )
-                self._lens_list.append(LensLikelihood(**kwargs_lens_))
+                self._lens_list.append(LensLikelihood(gamma_pl_index=gamma_pl_index_, **kwargs_lens_))
 
     def log_likelihood(
         self,
@@ -71,6 +78,15 @@ class LensSampleLikelihood(object):
         for lens in self._lens_list:
             num += lens.num_data()
         return num
+
+    @property
+    def gamma_pl_num(self):
+        """
+        number of power-law density slope parameters being sampled on individual lenses
+
+        :return: number of power-law density slope parameters being sampled on individual lenses
+        """
+        return self._gamma_pl_num
 
     @staticmethod
     def _merge_global2local_settings(kwargs_global_model, kwargs_lens):

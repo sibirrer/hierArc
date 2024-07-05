@@ -27,6 +27,7 @@ class ParamManager(object):
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
         alpha_log_m2l_sampling=False,
+        gamma_pl_num=0,
         sigma_v_systematics=False,
         sne_apparent_m_sampling=False,
         sne_distribution="GAUSSIAN",
@@ -74,6 +75,7 @@ class ParamManager(object):
             according to a predefined quantity of the lens
         :param alpha_log_m2l_sampling: bool, if True samples a parameter alpha_log_m2l, which scales log_m2l linearly
             according to a predefined quantity of the lens
+        :param gamma_pl_num: int, number of power-law density slopes being sampled (to be assigned to individual lenses)
         :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
          (not intrinsic magnitudes but apparent!)
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
@@ -115,6 +117,7 @@ class ParamManager(object):
             beta_lambda_sampling=beta_lambda_sampling,
             alpha_gamma_in_sampling=alpha_gamma_in_sampling,
             alpha_log_m2l_sampling=alpha_log_m2l_sampling,
+            gamma_pl_num=gamma_pl_num,
             log_scatter=log_scatter,
             kwargs_fixed=kwargs_fixed_lens,
         )

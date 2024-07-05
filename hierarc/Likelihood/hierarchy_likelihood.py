@@ -43,6 +43,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         alpha_gamma_in_sampling=False,
         alpha_log_m2l_sampling=False,
         log_scatter=False,
+        gamma_pl_index=None,
         # kinematic model quantities
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
@@ -82,6 +83,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
          lambda_mst = lambda_mst_global + alpha * lambda_scaling_property
         :param lambda_scaling_property_beta: float (optional), scaling of
          lambda_mst = lambda_mst_global + beta * lambda_scaling_property_beta
+        :param gamma_pl_index: index of gamma_pl parameter associated with this lens
+        :type gamma_pl_index: int or None
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
@@ -139,6 +142,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             lambda_scaling_property_beta=lambda_scaling_property_beta,
             kwargs_min=kwargs_min,
             kwargs_max=kwargs_max,
+            gamma_pl_index=gamma_pl_index,
         )
 
         self._aniso_distribution = AnisotropyDistribution(

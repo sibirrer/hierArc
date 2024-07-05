@@ -36,6 +36,7 @@ class DdtKinConstraints(KinConstraints):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        gamma_pl_scaling=None,
     ):
         """
 
@@ -67,6 +68,7 @@ class DdtKinConstraints(KinConstraints):
         :param kappa_ext_sigma: 1-sigma distribution uncertainty from which the ddt constraints are coming from
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
+        :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
         """
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
@@ -96,6 +98,7 @@ class DdtKinConstraints(KinConstraints):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
+            gamma_pl_scaling=gamma_pl_scaling,
         )
 
     def hierarchy_configuration(self, num_sample_model=20):
@@ -128,4 +131,16 @@ class DdtKinConstraints(KinConstraints):
             "j_kin_scaling_param_axes": self.kin_scaling_param_array,
             "j_kin_scaling_grid_list": ani_scaling_array_list,
         }
+
+        prior_list = []
+        if "gamma_pl" in self._param_name_list:
+            prior_list.append(["gamma_pl", self._gamma, self._gamma_error])
+        # TODO: make sure to add other priors if needed or available
+        # if "gamma_in" in self._param_name_list:
+        #    prior_list.append(["gamma_in"])
+        kwargs_likelihood["prior_list"] = prior_list
+        if "gamma_pl" in self._param_name_list:
+            kwargs_likelihood["gamma_pl_sampling"] = True
+
+
         return kwargs_likelihood
