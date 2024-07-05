@@ -72,9 +72,9 @@ class TestLensParam(object):
             "gamma_pl_list": [2, 2.5],
         }
         args = self._param.kwargs2args(kwargs)
-        print(args, 'test args')
+        print(args, "test args")
         kwargs_new, i = self._param.args2kwargs(args, i=0)
-        print(kwargs_new, 'test kwargs_new')
+        print(kwargs_new, "test kwargs_new")
         args_new = self._param.kwargs2args(kwargs_new)
         npt.assert_almost_equal(args_new, args)
 
