@@ -142,5 +142,4 @@ class DdtKinConstraints(KinConstraints):
         # if "gamma_pl" in self._param_name_list:
         #    kwargs_likelihood["gamma_pl_sampling"] = True
 
-
         return kwargs_likelihood

@@ -42,7 +42,9 @@ class LensSampleLikelihood(object):
                 kwargs_lens_ = self._merge_global2local_settings(
                     kwargs_global_model=kwargs_global_model, kwargs_lens=kwargs_lens
                 )
-                self._lens_list.append(LensLikelihood(gamma_pl_index=gamma_pl_index_, **kwargs_lens_))
+                self._lens_list.append(
+                    LensLikelihood(gamma_pl_index=gamma_pl_index_, **kwargs_lens_)
+                )
 
     def log_likelihood(
         self,
@@ -84,10 +86,11 @@ class LensSampleLikelihood(object):
 
     @property
     def gamma_pl_num(self):
-        """
-        number of power-law density slope parameters being sampled on individual lenses
+        """Number of power-law density slope parameters being sampled on individual
+        lenses.
 
-        :return: number of power-law density slope parameters being sampled on individual lenses
+        :return: number of power-law density slope parameters being sampled on
+            individual lenses
         """
         return self._gamma_pl_num
 
