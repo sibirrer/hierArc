@@ -2,7 +2,11 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from hierarc.Likelihood.kin_scaling import KinScaling, ParameterScalingSingleMeasurement, KinScalingParamManager
+from hierarc.Likelihood.kin_scaling import (
+    KinScaling,
+    ParameterScalingSingleMeasurement,
+    KinScalingParamManager,
+)
 
 
 class TestKinScaling(object):
@@ -289,12 +293,18 @@ class TestParameterScalingIFU(object):
 class TestKinScalingParamManager(object):
 
     def test_(self):
-        kin_param_manager = KinScalingParamManager(j_kin_scaling_param_name_list=["gamma_pl", "a_ani", "beta_inf"])
+        kin_param_manager = KinScalingParamManager(
+            j_kin_scaling_param_name_list=["gamma_pl", "a_ani", "beta_inf"]
+        )
         param_array = [1, 2, 3]
-        kwargs_anisotropy, kwargs_deflector = kin_param_manager.param_array2kwargs(param_array=param_array)
+        kwargs_anisotropy, kwargs_deflector = kin_param_manager.param_array2kwargs(
+            param_array=param_array
+        )
         assert kwargs_deflector["gamma_pl"] == param_array[0]
 
-        param_array_new = kin_param_manager.kwargs2param_array(kwargs={**kwargs_anisotropy, **kwargs_deflector})
+        param_array_new = kin_param_manager.kwargs2param_array(
+            kwargs={**kwargs_anisotropy, **kwargs_deflector}
+        )
         for i, param in enumerate(param_array_new):
             assert param == param_array[i]
 

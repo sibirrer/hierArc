@@ -1,9 +1,5 @@
-
-
 class PriorLikelihood(object):
-    """
-    class to define priors for individual lenses, e.g. from lens models etc.
-    """
+    """Class to define priors for individual lenses, e.g. from lens models etc."""
 
     def __init__(self, prior_list=None):
         """
@@ -16,7 +12,7 @@ class PriorLikelihood(object):
         self._param_name_list = []
         self._param_mean_list = []
         self._param_sigma_list = []
-        print(prior_list, 'test prior_list')
+        print(prior_list, "test prior_list")
         for i, param in enumerate(prior_list):
             self._param_name_list.append(param[0])
             self._param_mean_list.append(param[1])
@@ -32,5 +28,7 @@ class PriorLikelihood(object):
         lnlikelihood = 0
         for i, param in enumerate(self._param_name_list):
             if param in kwargs:
-                lnlikelihood -= (kwargs[param] - self._param_mean_list[i]) ** 2 / (2 * self._param_sigma_list[i] ** 2)
+                lnlikelihood -= (kwargs[param] - self._param_mean_list[i]) ** 2 / (
+                    2 * self._param_sigma_list[i] ** 2
+                )
         return lnlikelihood

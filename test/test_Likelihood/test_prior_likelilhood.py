@@ -14,7 +14,7 @@ class TestPriorLikelihood(object):
 
         kwargs = {"a": 1}
         ln_l = prior_likelihood.log_likelihood(kwargs)
-        npt.assert_almost_equal(ln_l, -1/2, decimal=5)
+        npt.assert_almost_equal(ln_l, -1 / 2, decimal=5)
 
         kwargs = {"a": 1, "b": 1}
         ln_l = prior_likelihood.log_likelihood(kwargs)

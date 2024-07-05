@@ -191,7 +191,7 @@ class KinConstraints(BaseLensConfig):
         if "gamma_pl" in self._param_name_list:
             prior_list.append(["gamma_pl", self._gamma, self._gamma_error])
         # TODO: make sure to add other priors if needed or available
-        #if "gamma_in" in self._param_name_list:
+        # if "gamma_in" in self._param_name_list:
         #    prior_list.append(["gamma_in"])
         kwargs_likelihood["prior_list"] = prior_list
         if "gamma_pl" in self._param_name_list:
