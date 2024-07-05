@@ -12,7 +12,6 @@ class PriorLikelihood(object):
         self._param_name_list = []
         self._param_mean_list = []
         self._param_sigma_list = []
-        print(prior_list, "test prior_list")
         for i, param in enumerate(prior_list):
             self._param_name_list.append(param[0])
             self._param_mean_list.append(param[1])

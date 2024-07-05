@@ -139,8 +139,8 @@ class DdtKinConstraints(KinConstraints):
         # if "gamma_in" in self._param_name_list:
         #    prior_list.append(["gamma_in"])
         kwargs_likelihood["prior_list"] = prior_list
-        if "gamma_pl" in self._param_name_list:
-            kwargs_likelihood["gamma_pl_sampling"] = True
+        # if "gamma_pl" in self._param_name_list:
+        #    kwargs_likelihood["gamma_pl_sampling"] = True
 
 
         return kwargs_likelihood
