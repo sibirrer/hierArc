@@ -2,6 +2,7 @@ from hierarc.LensPosterior.kin_constraints import KinConstraints
 from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 import numpy.testing as npt
+import numpy as np
 import pytest
 import unittest
 
@@ -105,15 +106,17 @@ class TestKinConstraints(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            gamma_pl_scaling=np.linspace(1.8, 2.2, 5),
             **kwargs_kin_api_settings
         )
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(**kwargs_likelihood)
+        ln_class = LensLikelihood(gamma_pl_index=0, **kwargs_likelihood)
         kwargs_kin = {"a_ani": 1}
+        kwargs_lens = {"gamma_pl_list": [gamma]}
         ln_likelihood = ln_class.lens_log_likelihood(
-            cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin
+            cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
         )
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 

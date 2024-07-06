@@ -118,4 +118,5 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             gamma_in_scaling=gamma_in_scaling,
             log_m2l_scaling=log_m2l_scaling,
             gamma_pl_scaling=gamma_pl_scaling,
+            gamma_pl_mean=gamma,
         )

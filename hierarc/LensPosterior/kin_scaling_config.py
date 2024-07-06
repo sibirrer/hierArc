@@ -13,6 +13,7 @@ class KinScalingConfig(KinScalingParamManager):
         gamma_in_scaling=None,
         log_m2l_scaling=None,
         gamma_pl_scaling=None,
+        gamma_pl_mean=None,
     ):
         """
 
@@ -22,6 +23,7 @@ class KinScalingConfig(KinScalingParamManager):
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         :param gamma_pl_scaling: array of power-law density profile slopes to be interpolated (optional, otherwise None)
+        :param gamma_pl_mean: mean gamma_pl upon which the covariances are calculated
         """
         self._r_eff = r_eff
         self._anisotropy_model = anisotropy_model
@@ -51,6 +53,7 @@ class KinScalingConfig(KinScalingParamManager):
         self._gamma_in_scaling = gamma_in_scaling
         self._log_m2l_scaling = log_m2l_scaling
         self._gamma_pl_scaling = gamma_pl_scaling
+        self._gamma_pl_mean = gamma_pl_mean
 
         if gamma_in_scaling is not None:
             self._param_name_list.append("gamma_in")
@@ -101,7 +104,7 @@ class KinScalingConfig(KinScalingParamManager):
         if "log_m2l" in self._param_name_list:
             kwargs_base["log_m2l"] = np.mean(self._log_m2l_scaling)
         if "gamma_pl" in self._param_name_list:
-            kwargs_base["gamma_pl"] = np.mean(self._gamma_pl_scaling)
+            kwargs_base["gamma_pl"] = self._gamma_pl_mean
         return kwargs_base
 
     @property
