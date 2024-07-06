@@ -10,12 +10,13 @@ class TestKinScalingConfig(object):
         pass
 
     def test_kwargs_lens_base(self):
-        kin_scaling = KinScalingConfig(anisotropy_model="GOM",
-                         r_eff=1,
-                         gamma_pl_scaling=np.linspace(1.5, 2.5, 5),
-                         log_m2l_scaling=np.linspace(0, 1, 5),
-                         gamma_in_scaling=np.linspace(0.5, 1.5, 5),
-                         )
+        kin_scaling = KinScalingConfig(
+            anisotropy_model="GOM",
+            r_eff=1,
+            gamma_pl_scaling=np.linspace(1.5, 2.5, 5),
+            log_m2l_scaling=np.linspace(0, 1, 5),
+            gamma_in_scaling=np.linspace(0.5, 1.5, 5),
+        )
         kin_scaling.kwargs_lens_base
 
     def test_init(self):
