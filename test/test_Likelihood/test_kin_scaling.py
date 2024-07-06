@@ -2,7 +2,11 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from hierarc.Likelihood.kin_scaling import KinScaling, ParameterScalingSingleMeasurement
+from hierarc.Likelihood.kin_scaling import (
+    KinScaling,
+    ParameterScalingSingleMeasurement,
+    KinScalingParamManager,
+)
 
 
 class TestKinScaling(object):
@@ -71,7 +75,7 @@ class TestKinScaling(object):
             j_kin_scaling_param_name_list=param_list,
         )
         kwargs_param = {"a": 0.5, "b": 0.3}
-        param_array = kin_scaling._kwargs2param_array(kwargs_param)
+        param_array = kin_scaling.kwargs2param_array(kwargs_param)
         assert param_array[0] == kwargs_param["a"]
         assert param_array[1] == kwargs_param["b"]
         kwargs_min, kwargs_max = kin_scaling.param_bounds_interpol()
@@ -82,7 +86,7 @@ class TestKinScaling(object):
 
         with npt.assert_raises(ValueError):
             kwargs_param = {"a": 0.5}  # remove parameter "b" and expect a raise
-            param_array = kin_scaling._kwargs2param_array(kwargs_param)
+            param_array = kin_scaling.kwargs2param_array(kwargs_param)
 
     def test_empty(self):
         kin_scaling = KinScaling(
@@ -284,6 +288,25 @@ class TestParameterScalingIFU(object):
         kwargs_param = {"a": 1, "b": 2, "c": 2.9}
         scaling = self.scaling_nfw_2d_no_m2l.kin_scaling(kwargs_param=kwargs_param)
         assert scaling[0] == 1 * 2 * 2.9
+
+
+class TestKinScalingParamManager(object):
+
+    def test_(self):
+        kin_param_manager = KinScalingParamManager(
+            j_kin_scaling_param_name_list=["gamma_pl", "a_ani", "beta_inf"]
+        )
+        param_array = [1, 2, 3]
+        kwargs_anisotropy, kwargs_deflector = kin_param_manager.param_array2kwargs(
+            param_array=param_array
+        )
+        assert kwargs_deflector["gamma_pl"] == param_array[0]
+
+        param_array_new = kin_param_manager.kwargs2param_array(
+            kwargs={**kwargs_anisotropy, **kwargs_deflector}
+        )
+        for i, param in enumerate(param_array_new):
+            assert param == param_array[i]
 
 
 if __name__ == "__main__":

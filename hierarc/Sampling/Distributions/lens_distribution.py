@@ -22,6 +22,7 @@ class LensDistribution(object):
         lambda_scaling_property_beta=0,
         kwargs_min=None,
         kwargs_max=None,
+        gamma_pl_index=None,
     ):
         """
 
@@ -52,6 +53,8 @@ class LensDistribution(object):
         :type kwargs_min: dict or None
         :param kwargs_max: maximum arguments of parameters supported by each lens
         :type kwargs_max: dict or None
+        :param gamma_pl_index: index of gamma_pl parameter associated with this lens
+        :type gamma_pl_index: int or None
         """
         self._lambda_mst_sampling = lambda_mst_sampling
         self._lambda_mst_distribution = lambda_mst_distribution
@@ -78,6 +81,12 @@ class LensDistribution(object):
         self._log_m2l_min, self._log_m2l_max = kwargs_min.get(
             "log_m2l", -np.inf
         ), kwargs_max.get("log_m2l", np.inf)
+        if gamma_pl_index is not None:
+            self._gamma_pl_model = True
+            self._gamma_pl_index = gamma_pl_index
+        else:
+            self._gamma_pl_model = False
+            self._gamma_pl_index = None
 
     def draw_lens(
         self,
@@ -94,6 +103,7 @@ class LensDistribution(object):
         log_m2l=1,
         log_m2l_sigma=0,
         alpha_log_m2l=0,
+        gamma_pl_list=None,
     ):
         """Draws a realization of a specific model from the hyperparameter distribution.
 
@@ -116,6 +126,8 @@ class LensDistribution(object):
         :param log_m2l_sigma: spread in the distribution
         :param alpha_log_m2l: float, linear slope of the log(m2l) scaling relation with
             lens quantity self._lambda_scaling_property
+        :param gamma_pl_list: power-law density slopes as lists (for multiple lenses)
+        :type gamma_pl_list: list or None
         :return: draw from the distributions
         """
         kwargs_return = {}
@@ -165,6 +177,7 @@ class LensDistribution(object):
                     log_m2l=log_m2l,
                     log_m2l_sigma=log_m2l_sigma,
                     alpha_log_m2l=alpha_log_m2l,
+                    gamma_pl_list=gamma_pl_list,
                 )
             kwargs_return["gamma_in"] = gamma_in_draw
         if self._log_m2l_sampling:
@@ -192,6 +205,9 @@ class LensDistribution(object):
                     log_m2l=log_m2l,
                     log_m2l_sigma=log_m2l_sigma,
                     alpha_log_m2l=alpha_log_m2l,
+                    gamma_pl_list=gamma_pl_list,
                 )
             kwargs_return["log_m2l"] = log_m2l_draw
+        if self._gamma_pl_model is True:
+            kwargs_return["gamma_pl"] = gamma_pl_list[self._gamma_pl_index]
         return kwargs_return

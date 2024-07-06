@@ -6,6 +6,63 @@ from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 
 
+class KinScalingParamManager(object):
+    """Class to handle the sorting of parameters in the kinematics scaling."""
+
+    def __init__(self, j_kin_scaling_param_name_list):
+        """
+
+        :param j_kin_scaling_param_name_list: list of strings for the parameters as they are interpolated in the same
+         order as j_kin_scaling_grid
+        """
+        if j_kin_scaling_param_name_list is None:
+            self._param_list = []
+        else:
+            self._param_list = j_kin_scaling_param_name_list
+        self._num_param = len(self._param_list)
+
+    @property
+    def num_scaling_dim(self):
+        """Number of parameter dimensions for kinematic scaling.
+
+        :return: number of scaling dimensions
+        :rtype: int
+        """
+        return self._num_param
+
+    def kwargs2param_array(self, kwargs):
+        """Converts dictionary to sorted array in same order as interpolation grid.
+
+        :param kwargs: dictionary of all model components, must include the one that are
+            interpolated
+        :return: sorted list of parameters to interpolate
+        """
+        param_array = []
+        for param in self._param_list:
+            if param not in kwargs:
+                raise ValueError(
+                    "key %s not in parameters and hence kinematic scaling not possible"
+                    % param
+                )
+            param_array.append(kwargs.get(param))
+        return param_array
+
+    def param_array2kwargs(self, param_array):
+        """Inverse function of kwargs2param_array for a given param_array returns the
+        dictionary split in anisotropy and lens models.
+
+        :param param_array:
+        :return: kwargs_anisotropy, kwargs_lens
+        """
+        kwargs_anisotropy, kwargs_lens = {}, {}
+        for i, param in enumerate(self._param_list):
+            if param in ["gamma_in", "gamma_pl", "log_m2l"]:
+                kwargs_lens[param] = param_array[i]
+            else:
+                kwargs_anisotropy[param] = param_array[i]
+        return kwargs_anisotropy, kwargs_lens
+
+
 class ParameterScalingSingleMeasurement(object):
     """Class to manage anisotropy scaling for single slit observation."""
 
@@ -57,7 +114,7 @@ class ParameterScalingSingleMeasurement(object):
             return self._f_ani(param_array)[0]
 
 
-class KinScaling(object):
+class KinScaling(KinScalingParamManager):
     """Class to manage model parameter and anisotropy scalings for IFU data."""
 
     def __init__(
@@ -73,10 +130,7 @@ class KinScaling(object):
         :param j_kin_scaling_param_name_list: list of strings for the parameters as they are interpolated in the same
          order as j_kin_scaling_grid
         """
-        if j_kin_scaling_param_name_list is None:
-            self._param_list = []
-        else:
-            self._param_list = j_kin_scaling_param_name_list
+
         self._param_arrays = j_kin_scaling_param_axes
         if (
             not isinstance(j_kin_scaling_param_axes, list)
@@ -104,23 +158,9 @@ class KinScaling(object):
             self._dim_scaling = len(j_kin_scaling_param_axes)
         else:
             self._dim_scaling = 1
-
-    def _kwargs2param_array(self, kwargs):
-        """Converts dictionary to sorted array in same order as interpolation grid.
-
-        :param kwargs: dictionary of all model components, must include the one that are
-            interpolated
-        :return: sorted list of parameters to interpolate
-        """
-        param_array = []
-        for param in self._param_list:
-            if param not in kwargs:
-                raise ValueError(
-                    "key %s not in parameters and hence kinematic scaling not possible"
-                    % param
-                )
-            param_array.append(kwargs.get(param))
-        return param_array
+        KinScalingParamManager.__init__(
+            self, j_kin_scaling_param_name_list=j_kin_scaling_param_name_list
+        )
 
     def param_bounds_interpol(self):
         """Minimum and maximum bounds of parameters that are being used to call
@@ -143,7 +183,7 @@ class KinScaling(object):
         """
         if kwargs_param is None:
             return np.ones(self._dim_scaling)
-        param_array = self._kwargs2param_array(kwargs_param)
+        param_array = self.kwargs2param_array(kwargs_param)
         if self._evaluate_scaling is not True or len(param_array) == 0:
             return np.ones(self._dim_scaling)
         scaling_list = []
