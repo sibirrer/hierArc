@@ -12,7 +12,7 @@ class TestKinConstraints(object):
         pass
 
     def test_likelihoodconfiguration_om(self):
-        anisotropy_model = "OM"
+        anisotropy_model = "GOM"
         kwargs_aperture = {
             "aperture_type": "shell",
             "r_in": 0,
@@ -77,8 +77,9 @@ class TestKinConstraints(object):
         kwargs_lens = [
             {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
         ]
+        beta_inf = 0.9
         kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
-        kwargs_anisotropy = {"r_ani": r_eff}
+        kwargs_anisotropy = {"r_ani": r_eff, "beta_inf": beta_inf}
         sigma_v = kin_api.velocity_dispersion(
             kwargs_lens,
             kwargs_lens_light,
@@ -113,7 +114,7 @@ class TestKinConstraints(object):
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(gamma_pl_index=0, **kwargs_likelihood)
-        kwargs_kin = {"a_ani": 1}
+        kwargs_kin = {"a_ani": 1, "beta_inf": beta_inf}
         kwargs_lens = {"gamma_pl_list": [gamma]}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
