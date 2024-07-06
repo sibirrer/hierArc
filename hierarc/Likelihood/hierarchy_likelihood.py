@@ -306,7 +306,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
         kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
         kin_scaling = self.kin_scaling(kwargs_param)
-        print(kwargs_lens_draw, 'test kwargs_lens_draw')
+        print(kwargs_lens_draw, "test kwargs_lens_draw")
         lnlikelihood = self.log_likelihood(
             ddt_,
             dd_,
