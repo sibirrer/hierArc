@@ -52,8 +52,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         num_distribution_draws=50,
         normalized=True,
         # kappa quantities
-        kappa_pdf=None,
-        kappa_bin_edges=None,
+        los_distribution_individual=None,
+        kwargs_los_individual=None,
         # priors
         prior_list=None,
         # specifics for each lens
@@ -74,9 +74,16 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param global_los_distribution: if integer, will draw from the global kappa distribution specified in that
          integer. If False, will instead draw from the distribution specified in kappa_pdf.
         :type global_los_distribution: bool or integer
-        :param kappa_pdf: array of probability density function of the external convergence distribution
+        :param los_distribution_individual: name of the individual distribution ["GEV" and "PDF"]
+        :type los_distribution_individual: str or None
+        :param kwargs_los_individual: dictionary of the parameters of the individual distribution
+         If individual_distribution is "PDF":
+         "pdf_array": array of probability density function of the external convergence distribution
          binned according to kappa_bin_edges
-        :param kappa_bin_edges: array of length (len(kappa_pdf)+1), bin edges of the kappa PDF
+         "bin_edges": array of length (len(kappa_pdf)+1), bin edges of the kappa PDF
+         If individual_distribution is "GEV":
+         "xi", "mean", "sigma"
+        :type kwargs_los_individual: dict or None
         :param mst_ifu: bool, if True replaces the lambda_mst parameter by the lambda_ifu parameter (and distribution)
          in sampling this lens.
         :param lambda_scaling_property: float (optional), scaling of
@@ -119,10 +126,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         self._num_distribution_draws = int(num_distribution_draws)
 
         self._los = LOSDistribution(
-            kappa_pdf=kappa_pdf,
-            kappa_bin_edges=kappa_bin_edges,
             global_los_distribution=global_los_distribution,
             los_distributions=los_distributions,
+            individual_distribution=los_distribution_individual,
+            kwargs_individual=kwargs_los_individual
         )
         kwargs_min, kwargs_max = self.param_bounds_interpol()
         self._lens_distribution = LensDistribution(
@@ -306,7 +313,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
         kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
         kin_scaling = self.kin_scaling(kwargs_param)
-        print(kwargs_lens_draw, "test kwargs_lens_draw")
         lnlikelihood = self.log_likelihood(
             ddt_,
             dd_,
