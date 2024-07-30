@@ -113,7 +113,7 @@ class KinConstraintsComposite(KinConstraints):
             lens_light_model_list = ["MULTI_GAUSSIAN"]
             kwargs_lens_light = [{"amp": amps, "sigma": sigmas}]
 
-        lens_model_list = ["GNFW", "MULTI_GAUSSIAN_KAPPA"]
+        lens_model_list = ["GNFW", "MULTI_GAUSSIAN"]
 
         # log_m2l is interpolated when sampled on the population level, otherwise marginalized
         if is_m2l_population_level:
