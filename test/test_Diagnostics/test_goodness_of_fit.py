@@ -72,7 +72,10 @@ class TestGoodnessOfFit(object):
             {
                 "ddt_samples": ddt_samples,
                 "los_distribution_individual": "PDF",
-                "kwargs_los_individual": {"bin_edges": kappa_bin_edges, "pdf_array": kappa_pdf},
+                "kwargs_los_individual": {
+                    "bin_edges": kappa_bin_edges,
+                    "pdf_array": kappa_pdf,
+                },
             },
             {"ddt_samples": ddt_samples},
             {

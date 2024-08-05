@@ -38,7 +38,7 @@ class TestLOSDistribution(object):
             global_los_distribution=1,
             los_distributions=los_distribution,
             individual_distribution="PDF",
-            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges}
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
@@ -50,7 +50,7 @@ class TestLOSDistribution(object):
             global_los_distribution=False,
             los_distributions=los_distribution,
             individual_distribution="PDF",
-            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges}
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
@@ -62,7 +62,7 @@ class TestLOSDistribution(object):
             global_los_distribution=0,
             los_distributions=los_distribution,
             individual_distribution="PDF",
-            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges}
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
@@ -95,7 +95,7 @@ class TestLOSDistribution(object):
             global_los_distribution=1,
             los_distributions=los_distribution,
             individual_distribution="PDF",
-            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges}
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is True
@@ -104,7 +104,7 @@ class TestLOSDistribution(object):
             global_los_distribution=0,
             los_distributions=los_distribution,
             individual_distribution="PDF",
-            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges}
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is False
@@ -113,7 +113,7 @@ class TestLOSDistribution(object):
             global_los_distribution=False,
             los_distributions=los_distribution,
             individual_distribution="PDF",
-            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges}
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is True
