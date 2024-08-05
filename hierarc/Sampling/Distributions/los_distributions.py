@@ -41,14 +41,15 @@ class LOSDistribution(object):
             self._los_distribution = los_distributions[global_los_distribution]
         else:
             self._draw_kappa_global = False
-        if (not self._draw_kappa_global and individual_distribution is not None
-        ):
+        if not self._draw_kappa_global and individual_distribution is not None:
             if individual_distribution == "PDF":
                 self._kappa_dist = PDFSampling(**kwargs_individual)
             elif individual_distribution == "GEV":
                 self._kappa_dist = GEV(**kwargs_individual)
             else:
-                raise ValueError("individual_distribution %s not supported. Chose among 'GEV' and 'PDF'")
+                raise ValueError(
+                    "individual_distribution %s not supported. Chose among 'GEV' and 'PDF'"
+                )
             self._draw_kappa_individual = True
         else:
             self._draw_kappa_individual = False
@@ -99,9 +100,8 @@ class LOSDistribution(object):
 
 
 class GEV(object):
-    """
-    draw from General Extreme Value distribution
-    """
+    """Draw from General Extreme Value distribution."""
+
     def __init__(self, xi, mean, sigma):
         """
 
@@ -114,12 +114,13 @@ class GEV(object):
         self._sigma = sigma
 
     def draw(self, n=1):
-        """
-        draws from the PDF of the GEV distribution
+        """Draws from the PDF of the GEV distribution.
 
         :param n: number of draws from distribution
         :type n: int
         :return: draws according to the PDF of the distribution
         """
-        kappa_ext_draw = genextreme.rvs(c=self._xi, loc=self._mean, scale=self._sigma, size=n)
+        kappa_ext_draw = genextreme.rvs(
+            c=self._xi, loc=self._mean, scale=self._sigma, size=n
+        )
         return kappa_ext_draw

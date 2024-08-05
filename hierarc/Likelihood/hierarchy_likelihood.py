@@ -129,7 +129,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             global_los_distribution=global_los_distribution,
             los_distributions=los_distributions,
             individual_distribution=los_distribution_individual,
-            kwargs_individual=kwargs_los_individual
+            kwargs_individual=kwargs_los_individual,
         )
         kwargs_min, kwargs_max = self.param_bounds_interpol()
         self._lens_distribution = LensDistribution(

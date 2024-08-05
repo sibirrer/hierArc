@@ -101,7 +101,10 @@ class TestLensLikelihood(object):
             # los_distributions=["GAUSSIAN"],
             global_los_distribution=False,
             los_distribution_individual="PDF",
-            kwargs_los_individual={"bin_edges": kappa_bin_edges, "pdf_array": kappa_pdf},
+            kwargs_los_individual={
+                "bin_edges": kappa_bin_edges,
+                "pdf_array": kappa_pdf,
+            },
             mst_ifu=False,
             **kwargs_likelihood,
             **kwargs_model
