@@ -205,8 +205,8 @@ class TestCosmoLikelihood(object):
             {
                 "likelihood_type": "DSPL",
                 "z_lens": 0.3,
-                "z_source_1": 0.5,
-                "z_source_2": 1.5,
+                "z_source": 0.5,
+                "z_source2": 1.5,
                 "beta_dspl": 1.2,
                 "sigma_beta_dspl": 0.01,
             }
