@@ -179,12 +179,11 @@ class TestCosmoLikelihood(object):
             cosmo_interp.k
         )  # compute the curvature from the interpolation class (as easily available)
         kwargs_cosmo_interp = {
-            "ang_diameter_distances": ang_diameter_distances,
+            "ang_diameter_distances": ang_diameter_distances.value,
             "redshifts": redshifts,
             "ok": Ok0,
-            "K": K,
+            "K": K.value,
         }
-
         cosmo_interp_input = cosmoL.cosmo_instance(kwargs_cosmo_interp)
 
         z = 1

@@ -124,10 +124,10 @@ class CosmoLikelihood(object):
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo["h0"], kwargs_cosmo["ok"], kwargs_cosmo["om"]
             for lens in self._kwargs_lens_list:
-                if "z_source" in lens:
-                    z = lens["z_source"]
-                elif "z_source2" in lens:
+                if "z_source2" in lens:
                     z = lens["z_source2"]
+                elif "z_source" in lens:
+                    z = lens["z_source"]
                 else:
                     z = 1100
                 cut = ok * (1.0 + z) ** 2 + om * (1.0 + z) ** 3 + (1.0 - om - ok)
@@ -174,11 +174,10 @@ class CosmoLikelihood(object):
         """
 
         :param kwargs_cosmo: cosmology parameter keyword argument list
-        :return: astropy.cosmology (or equivalent interpolation scheme class)
+        :return: ~astropy.cosmology (or equivalent interpolation scheme class)
         """
-        if hasattr(kwargs_cosmo, "ang_diameter_distances") and hasattr(
-            kwargs_cosmo, "redshifts"
-        ):
+        print(kwargs_cosmo, "test kwargs_cosmo")
+        if "ang_diameter_distances" in kwargs_cosmo and "redshifts" in kwargs_cosmo:
             # in that case we use directly the interpolation mode to approximate angular diameter distances
             cosmo = CosmoInterp(
                 ang_dist_list=kwargs_cosmo["ang_diameter_distances"],

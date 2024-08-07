@@ -15,6 +15,8 @@ class TestLensDistribution(object):
             "log_m2l_sampling": True,
             "log_m2l_distribution": "GAUSSIAN",
             "alpha_lambda_sampling": True,
+            "gamma_pl_global_sampling": True,
+            "gamma_pl_global_dist": "GAUSSIAN",
             "beta_lambda_sampling": True,
             "alpha_gamma_in_sampling": True,
             "alpha_log_m2l_sampling": True,
@@ -40,6 +42,8 @@ class TestLensDistribution(object):
             "log_m2l": 0.6,
             "log_m2l_sigma": 1,
             "alpha_log_m2l": -0.1,
+            "gamma_pl_mean": 2.,
+            "gamma_pl_sigma": 0.1,
         }
 
     def test_draw_lens(self):
