@@ -42,7 +42,7 @@ class TestLensDistribution(object):
             "log_m2l": 0.6,
             "log_m2l_sigma": 1,
             "alpha_log_m2l": -0.1,
-            "gamma_pl_mean": 2.,
+            "gamma_pl_mean": 2.0,
             "gamma_pl_sigma": 0.1,
         }
 
