@@ -22,9 +22,12 @@ class LensSampleLikelihood(object):
         self._lens_list = []
         self._gamma_pl_num = 0
         gamma_pl_index = 0
+
+        gamma_pl_global_sampling = kwargs_global_model.get("gamma_pl_global_sampling", False)
+
         for kwargs_lens in kwargs_lens_list:
             gamma_pl_index_ = None
-            if "kin_scaling_param_list" in kwargs_lens:
+            if "kin_scaling_param_list" in kwargs_lens and not gamma_pl_global_sampling:
                 kin_scaling_param_list = kwargs_lens["kin_scaling_param_list"]
                 if "gamma_pl" in kin_scaling_param_list:
                     self._gamma_pl_num += 1
@@ -117,5 +120,7 @@ _input_param_list = [
     "beta_lambda_sampling",
     "alpha_gamma_in_sampling",
     "alpha_log_m2l_sampling",
+    "gamma_pl_global_sampling",
+    "gamma_pl_global_dist",
     "log_scatter",
 ]

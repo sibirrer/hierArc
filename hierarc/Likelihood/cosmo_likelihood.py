@@ -33,10 +33,10 @@ class CosmoLikelihood(object):
         :param kwargs_model: model settings for ParamManager() class
         :type kwargs_model: dict
         :param kwargs_bounds: keyword arguments of the lower and upper bounds and parameters that are held fixed.
-        Includes:
-        'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
-        'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
-        'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
+         Includes:
+         'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
+         'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
+         'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
         :param KDE_likelihood_chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density
          estimator
         :param kwargs_kde_likelihood: keyword argument for the KDE likelihood, see KDELikelihood module for options
@@ -99,9 +99,9 @@ class CosmoLikelihood(object):
             if "z_source" in kwargs_lens:
                 if kwargs_lens["z_source"] > z_max:
                     z_max = kwargs_lens["z_source"]
-            if "z_source_2" in kwargs_lens:
-                if kwargs_lens["z_source_2"] > z_max:
-                    z_max = kwargs_lens["z_source_2"]
+            if "z_source2" in kwargs_lens:
+                if kwargs_lens["z_source2"] > z_max:
+                    z_max = kwargs_lens["z_source2"]
         self._z_max = z_max
 
     def likelihood(self, args, kwargs_cosmo_interp=None):
@@ -126,8 +126,8 @@ class CosmoLikelihood(object):
             for lens in self._kwargs_lens_list:
                 if "z_source" in lens:
                     z = lens["z_source"]
-                elif "z_source_2" in lens:
-                    z = lens["z_source_2"]
+                elif "z_source2" in lens:
+                    z = lens["z_source2"]
                 else:
                     z = 1100
                 cut = ok * (1.0 + z) ** 2 + om * (1.0 + z) ** 3 + (1.0 - om - ok)
