@@ -196,7 +196,7 @@ class TestLensLikelihood(object):
             kwargs_kin=kwargs_kin,
             kwargs_los=kwargs_los,
         )
-        assert np.nan_to_num(ln_likelihood_zero) <= -10 ** 300
+        assert np.nan_to_num(ln_likelihood_zero) <= -(10**300)
 
         ln_likelihood_kappa_ext = self.likelihood_kappa_ext.lens_log_likelihood(
             self.cosmo,
