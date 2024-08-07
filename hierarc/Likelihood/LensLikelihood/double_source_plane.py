@@ -28,13 +28,15 @@ class DSPLikelihood(object):
     ):
         """Log likelihood of the data given a model.
 
-        :param beta_dsp: scaled deflection angles alpha_1 / alpha_2 as ratio
-         between z_source and z_source2 source planes
+        :param beta_dsp: scaled deflection angles alpha_1 / alpha_2 as ratio between
+            z_source and z_source2 source planes
         :param gamma_pl: power-law density slope of main deflector (=2 being isothermal)
         :param lambda_mst: mass-sheet transform at the main deflector
         :return: log likelihood of data given model
         """
-        theta_E_ratio = beta2theta_e_ratio(beta_dsp, gamma_pl=gamma_pl, lambda_mst=lambda_mst)
+        theta_E_ratio = beta2theta_e_ratio(
+            beta_dsp, gamma_pl=gamma_pl, lambda_mst=lambda_mst
+        )
         log_l = -0.5 * ((theta_E_ratio - self._beta_dspl) / self._sigma_beta_dspl) ** 2
         if self._normalized:
             log_l -= 1 / 2.0 * np.log(2 * np.pi * self._sigma_beta_dspl**2)
@@ -67,13 +69,13 @@ def beta_double_source_plane(z_lens, z_source_1, z_source_2, cosmo):
 
 
 def beta2theta_e_ratio(beta_dsp, gamma_pl=2, lambda_mst=1):
-    """
-    calculates Einstein radii ratio for a power-law + MST profile with given parameters
+    """Calculates Einstein radii ratio for a power-law + MST profile with given
+    parameters.
 
-    :param beta_dsp: scaled deflection angles alpha_1 / alpha_2 as ratio
-     between z_source and z_source2 source planes
+    :param beta_dsp: scaled deflection angles alpha_1 / alpha_2 as ratio between
+        z_source and z_source2 source planes
     :param gamma_pl: power-law density slope of main deflector (=2 being isothermal)
     :param lambda_mst: mass-sheet transform at the main deflector
     :return: theta_E1 / theta_E2
     """
-    return (beta_dsp - (1 - lambda_mst) * (1 - beta_dsp)) ** (1/(gamma_pl - 1))
+    return (beta_dsp - (1 - lambda_mst) * (1 - beta_dsp)) ** (1 / (gamma_pl - 1))

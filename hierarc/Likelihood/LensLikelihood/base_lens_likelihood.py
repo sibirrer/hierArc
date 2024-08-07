@@ -1,6 +1,8 @@
 __author__ = "sibirrer"
 
-from hierarc.Likelihood.LensLikelihood.double_source_plane import beta_double_source_plane
+from hierarc.Likelihood.LensLikelihood.double_source_plane import (
+    beta_double_source_plane,
+)
 
 LIKELIHOOD_TYPES = [
     "DdtGaussian",
@@ -102,7 +104,9 @@ class LensLikelihoodBase(object):
                 DdtHistLikelihood,
             )
 
-            self._lens_type = DdtHistLikelihood(z_lens, z_source, normalized=normalized, **kwargs_likelihood)
+            self._lens_type = DdtHistLikelihood(
+                z_lens, z_source, normalized=normalized, **kwargs_likelihood
+            )
         elif likelihood_type == "DdtHistKDE":
             from hierarc.Likelihood.LensLikelihood.ddt_hist_likelihood import (
                 DdtHistKDELikelihood,
@@ -146,7 +150,10 @@ class LensLikelihoodBase(object):
 
             self._lens_type = TDMagMagnitudeLikelihood(**kwargs_likelihood)
         elif likelihood_type == "DSPL":
-            from hierarc.Likelihood.LensLikelihood.double_source_plane import DSPLikelihood
+            from hierarc.Likelihood.LensLikelihood.double_source_plane import (
+                DSPLikelihood,
+            )
+
             self._lens_type = DSPLikelihood(normalized=normalized, **kwargs_likelihood)
         else:
             raise ValueError(
@@ -162,8 +169,15 @@ class LensLikelihoodBase(object):
         return self._lens_type.num_data
 
     def log_likelihood(
-        self, ddt, dd, beta_dsp=None, kin_scaling=None, sigma_v_sys_error=None, mu_intrinsic=None,
-        gamma_pl=None, lambda_mst=None
+        self,
+        ddt,
+        dd,
+        beta_dsp=None,
+        kin_scaling=None,
+        sigma_v_sys_error=None,
+        mu_intrinsic=None,
+        gamma_pl=None,
+        lambda_mst=None,
     ):
         """
 
@@ -201,7 +215,9 @@ class LensLikelihoodBase(object):
         elif self.likelihood_type in ["TDMag", "TDMagMagnitude"]:
             return self._lens_type.log_likelihood(ddt=ddt, mu_intrinsic=mu_intrinsic)
         elif self.likelihood_type in ["DSPL"]:
-            return self._lens_type.log_likelihood(beta_dsp=beta_dsp, gamma_pl=gamma_pl, lambda_mst=lambda_mst)
+            return self._lens_type.log_likelihood(
+                beta_dsp=beta_dsp, gamma_pl=gamma_pl, lambda_mst=lambda_mst
+            )
         else:
             raise ValueError(
                 "likelihood type %s not fully supported." % self.likelihood_type
@@ -249,14 +265,18 @@ class LensLikelihoodBase(object):
 
     def beta_dsp(self, cosmo):
         """Model prediction of ratio of Einstein radii theta_E_1 / theta_E_2 or scaled
-        deflection angles. Only computes it when likelihood is DSP
+        deflection angles. Only computes it when likelihood is DSP.
 
         :param cosmo: ~astropy.cosmology instance
         :return: beta
         """
         if self.likelihood_type == "DSPL":
-            beta = beta_double_source_plane(z_lens=self.z_lens, z_source_1=self.z_source, z_source_2=self.z_source2,
-                                            cosmo=cosmo)
+            beta = beta_double_source_plane(
+                z_lens=self.z_lens,
+                z_source_1=self.z_source,
+                z_source_2=self.z_source2,
+                cosmo=cosmo,
+            )
         else:
             beta = None
         return beta

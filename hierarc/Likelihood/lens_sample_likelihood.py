@@ -23,7 +23,9 @@ class LensSampleLikelihood(object):
         self._gamma_pl_num = 0
         gamma_pl_index = 0
 
-        gamma_pl_global_sampling = kwargs_global_model.get("gamma_pl_global_sampling", False)
+        gamma_pl_global_sampling = kwargs_global_model.get(
+            "gamma_pl_global_sampling", False
+        )
 
         for kwargs_lens in kwargs_lens_list:
             gamma_pl_index_ = None
@@ -37,7 +39,11 @@ class LensSampleLikelihood(object):
                 kwargs_global_model=kwargs_global_model, kwargs_lens=kwargs_lens
             )
             self._lens_list.append(
-                LensLikelihood(gamma_pl_index=gamma_pl_index_, normalized=normalized, **kwargs_lens_)
+                LensLikelihood(
+                    gamma_pl_index=gamma_pl_index_,
+                    normalized=normalized,
+                    **kwargs_lens_
+                )
             )
 
     def log_likelihood(
