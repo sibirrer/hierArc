@@ -223,19 +223,22 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         kwargs_los=None,
         cosmo=None,
     ):
-        """Log likelihood of the data of a lens given a model (defined with hyperparameters) and cosmological distances.
+        """Log likelihood of the data of a lens given a model (defined with
+        hyperparameters) and cosmological distances.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param delta_lum_dist: relative luminosity distance to pivot redshift
-        :param beta_dsp: Model prediction of ratio of Einstein radii theta_E_1 / theta_E_2
+        :param beta_dsp: Model prediction of ratio of Einstein radii theta_E_1 /
+            theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
         :param cosmo: ~astropy.cosmology instance
-        :return: log likelihood given the single lens analysis for the given hyperparameter
+        :return: log likelihood given the single lens analysis for the given
+            hyperparameter
         """
         kwargs_lens = self._kwargs_init(kwargs_lens)
         kwargs_kin = self._kwargs_init(kwargs_kin)
@@ -296,7 +299,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param delta_lum_dist: relative luminosity distance to pivot redshift
-        :param beta_dsp: Model prediction of ratio of Einstein radii theta_E_1 / theta_E_2
+        :param beta_dsp: Model prediction of ratio of Einstein radii theta_E_1 /
+            theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
         :param kwargs_source: keyword arguments of source brightness

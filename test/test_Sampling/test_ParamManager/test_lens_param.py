@@ -78,7 +78,7 @@ class TestLensParam(object):
             "alpha_lambda": 0.1,
             "beta_lambda": 0.1,
             "gamma_pl_list": [2, 2.5],
-            "gamma_pl_mean": 2.,
+            "gamma_pl_mean": 2.0,
             "gamma_pl_sigma": 0.1,
         }
         args = self._param.kwargs2args(kwargs)
