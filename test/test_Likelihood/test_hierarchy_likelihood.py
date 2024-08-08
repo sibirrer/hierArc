@@ -318,12 +318,13 @@ class TestLensLikelihood(object):
         magnitude_measured = magnification_model * amp_int
         magnitude_measured_cov = np.diag((magnitude_measured / 10) ** 2)
 
-        kwargs_likelihood = {"amp_measured": magnitude_measured,
+        kwargs_likelihood = {
+            "amp_measured": magnitude_measured,
             "cov_amp_measured": magnitude_measured_cov,
             "magnification_model": magnification_model,
             "cov_magnification_model": magnification_model_cov,
-            "magnitude_zero_point": magnitude_zero_point}
-
+            "magnitude_zero_point": magnitude_zero_point,
+        }
 
         likelihood = LensLikelihood(
             z_lens=z_lens,
