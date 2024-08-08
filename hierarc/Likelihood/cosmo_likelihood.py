@@ -33,10 +33,10 @@ class CosmoLikelihood(object):
         :param kwargs_model: model settings for ParamManager() class
         :type kwargs_model: dict
         :param kwargs_bounds: keyword arguments of the lower and upper bounds and parameters that are held fixed.
-        Includes:
-        'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
-        'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
-        'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
+         Includes:
+         'kwargs_lower_lens', 'kwargs_upper_lens', 'kwargs_fixed_lens',
+         'kwargs_lower_kin', 'kwargs_upper_kin', 'kwargs_fixed_kin'
+         'kwargs_lower_cosmo', 'kwargs_upper_cosmo', 'kwargs_fixed_cosmo'
         :param KDE_likelihood_chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density
          estimator
         :param kwargs_kde_likelihood: keyword argument for the KDE likelihood, see KDELikelihood module for options
@@ -99,9 +99,9 @@ class CosmoLikelihood(object):
             if "z_source" in kwargs_lens:
                 if kwargs_lens["z_source"] > z_max:
                     z_max = kwargs_lens["z_source"]
-            if "z_source_2" in kwargs_lens:
-                if kwargs_lens["z_source_2"] > z_max:
-                    z_max = kwargs_lens["z_source_2"]
+            if "z_source2" in kwargs_lens:
+                if kwargs_lens["z_source2"] > z_max:
+                    z_max = kwargs_lens["z_source2"]
         self._z_max = z_max
 
     def likelihood(self, args, kwargs_cosmo_interp=None):
@@ -124,10 +124,10 @@ class CosmoLikelihood(object):
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo["h0"], kwargs_cosmo["ok"], kwargs_cosmo["om"]
             for lens in self._kwargs_lens_list:
-                if "z_source" in lens:
+                if "z_source2" in lens:
+                    z = lens["z_source2"]
+                elif "z_source" in lens:
                     z = lens["z_source"]
-                elif "z_source_2" in lens:
-                    z = lens["z_source_2"]
                 else:
                     z = 1100
                 cut = ok * (1.0 + z) ** 2 + om * (1.0 + z) ** 3 + (1.0 - om - ok)
@@ -174,11 +174,10 @@ class CosmoLikelihood(object):
         """
 
         :param kwargs_cosmo: cosmology parameter keyword argument list
-        :return: astropy.cosmology (or equivalent interpolation scheme class)
+        :return: ~astropy.cosmology (or equivalent interpolation scheme class)
         """
-        if hasattr(kwargs_cosmo, "ang_diameter_distances") and hasattr(
-            kwargs_cosmo, "redshifts"
-        ):
+        print(kwargs_cosmo, "test kwargs_cosmo")
+        if "ang_diameter_distances" in kwargs_cosmo and "redshifts" in kwargs_cosmo:
             # in that case we use directly the interpolation mode to approximate angular diameter distances
             cosmo = CosmoInterp(
                 ang_dist_list=kwargs_cosmo["ang_diameter_distances"],

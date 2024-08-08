@@ -3,6 +3,7 @@ from astropy.cosmology import FlatLambdaCDM
 import pytest
 import numpy as np
 import numpy.testing as npt
+from lenstronomy.Util.data_util import magnitude2cps
 
 
 class TestLensLikelihood(object):
@@ -199,7 +200,7 @@ class TestLensLikelihood(object):
             kwargs_kin=kwargs_kin,
             kwargs_los=kwargs_los,
         )
-        assert ln_likelihood_zero == -np.inf
+        assert np.nan_to_num(ln_likelihood_zero) <= -(10**300)
 
         ln_likelihood_kappa_ext = self.likelihood_kappa_ext.lens_log_likelihood(
             self.cosmo,
@@ -279,6 +280,66 @@ class TestLensLikelihood(object):
         # )
 
         # assert ln_likelihood < -10000000
+
+    def test_lum_dist_likelihood(self):
+        "Mag"
+        kwargs_model = {}
+        z_lens, z_source = 0.2, 0.5
+        mu_sne = 10
+        z_apparent_m_anchor = 0.2
+        kwargs_source = {"mu_sne": mu_sne, "z_apparent_m_anchor": z_apparent_m_anchor}
+
+        cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)
+        angular_diameter_distances = np.maximum(
+            np.nan_to_num(cosmo.angular_diameter_distance(z_source).value),
+            0.00001,
+        )
+        lum_dists = 5 * np.log10(
+            (1 + z_source) * (1 + z_source) * angular_diameter_distances
+        )
+
+        z_anchor = z_apparent_m_anchor
+        ang_dist_anchor = np.maximum(
+            np.nan_to_num(cosmo.angular_diameter_distance(z_anchor).value), 0.00001
+        )
+        lum_dist_anchor = 5 * np.log10(
+            (1 + z_anchor) * (1 + z_anchor) * ang_dist_anchor
+        )
+        delta_lum_dist = lum_dists - lum_dist_anchor
+
+        mag_source = mu_sne + delta_lum_dist
+        num = 4
+        magnitude_intrinsic = mag_source
+        magnitude_zero_point = 20
+
+        amp_int = magnitude2cps(
+            magnitude=magnitude_intrinsic, magnitude_zero_point=magnitude_zero_point
+        )
+        magnification_model = np.ones(num)
+        magnification_model_cov = np.diag((magnification_model / 10) ** 2)
+
+        magnitude_measured = magnification_model * amp_int
+        magnitude_measured_cov = np.diag((magnitude_measured / 10) ** 2)
+
+        kwargs_likelihood = {
+            "amp_measured": magnitude_measured,
+            "cov_amp_measured": magnitude_measured_cov,
+            "magnification_model": magnification_model,
+            "cov_magnification_model": magnification_model_cov,
+            "magnitude_zero_point": magnitude_zero_point,
+        }
+
+        likelihood = LensLikelihood(
+            z_lens=z_lens,
+            z_source=z_source,
+            name="name",
+            likelihood_type="Mag",
+            num_distribution_draws=100,
+            **kwargs_likelihood,
+            **kwargs_model
+        )
+        log_l = likelihood.lens_log_likelihood(cosmo=cosmo, kwargs_source=kwargs_source)
+        npt.assert_almost_equal(log_l, -24, decimal=0)
 
 
 if __name__ == "__main__":

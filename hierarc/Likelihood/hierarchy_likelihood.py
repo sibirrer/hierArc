@@ -44,6 +44,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         alpha_log_m2l_sampling=False,
         log_scatter=False,
         gamma_pl_index=None,
+        gamma_pl_global_sampling=False,
+        gamma_pl_global_dist="NONE",
         # kinematic model quantities
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
@@ -92,6 +94,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
          lambda_mst = lambda_mst_global + beta * lambda_scaling_property_beta
         :param gamma_pl_index: index of gamma_pl parameter associated with this lens
         :type gamma_pl_index: int or None
+        :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
+        :type gamma_pl_global_sampling: bool
+        :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
@@ -150,6 +155,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_min=kwargs_min,
             kwargs_max=kwargs_max,
             gamma_pl_index=gamma_pl_index,
+            gamma_pl_global_sampling=gamma_pl_global_sampling,
+            gamma_pl_global_dist=gamma_pl_global_dist,
         )
 
         self._aniso_distribution = AnisotropyDistribution(
@@ -185,6 +192,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
         ddt, dd = self.angular_diameter_distances(cosmo)
+        beta_dsp = self.beta_dsp(cosmo)
         kwargs_source = self._kwargs_init(kwargs_source)
         z_apparent_m_anchor = kwargs_source.get("z_apparent_m_anchor", 0.1)
         delta_lum_dist = self.luminosity_distance_modulus(cosmo, z_apparent_m_anchor)
@@ -194,39 +202,43 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             ddt,
             dd,
             delta_lum_dist,
+            beta_dsp=beta_dsp,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
             kwargs_source=kwargs_source,
             kwargs_los=kwargs_los,
             cosmo=cosmo,
         )
-        return a
+        return np.nan_to_num(a)
 
     def hyper_param_likelihood(
         self,
         ddt,
         dd,
         delta_lum_dist,
+        beta_dsp=None,
         kwargs_lens=None,
         kwargs_kin=None,
         kwargs_source=None,
         kwargs_los=None,
         cosmo=None,
     ):
-        """Log likelihood of the data of a lens given a model (defined with hyper-
-        parameters) and cosmological distances.
+        """Log likelihood of the data of a lens given a model (defined with
+        hyperparameters) and cosmological distances.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param delta_lum_dist: relative luminosity distance to pivot redshift
-        :param kwargs_lens: keywords of the hyper parameters of the lens model
-        :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :param beta_dsp: Model prediction of ratio of Einstein radii theta_E_1 /
+            theta_E_2
+        :param kwargs_lens: keywords of the hyperparameters of the lens model
+        :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
-        :param cosmo: astropy.cosmology instance
-        :return: log likelihood given the single lens analysis for the given hyper
-            parameter
+        :param cosmo: ~astropy.cosmology instance
+        :return: log likelihood given the single lens analysis for the given
+            hyperparameter
         """
         kwargs_lens = self._kwargs_init(kwargs_lens)
         kwargs_kin = self._kwargs_init(kwargs_kin)
@@ -241,10 +253,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                 ddt,
                 dd,
                 delta_lum_dist,
-                kwargs_lens,
-                kwargs_kin_copy,
-                kwargs_source,
-                kwargs_los,
+                beta_dsp=beta_dsp,
+                kwargs_lens=kwargs_lens,
+                kwargs_kin=kwargs_kin_copy,
+                kwargs_source=kwargs_source,
+                kwargs_los=kwargs_los,
                 sigma_v_sys_error=sigma_v_sys_error,
             )
         else:
@@ -254,10 +267,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                     ddt,
                     dd,
                     delta_lum_dist,
-                    kwargs_lens,
-                    kwargs_kin_copy,
-                    kwargs_source,
-                    kwargs_los,
+                    beta_dsp=beta_dsp,
+                    kwargs_lens=kwargs_lens,
+                    kwargs_kin=kwargs_kin_copy,
+                    kwargs_source=kwargs_source,
+                    kwargs_los=kwargs_los,
                     sigma_v_sys_error=sigma_v_sys_error,
                 )
                 exp_logl = np.exp(logl)
@@ -272,6 +286,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         ddt,
         dd,
         delta_lum_dist,
+        beta_dsp,
         kwargs_lens,
         kwargs_kin,
         kwargs_source,
@@ -279,11 +294,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         sigma_v_sys_error=None,
     ):
         """Log likelihood of the data of a lens given a specific model (as a draw from
-        hyper-parameters) and cosmological distances.
+        hyperparameters) and cosmological distances.
 
         :param ddt: time-delay distance
         :param dd: angular diameter distance to the deflector
         :param delta_lum_dist: relative luminosity distance to pivot redshift
+        :param beta_dsp: Model prediction of ratio of Einstein radii theta_E_1 /
+            theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
         :param kwargs_source: keyword arguments of source brightness
@@ -298,6 +315,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_lens_draw["lambda_mst"],
             kwargs_lens_draw["gamma_ppn"],
         )
+        gamma_pl = kwargs_lens_draw.get("gamma_pl", 2)
         kappa_ext = self._los.draw_los(kwargs_los)
 
         # draw intrinsic source magnitude
@@ -316,19 +334,24 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         lnlikelihood = self.log_likelihood(
             ddt_,
             dd_,
+            beta_dsp=beta_dsp,
             kin_scaling=kin_scaling,
             sigma_v_sys_error=sigma_v_sys_error,
             mu_intrinsic=mag_source_,
+            gamma_pl=gamma_pl,
+            lambda_mst=lambda_mst,
         )
         lnlikelihood += self._prior.log_likelihood(kwargs_param)
-        return np.nan_to_num(lnlikelihood)
+        return lnlikelihood
 
     def angular_diameter_distances(self, cosmo):
         """Time-delay distance Ddt, angular diameter distance to the lens (dd)
 
         :param cosmo: astropy.cosmology instance (or equivalent with interpolation)
-        :return: ddt, dd, ds in units physical Mpc
+        :return: ddt, dd in units physical Mpc
         """
+        if self.likelihood_type in ["DSPL"]:
+            return 0, 0  # just returns some random numbers as not being used
         dd = cosmo.angular_diameter_distance(z=self._z_lens).value
         ds = cosmo.angular_diameter_distance(z=self._z_source).value
         dds = cosmo.angular_diameter_distance_z1z2(
@@ -348,6 +371,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param z_apparent_m_anchor: redshift of pivot/anchor at which the apparent SNe brightness is defined relative to
         :return: lum_dist(z_source) - lum_dist(z_pivot)
         """
+        if self.likelihood_type not in ["Mag", "TDMag", "TDMagMagnitude"]:
+            return 0
         angular_diameter_distances = np.maximum(
             np.nan_to_num(cosmo.angular_diameter_distance(self._z_source).value),
             0.00001,
@@ -381,11 +406,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         a_ani_sigma = kwargs_kin.get("a_ani_sigma", 0)
         beta_inf_sigma = kwargs_kin.get("beta_inf_sigma", 0)
         sne_sigma = kwargs_source.get("sigma_sne", 0)
+        gamma_pl_sigma = kwargs_lens.get("gamma_pl_sigma", 0)
         if (
             a_ani_sigma == 0
             and lambda_mst_sigma == 0
             and beta_inf_sigma == 0
             and sne_sigma == 0
+            and gamma_pl_sigma == 0
             and not draw_kappa_bool
         ):
             return True

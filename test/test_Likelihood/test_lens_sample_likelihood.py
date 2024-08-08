@@ -85,8 +85,8 @@ class TestLensLikelihood(object):
         kwargs_lens_list = [
             {
                 "z_lens": zl,
-                "z_source_1": zs1,
-                "z_source_2": zs2,
+                "z_source": zs1,
+                "z_source2": zs2,
                 "beta_dspl": beta,
                 "sigma_beta_dspl": sigma_beta,
                 "likelihood_type": "DSPL",

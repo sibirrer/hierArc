@@ -11,6 +11,8 @@ class TestLensParam(object):
             lambda_ifu_distribution="GAUSSIAN",
             alpha_lambda_sampling=True,
             beta_lambda_sampling=True,
+            gamma_pl_global_sampling=True,
+            gamma_pl_global_dist="GAUSSIAN",
             kwargs_fixed={},
             gamma_pl_num=2,
         )
@@ -22,6 +24,8 @@ class TestLensParam(object):
             "lambda_ifu_sigma": 0.2,
             "alpha_lambda": 0,
             "beta_lambda": 0,
+            "gamma_pl_mean": 2,
+            "gamma_pl_sigma": 0.1,
         }
         self._param_fixed = LensParam(
             lambda_mst_sampling=True,
@@ -30,6 +34,8 @@ class TestLensParam(object):
             lambda_ifu_distribution="GAUSSIAN",
             alpha_lambda_sampling=True,
             beta_lambda_sampling=True,
+            gamma_pl_global_sampling=True,
+            gamma_pl_global_dist="GAUSSIAN",
             kwargs_fixed=kwargs_fixed,
         )
         self._param_log_scatter = LensParam(
@@ -39,20 +45,22 @@ class TestLensParam(object):
             lambda_ifu_distribution="GAUSSIAN",
             alpha_lambda_sampling=True,
             beta_lambda_sampling=True,
+            gamma_pl_global_sampling=True,
+            gamma_pl_global_dist="GAUSSIAN",
             log_scatter=True,
             kwargs_fixed={},
         )
 
     def test_param_list(self):
         param_list = self._param.param_list(latex_style=False)
-        assert len(param_list) == 8
+        assert len(param_list) == 10
         param_list = self._param.param_list(latex_style=True)
-        assert len(param_list) == 8
+        assert len(param_list) == 10
 
         param_list = self._param_log_scatter.param_list(latex_style=False)
-        assert len(param_list) == 6
+        assert len(param_list) == 8
         param_list = self._param_log_scatter.param_list(latex_style=True)
-        assert len(param_list) == 6
+        assert len(param_list) == 8
 
         param_list = self._param_fixed.param_list(latex_style=False)
         assert len(param_list) == 0
@@ -70,6 +78,8 @@ class TestLensParam(object):
             "alpha_lambda": 0.1,
             "beta_lambda": 0.1,
             "gamma_pl_list": [2, 2.5],
+            "gamma_pl_mean": 2.0,
+            "gamma_pl_sigma": 0.1,
         }
         args = self._param.kwargs2args(kwargs)
         print(args, "test args")

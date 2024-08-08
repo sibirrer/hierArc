@@ -19,9 +19,9 @@ class MagnificationLikelihood(object):
 
         :param amp_measured: array, amplitudes of measured fluxes of image positions
         :param cov_amp_measured: 2d array, error covariance matrix of the measured amplitudes, in linear space
-        for given magnitude zero point
+         for given magnitude zero point
         :param magnitude_zero_point: magnitude zero point for which the image amplitudes and covariance matrix are
-        defined
+         defined
         :param magnification_model: mean magnification of the model prediction (array with number of images)
         :param cov_magnification_model: 2d array (image amplitudes); model lensing magnification covariances
         """

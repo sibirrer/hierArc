@@ -23,6 +23,8 @@ class LensDistribution(object):
         kwargs_min=None,
         kwargs_max=None,
         gamma_pl_index=None,
+        gamma_pl_global_sampling=False,
+        gamma_pl_global_dist="NONE",
     ):
         """
 
@@ -55,6 +57,9 @@ class LensDistribution(object):
         :type kwargs_max: dict or None
         :param gamma_pl_index: index of gamma_pl parameter associated with this lens
         :type gamma_pl_index: int or None
+        :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
+        :type gamma_pl_global_sampling: bool
+        :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
         """
         self._lambda_mst_sampling = lambda_mst_sampling
         self._lambda_mst_distribution = lambda_mst_distribution
@@ -69,6 +74,8 @@ class LensDistribution(object):
         self._mst_ifu = mst_ifu
         self._lambda_scaling_property = lambda_scaling_property
         self._lambda_scaling_property_beta = lambda_scaling_property_beta
+        self._gamma_pl_global_sampling = gamma_pl_global_sampling
+        self._gamma_pl_global_dist = gamma_pl_global_dist
 
         self._log_scatter = log_scatter
         if kwargs_max is None:
@@ -104,6 +111,8 @@ class LensDistribution(object):
         log_m2l_sigma=0,
         alpha_log_m2l=0,
         gamma_pl_list=None,
+        gamma_pl_mean=2,
+        gamma_pl_sigma=0,
     ):
         """Draws a realization of a specific model from the hyperparameter distribution.
 
@@ -128,6 +137,8 @@ class LensDistribution(object):
             lens quantity self._lambda_scaling_property
         :param gamma_pl_list: power-law density slopes as lists (for multiple lenses)
         :type gamma_pl_list: list or None
+        :param gamma_pl_mean: mean of gamma_pl of the global distribution
+        :param gamma_pl_sigma: sigma of the gamma_pl global distribution
         :return: draw from the distributions
         """
         kwargs_return = {}
@@ -178,6 +189,8 @@ class LensDistribution(object):
                     log_m2l_sigma=log_m2l_sigma,
                     alpha_log_m2l=alpha_log_m2l,
                     gamma_pl_list=gamma_pl_list,
+                    gamma_pl_mean=gamma_pl_mean,
+                    gamma_pl_sigma=gamma_pl_sigma,
                 )
             kwargs_return["gamma_in"] = gamma_in_draw
         if self._log_m2l_sampling:
@@ -206,8 +219,17 @@ class LensDistribution(object):
                     log_m2l_sigma=log_m2l_sigma,
                     alpha_log_m2l=alpha_log_m2l,
                     gamma_pl_list=gamma_pl_list,
+                    gamma_pl_mean=gamma_pl_mean,
+                    gamma_pl_sigma=gamma_pl_sigma,
                 )
             kwargs_return["log_m2l"] = log_m2l_draw
         if self._gamma_pl_model is True:
             kwargs_return["gamma_pl"] = gamma_pl_list[self._gamma_pl_index]
+        elif self._gamma_pl_global_sampling is True:
+            if self._gamma_pl_global_dist in ["GAUSSIAN"]:
+                gamma_pl_draw = np.random.normal(gamma_pl_mean, gamma_pl_sigma)
+            else:
+                gamma_pl_draw = gamma_pl_mean
+            kwargs_return["gamma_pl"] = gamma_pl_draw
+
         return kwargs_return

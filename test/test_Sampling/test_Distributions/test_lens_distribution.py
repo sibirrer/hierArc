@@ -15,6 +15,8 @@ class TestLensDistribution(object):
             "log_m2l_sampling": True,
             "log_m2l_distribution": "GAUSSIAN",
             "alpha_lambda_sampling": True,
+            "gamma_pl_global_sampling": True,
+            "gamma_pl_global_dist": "GAUSSIAN",
             "beta_lambda_sampling": True,
             "alpha_gamma_in_sampling": True,
             "alpha_log_m2l_sampling": True,
@@ -40,6 +42,8 @@ class TestLensDistribution(object):
             "log_m2l": 0.6,
             "log_m2l_sigma": 1,
             "alpha_log_m2l": -0.1,
+            "gamma_pl_mean": 2.0,
+            "gamma_pl_sigma": 0.1,
         }
 
     def test_draw_lens(self):
@@ -50,9 +54,10 @@ class TestLensDistribution(object):
 
         kwargs_sampling = copy.deepcopy(self.kwargs_sampling)
         kwargs_sampling["log_scatter"] = True
-        kwargs_sampling["lambda_ifu"] = True
+        kwargs_sampling["mst_ifu"] = True
         kwargs_sampling["gamma_in_sampling"] = False
-        lens_dist = LensDistribution(kwargs_sampling)
+        kwargs_sampling["gamma_pl_global_dist"] = "NONE"
+        lens_dist = LensDistribution(**kwargs_sampling)
         for i in range(100):
             kwargs_return = lens_dist.draw_lens(**self.kwargs_lens)
 
