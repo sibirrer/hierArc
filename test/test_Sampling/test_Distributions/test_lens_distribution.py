@@ -54,9 +54,10 @@ class TestLensDistribution(object):
 
         kwargs_sampling = copy.deepcopy(self.kwargs_sampling)
         kwargs_sampling["log_scatter"] = True
-        kwargs_sampling["lambda_ifu"] = True
+        kwargs_sampling["mst_ifu"] = True
         kwargs_sampling["gamma_in_sampling"] = False
-        lens_dist = LensDistribution(kwargs_sampling)
+        kwargs_sampling["gamma_pl_global_dist"] = "NONE"
+        lens_dist = LensDistribution(**kwargs_sampling)
         for i in range(100):
             kwargs_return = lens_dist.draw_lens(**self.kwargs_lens)
 
