@@ -99,7 +99,7 @@ class TestCosmoLikelihood(object):
 
         kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         logl_prior = cosmoL_prior.likelihood(args=args)
         npt.assert_almost_equal(logl - logl_prior, 1, decimal=8)
 

@@ -104,17 +104,22 @@ class CosmoLikelihood(object):
                     z_max = kwargs_lens["z_source2"]
         self._z_max = z_max
 
-    def likelihood(self, args, kwargs_cosmo_interp=None):
+    def likelihood(self, args, kwargs_cosmo_interp=None, verbose=False):
         """
 
         :param args: list of sampled parameters
         :param kwargs_cosmo_interp: interpolated angular diameter distances with
          'ang_diameter_distances' and 'redshifts', and optionally 'ok' and 'K' in none-flat scenarios
         :type kwargs_cosmo_interp: dict
+        :param verbose: If true, prints intermediate outputs of likelihood calculation
+        :type verbose: bool
         :return: log likelihood of the combined lenses
         """
         for i in range(0, len(args)):
             if args[i] < self._lower_limit[i] or args[i] > self._upper_limit[i]:
+                if verbose:
+                    print("Parameter %i with value %s out of range [%s, %s]" % (i, args[i], self._lower_limit[i],
+                                                                                self._upper_limit[i]))
                 return -np.inf
 
         kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los = (
@@ -135,6 +140,8 @@ class CosmoLikelihood(object):
                     return -np.inf
             # make sure that Omega_DE is not negative...
             if 1.0 - om - ok <= 0:
+                if verbose:
+                    print("curvature unphysical with 1-Om - Ok <= 0")
                 return -np.inf
         if kwargs_cosmo_interp is not None:
             kwargs_cosmo = {**kwargs_cosmo, **kwargs_cosmo_interp}
@@ -145,6 +152,7 @@ class CosmoLikelihood(object):
             kwargs_kin=kwargs_kin,
             kwargs_source=kwargs_source,
             kwargs_los=kwargs_los,
+            verbose=verbose,
         )
 
         if self._sne_evaluate is True:
@@ -176,7 +184,6 @@ class CosmoLikelihood(object):
         :param kwargs_cosmo: cosmology parameter keyword argument list
         :return: ~astropy.cosmology (or equivalent interpolation scheme class)
         """
-        print(kwargs_cosmo, "test kwargs_cosmo")
         if "ang_diameter_distances" in kwargs_cosmo and "redshifts" in kwargs_cosmo:
             # in that case we use directly the interpolation mode to approximate angular diameter distances
             cosmo = CosmoInterp(
