@@ -118,8 +118,10 @@ class CosmoLikelihood(object):
         for i in range(0, len(args)):
             if args[i] < self._lower_limit[i] or args[i] > self._upper_limit[i]:
                 if verbose:
-                    print("Parameter %i with value %s out of range [%s, %s]" % (i, args[i], self._lower_limit[i],
-                                                                                self._upper_limit[i]))
+                    print(
+                        "Parameter %i with value %s out of range [%s, %s]"
+                        % (i, args[i], self._lower_limit[i], self._upper_limit[i])
+                    )
                 return -np.inf
 
         kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los = (
