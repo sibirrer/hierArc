@@ -99,29 +99,29 @@ class TestCosmoLikelihood(object):
 
         kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
-        logl = cosmoL.likelihood(args=args)
-        logl_prior = cosmoL_prior.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
+        logl_prior = cosmoL_prior.likelihood(args=args, verbose=True)
         npt.assert_almost_equal(logl - logl_prior, 1, decimal=8)
 
         kwargs = {"h0": self.H0_true * 0.99, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs)
-        logl_sigma = cosmoL.likelihood(args=args)
+        logl_sigma = cosmoL.likelihood(args=args, verbose=True)
         npt.assert_almost_equal(logl - logl_sigma, 0.5, decimal=2)
 
         kwargs = {"h0": 100, "om": 1.0, "ok": 0.1}
         args = cosmoL.param.kwargs2args(kwargs)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl == -np.inf
 
         kwargs = {"h0": 100, "om": 0.1, "ok": -0.6}
         args = cosmoL.param.kwargs2args(kwargs)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl == -np.inf
 
         # outside the prior limit
         kwargs = {"h0": 1000, "om": 0.3, "ok": -0.1}
         args = cosmoL.param.kwargs2args(kwargs)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl == -np.inf
 
     def test_cosmo_instance(self):
@@ -232,7 +232,7 @@ class TestCosmoLikelihood(object):
         )
         kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl < 0
 
     def test_kde_likelihood_integration(self):
@@ -253,7 +253,7 @@ class TestCosmoLikelihood(object):
         )
         kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl < 0
 
 

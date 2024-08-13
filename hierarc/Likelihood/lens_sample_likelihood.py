@@ -53,6 +53,7 @@ class LensSampleLikelihood(object):
         kwargs_kin=None,
         kwargs_source=None,
         kwargs_los=None,
+        verbose=False,
     ):
         """
 
@@ -61,6 +62,8 @@ class LensSampleLikelihood(object):
         :param kwargs_kin: keyword arguments of the kinematic model
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: line of sight keyword argument list
+        :param verbose: If true, prints intermediate outputs of likelihood calculation
+        :type verbose: bool
         :return: log likelihood of the combined lenses
         """
         log_likelihood = 0
@@ -71,6 +74,7 @@ class LensSampleLikelihood(object):
                 kwargs_kin=kwargs_kin,
                 kwargs_source=kwargs_source,
                 kwargs_los=kwargs_los,
+                verbose=verbose,
             )
         return log_likelihood
 

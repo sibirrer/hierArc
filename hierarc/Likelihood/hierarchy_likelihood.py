@@ -175,16 +175,19 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         kwargs_kin=None,
         kwargs_source=None,
         kwargs_los=None,
+        verbose=False,
     ):
         """Log likelihood of the data of a lens given a model (defined with hyper-
         parameters) and cosmology.
 
         :param cosmo: astropy.cosmology instance
-        :param kwargs_lens: keywords of the hyper parameters of the lens model
-        :param kwargs_kin: keyword arguments of the kinematic model hyper parameters
+        :param kwargs_lens: keywords of the hyperparameters of the lens model
+        :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
+        :param verbose: If true, prints intermediate outputs of likelihood calculation
+        :type verbose: bool
         :return: log likelihood of the data given the model
         """
 
@@ -209,6 +212,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_los=kwargs_los,
             cosmo=cosmo,
         )
+        if verbose:
+            print("log likelihood of lens %s = %s" % (self._name, a))
         return np.nan_to_num(a)
 
     def hyper_param_likelihood(
