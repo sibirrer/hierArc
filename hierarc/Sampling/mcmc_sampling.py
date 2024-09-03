@@ -40,9 +40,6 @@ class MCMCSampler(object):
         """
 
         num_param = self.param.num_param
-        sampler = emcee.EnsembleSampler(
-            n_walkers, num_param, self.chain.likelihood, args=(), **kwargs_emcee
-        )
         mean_start = self.param.kwargs2args(**kwargs_mean_start)
         sigma_start = self.param.kwargs2args(**kwargs_sigma_start)
         p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
@@ -52,6 +49,9 @@ class MCMCSampler(object):
                 p0 = None
             else:
                 backend.reset(n_walkers, num_param)
+        sampler = emcee.EnsembleSampler(
+            n_walkers, num_param, self.chain.likelihood, args=(), **kwargs_emcee
+        )
         sampler.run_mcmc(p0, n_burn + n_run, progress=True)
 
         return sampler
