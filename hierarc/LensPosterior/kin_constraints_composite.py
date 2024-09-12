@@ -89,8 +89,8 @@ class KinConstraintsComposite(KinConstraints):
             routine
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
-        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
         :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
+        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
         :param r_s_array: array of halo scale radii in Mpc
         """
 
@@ -234,7 +234,9 @@ class KinConstraintsComposite(KinConstraints):
                     1,
                 )
 
-        random_index = np.random.randint(low=0, high=len(self._alpha_Rs_or_kappa_s_array))
+        random_index = np.random.randint(
+            low=0, high=len(self._alpha_Rs_or_kappa_s_array)
+        )
         alpha_Rs_or_kappa_s_draw = self._alpha_Rs_or_kappa_s_array[random_index]
         r_scale_angle_draw = self._r_scale_angle_array[random_index]
 
@@ -300,8 +302,8 @@ class KinConstraintsComposite(KinConstraints):
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = self.draw_lens(
-            no_error=no_error
+        alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = (
+            self.draw_lens(no_error=no_error)
         )
 
         kwargs_lens_stars = copy.deepcopy(self._kwargs_lens_light[0])
@@ -319,7 +321,9 @@ class KinConstraintsComposite(KinConstraints):
             alpha_Rs_draw = alpha_Rs_or_kappa_s_draw
         # Input is kappa_s
         else:
-            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in)
+            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(
+                alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in
+            )
 
         kwargs_lens = [
             {
@@ -375,7 +379,9 @@ class KinConstraintsComposite(KinConstraints):
             alpha_Rs_draw = alpha_Rs_or_kappa_s_draw
         # Input is kappa_s
         else:
-            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in)
+            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(
+                alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in
+            )
 
         kwargs_lens = [
             {
