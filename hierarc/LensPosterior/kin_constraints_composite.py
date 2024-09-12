@@ -156,18 +156,18 @@ class KinConstraintsComposite(KinConstraints):
         )
 
         if self._check_arrays(alpha_Rs_array, r_s_angle_array):
-            self._alpha_Rs_or_kappa_s_array = alpha_Rs_array
+            self._halo_normalization_array = alpha_Rs_array
             self._alpha_Rs_or_kappa_s_bool = True
             self._r_scale_angle_array = r_s_angle_array
         elif self._check_arrays(kappa_s_array, r_s_angle_array):
-            self._alpha_Rs_or_kappa_s_array = kappa_s_array
+            self._halo_normalization_array = kappa_s_array
             self._alpha_Rs_or_kappa_s_bool = False
             self._r_scale_angle_array = r_s_angle_array
         elif self._check_arrays(rho0_array, r_s_array):
             kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
                 rho0_array, r_s_array
             )
-            self._alpha_Rs_or_kappa_s_array = kappa_s_array
+            self._halo_normalization_array = kappa_s_array
             self._alpha_Rs_or_kappa_s_bool = False
         else:
             raise ValueError(
@@ -182,7 +182,7 @@ class KinConstraintsComposite(KinConstraints):
         self._gamma_in_prior_std = gamma_in_prior_std
 
         if not is_m2l_population_level and not self._check_arrays(
-            self._alpha_Rs_or_kappa_s_array, log_m2l_array
+            self._halo_normalization_array, log_m2l_array
         ):
             raise ValueError(
                 "log_m2l_array must have the same length as alpha_Rs_array, kappa_s_array, or rho0_array!"
@@ -220,14 +220,14 @@ class KinConstraintsComposite(KinConstraints):
         if no_error is True:
             if self._is_m2l_population_level:
                 return (
-                    np.mean(self._alpha_Rs_or_kappa_s_array),
+                    np.mean(self._halo_normalization_array),
                     np.mean(self._r_scale_angle_array),
                     self._r_eff,
                     1,
                 )
             else:
                 return (
-                    np.mean(self._alpha_Rs_or_kappa_s_array),
+                    np.mean(self._halo_normalization_array),
                     np.mean(self._r_scale_angle_array),
                     np.mean(self.log_m2l_array),
                     self._r_eff,
@@ -235,9 +235,9 @@ class KinConstraintsComposite(KinConstraints):
                 )
 
         random_index = np.random.randint(
-            low=0, high=len(self._alpha_Rs_or_kappa_s_array)
+            low=0, high=len(self._halo_normalization_array)
         )
-        alpha_Rs_or_kappa_s_draw = self._alpha_Rs_or_kappa_s_array[random_index]
+        halo_normalization_draw = self._halo_normalization_array[random_index]
         r_scale_angle_draw = self._r_scale_angle_array[random_index]
 
         # we make sure no negative r_eff are being sampled
@@ -247,11 +247,11 @@ class KinConstraintsComposite(KinConstraints):
         r_eff_draw = delta_r_eff * self._r_eff
 
         if self._is_m2l_population_level:
-            return alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
+            return halo_normalization_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
         else:
             log_m2l_draw = self.log_m2l_array[random_index]
             return (
-                alpha_Rs_or_kappa_s_draw,
+                halo_normalization_draw,
                 r_scale_angle_draw,
                 log_m2l_draw,
                 r_eff_draw,
@@ -302,7 +302,7 @@ class KinConstraintsComposite(KinConstraints):
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = (
+        halo_normalization_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = (
             self.draw_lens(no_error=no_error)
         )
 
@@ -318,11 +318,11 @@ class KinConstraintsComposite(KinConstraints):
 
         # Input is alpha_Rs
         if self._alpha_Rs_or_kappa_s_bool:
-            alpha_Rs_draw = alpha_Rs_or_kappa_s_draw
+            alpha_Rs_draw = halo_normalization_draw
         # Input is kappa_s
         else:
             alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(
-                alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in
+                halo_normalization_draw, r_scale_angle_draw, gamma_in
             )
 
         kwargs_lens = [
@@ -357,7 +357,7 @@ class KinConstraintsComposite(KinConstraints):
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         (
-            alpha_Rs_or_kappa_s_draw,
+            halo_normalization_draw,
             r_scale_angle_draw,
             log_m2l_draw,
             r_eff_draw,
@@ -376,11 +376,11 @@ class KinConstraintsComposite(KinConstraints):
 
         # Input is alpha_Rs
         if self._alpha_Rs_or_kappa_s_bool:
-            alpha_Rs_draw = alpha_Rs_or_kappa_s_draw
+            alpha_Rs_draw = halo_normalization_draw
         # Input is kappa_s
         else:
             alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(
-                alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in
+                halo_normalization_draw, r_scale_angle_draw, gamma_in
             )
 
         kwargs_lens = [
