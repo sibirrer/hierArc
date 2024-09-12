@@ -104,9 +104,13 @@ class TestKinConstraintsComposite(object):
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(**kwargs_likelihood)
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=True, **kwargs_likelihood
+        )
         kwargs_kin = {"a_ani": 1}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 1}, kwargs_kin=kwargs_kin
+        )
 
         kwargs_lens_light_test = [{"amp": [1, 1], "sigma": [1, 2]}]
         lens_light_model_list_test = ["MULTI_GAUSSIAN"]
@@ -135,8 +139,8 @@ class TestKinConstraintsComposite(object):
             **kwargs_kin_api_settings
         )
 
-        kappa_s_array = 10 ** np.random.normal(8, 0, 100) / 1e6
-        r_s_angle_array = np.random.normal(0.1, 0, 100)
+        kappa_s_array = 10 ** np.random.normal(8, 0, 10) / 1e6
+        r_s_angle_array = np.random.normal(0.1, 0, 10)
 
         kin_constraints_kappa = KinConstraintsComposite(
             z_lens=z_lens,
@@ -224,8 +228,8 @@ class TestKinConstraintsComposite(object):
         gamma_in_array = np.linspace(0.1, 2.9, 5)
         log_m2l_array = np.linspace(0.1, 1, 5)
 
-        rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
-        r_s_array = np.random.normal(0.1, 0, 100)
+        rho0_array = 10 ** np.random.normal(8, 0, 10) / 1e6
+        r_s_array = np.random.normal(0.1, 0, 10)
 
         # compute likelihood
         kin_constraints = KinConstraintsComposite(
@@ -256,9 +260,13 @@ class TestKinConstraintsComposite(object):
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(**kwargs_likelihood)
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=True, **kwargs_likelihood
+        )
         kwargs_kin = {"a_ani": 1, "beta_inf": 0.5}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 1}, kwargs_kin=kwargs_kin
+        )
 
 
 class TestKinConstraintsCompositeM2l(object):
@@ -324,9 +332,9 @@ class TestKinConstraintsCompositeM2l(object):
 
         gamma_in_array = np.linspace(0.1, 2.9, 5)
 
-        log_m2l_array = np.random.uniform(0.1, 1, 100)
-        rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
-        r_s_array = np.random.normal(0.1, 0, 100)
+        log_m2l_array = np.random.uniform(0.1, 1, 5)
+        rho0_array = 10 ** np.random.normal(8, 0, 5) / 1e6
+        r_s_array = np.random.normal(0.1, 0, 5)
 
         # compute likelihood
         kin_constraints = KinConstraintsComposite(
@@ -360,9 +368,13 @@ class TestKinConstraintsCompositeM2l(object):
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(**kwargs_likelihood)
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=False, **kwargs_likelihood
+        )
         kwargs_kin = {"a_ani": 1}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 0}, kwargs_kin=kwargs_kin
+        )
 
     def test_likelihoodconfiguration_gom(self):
         anisotropy_model = "GOM"
@@ -423,9 +435,9 @@ class TestKinConstraintsCompositeM2l(object):
 
         gamma_in_array = np.linspace(0.1, 2.9, 5)
 
-        log_m2l_array = np.random.uniform(0.1, 1, 100)
-        rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
-        r_s_array = np.random.normal(0.1, 0, 100)
+        log_m2l_array = np.random.uniform(0.1, 1, 10)
+        rho0_array = 10 ** np.random.normal(8, 0, 10) / 1e6
+        r_s_array = np.random.normal(0.1, 0, 10)
 
         # compute likelihood
         kin_constraints = KinConstraintsComposite(
@@ -455,9 +467,11 @@ class TestKinConstraintsCompositeM2l(object):
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(**kwargs_likelihood)
+        ln_class = LensLikelihood(gamma_in_sampling=True, **kwargs_likelihood)
         kwargs_kin = {"a_ani": 1, "beta_inf": 0.5}
-        ln_class.lens_log_likelihood(cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin)
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2}, kwargs_kin=kwargs_kin
+        )
 
 
 class TestRaise(unittest.TestCase):
@@ -510,8 +524,8 @@ class TestRaise(unittest.TestCase):
 
             gamma_in_array = np.linspace(0.1, 2.9, 5)
             log_m2l_array = np.linspace(0.1, 1, 5)
-            rho0_array = 10 ** np.random.normal(8, 0.2, 100) / 1e6
-            r_s_array = np.random.normal(0.1, 0.01, 100)
+            rho0_array = 10 ** np.random.normal(8, 0.2, 10) / 1e6
+            r_s_array = np.random.normal(0.1, 0.01, 10)
 
             kin_constraints = KinConstraintsComposite(
                 z_lens=z_lens,
@@ -737,9 +751,9 @@ class TestRaise(unittest.TestCase):
             kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
 
             gamma_in_array = np.linspace(0.1, 2.9, 5)
-            log_m2l_array = np.random.uniform(0.1, 1, 100)
-            rho0_array = 10 ** np.random.normal(8, 0.2, 100) / 1e6
-            r_s_array = np.random.normal(0.1, 0.01, 100)
+            log_m2l_array = np.random.uniform(0.1, 1, 10)
+            rho0_array = 10 ** np.random.normal(8, 0.2, 10) / 1e6
+            r_s_array = np.random.normal(0.1, 0.01, 10)
 
             kin_constraints = KinConstraintsComposite(
                 z_lens=z_lens,
@@ -890,9 +904,9 @@ class TestRaise(unittest.TestCase):
             kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
 
             gamma_in_array = np.linspace(0.1, 2.9, 5)
-            log_m2l_array = np.linspace(0.1, 1, 100)
-            rho0_array = 10 ** np.random.normal(8, 0.2, 100) / 1e6
-            r_s_array = np.random.normal(0.1, 0.01, 100)
+            log_m2l_array = np.linspace(0.1, 1, 10)
+            rho0_array = 10 ** np.random.normal(8, 0.2, 10) / 1e6
+            r_s_array = np.random.normal(0.1, 0.01, 10)
 
             kin_constraints = KinConstraintsComposite(
                 z_lens=z_lens,

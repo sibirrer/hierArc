@@ -15,6 +15,47 @@ class MCMCSampler(object):
         self.chain = CosmoLikelihood(*args, **kwargs)
         self.param = self.chain.param
 
+    def get_emcee_sampler(
+        self,
+        n_walkers,
+        n_burn,
+        n_run,
+        kwargs_mean_start,
+        kwargs_sigma_start,
+        continue_from_backend=False,
+        **kwargs_emcee
+    ):
+        """Runs the EMCEE MCMC sampling and returns the sampler.
+
+        :param n_walkers: number of walkers
+        :param n_burn: number of iteration of burn in (not stored in the output sample
+        :param n_run: number of iterations (after burn in) to be sampled
+        :param kwargs_mean_start: keyword arguments of the mean starting position
+        :param kwargs_sigma_start: keyword arguments of the spread in the initial
+            particles per parameter
+        :param continue_from_backend: bool, if True and 'backend' in kwargs_emcee, will
+            continue a chain sampling from backend
+        :param kwargs_emcee: keyword argument for the emcee (e.g. to specify backend)
+        :return: sampler of the EMCEE run
+        """
+
+        num_param = self.param.num_param
+        mean_start = self.param.kwargs2args(**kwargs_mean_start)
+        sigma_start = self.param.kwargs2args(**kwargs_sigma_start)
+        p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
+        backend = kwargs_emcee.get("backend", None)
+        if backend is not None:
+            if continue_from_backend:
+                p0 = None
+            else:
+                backend.reset(n_walkers, num_param)
+        sampler = emcee.EnsembleSampler(
+            n_walkers, num_param, self.chain.likelihood, args=(), **kwargs_emcee
+        )
+        sampler.run_mcmc(p0, n_burn + n_run, progress=True)
+
+        return sampler
+
     def mcmc_emcee(
         self,
         n_walkers,
@@ -25,7 +66,7 @@ class MCMCSampler(object):
         continue_from_backend=False,
         **kwargs_emcee
     ):
-        """Runs the EMCEE MCMC sampling.
+        """Runs the EMCEE MCMC sampling and returns the flat chain.
 
         :param n_walkers: number of walkers
         :param n_burn: number of iteration of burn in (not stored in the output sample
@@ -38,21 +79,15 @@ class MCMCSampler(object):
         :param kwargs_emcee: keyword argument for the emcee (e.g. to specify backend)
         :return: samples of the EMCEE run
         """
-
-        num_param = self.param.num_param
-        sampler = emcee.EnsembleSampler(
-            n_walkers, num_param, self.chain.likelihood, args=(), **kwargs_emcee
+        sampler = self.get_emcee_sampler(
+            n_walkers,
+            n_burn,
+            n_run,
+            kwargs_mean_start,
+            kwargs_sigma_start,
+            continue_from_backend=continue_from_backend,
+            **kwargs_emcee
         )
-        mean_start = self.param.kwargs2args(**kwargs_mean_start)
-        sigma_start = self.param.kwargs2args(**kwargs_sigma_start)
-        p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
-        backend = kwargs_emcee.get("backend", None)
-        if backend is not None:
-            if continue_from_backend:
-                p0 = None
-            else:
-                backend.reset(n_walkers, num_param)
-        sampler.run_mcmc(p0, n_burn + n_run, progress=True)
         flat_samples = sampler.get_chain(discard=n_burn, thin=1, flat=True)
         log_prob = sampler.get_log_prob(discard=n_burn, thin=1, flat=True)
         return flat_samples, log_prob

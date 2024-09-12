@@ -29,8 +29,8 @@ class TestLensLikelihood(object):
             self.D_dt_true, self.sigma_Ddt, num_samples
         )
         self.D_d_samples = np.random.normal(self.Dd_true, self.sigma_Dd, num_samples)
-        ani_param_array = np.linspace(0, 2, 10)
-        ani_scaling_array = np.ones_like(ani_param_array)
+        ani_param_array = [np.linspace(0, 2, 10), np.linspace(1.5, 2.5, 10)]
+        ani_scaling_array = np.ones((len(ani_param_array[0]), len(ani_param_array[1])))
         self.kwargs_lens_list = [
             {
                 "z_lens": self.z_L,
@@ -47,14 +47,17 @@ class TestLensLikelihood(object):
                 "likelihood_type": "DsDdsGaussian",
                 "ds_dds_mean": lensCosmo.ds / lensCosmo.dds,
                 "ds_dds_sigma": 1,
-                "ani_param_array": ani_param_array,
-                "ani_scaling_array": ani_scaling_array,
+                "kin_scaling_param_list": ["a_ani", "gamma_pl"],
+                "j_kin_scaling_param_axes": ani_param_array,
+                "j_kin_scaling_grid_list": [ani_scaling_array],
             },
         ]
+        kwargs_global_model = {"anisotropy_sampling": True}
+
         self.likelihood = LensSampleLikelihood(kwargs_lens_list=self.kwargs_lens_list)
 
     def test_log_likelihood(self):
-        kwargs_lens = {"kappa_ext": 0, "gamma_ppn": 1}
+        kwargs_lens = {"gamma_ppn": 1, "gamma_pl_list": [2]}
         kwargs_kin = {"a_ani": 1}
         logl = self.likelihood.log_likelihood(
             self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
@@ -82,8 +85,8 @@ class TestLensLikelihood(object):
         kwargs_lens_list = [
             {
                 "z_lens": zl,
-                "z_source_1": zs1,
-                "z_source_2": zs2,
+                "z_source": zs1,
+                "z_source2": zs2,
                 "beta_dspl": beta,
                 "sigma_beta_dspl": sigma_beta,
                 "likelihood_type": "DSPL",

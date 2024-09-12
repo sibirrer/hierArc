@@ -28,45 +28,34 @@ class TestDSPLikelihood(object):
         # make cosmo instance
         # compute beta
         dspl_likelihood = DSPLikelihood(
-            z_lens=self.zl,
-            z_source_1=self.zs1,
-            z_source_2=self.zs2,
             beta_dspl=self.beta,
             sigma_beta_dspl=self.sigma_beta,
             normalized=False,
         )
-        log_l = dspl_likelihood.lens_log_likelihood(cosmo=self.cosmo)
+
+        log_l = dspl_likelihood.log_likelihood(beta_dsp=self.beta)
         npt.assert_almost_equal(log_l, 0, decimal=5)
 
         dspl_likelihood = DSPLikelihood(
-            z_lens=self.zl,
-            z_source_1=self.zs1,
-            z_source_2=self.zs2,
             beta_dspl=self.beta - self.sigma_beta,
             sigma_beta_dspl=self.sigma_beta,
             normalized=False,
         )
-        log_l = dspl_likelihood.lens_log_likelihood(cosmo=self.cosmo)
+        log_l = dspl_likelihood.log_likelihood(beta_dsp=self.beta)
         npt.assert_almost_equal(log_l, -0.5, decimal=5)
 
         dspl_likelihood = DSPLikelihood(
-            z_lens=self.zl,
-            z_source_1=self.zs1,
-            z_source_2=self.zs2,
             beta_dspl=self.beta,
             sigma_beta_dspl=self.sigma_beta,
             normalized=True,
         )
-        log_l = dspl_likelihood.lens_log_likelihood(cosmo=self.cosmo)
+        log_l = dspl_likelihood.log_likelihood(beta_dsp=self.beta)
         npt.assert_almost_equal(
             log_l, np.log(1 / np.sqrt(2 * np.pi) / self.sigma_beta), decimal=5
         )
 
     def test_num_data(self):
         dspl_likelihood = DSPLikelihood(
-            z_lens=self.zl,
-            z_source_1=self.zs1,
-            z_source_2=self.zs2,
             beta_dspl=self.beta,
             sigma_beta_dspl=self.sigma_beta,
             normalized=False,

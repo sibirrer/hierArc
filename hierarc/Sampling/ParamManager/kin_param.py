@@ -17,8 +17,8 @@ class KinParam(object):
 
         :param anisotropy_sampling: bool, if True, makes use of this module, else ignores it's functionalities
         :param anisotropy_model: string, name of anisotropy model to consider
-        :param distribution_function: string, 'NONE', 'GAUSSIAN', description of the distribution function of the
-        anisotropy model parameters
+        :param distribution_function: string, 'NONE', 'GAUSSIAN', 'GAUSSIAN_SCALED', description of the distribution
+         function of the anisotropy model parameters
         :param sigma_v_systematics: bool, if True samples parameters relative to systematics in the velocity dispersion
          measurement
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
@@ -49,7 +49,7 @@ class KinParam(object):
                         list.append(r"$\langle a_{\rm ani}\rangle$")
                     else:
                         list.append("a_ani")
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "a_ani_sigma" not in self._kwargs_fixed:
                         if latex_style is True:
                             if self._log_scatter is True:
@@ -64,7 +64,7 @@ class KinParam(object):
                         list.append(r"$\beta_{\infty}$")
                     else:
                         list.append("beta_inf")
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "beta_inf_sigma" not in self._kwargs_fixed:
                         if latex_style is True:
                             if self._log_scatter is True:
@@ -99,7 +99,7 @@ class KinParam(object):
                 else:
                     kwargs["a_ani"] = args[i]
                     i += 1
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "a_ani_sigma" in self._kwargs_fixed:
                         kwargs["a_ani_sigma"] = self._kwargs_fixed["a_ani_sigma"]
                     else:
@@ -114,7 +114,7 @@ class KinParam(object):
                 else:
                     kwargs["beta_inf"] = args[i]
                     i += 1
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "beta_inf_sigma" in self._kwargs_fixed:
                         kwargs["beta_inf_sigma"] = self._kwargs_fixed["beta_inf_sigma"]
                     else:
@@ -145,7 +145,7 @@ class KinParam(object):
             if self._anisotropy_model in ["OM", "GOM", "const"]:
                 if "a_ani" not in self._kwargs_fixed:
                     args.append(kwargs["a_ani"])
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "a_ani_sigma" not in self._kwargs_fixed:
                         if self._log_scatter is True:
                             args.append(np.log10(kwargs["a_ani_sigma"]))
@@ -154,7 +154,7 @@ class KinParam(object):
             if self._anisotropy_model in ["GOM"]:
                 if "beta_inf" not in self._kwargs_fixed:
                     args.append(kwargs["beta_inf"])
-                if self._distribution_function in ["GAUSSIAN"]:
+                if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                     if "beta_inf_sigma" not in self._kwargs_fixed:
                         if self._log_scatter is True:
                             args.append(np.log10(kwargs["beta_inf_sigma"]))

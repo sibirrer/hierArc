@@ -71,8 +71,11 @@ class TestGoodnessOfFit(object):
             },
             {
                 "ddt_samples": ddt_samples,
-                "kappa_pdf": kappa_pdf,
-                "kappa_bin_edges": kappa_bin_edges,
+                "los_distribution_individual": "PDF",
+                "kwargs_los_individual": {
+                    "bin_edges": kappa_bin_edges,
+                    "pdf_array": kappa_pdf,
+                },
             },
             {"ddt_samples": ddt_samples},
             {
@@ -104,18 +107,20 @@ class TestGoodnessOfFit(object):
         kwargs_lens = {"lambda_mst": 1}
         kwargs_kin = {}
         f, ax = self.goodnessofFit.plot_ddt_fit(
-            self.cosmo, kwargs_lens, kwargs_kin, redshift_trend=False
+            self.cosmo, kwargs_lens, kwargs_kin, kwargs_los=None, redshift_trend=False
         )
         plt.close()
         f, ax = self.goodnessofFit.plot_ddt_fit(
-            self.cosmo, kwargs_lens, kwargs_kin, redshift_trend=True
+            self.cosmo, kwargs_lens, kwargs_kin, kwargs_los=None, redshift_trend=True
         )
         plt.close()
 
     def test_plot_kin_fit(self):
         kwargs_lens = {"lambda_mst": 1}
         kwargs_kin = {}
-        f, ax = self.goodnessofFit.plot_kin_fit(self.cosmo, kwargs_lens, kwargs_kin)
+        f, ax = self.goodnessofFit.plot_kin_fit(
+            self.cosmo, kwargs_lens, kwargs_kin, kwargs_los=None
+        )
         plt.close()
 
     def test_plot_ifu_fit(self):
@@ -127,6 +132,7 @@ class TestGoodnessOfFit(object):
             self.cosmo,
             kwargs_lens,
             kwargs_kin,
+            kwargs_los=None,
             lens_index=self.ifu_index,
             bin_edges=1.0,
             show_legend=True,
@@ -152,12 +158,14 @@ class TestRaise(unittest.TestCase):
             f, ax = plt.subplots(1, 1, figsize=(4, 4))
             kwargs_lens = {"lambda_mst": 1}
             kwargs_kin = {}
+            kwargs_los = None
             cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.0)
             goodness_of_fit.plot_ifu_fit(
                 ax,
                 cosmo,
                 kwargs_lens,
                 kwargs_kin,
+                kwargs_los=kwargs_los,
                 lens_index=0,
                 bin_edges=1,
                 show_legend=True,
