@@ -7,6 +7,7 @@ from hierarc.LensPosterior.kin_constraints import KinConstraints
 from lenstronomy.Util import constants as const
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.LightModel.light_model import LightModel
+from lenstronomy.LensModel.Profiles.gnfw import GNFW
 
 
 class KinConstraintsComposite(KinConstraints):
@@ -16,7 +17,7 @@ class KinConstraintsComposite(KinConstraints):
         z_source,
         gamma_in_array,
         log_m2l_array,
-        kappa_s_array,
+        alpha_Rs_array,
         r_s_angle_array,
         theta_E,
         theta_E_error,
@@ -42,6 +43,7 @@ class KinConstraintsComposite(KinConstraints):
         num_kin_sampling=1000,
         multi_observations=False,
         rho0_array=None,
+        kappa_s_array=None,
         r_s_array=None,
         is_m2l_population_level=True,
     ):
@@ -152,16 +154,23 @@ class KinConstraintsComposite(KinConstraints):
             log_m2l_scaling=log_m2l_scaling,
         )
 
-        if self._check_arrays(kappa_s_array, r_s_angle_array):
-            self._kappa_s_array = kappa_s_array
+        if self._check_arrays(alpha_Rs_array, r_s_angle_array):
+            self._alpha_Rs_or_kappa_s_array = alpha_Rs_array
+            self._alpha_Rs_or_kappa_s_bool = True
+            self._r_scale_angle_array = r_s_angle_array
+        elif self._check_arrays(kappa_s_array, r_s_angle_array):
+            self._alpha_Rs_or_kappa_s_array = kappa_s_array
+            self._alpha_Rs_or_kappa_s_bool = False
             self._r_scale_angle_array = r_s_angle_array
         elif self._check_arrays(rho0_array, r_s_array):
-            self._kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
+            kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
                 rho0_array, r_s_array
             )
+            self._alpha_Rs_or_kappa_s_array = kappa_s_array
+            self._alpha_Rs_or_kappa_s_bool = False
         else:
             raise ValueError(
-                "Both kappa_s_array and r_s_angle_array, or rho0_array and r_s_array must be arrays of the same length!"
+                "Both alpha_Rs_array and r_s_angle_array, kappa_s_array and r_s_angle_array, or rho0_array and r_s_array must be arrays of the same length!"
             )
 
         self.gamma_in_array = gamma_in_array
@@ -172,10 +181,10 @@ class KinConstraintsComposite(KinConstraints):
         self._gamma_in_prior_std = gamma_in_prior_std
 
         if not is_m2l_population_level and not self._check_arrays(
-            self._kappa_s_array, log_m2l_array
+            self._alpha_Rs_or_kappa_s_array, log_m2l_array
         ):
             raise ValueError(
-                "log_m2l_array must have the same length as rho0_array or kappa_s_array!"
+                "log_m2l_array must have the same length as alpha_Rs_array, kappa_s_array, or rho0_array!"
             )
 
     @staticmethod
@@ -210,22 +219,22 @@ class KinConstraintsComposite(KinConstraints):
         if no_error is True:
             if self._is_m2l_population_level:
                 return (
-                    np.mean(self._kappa_s_array),
+                    np.mean(self._alpha_Rs_or_kappa_s_array),
                     np.mean(self._r_scale_angle_array),
                     self._r_eff,
                     1,
                 )
             else:
                 return (
-                    np.mean(self._kappa_s_array),
+                    np.mean(self._alpha_Rs_or_kappa_s_array),
                     np.mean(self._r_scale_angle_array),
                     np.mean(self.log_m2l_array),
                     self._r_eff,
                     1,
                 )
 
-        random_index = np.random.randint(low=0, high=len(self._kappa_s_array))
-        kappa_s_draw = self._kappa_s_array[random_index]
+        random_index = np.random.randint(low=0, high=len(self._alpha_Rs_or_kappa_s_array))
+        alpha_Rs_or_kappa_s_draw = self._alpha_Rs_or_kappa_s_array[random_index]
         r_scale_angle_draw = self._r_scale_angle_array[random_index]
 
         # we make sure no negative r_eff are being sampled
@@ -235,11 +244,11 @@ class KinConstraintsComposite(KinConstraints):
         r_eff_draw = delta_r_eff * self._r_eff
 
         if self._is_m2l_population_level:
-            return kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
+            return alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
         else:
             log_m2l_draw = self.log_m2l_array[random_index]
             return (
-                kappa_s_draw,
+                alpha_Rs_or_kappa_s_draw,
                 r_scale_angle_draw,
                 log_m2l_draw,
                 r_eff_draw,
@@ -290,7 +299,7 @@ class KinConstraintsComposite(KinConstraints):
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = self.draw_lens(
+        alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = self.draw_lens(
             no_error=no_error
         )
 
@@ -304,11 +313,18 @@ class KinConstraintsComposite(KinConstraints):
         for kwargs in kwargs_light:
             kwargs["sigma"] *= delta_r_eff
 
+        # Input is alpha_Rs
+        if self._alpha_Rs_or_kappa_s_bool:
+            alpha_Rs_draw = alpha_Rs_or_kappa_s_draw
+        # Input is kappa_s
+        else:
+            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in)
+
         kwargs_lens = [
             {
                 "Rs": r_scale_angle_draw,
                 "gamma_in": gamma_in,
-                "kappa_s": kappa_s_draw,
+                "alpha_Rs": alpha_Rs_draw,
                 "center_x": 0,
                 "center_y": 0,
             },
@@ -336,7 +352,7 @@ class KinConstraintsComposite(KinConstraints):
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         (
-            kappa_s_draw,
+            alpha_Rs_or_kappa_s_draw,
             r_scale_angle_draw,
             log_m2l_draw,
             r_eff_draw,
@@ -353,11 +369,18 @@ class KinConstraintsComposite(KinConstraints):
         for kwargs in kwargs_light:
             kwargs["sigma"] *= delta_r_eff
 
+        # Input is alpha_Rs
+        if self._alpha_Rs_or_kappa_s_bool:
+            alpha_Rs_draw = alpha_Rs_or_kappa_s_draw
+        # Input is kappa_s
+        else:
+            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(alpha_Rs_or_kappa_s_draw, r_scale_angle_draw, gamma_in)
+
         kwargs_lens = [
             {
                 "Rs": r_scale_angle_draw,
                 "gamma_in": gamma_in,
-                "kappa_s": kappa_s_draw,
+                "alpha_Rs": alpha_Rs_draw,
                 "center_x": 0,
                 "center_y": 0,
             },
