@@ -55,7 +55,7 @@ class KinConstraintsComposite(KinConstraints):
         :param log_m2l_array: array of log10(mass-to-light ratios) of the stellar component,
             needs to be in the unit/scaling such that m2l / sigma_crit * amp in the
             kwargs_lens_light provides the convergence amplitude of the stars
-        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
+        :param alpha_Rs_array: array of the deflection (angular units) at projected Rs
         :param r_s_angle_array: array of halo scale radii in arcsecond
         :param theta_E: Einstein radius (in arc seconds)
         :param theta_E_error: 1-sigma error on Einstein radius
@@ -89,6 +89,7 @@ class KinConstraintsComposite(KinConstraints):
             routine
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
+        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
         :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
         :param r_s_array: array of halo scale radii in Mpc
         """
