@@ -81,6 +81,7 @@ class TestKinConstraintsComposite(object):
             z_source=z_source,
             gamma_in_array=gamma_in_array,
             log_m2l_array=log_m2l_array,
+            alpha_Rs_array=[],
             kappa_s_array=rho0_array,
             r_s_angle_array=r_s_array,
             theta_E=theta_E,
@@ -120,6 +121,7 @@ class TestKinConstraintsComposite(object):
             z_source=z_source,
             gamma_in_array=gamma_in_array,
             log_m2l_array=log_m2l_array,
+            alpha_Rs_array=[],
             kappa_s_array=rho0_array,
             r_s_angle_array=r_s_array,
             theta_E=theta_E,
@@ -147,6 +149,7 @@ class TestKinConstraintsComposite(object):
             z_source=z_source,
             gamma_in_array=gamma_in_array,
             log_m2l_array=log_m2l_array,
+            alpha_Rs_array=[],
             kappa_s_array=[],
             r_s_angle_array=[],
             theta_E=theta_E,
@@ -237,6 +240,7 @@ class TestKinConstraintsComposite(object):
             z_source=z_source,
             gamma_in_array=gamma_in_array,
             log_m2l_array=log_m2l_array,
+            alpha_Rs_array=[],
             kappa_s_array=rho0_array,
             r_s_angle_array=r_s_array,
             theta_E=theta_E,
@@ -342,6 +346,7 @@ class TestKinConstraintsCompositeM2l(object):
             z_source=z_source,
             gamma_in_array=gamma_in_array,
             log_m2l_array=log_m2l_array,
+            alpha_Rs_array=[],
             kappa_s_array=rho0_array,
             r_s_angle_array=r_s_array,
             theta_E=theta_E,
@@ -445,6 +450,7 @@ class TestKinConstraintsCompositeM2l(object):
             z_source=z_source,
             gamma_in_array=gamma_in_array,
             log_m2l_array=log_m2l_array,
+            alpha_Rs_array=[],
             kappa_s_array=rho0_array,
             r_s_angle_array=r_s_array,
             theta_E=theta_E,
@@ -471,6 +477,221 @@ class TestKinConstraintsCompositeM2l(object):
         kwargs_kin = {"a_ani": 1, "beta_inf": 0.5}
         ln_class.lens_log_likelihood(
             cosmo, kwargs_lens={"gamma_in": 2}, kwargs_kin=kwargs_kin
+        )
+
+
+class TestKinConstraintsCompositeAlphaRs(object):
+    def setup_method(self):
+        pass
+
+    def test_likelihoodconfiguration_om(self):
+        anisotropy_model = "OM"
+        kwargs_aperture = {
+            "aperture_type": "shell",
+            "r_in": 0,
+            "r_out": 3 / 2.0,
+            "center_ra": 0.0,
+            "center_dec": 0,
+        }
+        kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
+
+        # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
+        kwargs_numerics_galkin = {
+            "interpol_grid_num": 50,  # numerical interpolation, should converge -> infinity
+            "log_integration": True,
+            # log or linear interpolation of surface brightness and mass models
+            "max_integrate": 100,
+            "min_integrate": 0.001,
+        }  # lower/upper bound of numerical integrals
+
+        # redshift
+        z_lens = 0.5
+        z_source = 1.5
+
+        cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
+        theta_E = 1.0
+        r_eff = 1
+        gamma = 2.1
+
+        kwargs_mge_light = {
+            "grid_spacing": 0.1,
+            "grid_num": 10,
+            "n_comp": 20,
+            "center_x": 0,
+            "center_y": 0,
+        }
+
+        kwargs_kin_api_settings = {
+            "multi_observations": False,
+            "kwargs_numerics_galkin": kwargs_numerics_galkin,
+            "kwargs_mge_light": kwargs_mge_light,
+            "sampling_number": 50,
+            "num_kin_sampling": 50,
+            "num_psf_sampling": 50,
+        }
+
+        kwargs_lens_light = [
+            {
+                "R_sersic": 2,
+                "amp": 1,
+                "n_sersic": 2,
+                "center_x": 0,
+                "center_y": 0,
+            }
+        ]
+        lens_light_model_list = ["SERSIC"]
+
+        gamma_in_array = np.linspace(0.1, 2.9, 5)
+        log_m2l_array = np.linspace(0.1, 1, 5)
+
+        rho0_array = np.random.normal(5, 0, 100)
+        r_s_array = np.random.normal(0.1, 0, 100)
+
+        # compute likelihood
+        kin_constraints = KinConstraintsComposite(
+            z_lens=z_lens,
+            z_source=z_source,
+            gamma_in_array=gamma_in_array,
+            log_m2l_array=log_m2l_array,
+            alpha_Rs_array=rho0_array,
+            kappa_s_array=[],
+            r_s_angle_array=r_s_array,
+            theta_E=theta_E,
+            theta_E_error=0.01,
+            gamma=gamma,
+            gamma_error=0.02,
+            r_eff=r_eff,
+            r_eff_error=0.05,
+            sigma_v_measured=[200],
+            sigma_v_error_independent=[10],
+            sigma_v_error_covariant=0,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            kwargs_lens_light=kwargs_lens_light,
+            lens_light_model_list=lens_light_model_list,
+            **kwargs_kin_api_settings
+        )
+
+        kin_constraints.draw_lens(no_error=True)
+
+        kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
+        kwargs_likelihood["normalized"] = False
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=True, **kwargs_likelihood
+        )
+        kwargs_kin = {"a_ani": 1}
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 1}, kwargs_kin=kwargs_kin
+        )
+
+
+class TestKinConstraintsCompositeAlphaRsM2l(object):
+    def setup_method(self):
+        pass
+
+    def test_likelihoodconfiguration_om(self):
+        anisotropy_model = "OM"
+        kwargs_aperture = {
+            "aperture_type": "shell",
+            "r_in": 0,
+            "r_out": 3 / 2.0,
+            "center_ra": 0.0,
+            "center_dec": 0,
+        }
+        kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
+
+        # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
+        kwargs_numerics_galkin = {
+            "interpol_grid_num": 50,  # numerical interpolation, should converge -> infinity
+            "log_integration": True,
+            # log or linear interpolation of surface brightness and mass models
+            "max_integrate": 100,
+            "min_integrate": 0.001,
+        }  # lower/upper bound of numerical integrals
+
+        # redshift
+        z_lens = 0.5
+        z_source = 1.5
+
+        cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
+        theta_E = 1.0
+        r_eff = 1
+        gamma = 2.1
+
+        kwargs_mge_light = {
+            "grid_spacing": 0.1,
+            "grid_num": 10,
+            "n_comp": 20,
+            "center_x": 0,
+            "center_y": 0,
+        }
+
+        kwargs_kin_api_settings = {
+            "multi_observations": False,
+            "kwargs_numerics_galkin": kwargs_numerics_galkin,
+            "kwargs_mge_light": kwargs_mge_light,
+            "sampling_number": 50,
+            "num_kin_sampling": 50,
+            "num_psf_sampling": 50,
+        }
+
+        kwargs_lens_light = [
+            {
+                "R_sersic": 2,
+                "amp": 1,
+                "n_sersic": 2,
+                "center_x": 0,
+                "center_y": 0,
+            }
+        ]
+        lens_light_model_list = ["SERSIC"]
+
+        gamma_in_array = np.linspace(0.1, 2.9, 5)
+
+        log_m2l_array = np.random.uniform(0.1, 1, 5)
+        rho0_array = np.random.normal(5, 0, 5)
+        r_s_array = np.random.normal(0.1, 0, 5)
+
+        # compute likelihood
+        kin_constraints = KinConstraintsComposite(
+            z_lens=z_lens,
+            z_source=z_source,
+            gamma_in_array=gamma_in_array,
+            log_m2l_array=log_m2l_array,
+            alpha_Rs_array=rho0_array,
+            kappa_s_array=[],
+            r_s_angle_array=r_s_array,
+            theta_E=theta_E,
+            theta_E_error=0.01,
+            gamma=gamma,
+            gamma_error=0.02,
+            r_eff=r_eff,
+            r_eff_error=0.05,
+            sigma_v_measured=[200],
+            sigma_v_error_independent=[10],
+            sigma_v_error_covariant=0,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            kwargs_lens_light=kwargs_lens_light,
+            lens_light_model_list=lens_light_model_list,
+            is_m2l_population_level=False,
+            gamma_in_prior_mean=2,
+            gamma_in_prior_std=0.5,
+            **kwargs_kin_api_settings
+        )
+
+        kin_constraints.draw_lens(no_error=True)
+
+        kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
+        kwargs_likelihood["normalized"] = False
+        ln_class = LensLikelihood(
+            gamma_in_sampling=True, log_m2l_sampling=False, **kwargs_likelihood
+        )
+        kwargs_kin = {"a_ani": 1}
+        ln_class.lens_log_likelihood(
+            cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 0}, kwargs_kin=kwargs_kin
         )
 
 
@@ -532,6 +753,7 @@ class TestRaise(unittest.TestCase):
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
                 log_m2l_array=log_m2l_array,
+                alpha_Rs_array=[],
                 kappa_s_array=rho0_array,
                 r_s_angle_array=r_s_array,
                 theta_E=theta_E,
@@ -609,6 +831,7 @@ class TestRaise(unittest.TestCase):
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
                 log_m2l_array=log_m2l_array,
+                alpha_Rs_array=[],
                 kappa_s_array=rho0_array,
                 r_s_angle_array=r_s_array,
                 theta_E=theta_E,
@@ -683,6 +906,7 @@ class TestRaise(unittest.TestCase):
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
                 log_m2l_array=log_m2l_array,
+                alpha_Rs_array=[],
                 kappa_s_array=[],
                 r_s_angle_array=[],
                 theta_E=theta_E,
@@ -760,6 +984,7 @@ class TestRaise(unittest.TestCase):
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
                 log_m2l_array=log_m2l_array,
+                alpha_Rs_array=[],
                 kappa_s_array=rho0_array,
                 r_s_angle_array=r_s_array,
                 theta_E=theta_E,
@@ -838,6 +1063,7 @@ class TestRaise(unittest.TestCase):
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
                 log_m2l_array=log_m2l_array,
+                alpha_Rs_array=[],
                 kappa_s_array=rho0_array,
                 r_s_angle_array=r_s_array,
                 theta_E=theta_E,
@@ -913,6 +1139,7 @@ class TestRaise(unittest.TestCase):
                 z_source=z_source,
                 gamma_in_array=gamma_in_array,
                 log_m2l_array=log_m2l_array,
+                alpha_Rs_array=[],
                 kappa_s_array=rho0_array,
                 r_s_angle_array=r_s_array,
                 theta_E=theta_E,
