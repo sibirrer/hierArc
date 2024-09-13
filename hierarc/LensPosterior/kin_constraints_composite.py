@@ -157,18 +157,18 @@ class KinConstraintsComposite(KinConstraints):
 
         if self._check_arrays(alpha_Rs_array, r_s_angle_array):
             self._halo_normalization_array = alpha_Rs_array
-            self._alpha_Rs_or_kappa_s_bool = True
+            self._is_normalization_alpha_Rs = True
             self._r_scale_angle_array = r_s_angle_array
         elif self._check_arrays(kappa_s_array, r_s_angle_array):
             self._halo_normalization_array = kappa_s_array
-            self._alpha_Rs_or_kappa_s_bool = False
+            self._is_normalization_alpha_Rs = False
             self._r_scale_angle_array = r_s_angle_array
         elif self._check_arrays(rho0_array, r_s_array):
             kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
                 rho0_array, r_s_array
             )
             self._halo_normalization_array = kappa_s_array
-            self._alpha_Rs_or_kappa_s_bool = False
+            self._is_normalization_alpha_Rs = False
         else:
             raise ValueError(
                 "Both alpha_Rs_array and r_s_angle_array, kappa_s_array and r_s_angle_array, or rho0_array and r_s_array must be arrays of the same length!"
@@ -317,7 +317,7 @@ class KinConstraintsComposite(KinConstraints):
             kwargs["sigma"] *= delta_r_eff
 
         # Input is alpha_Rs
-        if self._alpha_Rs_or_kappa_s_bool:
+        if self._is_normalization_alpha_Rs:
             alpha_Rs_draw = halo_normalization_draw
         # Input is kappa_s
         else:
@@ -375,7 +375,7 @@ class KinConstraintsComposite(KinConstraints):
             kwargs["sigma"] *= delta_r_eff
 
         # Input is alpha_Rs
-        if self._alpha_Rs_or_kappa_s_bool:
+        if self._is_normalization_alpha_Rs:
             alpha_Rs_draw = halo_normalization_draw
         # Input is kappa_s
         else:
