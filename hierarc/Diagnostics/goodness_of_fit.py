@@ -1,25 +1,31 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from hierarc.Likelihood.lens_sample_likelihood import LensSampleLikelihood
+from hierarc.Likelihood.cosmo_likelihood import CosmoLikelihood
 
 
 class GoodnessOfFit(object):
     """Class to manage goodness of fit diagnostics."""
 
-    def __init__(self, kwargs_likelihood_list):
+    def __init__(self, kwargs_likelihood_list, kwargs_model):
         """
 
         :param kwargs_likelihood_list: list of likelihood kwargs of individual lenses consistent with the
          LensLikelihood module
+        :param kwargs_model: model settings for ParamManager() class
+        :type kwargs_model: dict
         """
         self._kwargs_likelihood_list = kwargs_likelihood_list
         self._sample_likelihood = LensSampleLikelihood(
-            kwargs_likelihood_list, normalized=False
+            kwargs_likelihood_list,
+            normalized=False,
+            kwargs_global_model=kwargs_model,
         )
 
     def reduced_chi2(self, cosmo, kwargs_lens, kwargs_kin):
         """Reduced chi^2 of fit."""
-        logL = self._sample_likelihood.log_likelihood(cosmo, kwargs_lens, kwargs_kin)
+        logL = self._sample_likelihood.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
+                                                      verbose=False)
         num_data = self._sample_likelihood.num_data()
         return -logL * 2 / num_data
 

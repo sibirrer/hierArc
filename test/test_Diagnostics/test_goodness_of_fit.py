@@ -100,7 +100,7 @@ class TestGoodnessOfFit(object):
             self.kwargs_likelihood_list[i]["likelihood_type"] = likelihood_type
 
         self.goodnessofFit = GoodnessOfFit(
-            kwargs_likelihood_list=self.kwargs_likelihood_list
+            kwargs_likelihood_list=self.kwargs_likelihood_list, kwargs_model={}
         )
 
     def test_plot_ddt_fit(self):
@@ -153,7 +153,7 @@ class TestRaise(unittest.TestCase):
                 }
             ]
             goodness_of_fit = GoodnessOfFit(
-                kwargs_likelihood_list=kwargs_likelihood_list
+                kwargs_likelihood_list=kwargs_likelihood_list, kwargs_model={}
             )
             f, ax = plt.subplots(1, 1, figsize=(4, 4))
             kwargs_lens = {"lambda_mst": 1}

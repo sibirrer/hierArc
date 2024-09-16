@@ -47,7 +47,7 @@ class CosmoLikelihood(object):
          log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
         :param num_redshift_interp: int, number of redshift interpolation steps
-        :param cosmo_fixed: astropy.cosmology instance to be used and held fixed throughout the sampling
+        :param cosmo_fixed: ~astropy.cosmology instance to be used and held fixed throughout the sampling
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         """

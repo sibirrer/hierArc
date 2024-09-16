@@ -27,7 +27,9 @@ class ImageModelPosterior(object):
         :return: theta_E, gamma, r_eff, delta_r_eff
         """
         if no_error is True:
-            return self._theta_E, self._gamma, self._r_eff, 1
+            if gamma_pl is None:
+                gamma_pl = self._gamma
+            return self._theta_E, gamma_pl, self._r_eff, 1
         theta_E_draw = np.maximum(
             np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0
         )
