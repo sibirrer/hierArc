@@ -51,7 +51,7 @@ class DSPLikelihood(object):
 
 
 def beta_double_source_plane(z_lens, z_source_1, z_source_2, cosmo):
-    """Model prediction of ratio of Einstein radii theta_E_1 / theta_E_2 or scaled
+    """Model prediction of ratio of scaled
     deflection angles.
 
     :param z_lens: lens redshift
