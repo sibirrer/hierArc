@@ -256,6 +256,20 @@ class TestCosmoLikelihood(object):
         logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl < 0
 
+    def test_info(self):
+        cosmoL = CosmoLikelihood(
+            self.kwargs_likelihood_list,
+            self.cosmology,
+            self.kwargs_model,
+            self.kwargs_bounds,
+            custom_prior=None,
+            interpolate_cosmo=True,
+            num_redshift_interp=100,
+            cosmo_fixed=None,
+        )
+
+        cosmoL.info()
+
 
 if __name__ == "__main__":
     pytest.main()

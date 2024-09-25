@@ -215,3 +215,11 @@ class CosmoLikelihood(object):
             else:
                 cosmo = self._cosmo_fixed
         return cosmo
+
+    def info(self):
+        """
+        prints information about the likelihood object
+
+        :return: print statements
+        """
+        self._likelihoodLensSample.info()
