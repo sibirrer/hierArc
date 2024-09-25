@@ -341,6 +341,9 @@ class TestLensLikelihood(object):
         log_l = likelihood.lens_log_likelihood(cosmo=cosmo, kwargs_source=kwargs_source)
         npt.assert_almost_equal(log_l, -24, decimal=0)
 
+    def test_info(self):
+        self.likelihood.info()
+
 
 if __name__ == "__main__":
     pytest.main()

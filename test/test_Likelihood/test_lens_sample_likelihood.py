@@ -72,6 +72,9 @@ class TestLensLikelihood(object):
         num_data = self.likelihood.num_data()
         assert num_data == 3
 
+    def test_info(self):
+        self.likelihood.info()
+
     def test_double_source_plane(self):
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)
         zl = 0.5

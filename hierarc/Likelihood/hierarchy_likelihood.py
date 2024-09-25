@@ -168,6 +168,19 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         )
         self._prior = PriorLikelihood(prior_list=prior_list)
 
+    def info(self):
+        """
+        information about the lens
+
+        :return: print statement
+        """
+        gamma_pl_index = self._lens_distribution.gamma_pl_index
+        print("Name: ", self.name)
+        print("likelihood type: ", self.likelihood_type)
+        if gamma_pl_index is not None:
+            print("gamma_pl_index", gamma_pl_index)
+        print("========")
+
     def lens_log_likelihood(
         self,
         cosmo,
@@ -213,7 +226,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             cosmo=cosmo,
         )
         if verbose:
-            print("log likelihood of lens %s = %s" % (self._name, a))
+            print("log likelihood of lens %s = %s" % (self.name, a))
         return np.nan_to_num(a)
 
     def hyper_param_likelihood(

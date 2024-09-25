@@ -49,7 +49,7 @@ class LensLikelihoodBase(object):
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
         see individual classes for their use
         """
-        self._name = name
+        self.name = name
         self.z_lens = z_lens
         self.z_source = z_source
         self.z_source2 = z_source2

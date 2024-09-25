@@ -90,10 +90,10 @@ class LensDistribution(object):
         ), kwargs_max.get("log_m2l", np.inf)
         if gamma_pl_index is not None:
             self._gamma_pl_model = True
-            self._gamma_pl_index = gamma_pl_index
+            self.gamma_pl_index = gamma_pl_index
         else:
             self._gamma_pl_model = False
-            self._gamma_pl_index = None
+            self.gamma_pl_index = None
 
     def draw_lens(
         self,
@@ -224,7 +224,7 @@ class LensDistribution(object):
                 )
             kwargs_return["log_m2l"] = log_m2l_draw
         if self._gamma_pl_model is True:
-            kwargs_return["gamma_pl"] = gamma_pl_list[self._gamma_pl_index]
+            kwargs_return["gamma_pl"] = gamma_pl_list[self.gamma_pl_index]
         elif self._gamma_pl_global_sampling is True:
             if self._gamma_pl_global_dist in ["GAUSSIAN"]:
                 gamma_pl_draw = np.random.normal(gamma_pl_mean, gamma_pl_sigma)

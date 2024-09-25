@@ -88,6 +88,15 @@ class LensSampleLikelihood(object):
             num += lens.num_data()
         return num
 
+    def info(self):
+        """
+
+        :return:
+        """
+        print("number of lenses: ", self.num_data())
+        for lens in self._lens_list:
+            lens.info()
+
     @property
     def gamma_pl_num(self):
         """Number of power-law density slope parameters being sampled on individual
