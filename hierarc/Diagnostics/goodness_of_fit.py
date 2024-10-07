@@ -24,8 +24,9 @@ class GoodnessOfFit(object):
 
     def reduced_chi2(self, cosmo, kwargs_lens, kwargs_kin):
         """Reduced chi^2 of fit."""
-        logL = self._sample_likelihood.log_likelihood(cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin,
-                                                      verbose=False)
+        logL = self._sample_likelihood.log_likelihood(
+            cosmo=cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, verbose=False
+        )
         num_data = self._sample_likelihood.num_data()
         return -logL * 2 / num_data
 

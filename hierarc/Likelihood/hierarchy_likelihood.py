@@ -169,8 +169,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         self._prior = PriorLikelihood(prior_list=prior_list)
 
     def info(self):
-        """
-        information about the lens
+        """Information about the lens.
 
         :return: print statement
         """

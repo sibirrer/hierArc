@@ -84,7 +84,10 @@ class ParameterScalingSingleMeasurement(object):
 
             if self._dim_scaling == 1:
                 self._f_ani = interp1d(
-                    param_grid_axes[0], j_kin_scaling_grid, kind="linear", fill_value="extrapolate"
+                    param_grid_axes[0],
+                    j_kin_scaling_grid,
+                    kind="linear",
+                    fill_value="extrapolate",
                 )
             elif self._dim_scaling == 2:
                 self._f_ani = interp2d(
