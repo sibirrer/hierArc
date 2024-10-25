@@ -8,7 +8,6 @@ class TestLensDistribution(object):
 
     def setup_method(self):
         self.kwargs_sampling = {
-            "lambda_mst_sampling": True,
             "lambda_mst_distribution": "GAUSSIAN",
             "gamma_in_sampling": True,
             "gamma_in_distribution": "GAUSSIAN",

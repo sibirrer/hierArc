@@ -6,7 +6,6 @@ class LensDistribution(object):
 
     def __init__(
         self,
-        lambda_mst_sampling=False,
         lambda_mst_distribution="NONE",
         gamma_in_sampling=False,
         gamma_in_distribution="NONE",
@@ -61,7 +60,6 @@ class LensDistribution(object):
         :type gamma_pl_global_sampling: bool
         :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
         """
-        self._lambda_mst_sampling = lambda_mst_sampling
         self._lambda_mst_distribution = lambda_mst_distribution
         self._gamma_in_sampling = gamma_in_sampling
         self._gamma_in_distribution = gamma_in_distribution
@@ -94,6 +92,10 @@ class LensDistribution(object):
         else:
             self._gamma_pl_model = False
             self.gamma_pl_index = None
+        if self._lambda_mst_distribution in ["GAUSSIAN"]:
+            self._lambda_mst_sampling = True
+        else:
+            self._lambda_mst_sampling = False
 
     def draw_lens(
         self,
@@ -145,8 +147,10 @@ class LensDistribution(object):
 
         if self._mst_ifu is True:
             lambda_mst_mean_lens = lambda_ifu
+            lambda_mst_sigma_ = lambda_ifu_sigma
         else:
             lambda_mst_mean_lens = lambda_mst
+            lambda_mst_sigma_ = lambda_mst_sigma
 
         lambda_lens = (
             lambda_mst_mean_lens
@@ -156,7 +160,7 @@ class LensDistribution(object):
         lambda_mst_draw = lambda_lens
         if self._lambda_mst_sampling:
             if self._lambda_mst_distribution in ["GAUSSIAN"]:
-                lambda_mst_draw = np.random.normal(lambda_lens, lambda_ifu_sigma)
+                lambda_mst_draw = np.random.normal(lambda_lens, lambda_mst_sigma_)
 
         kwargs_return["lambda_mst"] = lambda_mst_draw
         kwargs_return["gamma_ppn"] = gamma_ppn

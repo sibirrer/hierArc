@@ -28,7 +28,7 @@ class TestLensLikelihood(object):
         kwargs_model = {
             "anisotropy_model": "OM",
             "anisotropy_sampling": True,
-            "anisotroy_distribution_function": "GAUSSIAN",
+            "anisotropy_distribution": "GAUSSIAN",
             "lambda_mst_distribution": "GAUSSIAN",
         }
         # "gamma_in_sampling" = False,

@@ -31,7 +31,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         # global distributions
         anisotropy_model="NONE",
         anisotropy_sampling=False,
-        anisotroy_distribution_function="NONE",  # make sure input is provided
+        anisotropy_distribution="NONE",  # make sure input is provided
         los_distributions=None,
         lambda_mst_distribution="NONE",
         gamma_in_sampling=False,
@@ -138,7 +138,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         )
         kwargs_min, kwargs_max = self.param_bounds_interpol()
         self._lens_distribution = LensDistribution(
-            lambda_mst_sampling=False,
             lambda_mst_distribution=lambda_mst_distribution,
             gamma_in_sampling=gamma_in_sampling,
             gamma_in_distribution=gamma_in_distribution,
@@ -158,11 +157,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             gamma_pl_global_sampling=gamma_pl_global_sampling,
             gamma_pl_global_dist=gamma_pl_global_dist,
         )
-
         self._aniso_distribution = AnisotropyDistribution(
             anisotropy_model=anisotropy_model,
             anisotropy_sampling=anisotropy_sampling,
-            distribution_function=anisotroy_distribution_function,
+            distribution_function=anisotropy_distribution,
             kwargs_anisotropy_min=kwargs_min,
             kwargs_anisotropy_max=kwargs_max,
         )
@@ -347,6 +345,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             mag_source=mag_source,
         )
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
+        #print(kwargs_kin_draw, 'test kwargs_kin_draw')
         kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
         kin_scaling = self.kin_scaling(kwargs_param)
         lnlikelihood = self.log_likelihood(

@@ -93,7 +93,8 @@ class LensSampleLikelihood(object):
 
         :return:
         """
-        print("number of lenses: ", self.num_data())
+        print("number of lenses: ", len(self._lens_list))
+        print("number of data points: ", self.num_data())
         for lens in self._lens_list:
             lens.info()
 
@@ -128,7 +129,7 @@ class LensSampleLikelihood(object):
 _input_param_list = [
     "anisotropy_model",
     "anisotropy_sampling",
-    "anisotroy_distribution_function",
+    "anisotropy_distribution",
     "los_distributions",
     "lambda_mst_distribution",
     "gamma_in_sampling",
