@@ -493,7 +493,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
             )
-            kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
+            kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin_copy)
             kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
             kin_scaling = self.kin_scaling(kwargs_param)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(
