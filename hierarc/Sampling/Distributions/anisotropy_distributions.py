@@ -1,6 +1,6 @@
 import numpy as np
 
-_SUPPORTED_DISTRIBUTIONS = ["GAUSSIAN", "GAUSSIAN_SCALED", "NONE"]
+_SUPPORTED_DISTRIBUTIONS = ["GAUSSIAN", "GAUSSIAN_SCALED", "NONE", "GAUSSIAN_TAN_RAD"]
 _SUPPORTED_MODELS = ["OM", "GOM", "const", "NONE"]
 
 
@@ -80,11 +80,14 @@ class AnisotropyDistribution(object):
                     "anisotropy parameter is out of bounds of the interpolated range!"
                 )
             # we draw a linear gaussian for 'const' anisotropy and a scaled proportional one for 'OM
-            if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
+            if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED", "GAUSSIAN_TAN_RAD"]:
                 if self._distribution_function in ["GAUSSIAN"]:
                     a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
-                else:
+                elif self._distribution_function in ["GAUSSIAN_SCALED"]:
                     a_ani_draw = np.random.normal(a_ani, a_ani_sigma * a_ani)
+                else:
+                    # convert to beta = 1 - (sigma_t/sigma_r)^2
+                    a_ani_draw = 1 - np.random.normal(a_ani, a_ani_sigma)**2
 
                 if a_ani_draw < self._a_ani_min or a_ani_draw > self._a_ani_max:
                     return self.draw_anisotropy(

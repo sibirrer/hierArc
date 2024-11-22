@@ -28,6 +28,14 @@ class TestAnisotropyDistribution(object):
             kwargs_anisotropy_max=kwargs_anisotropy_max,
         )
 
+        self._ani_dist_tan_rad = AnisotropyDistribution(
+            anisotropy_model=anisotropy_model,
+            anisotropy_sampling=True,
+            distribution_function="GAUSSIAN_TAN_RAD",
+            kwargs_anisotropy_min=kwargs_anisotropy_min,
+            kwargs_anisotropy_max=kwargs_anisotropy_max,
+        )
+
     def test_draw_anisotropy(self):
         kwargs_anisotropy = {
             "a_ani": 1,
@@ -40,6 +48,10 @@ class TestAnisotropyDistribution(object):
         assert "beta_inf" in kwargs_drawn
 
         kwargs_drawn = self._ani_dist_scaled.draw_anisotropy(**kwargs_anisotropy)
+        assert "a_ani" in kwargs_drawn
+        assert "beta_inf" in kwargs_drawn
+
+        kwargs_drawn = self._ani_dist_tan_rad.draw_anisotropy(**kwargs_anisotropy)
         assert "a_ani" in kwargs_drawn
         assert "beta_inf" in kwargs_drawn
 
