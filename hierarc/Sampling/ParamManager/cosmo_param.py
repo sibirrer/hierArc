@@ -1,4 +1,5 @@
 from astropy.cosmology import FlatLambdaCDM, FlatwCDM, LambdaCDM, w0waCDM
+from .cosmo_model import wPhiCDM
 
 
 class CosmoParam(object):
@@ -16,7 +17,7 @@ class CosmoParam(object):
             kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
         self._ppn_sampling = ppn_sampling
-        self._supported_cosmologies = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "NONE"]
+        self._supported_cosmologies = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wphiCDM", "NONE"]
         if cosmology not in self._supported_cosmologies:
             raise ValueError(
                 "cosmology %s not supported!. Please chose among %s "
@@ -36,7 +37,7 @@ class CosmoParam(object):
                     list.append(r"$H_0$")
                 else:
                     list.append("h0")
-            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
+            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wpiCDM"]:
                 if "om" not in self._kwargs_fixed:
                     if latex_style is True:
                         list.append(r"$\Omega_{\rm m}$")
@@ -65,6 +66,17 @@ class CosmoParam(object):
                         list.append(r"$\Omega_{\rm k}$")
                     else:
                         list.append("ok")
+            if self._cosmology in ["wphiCDM"]:
+                if "alpha" not in self._kwargs_fixed:
+                    if latex_style is True:
+                        list.append(r"$\alpha$")
+                    else:
+                        list.append("alpha")
+                if "w0" not in self._kwargs_fixed:
+                    if latex_style is True:
+                        list.append(r"$w_0$")
+                    else:
+                        list.append("w0")
         if self._ppn_sampling is True:
             if "gamma_ppn" not in self._kwargs_fixed:
                 if latex_style is True:
@@ -86,7 +98,7 @@ class CosmoParam(object):
             else:
                 kwargs["h0"] = args[i]
                 i += 1
-            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
+            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wpiCDM"]:
                 if "om" in self._kwargs_fixed:
                     kwargs["om"] = self._kwargs_fixed["om"]
                 else:
@@ -115,6 +127,17 @@ class CosmoParam(object):
                 else:
                     kwargs["ok"] = args[i]
                     i += 1
+            if self._cosmology in ["wphiCDM"]:
+                if "alpha" in self._kwargs_fixed:
+                    kwargs["alpha"] = self._kwargs_fixed["alpha"]
+                else:
+                    kwargs["alpha"] = args[i]
+                    i += 1
+                if "w0" in self._kwargs_fixed:
+                    kwargs["w0"] = self._kwargs_fixed["w0"]
+                else:
+                    kwargs["w0"] = args[i]
+                    i += 1
         if self._ppn_sampling is True:
             if "gamma_ppn" in self._kwargs_fixed:
                 kwargs["gamma_ppn"] = self._kwargs_fixed["gamma_ppn"]
@@ -133,7 +156,7 @@ class CosmoParam(object):
         if self._cosmology not in ["NONE"]:
             if "h0" not in self._kwargs_fixed:
                 args.append(kwargs["h0"])
-            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM"]:
+            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wpiCDM"]:
                 if "om" not in self._kwargs_fixed:
                     args.append(kwargs["om"])
             if self._cosmology in ["FwCDM"]:
@@ -147,6 +170,11 @@ class CosmoParam(object):
             if self._cosmology in ["oLCDM"]:
                 if "ok" not in self._kwargs_fixed:
                     args.append(kwargs["ok"])
+            if self._cosmology in ["wphiCDM"]:
+                if "alpha" not in self._kwargs_fixed:
+                    args.append(kwargs["alpha"])
+                if "w0" not in self._kwargs_fixed:
+                    args.append(kwargs["w0"])
         if self._ppn_sampling is True:
             if "gamma_ppn" not in self._kwargs_fixed:
                 args.append(kwargs["gamma_ppn"])
@@ -175,6 +203,13 @@ class CosmoParam(object):
                 H0=kwargs["h0"],
                 Om0=kwargs["om"],
                 Ode0=1.0 - kwargs["om"] - kwargs["ok"],
+            )
+        elif self._cosmology == "wphiCDM":
+            cosmo = wPhiCDM(
+                H0=kwargs["h0"],
+                Om0=kwargs["om"],
+                w0=kwargs["w0"],
+                alpha=kwargs["alpha"],
             )
         elif self._cosmology == "NONE":
             cosmo = None
