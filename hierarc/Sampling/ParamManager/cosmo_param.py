@@ -37,7 +37,7 @@ class CosmoParam(object):
                     list.append(r"$H_0$")
                 else:
                     list.append("h0")
-            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wpiCDM"]:
+            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wphiCDM"]:
                 if "om" not in self._kwargs_fixed:
                     if latex_style is True:
                         list.append(r"$\Omega_{\rm m}$")
@@ -98,7 +98,7 @@ class CosmoParam(object):
             else:
                 kwargs["h0"] = args[i]
                 i += 1
-            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wpiCDM"]:
+            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wphiCDM"]:
                 if "om" in self._kwargs_fixed:
                     kwargs["om"] = self._kwargs_fixed["om"]
                 else:
@@ -156,7 +156,7 @@ class CosmoParam(object):
         if self._cosmology not in ["NONE"]:
             if "h0" not in self._kwargs_fixed:
                 args.append(kwargs["h0"])
-            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wpiCDM"]:
+            if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wphiCDM"]:
                 if "om" not in self._kwargs_fixed:
                     args.append(kwargs["om"])
             if self._cosmology in ["FwCDM"]:
