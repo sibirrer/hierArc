@@ -75,7 +75,12 @@ class AnisotropyDistribution(object):
                 kwargs_return["beta_inf"] = beta_inf
             return kwargs_return
         if self._anisotropy_model in ["OM", "const", "GOM"]:
-            if a_ani < self._a_ani_min or a_ani > self._a_ani_max:
+            if self._distribution_function in ["GAUSSIAN_TAN_RAD"]:
+                # convert to beta = 1 - (sigma_t/sigma_r)^2
+                a = 1 - a_ani**2
+            else:
+                a = a_ani
+            if a < self._a_ani_min or a > self._a_ani_max:
                 raise ValueError(
                     "anisotropy parameter is out of bounds of the interpolated range!"
                 )
