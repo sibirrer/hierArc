@@ -130,6 +130,7 @@ _input_param_list = [
     "anisotropy_model",
     "anisotropy_sampling",
     "anisotropy_distribution",
+    "anisotropy_parameterization",
     "los_distributions",
     "lambda_mst_distribution",
     "gamma_in_sampling",

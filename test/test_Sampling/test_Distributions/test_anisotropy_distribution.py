@@ -31,9 +31,10 @@ class TestAnisotropyDistribution(object):
         self._ani_dist_tan_rad = AnisotropyDistribution(
             anisotropy_model=anisotropy_model,
             anisotropy_sampling=True,
-            distribution_function="GAUSSIAN_TAN_RAD",
+            distribution_function="GAUSSIAN",
             kwargs_anisotropy_min=kwargs_anisotropy_min,
             kwargs_anisotropy_max=kwargs_anisotropy_max,
+            parameterization="TAN_RAD",
         )
 
     def test_draw_anisotropy(self):

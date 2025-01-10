@@ -1,7 +1,8 @@
 import numpy as np
 
-_SUPPORTED_DISTRIBUTIONS = ["GAUSSIAN", "GAUSSIAN_SCALED", "NONE", "GAUSSIAN_TAN_RAD"]
-_SUPPORTED_MODELS = ["OM", "GOM", "const", "NONE"]
+_SUPPORTED_DISTRIBUTIONS = ["GAUSSIAN", "GAUSSIAN_SCALED", "NONE"]
+_SUPPORTED_MODELS = ["OM", "GOM", "const", "const",  "NONE"]
+_PARAMETERIZATION = ["beta", "TAN_RAD"]
 
 
 class AnisotropyDistribution(object):
@@ -14,14 +15,18 @@ class AnisotropyDistribution(object):
         distribution_function,
         kwargs_anisotropy_min,
         kwargs_anisotropy_max,
+        parameterization="beta",
     ):
         """
 
         :param anisotropy_model: string, name of anisotropy model to consider
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
          kinematic prediction
-        :param distribution_function: string, 'NONE', 'GAUSSIAN', 'GAUSSIAN_SCALED',
+        :param distribution_function: string, 'NONE', 'GAUSSIAN', 'GAUSSIAN_SCALED', "GAUSSIAN_TAN_RAD"
          description of the distribution function of the anisotropy model parameters
+        :param kwargs_anisotropy_min: dictionary of bounds in the parameterization (from the interpolation)
+        :param kwargs_anisotropy_max: dictionary of bounds in the parameterization (from the interpolation)
+        :param parameterization: model of parameterization (currently for constant anisotropy), ["beta" or "TAN_RAD"]
         """
         if anisotropy_model not in _SUPPORTED_MODELS:
             raise ValueError(
@@ -44,6 +49,7 @@ class AnisotropyDistribution(object):
                 % anisotropy_model
             )
         self._distribution_function = distribution_function
+        self._parametrization = parameterization
         if kwargs_anisotropy_min is None:
             kwargs_anisotropy_min = {}
         if kwargs_anisotropy_max is None:
@@ -68,31 +74,32 @@ class AnisotropyDistribution(object):
         :return: random draw from the distribution
         """
         kwargs_return = {}
+        if a_ani is not None and self._parametrization == "TAN_RAD":
+            a = 1 - a_ani**2
+        else:
+            a = a_ani
         if not self._anisotropy_sampling:
             if a_ani is not None:
-                kwargs_return["a_ani"] = a_ani
+                kwargs_return["a_ani"] = a
             if beta_inf is not None:
                 kwargs_return["beta_inf"] = beta_inf
             return kwargs_return
         if self._anisotropy_model in ["OM", "const", "GOM"]:
-            if self._distribution_function in ["GAUSSIAN_TAN_RAD"]:
-                # convert to beta = 1 - (sigma_t/sigma_r)^2
-                a = 1 - a_ani**2
-            else:
-                a = a_ani
             if a < self._a_ani_min or a > self._a_ani_max:
                 raise ValueError(
-                    "anisotropy parameter is out of bounds of the interpolated range!"
+                    "anisotropy parameter with %s is out of bounds of the interpolated range [%s, %s]!"
+                    % (a, self._a_ani_min, self._a_ani_max)
                 )
             # we draw a linear gaussian for 'const' anisotropy and a scaled proportional one for 'OM
-            if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED", "GAUSSIAN_TAN_RAD"]:
+            if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                 if self._distribution_function in ["GAUSSIAN"]:
                     a_ani_draw = np.random.normal(a_ani, a_ani_sigma)
                 elif self._distribution_function in ["GAUSSIAN_SCALED"]:
                     a_ani_draw = np.random.normal(a_ani, a_ani_sigma * a_ani)
                 else:
-                    # convert to beta = 1 - (sigma_t/sigma_r)^2
-                    a_ani_draw = 1 - np.random.normal(a_ani, a_ani_sigma)**2
+                    raise ValueError("Distribution function %s not implemented" % self._distribution_function)
+                if self._parametrization == "TAN_RAD":
+                    a_ani_draw = 1 - a_ani_draw ** 2
 
                 if a_ani_draw < self._a_ani_min or a_ani_draw > self._a_ani_max:
                     return self.draw_anisotropy(
@@ -100,7 +107,7 @@ class AnisotropyDistribution(object):
                     )
                 kwargs_return["a_ani"] = a_ani_draw
             else:
-                kwargs_return["a_ani"] = a_ani
+                kwargs_return["a_ani"] = a
 
         if self._anisotropy_model in ["GOM"]:
             if beta_inf < self._beta_inf_min or beta_inf > self._beta_inf_max:

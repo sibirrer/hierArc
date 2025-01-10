@@ -32,6 +32,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         anisotropy_model="NONE",
         anisotropy_sampling=False,
         anisotropy_distribution="NONE",  # make sure input is provided
+        anisotropy_parameterization="beta",
         los_distributions=None,
         lambda_mst_distribution="NONE",
         gamma_in_sampling=False,
@@ -108,6 +109,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :type los_distributions: list of str or None
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
          kinematic prediction
+        :param anisotropy_parameterization: model of parameterization (currently for constant anisotropy),
+         ["beta" or "TAN_RAD"] supported
         """
         TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
 
@@ -163,6 +166,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             distribution_function=anisotropy_distribution,
             kwargs_anisotropy_min=kwargs_min,
             kwargs_anisotropy_max=kwargs_max,
+            parameterization=anisotropy_parameterization,
         )
         self._prior = PriorLikelihood(prior_list=prior_list)
 
