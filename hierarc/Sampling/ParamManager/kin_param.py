@@ -9,9 +9,11 @@ class KinParam(object):
         anisotropy_sampling=False,
         anisotropy_model="OM",
         distribution_function="NONE",
+        anisotropy_parameterization="beta",
         sigma_v_systematics=False,
         log_scatter=False,
         kwargs_fixed=None,
+
     ):
         """
 
@@ -19,6 +21,8 @@ class KinParam(object):
         :param anisotropy_model: string, name of anisotropy model to consider
         :param distribution_function: string, 'NONE', 'GAUSSIAN', 'GAUSSIAN_SCALED', description of the distribution
          function of the anisotropy model parameters
+        :param anisotropy_parameterization: model of parameterization (currently for constant anisotropy),
+         ["beta" or "TAN_RAD"] supported
         :param sigma_v_systematics: bool, if True samples parameters relative to systematics in the velocity dispersion
          measurement
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
@@ -28,6 +32,7 @@ class KinParam(object):
         self._anisotropy_sampling = anisotropy_sampling
         self._anisotropy_model = anisotropy_model
         self._distribution_function = distribution_function
+        self._anisotropy_parameterization = anisotropy_parameterization
         self._sigma_v_systematics = sigma_v_systematics
         if kwargs_fixed is None:
             kwargs_fixed = {}
@@ -46,7 +51,12 @@ class KinParam(object):
             if self._anisotropy_model in ["OM", "GOM", "const"]:
                 if "a_ani" not in self._kwargs_fixed:
                     if latex_style is True:
-                        list.append(r"$\langle a_{\rm ani}\rangle$")
+                        if self._anisotropy_model == "const" and self._anisotropy_parameterization == "TAN_RAD":
+                            list.append(r"$\langle \phi_{\rm TAN}/\phi_{\rm RAD}\rangle$")
+                        elif self._anisotropy_model == "const":
+                            list.append(r"$\langle \beta_{\rm ani}\rangle$")
+                        else:
+                            list.append(r"$\langle a_{\rm ani}\rangle$")
                     else:
                         list.append("a_ani")
                 if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:

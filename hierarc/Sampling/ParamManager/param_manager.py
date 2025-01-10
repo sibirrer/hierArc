@@ -17,6 +17,7 @@ class ParamManager(object):
         anisotropy_sampling=False,
         anisotropy_model="OM",
         anisotropy_distribution="NONE",
+        anisotropy_parameterization="beta",
         gamma_in_sampling=False,
         gamma_in_distribution="NONE",
         log_m2l_sampling=False,
@@ -95,6 +96,9 @@ class ParamManager(object):
         :type los_distributions: list of str
         :param kwargs_fixed_los: fixed arguments in sampling
         :type kwargs_fixed_los: list of dictionaries for each los distribution
+        :param anisotropy_parameterization: model of parameterization (currently for constant anisotropy),
+         ["beta" or "TAN_RAD"] supported
+        :type anisotropy_parameterization: str
         """
         self._kin_param = KinParam(
             anisotropy_sampling=anisotropy_sampling,
@@ -103,6 +107,7 @@ class ParamManager(object):
             log_scatter=log_scatter,
             sigma_v_systematics=sigma_v_systematics,
             kwargs_fixed=kwargs_fixed_kin,
+            anisotropy_parameterization=anisotropy_parameterization,
         )
         self._cosmo_param = CosmoParam(
             cosmology=cosmology,
