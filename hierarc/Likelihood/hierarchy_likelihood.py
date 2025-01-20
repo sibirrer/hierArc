@@ -6,6 +6,7 @@ from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
 from hierarc.Sampling.Distributions.anisotropy_distributions import (
     AnisotropyDistribution,
 )
+from hierarc.Util.distribution_util import PDFSampling
 from hierarc.Sampling.Distributions.lens_distribution import LensDistribution
 import numpy as np
 import copy
@@ -51,6 +52,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
         j_kin_scaling_grid_list=None,
+        bin_edges_vel_disp_scaling=None,
+        pdf_array_vel_disp_scaling=None,
         # likelihood evaluation quantities
         num_distribution_draws=50,
         normalized=True,
@@ -72,6 +75,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param j_kin_scaling_grid_list: list of array with the scalings of J() for each IFU
         :param j_kin_scaling_param_name_list: list of strings for the parameters as they are interpolated in the same
          order as j_kin_scaling_grid
+        :param bin_edges_vel_disp_scaling: bin edges of histogram with PDF of scaling of sigma_axis/sigma_spherical
+         in velocity dispersion prediction
+        :param pdf_array_vel_disp_scaling: histogram for the bin edges to calculate the PDF of the
+         sigma_axis/sigma_spherical velocity dispersion prediction
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
         :param global_los_distribution: if integer, will draw from the global kappa distribution specified in that
@@ -169,6 +176,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             parameterization=anisotropy_parameterization,
         )
         self._prior = PriorLikelihood(prior_list=prior_list)
+        if bin_edges_vel_disp_scaling is None or pdf_array_vel_disp_scaling is None:
+            self._inclination_sampling = False
+        else:
+            self._inclination_sampling = True
+            self._inclination_sampling_class = PDFSampling(bin_edges=bin_edges_vel_disp_scaling,
+                                                     pdf_array=pdf_array_vel_disp_scaling)
 
     def info(self):
         """
@@ -349,7 +362,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             mag_source=mag_source,
         )
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
-        #print(kwargs_kin_draw, 'test kwargs_kin_draw')
+
         kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
         kin_scaling = self.kin_scaling(kwargs_param)
         lnlikelihood = self.log_likelihood(
@@ -435,6 +448,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             and sne_sigma == 0
             and gamma_pl_sigma == 0
             and not draw_kappa_bool
+            and not self._inclination_sampling
         ):
             return True
         return False
@@ -500,6 +514,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin_copy)
             kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
             kin_scaling = self.kin_scaling(kwargs_param)
+            if self._inclination_sampling is True:
+                inclination_scaling = self._inclination_sampling_class.draw_one
+                kin_scaling *= np.sqrt(inclination_scaling)
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(
                 ddt_, dd_, kin_scaling=kin_scaling
             )

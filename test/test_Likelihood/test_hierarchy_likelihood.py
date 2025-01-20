@@ -36,6 +36,9 @@ class TestLensLikelihood(object):
         log_m2l_sampling = (False,)
         log_m2l_distribution = ("NONE",)
 
+        vel_disp_scaling = np.random.normal(loc=1, scale=.1, size=1000)
+        pdf_array_vel_disp_scaling, bin_edges_vel_disp_scaling = np.histogram(vel_disp_scaling)
+
         self.likelihood = LensLikelihood(
             z_lens,
             z_source,
@@ -44,6 +47,8 @@ class TestLensLikelihood(object):
             kin_scaling_param_list=["a_ani"],
             j_kin_scaling_param_axes=ani_param_array,
             j_kin_scaling_grid_list=[ani_scaling_array],
+            bin_edges_vel_disp_scaling=bin_edges_vel_disp_scaling,
+            pdf_array_vel_disp_scaling=pdf_array_vel_disp_scaling,
             num_distribution_draws=200,
             los_distributions=["GAUSSIAN"],
             global_los_distribution=0,
