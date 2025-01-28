@@ -1,6 +1,7 @@
 import numpy as np
 from astropy.cosmology import FLRW, FlatFLRWMixin
 from scipy.special import expi
+from scipy.special import exp1
 from astropy.cosmology._utils import aszarr
 from astropy.cosmology.core import dataclass_decorator
 from astropy.cosmology.parameter import Parameter
@@ -46,8 +47,9 @@ class wPhiCDM(FlatFLRWMixin, FLRW):
         :math:`w(z) =  -1 + (1 + w_0) \exp(-\alpha  z)`.
         """
         z = aszarr(z)
-        return -1 + (1 + self.w0) * np.exp(-self.alpha * z) #self.w0 + self.wa * z / (z + 1.0)
-
+        return -1 + (1 + self.w0) * np.exp(
+            -self.alpha * z
+        )  # self.w0 + self.wa * z / (z + 1.0)
 
     def de_density_scale(self, z):
         r"""Evaluates the redshift dependence of the dark energy density.
@@ -77,4 +79,10 @@ class wPhiCDM(FlatFLRWMixin, FLRW):
         """
         z = aszarr(z)
         zp1 = z + 1.0
-        return np.exp(-3 * (1+self.w0) * np.exp(self.alpha) * (expi(-self.alpha*zp1) - expi(-self.alpha)))
+        return np.exp(
+            3
+            * (1 + self.w0)
+            * np.exp(self.alpha)
+            # * (expi(-self.alpha * zp1) - expi(-self.alpha))
+            * (exp1(self.alpha) - exp1(self.alpha * zp1))
+        )
