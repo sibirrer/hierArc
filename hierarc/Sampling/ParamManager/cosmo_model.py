@@ -74,7 +74,7 @@ class wPhiCDM(FlatFLRWMixin, FLRW):
         and in this case is given by
 
         .. math::
-            I = \exp\left(-3 (1 + w_0) \exp(\alpha) \left[\text{Ei}(-\alpha (z + 1)) - \text{Ei}(-\alpha)\right]\right)
+            I = \exp\left(-3 (1 + w_0) \exp(\alpha) \left[E_1(\alpha) - E_1(\alpha (1 + z))\right]\right)
 
         """
         z = aszarr(z)
