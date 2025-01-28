@@ -83,6 +83,5 @@ class wPhiCDM(FlatFLRWMixin, FLRW):
             3
             * (1 + self.w0)
             * np.exp(self.alpha)
-            # * (expi(-self.alpha * zp1) - expi(-self.alpha))
             * (exp1(self.alpha) - exp1(self.alpha * zp1))
         )
