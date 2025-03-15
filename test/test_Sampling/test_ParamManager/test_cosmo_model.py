@@ -1,12 +1,8 @@
 from hierarc.Sampling.ParamManager.cosmo_model import wPhiCDM
-import numpy.testing as npt
 import pytest
 from scipy.special import exp1
 from astropy.cosmology import FlatLambdaCDM
-
 import numpy as np
-from astropy.cosmology import units as cu
-from your_module import wPhiCDM  # Replace 'your_module' with the actual module name
 
 
 class TestwPhiCDM(unittest.TestCase):
