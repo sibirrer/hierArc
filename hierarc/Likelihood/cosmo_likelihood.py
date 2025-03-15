@@ -217,8 +217,7 @@ class CosmoLikelihood(object):
         return cosmo
 
     def info(self):
-        """
-        prints information about the likelihood object
+        """Prints information about the likelihood object.
 
         :return: print statements
         """

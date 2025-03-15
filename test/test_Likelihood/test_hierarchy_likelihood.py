@@ -36,8 +36,10 @@ class TestLensLikelihood(object):
         log_m2l_sampling = (False,)
         log_m2l_distribution = ("NONE",)
 
-        vel_disp_scaling = np.random.normal(loc=1, scale=.1, size=1000)
-        pdf_array_vel_disp_scaling, bin_edges_vel_disp_scaling = np.histogram(vel_disp_scaling)
+        vel_disp_scaling = np.random.normal(loc=1, scale=0.1, size=1000)
+        pdf_array_vel_disp_scaling, bin_edges_vel_disp_scaling = np.histogram(
+            vel_disp_scaling
+        )
 
         self.likelihood = LensLikelihood(
             z_lens,

@@ -73,7 +73,6 @@ class wPhiCDM(FlatFLRWMixin, FLRW):
 
         .. math::
             I = \exp\left(-3 (1 + w_0) \exp(\alpha) \left[E_1(\alpha) - E_1(\alpha (1 + z))\right]\right)
-
         """
         z = np.asarray(z)
         zp1 = z + 1.0
