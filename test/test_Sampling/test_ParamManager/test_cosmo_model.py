@@ -5,7 +5,7 @@ from astropy.cosmology import FlatLambdaCDM
 import numpy as np
 
 
-class TestwPhiCDM(unittest.TestCase):
+class TestwPhiCDM(object):
     def setUp(self):
         self.cosmo = wPhiCDM()
 
