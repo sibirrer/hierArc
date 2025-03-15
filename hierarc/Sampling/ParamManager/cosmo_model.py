@@ -8,6 +8,10 @@ from astropy.cosmology._utils import aszarr
 
 @dataclass_decorator
 class wPhiCDM(FlatFLRWMixin, FLRW):
+    """
+    This class implements the wphiCDM cosmology from Shajib & Frieman (2025), https://arxiv.org/abs/2502.06929.
+    """
+
     w0: Parameter = Parameter(
         default=-1.0, doc="Dark energy equation of state at z=0.", fvalidate="float"
     )
