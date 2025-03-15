@@ -6,7 +6,7 @@ import unittest
 
 class TestCosmoParamFLCDM(object):
     def setup_method(self):
-        cosmology_list = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "NONE"]
+        cosmology_list = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wphiCDM", "NONE"]
         kwargs_fixed = {
             "h0": 70,
             "om": 0.3,
@@ -15,6 +15,7 @@ class TestCosmoParamFLCDM(object):
             "wa": -0,
             "w0": -0,
             "gamma_ppn": 1,
+            "alpha": 1.45,
         }
         self._param_list = []
         self._param_list_fixed = []
@@ -33,6 +34,7 @@ class TestCosmoParamFLCDM(object):
             4,
             5,
             4,
+            5,
             1,
         ]  # number of parameters for the cosmological models cosmology_list
         for i, param in enumerate(self._param_list):
@@ -55,6 +57,7 @@ class TestCosmoParamFLCDM(object):
             "wa": -0,
             "w0": -0,
             "gamma_ppn": 1,
+            "alpha": 1.45,
         }
         for i, param in enumerate(self._param_list):
             args = param.kwargs2args(kwargs)
@@ -76,6 +79,7 @@ class TestCosmoParamFLCDM(object):
             "wa": -0,
             "w0": -0,
             "gamma_ppn": 1,
+            "alpha": 1.45,
         }
         for i, param in enumerate(self._param_list):
             cosmo = param.cosmo(kwargs_cosmo)
@@ -96,6 +100,7 @@ class TestRaise(unittest.TestCase):
                 "wa": -0,
                 "w0": -0,
                 "gamma_ppn": 1,
+                "alpha": 1.45,
             }
             param.cosmo(kwargs_cosmo)
 
