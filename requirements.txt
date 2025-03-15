@@ -1,7 +1,7 @@
 numpy
 astropy
 
-scipy
+scipy<1.14.0
 emcee
 mpmath
 h5py
