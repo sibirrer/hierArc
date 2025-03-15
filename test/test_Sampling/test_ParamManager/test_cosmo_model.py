@@ -6,8 +6,8 @@ import numpy as np
 
 
 class TestwPhiCDM(object):
-    def setUp(self):
-        self.cosmo = wPhiCDM()
+    def setup_class(self):
+        self.cosmo = wPhiCDM(w0=-1, alpha=1.45, H0=70, Om0=0.3)
 
     def test_w(self):
         z = np.array([0, 1, 2])
