@@ -3,6 +3,7 @@ from astropy.cosmology import FLRW, FlatFLRWMixin
 from scipy.special import exp1
 from astropy.cosmology.core import dataclass_decorator
 from astropy.cosmology.parameter import Parameter
+from astropy.cosmology._utils import aszarr
 
 
 @dataclass_decorator
@@ -44,7 +45,7 @@ class wPhiCDM(FlatFLRWMixin, FLRW):
         units where c=1. Here this is
         :math:`w(z) =  -1 + (1 + w_0) \exp(-\alpha  z)`.
         """
-        z = np.asarray(z)
+        z = aszarr(z)
         return -1 + (1 + self.w0) * np.exp(
             -self.alpha * z
         )  # self.w0 + self.wa * z / (z + 1.0)
@@ -74,7 +75,7 @@ class wPhiCDM(FlatFLRWMixin, FLRW):
         .. math::
             I = \exp\left(-3 (1 + w_0) \exp(\alpha) \left[E_1(\alpha) - E_1(\alpha (1 + z))\right]\right)
         """
-        z = np.asarray(z)
+        z = aszarr(z)
         zp1 = z + 1.0
         return np.exp(
             3
