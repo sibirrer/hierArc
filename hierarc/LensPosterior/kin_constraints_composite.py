@@ -7,6 +7,7 @@ from hierarc.LensPosterior.kin_constraints import KinConstraints
 from lenstronomy.Util import constants as const
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.LightModel.light_model import LightModel
+from lenstronomy.LensModel.Profiles.gnfw import GNFW
 
 
 class KinConstraintsComposite(KinConstraints):
@@ -16,7 +17,7 @@ class KinConstraintsComposite(KinConstraints):
         z_source,
         gamma_in_array,
         log_m2l_array,
-        kappa_s_array,
+        alpha_Rs_array,
         r_s_angle_array,
         theta_E,
         theta_E_error,
@@ -42,6 +43,7 @@ class KinConstraintsComposite(KinConstraints):
         num_kin_sampling=1000,
         multi_observations=False,
         rho0_array=None,
+        kappa_s_array=None,
         r_s_array=None,
         is_m2l_population_level=True,
     ):
@@ -53,7 +55,7 @@ class KinConstraintsComposite(KinConstraints):
         :param log_m2l_array: array of log10(mass-to-light ratios) of the stellar component,
             needs to be in the unit/scaling such that m2l / sigma_crit * amp in the
             kwargs_lens_light provides the convergence amplitude of the stars
-        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
+        :param alpha_Rs_array: array of the deflection (angular units) at projected Rs
         :param r_s_angle_array: array of halo scale radii in arcsecond
         :param theta_E: Einstein radius (in arc seconds)
         :param theta_E_error: 1-sigma error on Einstein radius
@@ -88,6 +90,7 @@ class KinConstraintsComposite(KinConstraints):
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
         :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
+        :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
         :param r_s_array: array of halo scale radii in Mpc
         """
 
@@ -113,7 +116,13 @@ class KinConstraintsComposite(KinConstraints):
             lens_light_model_list = ["MULTI_GAUSSIAN"]
             kwargs_lens_light = [{"amp": amps, "sigma": sigmas}]
 
-        lens_model_list = ["GNFW", "MULTI_GAUSSIAN_KAPPA"]
+        lens_model_list = ["GNFW", "MULTI_GAUSSIAN"]
+
+        # log_m2l is interpolated when sampled on the population level, otherwise marginalized
+        if is_m2l_population_level:
+            log_m2l_scaling = log_m2l_array
+        else:
+            log_m2l_scaling = None
 
         super(KinConstraintsComposite, self).__init__(
             z_lens,
@@ -142,18 +151,27 @@ class KinConstraintsComposite(KinConstraints):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
+            gamma_in_scaling=gamma_in_array,
+            log_m2l_scaling=log_m2l_scaling,
         )
 
-        if self._check_arrays(kappa_s_array, r_s_angle_array):
-            self._kappa_s_array = kappa_s_array
+        if self._check_arrays(alpha_Rs_array, r_s_angle_array):
+            self._halo_normalization_array = alpha_Rs_array
+            self._is_normalization_alpha_Rs = True
+            self._r_scale_angle_array = r_s_angle_array
+        elif self._check_arrays(kappa_s_array, r_s_angle_array):
+            self._halo_normalization_array = kappa_s_array
+            self._is_normalization_alpha_Rs = False
             self._r_scale_angle_array = r_s_angle_array
         elif self._check_arrays(rho0_array, r_s_array):
-            self._kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
+            kappa_s_array, self._r_scale_angle_array = self.get_kappa_s_r_s_angle(
                 rho0_array, r_s_array
             )
+            self._halo_normalization_array = kappa_s_array
+            self._is_normalization_alpha_Rs = False
         else:
             raise ValueError(
-                "Both kappa_s_array and r_s_angle_array, or rho0_array and r_s_array must be arrays of the same length!"
+                "Both alpha_Rs_array and r_s_angle_array, kappa_s_array and r_s_angle_array, or rho0_array and r_s_array must be arrays of the same length!"
             )
 
         self.gamma_in_array = gamma_in_array
@@ -164,10 +182,10 @@ class KinConstraintsComposite(KinConstraints):
         self._gamma_in_prior_std = gamma_in_prior_std
 
         if not is_m2l_population_level and not self._check_arrays(
-            self._kappa_s_array, log_m2l_array
+            self._halo_normalization_array, log_m2l_array
         ):
             raise ValueError(
-                "log_m2l_array must have the same length as rho0_array or kappa_s_array!"
+                "log_m2l_array must have the same length as alpha_Rs_array, kappa_s_array, or rho0_array!"
             )
 
     @staticmethod
@@ -202,22 +220,24 @@ class KinConstraintsComposite(KinConstraints):
         if no_error is True:
             if self._is_m2l_population_level:
                 return (
-                    np.mean(self._kappa_s_array),
+                    np.mean(self._halo_normalization_array),
                     np.mean(self._r_scale_angle_array),
                     self._r_eff,
                     1,
                 )
             else:
                 return (
-                    np.mean(self._kappa_s_array),
+                    np.mean(self._halo_normalization_array),
                     np.mean(self._r_scale_angle_array),
                     np.mean(self.log_m2l_array),
                     self._r_eff,
                     1,
                 )
 
-        random_index = np.random.randint(low=0, high=len(self._kappa_s_array))
-        kappa_s_draw = self._kappa_s_array[random_index]
+        random_index = np.random.randint(
+            low=0, high=len(self._halo_normalization_array)
+        )
+        halo_normalization_draw = self._halo_normalization_array[random_index]
         r_scale_angle_draw = self._r_scale_angle_array[random_index]
 
         # we make sure no negative r_eff are being sampled
@@ -227,11 +247,11 @@ class KinConstraintsComposite(KinConstraints):
         r_eff_draw = delta_r_eff * self._r_eff
 
         if self._is_m2l_population_level:
-            return kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
+            return halo_normalization_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff
         else:
             log_m2l_draw = self.log_m2l_array[random_index]
             return (
-                kappa_s_draw,
+                halo_normalization_draw,
                 r_scale_angle_draw,
                 log_m2l_draw,
                 r_eff_draw,
@@ -282,8 +302,8 @@ class KinConstraintsComposite(KinConstraints):
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
-        kappa_s_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = self.draw_lens(
-            no_error=no_error
+        halo_normalization_draw, r_scale_angle_draw, r_eff_draw, delta_r_eff = (
+            self.draw_lens(no_error=no_error)
         )
 
         kwargs_lens_stars = copy.deepcopy(self._kwargs_lens_light[0])
@@ -296,11 +316,20 @@ class KinConstraintsComposite(KinConstraints):
         for kwargs in kwargs_light:
             kwargs["sigma"] *= delta_r_eff
 
+        # Input is alpha_Rs
+        if self._is_normalization_alpha_Rs:
+            alpha_Rs_draw = halo_normalization_draw
+        # Input is kappa_s
+        else:
+            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(
+                halo_normalization_draw, r_scale_angle_draw, gamma_in
+            )
+
         kwargs_lens = [
             {
                 "Rs": r_scale_angle_draw,
                 "gamma_in": gamma_in,
-                "kappa_s": kappa_s_draw,
+                "alpha_Rs": alpha_Rs_draw,
                 "center_x": 0,
                 "center_y": 0,
             },
@@ -328,7 +357,7 @@ class KinConstraintsComposite(KinConstraints):
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         (
-            kappa_s_draw,
+            halo_normalization_draw,
             r_scale_angle_draw,
             log_m2l_draw,
             r_eff_draw,
@@ -345,11 +374,20 @@ class KinConstraintsComposite(KinConstraints):
         for kwargs in kwargs_light:
             kwargs["sigma"] *= delta_r_eff
 
+        # Input is alpha_Rs
+        if self._is_normalization_alpha_Rs:
+            alpha_Rs_draw = halo_normalization_draw
+        # Input is kappa_s
+        else:
+            alpha_Rs_draw = GNFW().kappa_s_to_alpha_Rs(
+                halo_normalization_draw, r_scale_angle_draw, gamma_in
+            )
+
         kwargs_lens = [
             {
                 "Rs": r_scale_angle_draw,
                 "gamma_in": gamma_in,
-                "kappa_s": kappa_s_draw,
+                "alpha_Rs": alpha_Rs_draw,
                 "center_x": 0,
                 "center_y": 0,
             },
@@ -392,16 +430,26 @@ class KinConstraintsComposite(KinConstraints):
             "j_model": j_model_list,
             "error_cov_measurement": error_cov_measurement,
             "error_cov_j_sqrt": error_cov_j_sqrt,
-            "ani_param_array": self.ani_param_array,
-            "gamma_in_array": self.gamma_in_array,
-            "log_m2l_array": self.log_m2l_array,
-            "param_scaling_grid_list": ani_scaling_grid_list,
-            "gamma_in_prior_mean": self._gamma_in_prior_mean,
-            "gamma_in_prior_std": self._gamma_in_prior_std,
+            # "ani_param_array": self.kin_scaling_param_array,
+            # "gamma_in_array": self.gamma_in_array,
+            # "log_m2l_array": self.log_m2l_array,
+            # "param_scaling_grid_list": ani_scaling_grid_list,
+            "kin_scaling_param_list": self.param_name_list,
+            "j_kin_scaling_param_axes": self.kin_scaling_param_array,
+            "j_kin_scaling_grid_list": ani_scaling_grid_list,
         }
-
-        if not self._is_m2l_population_level:
-            kwargs_likelihood["log_m2l_array"] = None
+        prior_list = None
+        if (
+            self.gamma_in_array is not None
+            and self._gamma_in_prior_mean is not None
+            and self._gamma_in_prior_std is not None
+        ):
+            prior_list = [
+                ["gamma_in", self._gamma_in_prior_mean, self._gamma_in_prior_std]
+            ]
+        kwargs_likelihood["prior_list"] = prior_list
+        # if not self._is_m2l_population_level:
+        #    kwargs_likelihood["log_m2l_array"] = None
         return kwargs_likelihood
 
     def anisotropy_scaling(self):
@@ -438,16 +486,16 @@ class KinConstraintsComposite(KinConstraints):
             ani_scaling_grid_list = [
                 np.zeros(
                     (
-                        len(self.ani_param_array[0]),
-                        len(self.ani_param_array[1]),
+                        len(self.kin_scaling_param_array[0]),
+                        len(self.kin_scaling_param_array[1]),
                         len(self.gamma_in_array),
                         len(self.log_m2l_array),
                     )
                 )
                 for _ in range(num_data)
             ]
-            for i, a_ani in enumerate(self.ani_param_array[0]):
-                for j, beta_inf in enumerate(self.ani_param_array[1]):
+            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
+                for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
                     for k, g_in in enumerate(self.gamma_in_array):
                         for l, log_m2l in enumerate(self.log_m2l_array):
                             kwargs_anisotropy = self.anisotropy_kwargs(
@@ -466,14 +514,14 @@ class KinConstraintsComposite(KinConstraints):
             ani_scaling_grid_list = [
                 np.zeros(
                     (
-                        len(self.ani_param_array),
+                        len(self.kin_scaling_param_array[0]),
                         len(self.gamma_in_array),
                         len(self.log_m2l_array),
                     )
                 )
                 for _ in range(num_data)
             ]
-            for i, a_ani in enumerate(self.ani_param_array):
+            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
                 for k, g_in in enumerate(self.gamma_in_array):
                     for l, log_m2l in enumerate(self.log_m2l_array):
                         kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
@@ -500,15 +548,15 @@ class KinConstraintsComposite(KinConstraints):
             ani_scaling_grid_list = [
                 np.zeros(
                     (
-                        len(self.ani_param_array[0]),
-                        len(self.ani_param_array[1]),
+                        len(self.kin_scaling_param_array[0]),
+                        len(self.kin_scaling_param_array[1]),
                         len(self.gamma_in_array),
                     )
                 )
                 for _ in range(num_data)
             ]
-            for i, a_ani in enumerate(self.ani_param_array[0]):
-                for j, beta_inf in enumerate(self.ani_param_array[1]):
+            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
+                for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
                     for k, g_in in enumerate(self.gamma_in_array):
                         kwargs_anisotropy = self.anisotropy_kwargs(
                             a_ani=a_ani, beta_inf=beta_inf
@@ -524,13 +572,13 @@ class KinConstraintsComposite(KinConstraints):
             ani_scaling_grid_list = [
                 np.zeros(
                     (
-                        len(self.ani_param_array),
+                        len(self.kin_scaling_param_array[0]),
                         len(self.gamma_in_array),
                     )
                 )
                 for _ in range(num_data)
             ]
-            for i, a_ani in enumerate(self.ani_param_array):
+            for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
                 for k, g_in in enumerate(self.gamma_in_array):
                     kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
                     j_kin_ani = self.j_kin_draw_composite_m2l(

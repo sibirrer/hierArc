@@ -17,6 +17,7 @@ class ParamManager(object):
         anisotropy_sampling=False,
         anisotropy_model="OM",
         anisotropy_distribution="NONE",
+        anisotropy_parameterization="beta",
         gamma_in_sampling=False,
         gamma_in_distribution="NONE",
         log_m2l_sampling=False,
@@ -27,6 +28,9 @@ class ParamManager(object):
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
         alpha_log_m2l_sampling=False,
+        gamma_pl_num=0,
+        gamma_pl_global_sampling=False,
+        gamma_pl_global_dist="NONE",
         sigma_v_systematics=False,
         sne_apparent_m_sampling=False,
         sne_distribution="GAUSSIAN",
@@ -64,7 +68,7 @@ class ParamManager(object):
          according to a predefined quantity of the lens
         :param lambda_ifu_distribution: string, distribution function of the lambda_ifu parameter
         :param anisotropy_sampling: bool, if True adds a global stellar anisotropy parameter that alters the single lens
-        kinematic prediction
+         kinematic prediction
         :param anisotropy_distribution: string, indicating the distribution function of the anisotropy model
         :param gamma_in_sampling: bool, if True samples gNFW inner slope parameter
         :param gamma_in_distribution: string, distribution function of the gamma_in parameter
@@ -74,6 +78,10 @@ class ParamManager(object):
             according to a predefined quantity of the lens
         :param alpha_log_m2l_sampling: bool, if True samples a parameter alpha_log_m2l, which scales log_m2l linearly
             according to a predefined quantity of the lens
+        :param gamma_pl_num: int, number of power-law density slopes being sampled (to be assigned to individual lenses)
+        :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
+        :type gamma_pl_global_sampling: bool
+        :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
         :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
          (not intrinsic magnitudes but apparent!)
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
@@ -88,6 +96,9 @@ class ParamManager(object):
         :type los_distributions: list of str
         :param kwargs_fixed_los: fixed arguments in sampling
         :type kwargs_fixed_los: list of dictionaries for each los distribution
+        :param anisotropy_parameterization: model of parameterization (currently for constant anisotropy),
+         ["beta" or "TAN_RAD"] supported
+        :type anisotropy_parameterization: str
         """
         self._kin_param = KinParam(
             anisotropy_sampling=anisotropy_sampling,
@@ -96,6 +107,7 @@ class ParamManager(object):
             log_scatter=log_scatter,
             sigma_v_systematics=sigma_v_systematics,
             kwargs_fixed=kwargs_fixed_kin,
+            anisotropy_parameterization=anisotropy_parameterization,
         )
         self._cosmo_param = CosmoParam(
             cosmology=cosmology,
@@ -115,6 +127,9 @@ class ParamManager(object):
             beta_lambda_sampling=beta_lambda_sampling,
             alpha_gamma_in_sampling=alpha_gamma_in_sampling,
             alpha_log_m2l_sampling=alpha_log_m2l_sampling,
+            gamma_pl_num=gamma_pl_num,
+            gamma_pl_global_sampling=gamma_pl_global_sampling,
+            gamma_pl_global_dist=gamma_pl_global_dist,
             log_scatter=log_scatter,
             kwargs_fixed=kwargs_fixed_lens,
         )

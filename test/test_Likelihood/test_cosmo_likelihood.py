@@ -57,6 +57,13 @@ class TestCosmoLikelihood(object):
             "kwargs_lower_cosmo": kwargs_lower_cosmo,
             "kwargs_upper_cosmo": kwargs_upper_cosmo,
         }
+        self.kwargs_model = {
+            "ppn_sampling": False,
+            "lambda_mst_sampling": False,
+            "lambda_mst_distribution": "delta",
+            "anisotropy_sampling": False,
+            "anisotropy_model": "OM",
+        }
 
         # self.kwargs_likelihood_list = [{'z_lens': self.z_L, 'z_source': self.z_S, 'likelihood_type': 'TDKinKDE',
         #                          'dd_sample': self.dd_samples, 'ddt_sample': self.ddt_samples,
@@ -66,30 +73,24 @@ class TestCosmoLikelihood(object):
         cosmoL = CosmoLikelihood(
             self.kwargs_likelihood_list,
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
-            ppn_sampling=False,
-            lambda_mst_sampling=False,
-            lambda_mst_distribution="delta",
-            anisotropy_sampling=False,
-            anisotropy_model="OM",
             custom_prior=None,
             interpolate_cosmo=True,
             num_redshift_interp=100,
             cosmo_fixed=None,
         )
 
-        def custom_prior(kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source):
+        def custom_prior(
+            kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
+        ):
             return -1
 
         cosmoL_prior = CosmoLikelihood(
             self.kwargs_likelihood_list,
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
-            ppn_sampling=False,
-            lambda_mst_sampling=False,
-            lambda_mst_distribution="delta",
-            anisotropy_sampling=False,
-            anisotropy_model="OM",
             custom_prior=custom_prior,
             interpolate_cosmo=True,
             num_redshift_interp=100,
@@ -98,29 +99,29 @@ class TestCosmoLikelihood(object):
 
         kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
-        logl = cosmoL.likelihood(args=args)
-        logl_prior = cosmoL_prior.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
+        logl_prior = cosmoL_prior.likelihood(args=args, verbose=True)
         npt.assert_almost_equal(logl - logl_prior, 1, decimal=8)
 
         kwargs = {"h0": self.H0_true * 0.99, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs)
-        logl_sigma = cosmoL.likelihood(args=args)
+        logl_sigma = cosmoL.likelihood(args=args, verbose=True)
         npt.assert_almost_equal(logl - logl_sigma, 0.5, decimal=2)
 
         kwargs = {"h0": 100, "om": 1.0, "ok": 0.1}
         args = cosmoL.param.kwargs2args(kwargs)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl == -np.inf
 
         kwargs = {"h0": 100, "om": 0.1, "ok": -0.6}
         args = cosmoL.param.kwargs2args(kwargs)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl == -np.inf
 
         # outside the prior limit
         kwargs = {"h0": 1000, "om": 0.3, "ok": -0.1}
         args = cosmoL.param.kwargs2args(kwargs)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl == -np.inf
 
     def test_cosmo_instance(self):
@@ -128,6 +129,7 @@ class TestCosmoLikelihood(object):
         cosmoL = CosmoLikelihood(
             self.kwargs_likelihood_list,
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
             interpolate_cosmo=False,
             cosmo_fixed=None,
@@ -137,6 +139,7 @@ class TestCosmoLikelihood(object):
         cosmoL = CosmoLikelihood(
             self.kwargs_likelihood_list,
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
             interpolate_cosmo=True,
             num_redshift_interp=100,
@@ -147,6 +150,7 @@ class TestCosmoLikelihood(object):
         cosmoL = CosmoLikelihood(
             self.kwargs_likelihood_list,
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
             interpolate_cosmo=True,
             num_redshift_interp=100,
@@ -158,6 +162,7 @@ class TestCosmoLikelihood(object):
         cosmoL = CosmoLikelihood(
             self.kwargs_likelihood_list,
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
             interpolate_cosmo=False,
             num_redshift_interp=100,
@@ -174,12 +179,11 @@ class TestCosmoLikelihood(object):
             cosmo_interp.k
         )  # compute the curvature from the interpolation class (as easily available)
         kwargs_cosmo_interp = {
-            "ang_diameter_distances": ang_diameter_distances,
+            "ang_diameter_distances": ang_diameter_distances.value,
             "redshifts": redshifts,
             "ok": Ok0,
-            "K": K,
+            "K": K.value,
         }
-
         cosmo_interp_input = cosmoL.cosmo_instance(kwargs_cosmo_interp)
 
         z = 1
@@ -200,8 +204,8 @@ class TestCosmoLikelihood(object):
             {
                 "likelihood_type": "DSPL",
                 "z_lens": 0.3,
-                "z_source_1": 0.5,
-                "z_source_2": 1.5,
+                "z_source": 0.5,
+                "z_source2": 1.5,
                 "beta_dspl": 1.2,
                 "sigma_beta_dspl": 0.01,
             }
@@ -209,6 +213,7 @@ class TestCosmoLikelihood(object):
         cosmoL = CosmoLikelihood(
             kwargs_likelihood_list,
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
             interpolate_cosmo=False,
             cosmo_fixed=None,
@@ -218,6 +223,7 @@ class TestCosmoLikelihood(object):
         cosmoL = CosmoLikelihood(
             [],
             self.cosmology,
+            self.kwargs_model,
             self.kwargs_bounds,
             sne_likelihood="Pantheon_binned",
             interpolate_cosmo=True,
@@ -226,7 +232,7 @@ class TestCosmoLikelihood(object):
         )
         kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl < 0
 
     def test_kde_likelihood_integration(self):
@@ -239,12 +245,30 @@ class TestCosmoLikelihood(object):
             rescale=True,
         )
         cosmoL = CosmoLikelihood(
-            [], "FLCDM", self.kwargs_bounds, KDE_likelihood_chain=chain
+            [],
+            "FLCDM",
+            self.kwargs_model,
+            self.kwargs_bounds,
+            KDE_likelihood_chain=chain,
         )
         kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
-        logl = cosmoL.likelihood(args=args)
+        logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl < 0
+
+    def test_info(self):
+        cosmoL = CosmoLikelihood(
+            self.kwargs_likelihood_list,
+            self.cosmology,
+            self.kwargs_model,
+            self.kwargs_bounds,
+            custom_prior=None,
+            interpolate_cosmo=True,
+            num_redshift_interp=100,
+            cosmo_fixed=None,
+        )
+
+        cosmoL.info()
 
 
 if __name__ == "__main__":

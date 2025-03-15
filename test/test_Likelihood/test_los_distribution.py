@@ -1,4 +1,4 @@
-from hierarc.Likelihood.los_distributions import LOSDistribution
+from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
 from scipy.stats import genextreme
 import numpy as np
 import numpy.testing as npt
@@ -35,10 +35,10 @@ class TestLOSDistribution(object):
 
         # here we draw from the scipy function
         dist_gev = LOSDistribution(
-            kappa_pdf=kappa_pdf,
-            kappa_bin_edges=kappa_bin_edges,
             global_los_distribution=1,
             los_distributions=los_distribution,
+            individual_distribution="PDF",
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
@@ -47,10 +47,10 @@ class TestLOSDistribution(object):
 
         # here we draw from the distribution
         dist_gev = LOSDistribution(
-            kappa_pdf=kappa_pdf,
-            kappa_bin_edges=kappa_bin_edges,
             global_los_distribution=False,
             los_distributions=los_distribution,
+            individual_distribution="PDF",
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
@@ -59,10 +59,10 @@ class TestLOSDistribution(object):
 
         # draw from Gaussian
         dist_gev = LOSDistribution(
-            kappa_pdf=kappa_pdf,
-            kappa_bin_edges=kappa_bin_edges,
             global_los_distribution=0,
             los_distributions=los_distribution,
+            individual_distribution="PDF",
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
 
         kappa_dist_drawn = dist_gev.draw_los(kwargs_los, size=10000)
@@ -92,28 +92,28 @@ class TestLOSDistribution(object):
         ]
 
         dist = LOSDistribution(
-            kappa_pdf=kappa_pdf,
-            kappa_bin_edges=kappa_bin_edges,
             global_los_distribution=1,
             los_distributions=los_distribution,
+            individual_distribution="PDF",
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is True
 
         dist = LOSDistribution(
-            kappa_pdf=kappa_pdf,
-            kappa_bin_edges=kappa_bin_edges,
             global_los_distribution=0,
             los_distributions=los_distribution,
+            individual_distribution="PDF",
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is False
 
         dist = LOSDistribution(
-            kappa_pdf=kappa_pdf,
-            kappa_bin_edges=kappa_bin_edges,
             global_los_distribution=False,
             los_distributions=los_distribution,
+            individual_distribution="PDF",
+            kwargs_individual={"pdf_array": kappa_pdf, "bin_edges": kappa_bin_edges},
         )
         bool_draw = dist.draw_bool(kwargs_los)
         assert bool_draw is True
@@ -123,9 +123,17 @@ class TestRaise(unittest.TestCase):
     def test_raise(self):
         with self.assertRaises(ValueError):
             los = LOSDistribution(
-                kappa_pdf=None,
-                kappa_bin_edges=None,
+                individual_distribution=None,
+                kwargs_individual=None,
                 global_los_distribution=0,
                 los_distributions=["BAD"],
             )
             los.draw_los(kwargs_los=[{}])
+
+        with self.assertRaises(ValueError):
+            los = LOSDistribution(
+                individual_distribution="BAD",
+                kwargs_individual=None,
+                global_los_distribution=False,
+                los_distributions=None,
+            )

@@ -22,6 +22,16 @@ class TestKinParam(object):
             kwargs_fixed={},
         )
 
+        self._param_tan_rad = KinParam(
+            anisotropy_sampling=True,
+            anisotropy_model="const",
+            distribution_function="GAUSSIAN",
+            sigma_v_systematics=True,
+            anisotropy_parameterization="TAN_RAD",
+            log_scatter=True,
+            kwargs_fixed={},
+        )
+
         kwargs_fixed = {
             "a_ani": 1,
             "a_ani_sigma": 0.1,
@@ -42,6 +52,9 @@ class TestKinParam(object):
         assert len(param_list) == 5
         param_list = self._param.param_list(latex_style=True)
         assert len(param_list) == 5
+
+        param_list = self._param_tan_rad.param_list(latex_style=True)
+        assert len(param_list) == 3
 
         param_list = self._param_log_scatter.param_list(latex_style=False)
         assert len(param_list) == 5

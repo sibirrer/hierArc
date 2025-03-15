@@ -18,23 +18,30 @@ class ImageModelPosterior(object):
         self._gamma, self._gamma_error = gamma, gamma_error
         self._r_eff, self._r_eff_error = r_eff, r_eff_error
 
-    def draw_lens(self, no_error=False):
+    def draw_lens(self, gamma_pl=None, no_error=False):
         """
 
         :param no_error: bool, if True, does not render from the uncertainty but uses the mean values instead
+        :param gamma_pl: power law slope, if None, draws from measurement uncertainty, otherwise takes at fixed value
+        :type gamma_pl: float or None
         :return: theta_E, gamma, r_eff, delta_r_eff
         """
         if no_error is True:
-            return self._theta_E, self._gamma, self._r_eff, 1
+            if gamma_pl is None:
+                gamma_pl = self._gamma
+            return self._theta_E, gamma_pl, self._r_eff, 1
         theta_E_draw = np.maximum(
             np.random.normal(loc=self._theta_E, scale=self._theta_E_error), 0
         )
-        gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
-        # distributions are drawn in the range [1, 3)
-        # the power-law slope gamma=3 is divergent in mass in the center and values close close to =3 may be unstable
-        # to compute the kinematics for.
-        gamma_draw = np.maximum(gamma_draw, 1.0)
-        gamma_draw = np.minimum(gamma_draw, 2.999)
+        if gamma_pl is None:
+            gamma_draw = np.random.normal(loc=self._gamma, scale=self._gamma_error)
+            # distributions are drawn in the range [1, 3)
+            # the power-law slope gamma=3 is divergent in mass in the center and values close to =3 may be unstable
+            # to compute the kinematics for.
+            gamma_draw = np.maximum(gamma_draw, 1.0)
+            gamma_draw = np.minimum(gamma_draw, 2.999)
+        else:
+            gamma_draw = gamma_pl
         # we make sure no negative r_eff are being sampled
         delta_r_eff = np.maximum(
             np.random.normal(loc=1, scale=self._r_eff_error / self._r_eff), 0.001

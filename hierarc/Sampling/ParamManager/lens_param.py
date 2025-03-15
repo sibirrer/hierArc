@@ -18,6 +18,9 @@ class LensParam(object):
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
         alpha_log_m2l_sampling=False,
+        gamma_pl_num=0,
+        gamma_pl_global_sampling=False,
+        gamma_pl_global_dist="NONE",
         kwargs_fixed=None,
         log_scatter=False,
     ):
@@ -45,7 +48,12 @@ class LensParam(object):
             according to a predefined quantity of the lens
         :param alpha_gamma_in_sampling: bool, if True samples a parameter alpha_gamma_in, which scales gamma_in linearly
         :param alpha_log_m2l_sampling: bool, if True samples a parameter alpha_log_m2l, which scales log_m2l linearly
-        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior in log)
+        :param gamma_pl_num: int, number of power-law density slopes being sampled (to be assigned to individual lenses)
+        :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
+        :type gamma_pl_global_sampling: bool
+        :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
+        :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior
+         in log)
         :param kwargs_fixed: keyword arguments that are held fixed through the sampling
         """
         self._lambda_mst_sampling = lambda_mst_sampling
@@ -60,6 +68,9 @@ class LensParam(object):
         self._beta_lambda_sampling = beta_lambda_sampling
         self._alpha_gamma_in_sampling = alpha_gamma_in_sampling
         self._alpha_log_m2l_sampling = alpha_log_m2l_sampling
+        self._gamma_pl_num = gamma_pl_num
+        self._gamma_pl_global_sampling = gamma_pl_global_sampling
+        self._gamma_pl_global_dist = gamma_pl_global_dist
 
         self._log_scatter = log_scatter
         if kwargs_fixed is None:
@@ -157,6 +168,23 @@ class LensParam(object):
                     list.append(r"$\alpha_{\Upsilon_{\rm stars}}$")
                 else:
                     list.append("alpha_log_m2l")
+        for i in range(self._gamma_pl_num):
+            if latex_style is True:
+                list.append(r"$\gamma_{\rm pl %i}$" % i)
+            else:
+                list.append("gamma_pl_%s" % i)
+        if self._gamma_pl_global_sampling is True:
+            if "gamma_pl_mean" not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$\gamma_{\rm pl, global}$")
+                else:
+                    list.append("gamma_pl_mean")
+            if self._gamma_pl_global_dist == "GAUSSIAN":
+                if "gamma_pl_sigma" not in self._kwargs_fixed:
+                    if latex_style is True:
+                        list.append(r"$\sigma(\gamma_{\rm pl, global})$")
+                    else:
+                        list.append("gamma_pl_sigma")
         return list
 
     def args2kwargs(self, args, i=0):
@@ -250,6 +278,24 @@ class LensParam(object):
             else:
                 kwargs["alpha_log_m2l"] = args[i]
                 i += 1
+        if self._gamma_pl_num > 0:
+            gamma_pl_list = []
+            for k in range(self._gamma_pl_num):
+                gamma_pl_list.append(args[i])
+                i += 1
+            kwargs["gamma_pl_list"] = gamma_pl_list
+        if self._gamma_pl_global_sampling is True:
+            if "gamma_pl_mean" in self._kwargs_fixed:
+                kwargs["gamma_pl_mean"] = self._kwargs_fixed["gamma_pl_mean"]
+            else:
+                kwargs["gamma_pl_mean"] = args[i]
+                i += 1
+            if self._gamma_pl_global_dist == "GAUSSIAN":
+                if "gamma_pl_sigma" in self._kwargs_fixed:
+                    kwargs["gamma_pl_sigma"] = self._kwargs_fixed["gamma_pl_sigma"]
+                else:
+                    kwargs["gamma_pl_sigma"] = args[i]
+                    i += 1
 
         return kwargs, i
 
@@ -308,4 +354,13 @@ class LensParam(object):
         if self._alpha_log_m2l_sampling is True:
             if "alpha_log_m2l" not in self._kwargs_fixed:
                 args.append(kwargs["alpha_log_m2l"])
+        if self._gamma_pl_num > 0:
+            for i in range(self._gamma_pl_num):
+                args.append(kwargs["gamma_pl_list"][i])
+        if self._gamma_pl_global_sampling is True:
+            if "gamma_pl_mean" not in self._kwargs_fixed:
+                args.append(kwargs["gamma_pl_mean"])
+            if self._gamma_pl_global_dist == "GAUSSIAN":
+                if "gamma_pl_sigma" not in self._kwargs_fixed:
+                    args.append(kwargs["gamma_pl_sigma"])
         return args
