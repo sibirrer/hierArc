@@ -1,7 +1,7 @@
 import numpy as np
 
 _SUPPORTED_DISTRIBUTIONS = ["GAUSSIAN", "GAUSSIAN_SCALED", "NONE"]
-_SUPPORTED_MODELS = ["OM", "GOM", "const", "const",  "NONE"]
+_SUPPORTED_MODELS = ["OM", "GOM", "const", "const", "NONE"]
 _PARAMETERIZATION = ["beta", "TAN_RAD"]
 
 
@@ -97,9 +97,12 @@ class AnisotropyDistribution(object):
                 elif self._distribution_function in ["GAUSSIAN_SCALED"]:
                     a_ani_draw = np.random.normal(a_ani, a_ani_sigma * a_ani)
                 else:
-                    raise ValueError("Distribution function %s not implemented" % self._distribution_function)
+                    raise ValueError(
+                        "Distribution function %s not implemented"
+                        % self._distribution_function
+                    )
                 if self._parametrization == "TAN_RAD":
-                    a_ani_draw = 1 - a_ani_draw ** 2
+                    a_ani_draw = 1 - a_ani_draw**2
 
                 if a_ani_draw < self._a_ani_min or a_ani_draw > self._a_ani_max:
                     return self.draw_anisotropy(
