@@ -1,5 +1,5 @@
-numpy>=1.13
-astropy>=3.0
+numpy
+astropy
 
 scipy
 emcee
