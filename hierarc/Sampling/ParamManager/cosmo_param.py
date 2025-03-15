@@ -17,7 +17,14 @@ class CosmoParam(object):
             kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
         self._ppn_sampling = ppn_sampling
-        self._supported_cosmologies = ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wphiCDM", "NONE"]
+        self._supported_cosmologies = [
+            "FLCDM",
+            "FwCDM",
+            "w0waCDM",
+            "oLCDM",
+            "wphiCDM",
+            "NONE",
+        ]
         if cosmology not in self._supported_cosmologies:
             raise ValueError(
                 "cosmology %s not supported!. Please chose among %s "
