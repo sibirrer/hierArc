@@ -13,7 +13,6 @@ class KinParam(object):
         sigma_v_systematics=False,
         log_scatter=False,
         kwargs_fixed=None,
-
     ):
         """
 
@@ -51,8 +50,13 @@ class KinParam(object):
             if self._anisotropy_model in ["OM", "GOM", "const"]:
                 if "a_ani" not in self._kwargs_fixed:
                     if latex_style is True:
-                        if self._anisotropy_model == "const" and self._anisotropy_parameterization == "TAN_RAD":
-                            list.append(r"$\langle \phi_{\rm TAN}/\phi_{\rm RAD}\rangle$")
+                        if (
+                            self._anisotropy_model == "const"
+                            and self._anisotropy_parameterization == "TAN_RAD"
+                        ):
+                            list.append(
+                                r"$\langle \phi_{\rm TAN}/\phi_{\rm RAD}\rangle$"
+                            )
                         elif self._anisotropy_model == "const":
                             list.append(r"$\langle \beta_{\rm ani}\rangle$")
                         else:
