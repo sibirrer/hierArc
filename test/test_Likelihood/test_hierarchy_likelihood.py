@@ -58,6 +58,28 @@ class TestLensLikelihood(object):
             **kwargs_likelihood,
             **kwargs_model
         )
+
+        self.likelihood_vel_disp_dist = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtDdGaussian",
+            kin_scaling_param_list=["a_ani"],
+            j_kin_scaling_param_axes=ani_param_array,
+            j_kin_scaling_grid_list=[ani_scaling_array],
+            bin_edges_vel_disp_scaling=None,
+            pdf_array_vel_disp_scaling=None,
+            vel_disp_scaling_distributions=vel_disp_scaling,
+            num_distribution_draws=200,
+            los_distributions=["GAUSSIAN"],
+            global_los_distribution=0,
+            los_distribution_individual=None,
+            kwargs_los_individual=None,
+            mst_ifu=True,
+            **kwargs_likelihood,
+            **kwargs_model
+        )
+
         self.likelihood_single = LensLikelihood(
             z_lens,
             z_source,
@@ -192,6 +214,14 @@ class TestLensLikelihood(object):
 
         kwargs_kin = {"a_ani": 1, "a_ani_sigma": 0.1}
         ln_likelihood = self.likelihood.lens_log_likelihood(
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_los=kwargs_los,
+        )
+        npt.assert_almost_equal(ln_likelihood, -0.5, decimal=1)
+
+        ln_likelihood = self.likelihood_vel_disp_dist.lens_log_likelihood(
             self.cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,

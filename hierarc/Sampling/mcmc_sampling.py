@@ -43,6 +43,7 @@ class MCMCSampler(object):
         mean_start = self.param.kwargs2args(**kwargs_mean_start)
         sigma_start = self.param.kwargs2args(**kwargs_sigma_start)
         p0 = sampling_util.sample_ball(mean_start, sigma_start, n_walkers)
+        # TODO: adjust ball within lower and upper limits
         backend = kwargs_emcee.get("backend", None)
         if backend is not None:
             if continue_from_backend:

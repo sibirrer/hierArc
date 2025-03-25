@@ -6,7 +6,7 @@ from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
 from hierarc.Sampling.Distributions.anisotropy_distributions import (
     AnisotropyDistribution,
 )
-from hierarc.Util.distribution_util import PDFSampling
+from hierarc.Util.distribution_util import PDFSampling, DistributionSampling
 from hierarc.Sampling.Distributions.lens_distribution import LensDistribution
 import numpy as np
 import copy
@@ -54,6 +54,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         j_kin_scaling_grid_list=None,
         bin_edges_vel_disp_scaling=None,
         pdf_array_vel_disp_scaling=None,
+        vel_disp_scaling_distributions=None,
         # likelihood evaluation quantities
         num_distribution_draws=50,
         normalized=True,
@@ -79,6 +80,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
          in velocity dispersion prediction
         :param pdf_array_vel_disp_scaling: histogram for the bin edges to calculate the PDF of the
          sigma_axis/sigma_spherical velocity dispersion prediction
+        :param vel_disp_scaling_distributions: list of samples that describes sigma_axis/sigma_spherical velocity
+         dispersion prediction. Distribution can be single values or an array of length of the velocity dispersion
+         measurements.
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
          over
         :param global_los_distribution: if integer, will draw from the global kappa distribution specified in that
@@ -176,12 +180,15 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             parameterization=anisotropy_parameterization,
         )
         self._prior = PriorLikelihood(prior_list=prior_list)
-        if bin_edges_vel_disp_scaling is None or pdf_array_vel_disp_scaling is None:
-            self._inclination_sampling = False
-        else:
+        if vel_disp_scaling_distributions is not None:
+            self._inclination_sampling_class = DistributionSampling(distributions=vel_disp_scaling_distributions)
+            self._inclination_sampling = True
+        elif bin_edges_vel_disp_scaling is not None and pdf_array_vel_disp_scaling is not None:
             self._inclination_sampling = True
             self._inclination_sampling_class = PDFSampling(bin_edges=bin_edges_vel_disp_scaling,
-                                                     pdf_array=pdf_array_vel_disp_scaling)
+                                                           pdf_array=pdf_array_vel_disp_scaling)
+        else:
+            self._inclination_sampling = False
 
     def info(self):
         """

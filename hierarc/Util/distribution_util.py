@@ -33,6 +33,28 @@ class PDFSampling(object):
         return self.draw(n=1)
 
 
+class DistributionSampling(object):
+    """
+    class to sample from discrete samples (can be multi-dimensional)
+    """
+    def __init__(self, distributions):
+        """
+
+        :param distributions: list of distributions
+        """
+        self._num_dist = len(distributions)
+        self._distributions = distributions
+
+    def draw_one(self):
+        """
+        randomly selects single point in distribution
+
+        :return:
+        """
+        index = np.random.randint(low=0, high=self._num_dist)
+        return self._distributions[index]
+
+
 def approx_cdf_1d(bin_edges, pdf_array):
     """
 

@@ -2,7 +2,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 from hierarc.Util import distribution_util
-from hierarc.Util.distribution_util import PDFSampling
+from hierarc.Util.distribution_util import PDFSampling, DistributionSampling
 from lenstronomy.Util import prob_density
 
 
@@ -48,6 +48,24 @@ class TestProbDensity(object):
 
         draw = approx.draw_one
         assert len(draw) == 1
+
+
+class TestDistributionSampling(object):
+
+    def setup_method(self):
+        num_dist = 1000
+        dist = np.zeros((num_dist, 3))
+        assert len(dist) == num_dist
+        dist[:, 0] = np.random.normal(num_dist)
+        dist[:, 1] = np.random.normal(num_dist) + 1
+        dist[:, 2] = dist[:, 0] * dist[:, 1]
+        self._dist_sampling = DistributionSampling(distributions=dist)
+
+    def test_draw_one(self):
+        dist_drawn = []
+        for i in range(100):
+            draw = self._dist_sampling.draw_one()
+            assert draw[2] == draw[0] * draw[1]
 
 
 if __name__ == "__main__":
