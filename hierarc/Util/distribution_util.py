@@ -34,9 +34,8 @@ class PDFSampling(object):
 
 
 class DistributionSampling(object):
-    """
-    class to sample from discrete samples (can be multi-dimensional)
-    """
+    """Class to sample from discrete samples (can be multi-dimensional)"""
+
     def __init__(self, distributions):
         """
 
@@ -46,8 +45,7 @@ class DistributionSampling(object):
         self._distributions = distributions
 
     def draw_one(self):
-        """
-        randomly selects single point in distribution
+        """Randomly selects single point in distribution.
 
         :return:
         """
