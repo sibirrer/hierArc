@@ -181,12 +181,19 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         )
         self._prior = PriorLikelihood(prior_list=prior_list)
         if vel_disp_scaling_distributions is not None:
-            self._inclination_sampling_class = DistributionSampling(distributions=vel_disp_scaling_distributions)
+            self._inclination_sampling_class = DistributionSampling(
+                distributions=vel_disp_scaling_distributions
+            )
             self._inclination_sampling = True
-        elif bin_edges_vel_disp_scaling is not None and pdf_array_vel_disp_scaling is not None:
+        elif (
+            bin_edges_vel_disp_scaling is not None
+            and pdf_array_vel_disp_scaling is not None
+        ):
             self._inclination_sampling = True
-            self._inclination_sampling_class = PDFSampling(bin_edges=bin_edges_vel_disp_scaling,
-                                                           pdf_array=pdf_array_vel_disp_scaling)
+            self._inclination_sampling_class = PDFSampling(
+                bin_edges=bin_edges_vel_disp_scaling,
+                pdf_array=pdf_array_vel_disp_scaling,
+            )
         else:
             self._inclination_sampling = False
 
