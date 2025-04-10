@@ -55,7 +55,7 @@ class KinParam(object):
                             and self._anisotropy_parameterization == "TAN_RAD"
                         ):
                             list.append(
-                                r"$\langle \phi_{\rm TAN}/\phi_{\rm RAD}\rangle$"
+                                r"$\langle \sigma_{\rm TAN}/\sigma_{\rm RAD}\rangle$"
                             )
                         elif self._anisotropy_model == "const":
                             list.append(r"$\langle \beta_{\rm ani}\rangle$")
