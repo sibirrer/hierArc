@@ -82,7 +82,7 @@ class LOSDistribution(object):
                     "line of sight distribution %s not valid." % self._los_distribution
                 )
         else:
-            kappa_ext_draw = 0
+            kappa_ext_draw = np.zeros(size)
         return kappa_ext_draw
 
     def draw_bool(self, kwargs_los):

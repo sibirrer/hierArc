@@ -362,10 +362,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_lens_draw["gamma_ppn"],
         )
         gamma_pl = kwargs_lens_draw.get("gamma_pl", 2)
-        kappa_ext = self._los.draw_los(kwargs_los)
+        kappa_ext = self._los.draw_los(kwargs_los, size=1)[0]
 
         # draw intrinsic source magnitude
         mag_source = self.draw_source(lum_dist=delta_lum_dist, **kwargs_source)
+
         ddt_, dd_, mag_source_ = self.displace_prediction(
             ddt,
             dd,
@@ -374,10 +375,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kappa_ext=kappa_ext,
             mag_source=mag_source,
         )
+
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
 
         kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
         kin_scaling = self.kin_scaling(kwargs_param)
+        if self._inclination_sampling is True:
+            inclination_scaling = self._inclination_sampling_class.draw_one
+            kin_scaling *= inclination_scaling ** 2
         lnlikelihood = self.log_likelihood(
             ddt_,
             dd_,
@@ -520,7 +525,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                 kwargs_lens_draw["lambda_mst"],
                 kwargs_lens_draw["gamma_ppn"],
             )
-            kappa_ext = self._los.draw_los(kwargs_los)
+            kappa_ext = self._los.draw_los(kwargs_los, size=1)[0]
             ddt_, dd_, _ = self.displace_prediction(
                 ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
             )

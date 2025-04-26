@@ -64,7 +64,7 @@ class TestDistributionSampling(object):
     def test_draw_one(self):
         dist_drawn = []
         for i in range(100):
-            draw = self._dist_sampling.draw_one()
+            draw = self._dist_sampling.draw_one
             assert draw[2] == draw[0] * draw[1]
 
 

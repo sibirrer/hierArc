@@ -294,6 +294,7 @@ class KinConstraints(BaseLensConfig):
                     j_kin_ani = self.j_kin_draw(
                         kwargs_anisotropy, no_error=True, **kwargs_lens
                     )
+                    # loop over IFU bins
                     for s, j_kin in enumerate(j_kin_ani):
                         ani_scaling_array_list[s][i, j] = j_kin / j_ani_0[s]
         elif num == 3:

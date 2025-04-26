@@ -176,7 +176,7 @@ class LensParam(object):
         if self._gamma_pl_global_sampling is True:
             if "gamma_pl_mean" not in self._kwargs_fixed:
                 if latex_style is True:
-                    list.append(r"$\gamma_{\rm pl, global}$")
+                    list.append(r"$\overline{\gamma}_{\rm pl}$")
                 else:
                     list.append("gamma_pl_mean")
             if self._gamma_pl_global_dist == "GAUSSIAN":

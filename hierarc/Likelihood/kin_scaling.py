@@ -1,7 +1,7 @@
 __author__ = "sibirrer", "ajshajib"
 
 from scipy.interpolate import interp1d
-from scipy.interpolate import interp2d
+from scipy.interpolate import RectBivariateSpline
 from scipy.interpolate import RegularGridInterpolator
 import numpy as np
 
@@ -90,9 +90,10 @@ class ParameterScalingSingleMeasurement(object):
                     fill_value="extrapolate",
                 )
             elif self._dim_scaling == 2:
-                self._f_ani = interp2d(
-                    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid.T
-                )
+                self._f_ani = r = RectBivariateSpline(param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid)
+                #self._f_ani = interp2d(
+                #    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid.T
+                #)
             else:
                 self._f_ani = RegularGridInterpolator(
                     tuple(param_grid_axes),
@@ -111,7 +112,7 @@ class ParameterScalingSingleMeasurement(object):
         if self._dim_scaling == 1:
             return self._f_ani(param_array[0])
         elif self._dim_scaling == 2:
-            return self._f_ani(param_array[0], param_array[1])[0]
+            return self._f_ani(param_array[0], param_array[1])[0].T[0]
         else:
             return self._f_ani(param_array)[0]
 

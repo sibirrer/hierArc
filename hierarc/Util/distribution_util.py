@@ -44,6 +44,7 @@ class DistributionSampling(object):
         self._num_dist = len(distributions)
         self._distributions = distributions
 
+    @property
     def draw_one(self):
         """Randomly selects single point in distribution.
 

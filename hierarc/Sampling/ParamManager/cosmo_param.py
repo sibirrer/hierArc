@@ -1,5 +1,5 @@
 from astropy.cosmology import FlatLambdaCDM, FlatwCDM, LambdaCDM, w0waCDM
-from .cosmo_model import wPhiCDM
+# from .cosmo_model import wPhiCDM
 
 
 class CosmoParam(object):
@@ -212,6 +212,7 @@ class CosmoParam(object):
                 Ode0=1.0 - kwargs["om"] - kwargs["ok"],
             )
         elif self._cosmology == "wphiCDM":
+            from .cosmo_model import wPhiCDM
             cosmo = wPhiCDM(
                 H0=kwargs["h0"],
                 Om0=kwargs["om"],

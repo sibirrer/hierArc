@@ -1,6 +1,7 @@
 from lenstronomy.Cosmo.kde_likelihood import KDELikelihood
 import numpy as np
-from scipy import interpolate
+#from scipy import interpolate
+from scipy.interpolate import RectBivariateSpline
 
 
 class DdtDdKDELikelihood(object):
@@ -46,8 +47,8 @@ class DdtDdKDELikelihood(object):
             for i, dd in enumerate(dd_grid):
                 for j, ddt in enumerate(ddt_grid):
                     z[j, i] = self._kde_likelihood.logLikelihood(dd, ddt)[0]
-            self._interp_log_likelihood = interpolate.interp2d(
-                dd_grid, ddt_grid, z, kind="cubic"
+            self._interp_log_likelihood = RectBivariateSpline(
+                dd_grid, ddt_grid, z.T
             )
         self._interpol = interpol
         self.num_data = 2
@@ -67,5 +68,5 @@ class DdtDdKDELikelihood(object):
         else:
             dd_ = dd
         if self._interpol is True:
-            return self._interp_log_likelihood(dd_, ddt)[0]
+            return self._interp_log_likelihood(dd_, ddt).T[0]
         return self._kde_likelihood.logLikelihood(dd_, ddt)[0]
