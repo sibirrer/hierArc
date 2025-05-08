@@ -30,7 +30,7 @@ class KinConstraints(BaseLensConfig):
         lens_model_list=None,
         MGE_light=False,
         kwargs_mge_light=None,
-        hernquist_approx=True,
+        hernquist_approx=False,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
