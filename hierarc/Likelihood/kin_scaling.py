@@ -90,10 +90,12 @@ class ParameterScalingSingleMeasurement(object):
                     fill_value="extrapolate",
                 )
             elif self._dim_scaling == 2:
-                self._f_ani = r = RectBivariateSpline(param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid)
-                #self._f_ani = interp2d(
+                self._f_ani = r = RectBivariateSpline(
+                    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid
+                )
+                # self._f_ani = interp2d(
                 #    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid.T
-                #)
+                # )
             else:
                 self._f_ani = RegularGridInterpolator(
                     tuple(param_grid_axes),

@@ -382,7 +382,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         kin_scaling = self.kin_scaling(kwargs_param)
         if self._inclination_sampling is True:
             inclination_scaling = self._inclination_sampling_class.draw_one
-            kin_scaling *= inclination_scaling ** 2
+            kin_scaling *= inclination_scaling**2
         lnlikelihood = self.log_likelihood(
             ddt_,
             dd_,
