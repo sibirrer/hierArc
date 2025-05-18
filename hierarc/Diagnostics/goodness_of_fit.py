@@ -287,6 +287,7 @@ class GoodnessOfFit(object):
         show_legend=True,
         color_measurement=None,
         color_prediction=None,
+        measurement_indexes=None,
     ):
         """Plot an individual IFU data goodness of fit.
 
@@ -322,7 +323,10 @@ class GoodnessOfFit(object):
         ) = likelihood.sigma_v_measured_vs_predict(
             cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_los=kwargs_los
         )
+        if measurement_indexes is None:
+            measurement_indexes = np.arange(len(sigma_v_measurement))
 
+        sigma_v_measurement = sigma_v_measurement[measurement_indexes]
         if len(np.atleast_1d(bin_edges)) < 2:
             bin_edges = np.arange(len(sigma_v_measurement) + 1) * bin_edges
         r_bins = bin_edges[:-1] + np.diff(bin_edges) / 2
@@ -331,7 +335,7 @@ class GoodnessOfFit(object):
             x=r_bins,
             y=sigma_v_measurement,
             xerr=np.diff(bin_edges) / 2.0,
-            yerr=np.sqrt(np.diag(cov_error_measurement)),
+            yerr=np.sqrt(np.diag(cov_error_measurement))[measurement_indexes],
             fmt="o",
             label="data",
             capsize=5,
@@ -339,8 +343,8 @@ class GoodnessOfFit(object):
         )
         ax.errorbar(
             r_bins,
-            sigma_v_predict_mean,
-            yerr=np.sqrt(np.diag(cov_error_predict)),
+            sigma_v_predict_mean[measurement_indexes],
+            yerr=np.sqrt(np.diag(cov_error_predict))[measurement_indexes],
             xerr=np.diff(bin_edges) / 2.0,
             fmt="o",
             label="model",

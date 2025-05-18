@@ -139,6 +139,19 @@ class TestGoodnessOfFit(object):
         )
         plt.close()
 
+        self.goodnessofFit.plot_ifu_fit(
+            ax,
+            self.cosmo,
+            kwargs_lens,
+            kwargs_kin,
+            kwargs_los=None,
+            lens_index=self.ifu_index,
+            bin_edges=[0, 0.5],
+            measurement_indexes=[0],
+            show_legend=True,
+        )
+        plt.close()
+
 
 class TestRaise(unittest.TestCase):
     def test_raise(self):
