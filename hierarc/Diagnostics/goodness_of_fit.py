@@ -288,6 +288,8 @@ class GoodnessOfFit(object):
         color_measurement=None,
         color_prediction=None,
         measurement_indexes=None,
+        data_label='data',
+        model_label='model',
     ):
         """Plot an individual IFU data goodness of fit.
 
@@ -304,6 +306,9 @@ class GoodnessOfFit(object):
         :param show_legend: bool, to show legend
         :param color_measurement: color of measurement
         :param color_prediction: color of model prediction
+        :param measurement_indexes: (optional) subset of indexes to be plotted
+        :param data_label: string for label of data points
+        :param model_label: string for label of predictions
         :return: figure as axes instance
         """
         kwargs_likelihood = self._kwargs_likelihood_list[lens_index]
@@ -337,7 +342,7 @@ class GoodnessOfFit(object):
             xerr=np.diff(bin_edges) / 2.0,
             yerr=np.sqrt(np.diag(cov_error_measurement))[measurement_indexes],
             fmt="o",
-            label="data",
+            label=data_label,
             capsize=5,
             color=color_measurement,
         )
@@ -347,7 +352,7 @@ class GoodnessOfFit(object):
             yerr=np.sqrt(np.diag(cov_error_predict))[measurement_indexes],
             xerr=np.diff(bin_edges) / 2.0,
             fmt="o",
-            label="model",
+            label=model_label,
             capsize=5,
             color=color_prediction,
         )
