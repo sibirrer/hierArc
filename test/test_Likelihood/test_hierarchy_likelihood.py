@@ -273,7 +273,9 @@ class TestLensLikelihood(object):
             kwargs_kin=kwargs_kin,
             kwargs_los=kwargs_los,
         )
-        npt.assert_almost_equal(ln_likelihood_simple, ln_likelihood_kappa_ext, decimal=1)
+        npt.assert_almost_equal(
+            ln_likelihood_simple, ln_likelihood_kappa_ext, decimal=1
+        )
 
         kwargs_lens = {
             "lambda_mst": 1000000,

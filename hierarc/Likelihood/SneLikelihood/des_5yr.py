@@ -23,35 +23,33 @@ class DES5YRData(object):
     """
 
     def __init__(self):
-        self._data_file = os.path.join(
-            _PATH_2_DATA, "DES-SN5YR", "DES-SN5YR_HD.csv"
-        )
-        self._cov_file = os.path.join(
-            _PATH_2_DATA, "DES-SN5YR", "STAT+SYS.txt"
-        )
+        self._data_file = os.path.join(_PATH_2_DATA, "DES-SN5YR", "DES-SN5YR_HD.csv")
+        self._cov_file = os.path.join(_PATH_2_DATA, "DES-SN5YR", "STAT+SYS.txt")
 
         print("Loading DES Y5 SN data from {}".format(self._data_file))
-        data = pd.read_csv(self._data_file, comment='#')
+        data = pd.read_csv(self._data_file, comment="#")
         self.origlen = len(data)
         # The only columns that we actually need here are the redshift,
         # distance modulus and distance modulus error
 
-        self.ww = (data['zHD'] > 0.00)
+        self.ww = data["zHD"] > 0.00
         # use the vpec corrected redshift for zCMB
-        self.zCMB = data['zHD'][self.ww]
-        self.zHEL = data['zHEL'][self.ww]
+        self.zCMB = data["zHD"][self.ww]
+        self.zHEL = data["zHEL"][self.ww]
         # distance modulus and relative stat uncertainties
-        self.mu_obs = data['MU'][self.ww]
-        self.mu_obs_err = data['MUERR_FINAL'][self.ww]
+        self.mu_obs = data["MU"][self.ww]
+        self.mu_obs_err = data["MUERR_FINAL"][self.ww]
 
         # Return this to the parent class, which will use it
         # when working out the likelihood
-        print(f"Found {len(self.zCMB)} DES SN 5 supernovae (or bins if you used the binned data file)")
+        print(
+            f"Found {len(self.zCMB)} DES SN 5 supernovae (or bins if you used the binned data file)"
+        )
 
         self.cov_mag_b = self.build_covariance()
 
     def build_covariance(self):
-        """Run once at the start to build the covariance matrix for the data"""
+        """Run once at the start to build the covariance matrix for the data."""
         filename = self._cov_file
         print("Loading DESY5 SN covariance from {}".format(filename))
         # The file format for the covariance has the first line as an integer
@@ -63,14 +61,14 @@ class DES5YRData(object):
         f = open(filename)
         line = f.readline()
         n = int(line)
-        C = np.zeros((n,n))
+        C = np.zeros((n, n))
         for i in range(n):
             for j in range(n):
-                C[i,j] = float(f.readline())
+                C[i, j] = float(f.readline())
 
         # Now add in the statistical error to the diagonal
         for i in range(n):
-            C[i,i] += self.mu_obs_err[i]**2
+            C[i, i] += self.mu_obs_err[i] ** 2
         f.close()
 
         # Return the covariance; the parent class knows to invert this
