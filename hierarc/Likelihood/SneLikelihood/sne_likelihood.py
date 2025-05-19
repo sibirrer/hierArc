@@ -32,6 +32,17 @@ class SneLikelihood(object):
             self._likelihood = CustomSneLikelihood(
                 mag_mean, cov_mag, zhel, zcmb, no_intrinsic_scatter=True
             )
+        elif sample_name == "DES5YR":
+            from hierarc.Likelihood.SneLikelihood.des_5yr import DES5YRData
+
+            data = DES5YRData()
+            mag_mean = data.mu_obs
+            cov_mag = data.cov_mag_b
+            zhel = data.zHEL
+            zcmb = data.zCMB
+            self._likelihood = CustomSneLikelihood(
+                mag_mean, cov_mag, zhel, zcmb, no_intrinsic_scatter=True
+            )
         else:
             self._likelihood = SneLikelihoodFromFile(
                 sample_name=sample_name, **kwargs_sne_likelihood
