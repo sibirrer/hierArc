@@ -288,8 +288,8 @@ class GoodnessOfFit(object):
         color_measurement=None,
         color_prediction=None,
         measurement_indexes=None,
-        data_label='data',
-        model_label='model',
+        data_label="data",
+        model_label="model",
     ):
         """Plot an individual IFU data goodness of fit.
 

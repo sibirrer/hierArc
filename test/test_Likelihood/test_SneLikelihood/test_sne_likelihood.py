@@ -109,6 +109,22 @@ class TestSnePantheon(object):
         logL_sigma_neg = likelihood.log_likelihood(cosmo=cosmo_sigma_neg)
         npt.assert_almost_equal(logL_sigma_neg - logL_mean, -0.132, decimal=1)
 
+    def test_DESSNY5R(self):
+        likelihood = SneLikelihood(sample_name="DES5YR")
+        om_mean, om_sigma = 0.352, 0.017  # from DES Collaboration 2022
+        from astropy.cosmology import FlatLambdaCDM
+
+        cosmo_mean = FlatLambdaCDM(H0=70, Om0=om_mean)
+        logL_mean = likelihood.log_likelihood(cosmo=cosmo_mean)
+        cosmo_sigma_plus = FlatLambdaCDM(H0=70, Om0=om_mean + om_sigma)
+        logL_sigma_plus = likelihood.log_likelihood(cosmo=cosmo_sigma_plus)
+        npt.assert_almost_equal(logL_sigma_plus - logL_mean, -0.4792, decimal=1)
+        cosmo_sigma_neg = FlatLambdaCDM(H0=70, Om0=om_mean - om_sigma)
+        logL_sigma_neg = likelihood.log_likelihood(cosmo=cosmo_sigma_neg)
+        npt.assert_almost_equal(logL_sigma_neg - logL_mean, -0.555, decimal=1)
+
+        print(logL_sigma_plus - logL_mean, logL_sigma_neg - logL_mean)
+
 
 if __name__ == "__main__":
     pytest.main()
