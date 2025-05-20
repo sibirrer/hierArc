@@ -6,17 +6,21 @@ class TransformedCosmography(object):
     """Class to manage hierarchical hyper-parameter that impact the cosmographic
     posterior interpretation of individual lenses."""
 
-    def __init__(self, z_lens, z_source):
+    def __init__(self, gamma_pl_pivot=None, gamma_pl_ddt_slope=None):
         """
 
-        :param z_lens: lens redshift
-        :param z_source: source redshift
+        :param gamma_pl_pivot: pivote power-law slope relative to which the Ddt scaling operates
+        :param gamma_pl_ddt_slope: slope of Ddt / gamma_pl such that Ddt(gamma_pl) = Ddt_0 + slope * gamma_pl
         """
-        self._z_lens = z_lens
-        self._z_source = z_source
+        if gamma_pl_ddt_slope is None or gamma_pl_ddt_slope is None:
+            self._gamma_pl_scaling = False
+        else:
+            self._gamma_pl_scaling = True
+        self._gamma_pl_pivot = gamma_pl_pivot
+        self._gamma_pl_ddt_slope = gamma_pl_ddt_slope
 
     def displace_prediction(
-        self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0
+        self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0, gamma_pl=None,
     ):
         """Here we effectively change the posteriors of the lens, but rather than
         changing the instance of the KDE we displace the predicted angular diameter
@@ -32,6 +36,7 @@ class TransformedCosmography(object):
         :param kappa_ext: external convergence to be added on top of the D_dt posterior
         :param mag_source: source magnitude (attention, log scale, thus transform needs
             to be changed!)
+        :param gamma_pl: power-law density slope
         :returns: ddt, dd, mag_source
         """
         ddt_, dd_ = self._displace_ppn(ddt, dd, gamma_ppn=gamma_ppn)
@@ -39,6 +44,7 @@ class TransformedCosmography(object):
         ddt_, dd_, mag_source_ = self._displace_lambda_mst(
             ddt_, dd_, lambda_mst=lambda_mst, kappa_ext=kappa_ext, mag_source=mag_source
         )
+        ddt_ = self._displace_gamma_pl(ddt_, gamma_pl)
         return ddt_, dd_, mag_source_
 
     @staticmethod
@@ -108,3 +114,17 @@ class TransformedCosmography(object):
             lambda_tot
         )  # inverse MST transform of magnification in magnitude
         return ddt_, dd_, mag_source_
+
+    def _displace_gamma_pl(self, ddt, gamma_pl):
+        """
+        shifts Ddt prediction as a function of the power-law density slope.
+        This shift is the inverse such that the Ddt predictions in the likelihood are unchanged.
+
+        :param ddt: model-predicted time-delay distance
+        :param gamma_pl: model-predicted power-law density slope
+        :return: shifted ddt
+        """
+        if self._gamma_pl_scaling:
+            # minus sign is as we move the model prediction and not the posteriors
+            ddt -= (gamma_pl - self._gamma_pl_pivot) * self._gamma_pl_ddt_slope
+        return ddt

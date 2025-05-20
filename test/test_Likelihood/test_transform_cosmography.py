@@ -6,9 +6,7 @@ import numpy.testing as npt
 
 class TestTransformedCoismography(object):
     def setup_method(self):
-        z_lens = 0.5
-        z_source = 1.5
-        self.transform = TransformedCosmography(z_lens=z_lens, z_source=z_source)
+        self.transform = TransformedCosmography()
 
     def test_displace_prediction(self):
         ddt, dd = 1, 1
@@ -80,6 +78,13 @@ class TestTransformedCoismography(object):
         ddt_, dd_ = self.transform._displace_kappa_ext(ddt, dd, kappa_ext=kappa_ext)
         assert ddt_ == ddt * (1 - kappa_ext)
         assert dd == dd_
+
+    def test_displace_ddt_gamma_pl(self):
+        ddt = 10
+        gamma_pl = 2.1
+        transform = TransformedCosmography(gamma_pl_pivot=2, gamma_pl_ddt_slope=-0.1)
+        ddt_ = transform._displace_gamma_pl(ddt, gamma_pl)
+        npt.assert_almost_equal(ddt_, ddt + 0.1 * 0.1)
 
 
 if __name__ == "__main__":

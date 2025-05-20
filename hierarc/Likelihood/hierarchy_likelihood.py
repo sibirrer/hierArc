@@ -61,6 +61,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         # kappa quantities
         los_distribution_individual=None,
         kwargs_los_individual=None,
+        # gamma_pl scaling
+        gamma_pl_pivot=None,
+        gamma_pl_ddt_slope=None,
         # priors
         prior_list=None,
         # specifics for each lens
@@ -122,8 +125,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
          kinematic prediction
         :param anisotropy_parameterization: model of parameterization (currently for constant anisotropy),
          ["beta" or "TAN_RAD"] supported
+        :param gamma_pl_pivot: pivote power-law slope relative to which the Ddt scaling operates
+        :param gamma_pl_ddt_slope: slope of Ddt / gamma_pl such that Ddt(gamma_pl) = Ddt_0 + slope * gamma_pl
         """
-        TransformedCosmography.__init__(self, z_lens=z_lens, z_source=z_source)
+        TransformedCosmography.__init__(self, gamma_pl_pivot=gamma_pl_pivot, gamma_pl_ddt_slope=gamma_pl_ddt_slope)
 
         KinScaling.__init__(
             self,
@@ -374,6 +379,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             lambda_mst=lambda_mst,
             kappa_ext=kappa_ext,
             mag_source=mag_source,
+            gamma_pl=gamma_pl,
         )
 
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
@@ -404,12 +410,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         """
         if self.likelihood_type in ["DSPL"]:
             return 0, 0  # just returns some random numbers as not being used
-        dd = cosmo.angular_diameter_distance(z=self._z_lens).value
-        ds = cosmo.angular_diameter_distance(z=self._z_source).value
+        dd = cosmo.angular_diameter_distance(z=self.z_lens).value
+        ds = cosmo.angular_diameter_distance(z=self.z_source).value
         dds = cosmo.angular_diameter_distance_z1z2(
-            z1=self._z_lens, z2=self._z_source
+            z1=self.z_lens, z2=self.z_source
         ).value
-        ddt = (1.0 + self._z_lens) * dd * ds / dds
+        ddt = (1.0 + self.z_lens) * dd * ds / dds
         return np.maximum(np.nan_to_num(ddt), 0.00001), np.maximum(
             np.nan_to_num(dd), 0.00001
         )
@@ -426,11 +432,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         if self.likelihood_type not in ["Mag", "TDMag", "TDMagMagnitude"]:
             return 0
         angular_diameter_distances = np.maximum(
-            np.nan_to_num(cosmo.angular_diameter_distance(self._z_source).value),
+            np.nan_to_num(cosmo.angular_diameter_distance(self.z_source).value),
             0.00001,
         )
         lum_dists = 5 * np.log10(
-            (1 + self._z_source) * (1 + self._z_source) * angular_diameter_distances
+            (1 + self.z_source) * (1 + self.z_source) * angular_diameter_distances
         )
 
         z_anchor = z_apparent_m_anchor
@@ -521,13 +527,15 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         cov_error_predict = np.zeros_like(cov_error_measurement)
         for i in range(self._num_distribution_draws):
             kwargs_lens_draw = self._lens_distribution.draw_lens(**kwargs_lens)
-            lambda_mst, gamma_ppn = (
+            lambda_mst, gamma_ppn, gamma_pl = (
                 kwargs_lens_draw["lambda_mst"],
                 kwargs_lens_draw["gamma_ppn"],
+                kwargs_lens_draw.get("gamma_pl", None)
             )
             kappa_ext = self._los.draw_los(kwargs_los, size=1)[0]
             ddt_, dd_, _ = self.displace_prediction(
-                ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
+                ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
+                gamma_pl=gamma_pl,
             )
             kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(
                 **kwargs_kin_copy
@@ -574,13 +582,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         dd_draws = []
         for i in range(self._num_distribution_draws):
             kwargs_lens_draw = self._lens_distribution.draw_lens(**kwargs_lens)
-            lambda_mst, gamma_ppn = (
+            lambda_mst, gamma_ppn, gamma_pl = (
                 kwargs_lens_draw["lambda_mst"],
                 kwargs_lens_draw["gamma_ppn"],
+                kwargs_lens_draw.get("gamma_pl", None),
             )
             kappa_ext = self._los.draw_los(kwargs_los)
             ddt_, dd_, _ = self.displace_prediction(
-                ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext
+                ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext, gamma_pl=gamma_pl
             )
             ddt_draws.append(ddt_)
             dd_draws.append(dd_)
