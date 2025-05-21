@@ -6,11 +6,12 @@ from astropy.cosmology import FlatLambdaCDM, FlatwCDM, LambdaCDM, w0waCDM
 class CosmoParam(object):
     """Manages the cosmological parameters in the sampling."""
 
-    def __init__(self, cosmology, ppn_sampling=False, kwargs_fixed=None):
+    def __init__(self, cosmology, ppn_sampling=False, rd_sampling=False, kwargs_fixed=None):
         """
 
         :param cosmology: string describing cosmological model
         :param ppn_sampling: post-newtonian parameter sampling
+        :param rd_sampling: sound horizon at drag epoch sampling (used only if the BAOLIkelihood is used)
         :param kwargs_fixed: keyword arguments of fixed parameters during sampling
         """
         self._cosmology = cosmology
@@ -18,6 +19,7 @@ class CosmoParam(object):
             kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
         self._ppn_sampling = ppn_sampling
+        self._rd_sampling = rd_sampling
         self._supported_cosmologies = [
             "FLCDM",
             "FwCDM",
@@ -91,6 +93,14 @@ class CosmoParam(object):
                     list.append(r"$\gamma_{\rm ppn}$")
                 else:
                     list.append("gamma_ppn")
+
+        if self._rd_sampling is True:
+            if "rd" not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$r_d$")
+                else:
+                    list.append("rd")
+
         return list
 
     def args2kwargs(self, args, i=0):
@@ -152,6 +162,13 @@ class CosmoParam(object):
             else:
                 kwargs["gamma_ppn"] = args[i]
                 i += 1
+        if self._rd_sampling is True:
+            if "rd" in self._kwargs_fixed:
+                kwargs["rd"] = self._kwargs_fixed["rd"]
+            else:
+                kwargs["rd"] = args[i]
+                i += 1
+
         return kwargs, i
 
     def kwargs2args(self, kwargs):
@@ -186,6 +203,9 @@ class CosmoParam(object):
         if self._ppn_sampling is True:
             if "gamma_ppn" not in self._kwargs_fixed:
                 args.append(kwargs["gamma_ppn"])
+        if self._rd_sampling is True:
+            if "rd" not in self._kwargs_fixed:
+                args.append(kwargs["rd"])
         return args
 
     def cosmo(self, kwargs):
