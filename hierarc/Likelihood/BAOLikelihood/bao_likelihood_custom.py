@@ -6,9 +6,11 @@ _twopi = 2 * np.pi
 
 
 class CustomBAOLikelihood(object):
-    """Class method for an arbitrary BAO measurements. Distances measurements (scaled by rs) and the
-     covariance matrix must be provided in the constructor. The likelihood is
-     assumed to be Gaussian."""
+    """Class method for an arbitrary BAO measurements.
+
+    Distances measurements (scaled by rs) and the covariance matrix must be provided in
+    the constructor. The likelihood is assumed to be Gaussian.
+    """
 
     def __init__(self, z, d, distance_type, cov):
         """
@@ -42,8 +44,10 @@ class CustomBAOLikelihood(object):
             elif self.distance_type[i] == "DH_over_rs":
                 distance_theory[i] = self._compute_DH(cosmo, self.z[i])
             else:
-                raise ValueError("Unsupported distance type: {}".format(self.distance_type))
-            #scale by the comoving sound horizon
+                raise ValueError(
+                    "Unsupported distance type: {}".format(self.distance_type)
+                )
+            # scale by the comoving sound horizon
             distance_theory[i] /= rd
 
         # Compute the log likelihood
@@ -53,9 +57,14 @@ class CustomBAOLikelihood(object):
         return logL
 
     def _compute_DV(self, cosmo, z):
-        """Compute the DV distance at redshift z. (see Section III.A of https://arxiv.org/pdf/2503.14738)"""
+        """Compute the DV distance at redshift z.
 
-        DV = (z * self._compute_DM(cosmo, z)**2 * self._compute_DH(cosmo, z))**(1./3.)
+        (see Section III.A of https://arxiv.org/pdf/2503.14738)
+        """
+
+        DV = (z * self._compute_DM(cosmo, z) ** 2 * self._compute_DH(cosmo, z)) ** (
+            1.0 / 3.0
+        )
         return DV
 
     def _compute_DM(self, cosmo, z):
@@ -67,5 +76,3 @@ class CustomBAOLikelihood(object):
         Hz = cosmo.H(z)  # in km/s/Mpc
         D_H = (c / Hz).to(u.Mpc)
         return D_H.value
-
-

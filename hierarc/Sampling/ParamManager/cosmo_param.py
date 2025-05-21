@@ -6,7 +6,9 @@ from astropy.cosmology import FlatLambdaCDM, FlatwCDM, LambdaCDM, w0waCDM
 class CosmoParam(object):
     """Manages the cosmological parameters in the sampling."""
 
-    def __init__(self, cosmology, ppn_sampling=False, rd_sampling=False, kwargs_fixed=None):
+    def __init__(
+        self, cosmology, ppn_sampling=False, rd_sampling=False, kwargs_fixed=None
+    ):
         """
 
         :param cosmology: string describing cosmological model
