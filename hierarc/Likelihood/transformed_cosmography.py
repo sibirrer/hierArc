@@ -20,7 +20,14 @@ class TransformedCosmography(object):
         self._gamma_pl_ddt_slope = gamma_pl_ddt_slope
 
     def displace_prediction(
-        self, ddt, dd, gamma_ppn=1, lambda_mst=1, kappa_ext=0, mag_source=0, gamma_pl=None,
+        self,
+        ddt,
+        dd,
+        gamma_ppn=1,
+        lambda_mst=1,
+        kappa_ext=0,
+        mag_source=0,
+        gamma_pl=None,
     ):
         """Here we effectively change the posteriors of the lens, but rather than
         changing the instance of the KDE we displace the predicted angular diameter
@@ -116,9 +123,9 @@ class TransformedCosmography(object):
         return ddt_, dd_, mag_source_
 
     def _displace_gamma_pl(self, ddt, gamma_pl):
-        """
-        shifts Ddt prediction as a function of the power-law density slope.
-        This shift is the inverse such that the Ddt predictions in the likelihood are unchanged.
+        """Shifts Ddt prediction as a function of the power-law density slope. This
+        shift is the inverse such that the Ddt predictions in the likelihood are
+        unchanged.
 
         :param ddt: model-predicted time-delay distance
         :param gamma_pl: model-predicted power-law density slope

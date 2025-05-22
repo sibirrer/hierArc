@@ -34,4 +34,3 @@ class DESIDR2Data(object):
         self.distance_type = data.iloc[:, 2].to_numpy()
 
         self.cov = np.loadtxt(self._cov_file)
-

@@ -1,9 +1,10 @@
 import numpy as np
 from hierarc.Likelihood.BAOLikelihood.bao_likelihood_custom import CustomBAOLikelihood
 
+
 class BAOLikelihood(object):
-    """BAO likelihood.This class supports custom likelihoods as well as
-    likelihoods from the DESI BAO files."""
+    """BAO likelihood.This class supports custom likelihoods as well as likelihoods from
+    the DESI BAO files."""
 
     def __init__(self, sample_name="DESI_DR2", **kwargs_bao_likelihood):
         """
@@ -15,6 +16,7 @@ class BAOLikelihood(object):
             self._likelihood = CustomBAOLikelihood(**kwargs_bao_likelihood)
         elif sample_name == "DESI_DR2":
             from hierarc.Likelihood.BAOLikelihood.desi_dr2 import DESIDR2Data
+
             data = DESIDR2Data()
 
             self._likelihood = CustomBAOLikelihood(
@@ -27,8 +29,6 @@ class BAOLikelihood(object):
         else:
             raise ValueError("Unsupported sample name: {}".format(sample_name))
 
-
-
     def log_likelihood(self, cosmo, rd=None):
         """
 
@@ -36,8 +36,10 @@ class BAOLikelihood(object):
 
         :return: log likelihood of the data given the specified cosmology
         """
-        #TODO compute here the default case if rd is not sampled.
+        # TODO compute here the default case if rd is not sampled.
         if rd is None:
-            raise NotImplementedError("Computation of rd is not implemented yet. Please provide rd.")
+            raise NotImplementedError(
+                "Computation of rd is not implemented yet. Please provide rd."
+            )
 
         return self._likelihood.log_likelihood_bao(cosmo, rd)
