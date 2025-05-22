@@ -54,7 +54,7 @@ class CustomBAOLikelihood(object):
         diff = self.d - distance_theory
         logL = -0.5 * np.dot(diff, np.dot(self._inv_cov, diff))
         sign_det, lndet = np.linalg.slogdet(self.cov)
-        logL -= 1 / 2.0 * (self.num_d * np.log(2 * np.pi) + lndet) #normalization term
+        logL -= 1 / 2.0 * (self.num_d * np.log(2 * np.pi) + lndet)  # normalization term
         return logL
 
     def _compute_DV(self, cosmo, z):

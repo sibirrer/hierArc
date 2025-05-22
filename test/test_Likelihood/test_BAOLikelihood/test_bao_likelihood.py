@@ -15,7 +15,7 @@ class TestBAO(object):
         from astropy.cosmology import FlatLambdaCDM
 
         om_mean, om_sigma = 0.3, 0.01
-        rd = 150 # comoving sound horizon at the drag epoch
+        rd = 150  # comoving sound horizon at the drag epoch
         cosmo_true = FlatLambdaCDM(H0=70, Om0=om_mean)
 
         # compute BAO distances (DM only)
@@ -31,7 +31,7 @@ class TestBAO(object):
             "z": z,
             "d": dist_measured,
             "distance_type": dist_type,
-            "cov":cov,
+            "cov": cov,
         }
 
         self.likelihood = BAOLikelihood(sample_name="CUSTOM", **kwargs_bao_likelihood)
@@ -82,6 +82,7 @@ class TestBAO(object):
 
         with pytest.raises(NotImplementedError):
             self.likelihood.log_likelihood(self.cosmo_true)
+
 
 if __name__ == "__main__":
     pytest.main()
