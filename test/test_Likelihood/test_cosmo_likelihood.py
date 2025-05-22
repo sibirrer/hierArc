@@ -47,9 +47,17 @@ class TestCosmoLikelihood(object):
             "w": -2,
             "wa": -1,
             "w0": -2,
-            "rd":0
+            "rd": 0,
         }
-        kwargs_upper_cosmo = {"h0": 200, "om": 1, "ok": 0.8, "w": 0, "wa": 1, "w0": 1., "rd":300}
+        kwargs_upper_cosmo = {
+            "h0": 200,
+            "om": 1,
+            "ok": 0.8,
+            "w": 0,
+            "wa": 1,
+            "w0": 1.0,
+            "rd": 300,
+        }
         self.cosmology = "oLCDM"
         self.kwargs_bounds = {
             "kwargs_lower_lens": kwargs_lower_lens,
@@ -248,7 +256,7 @@ class TestCosmoLikelihood(object):
             interpolate_cosmo=False,
             cosmo_fixed=None,
         )
-        kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0, "rd":150}
+        kwargs_cosmo = {"h0": self.H0_true, "om": self.omega_m_true, "ok": 0, "rd": 150}
         args = cosmoL.param.kwargs2args(kwargs_cosmo=kwargs_cosmo)
         logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl < 0

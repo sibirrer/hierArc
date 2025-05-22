@@ -24,7 +24,7 @@ class DESIDR2Data(object):
             _PATH_2_DATA, "desi_bao_dr2", "desi_gaussian_bao_ALL_GCcomb_cov.txt"
         )
 
-        data = pd.read_csv(self._data_file, sep=r'\s+')
+        data = pd.read_csv(self._data_file, sep=r"\s+")
 
         self.origlen = len(data)
         print(f"Importing {self.origlen} distances from DESI DR2 data.")
