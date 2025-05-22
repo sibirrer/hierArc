@@ -16,6 +16,7 @@ class TestCosmoParamFLCDM(object):
             "w0": -0,
             "gamma_ppn": 1,
             "alpha": 1.45,
+            "rd": 150.0,
         }
         self._param_list = []
         self._param_list_fixed = []
@@ -58,6 +59,7 @@ class TestCosmoParamFLCDM(object):
             "w0": -0,
             "gamma_ppn": 1,
             "alpha": 1.45,
+            "rd": 150.0,
         }
         for i, param in enumerate(self._param_list):
             args = param.kwargs2args(kwargs)
@@ -80,6 +82,7 @@ class TestCosmoParamFLCDM(object):
             "w0": -0,
             "gamma_ppn": 1,
             "alpha": 1.45,
+            "rd": 150.0,
         }
         for i, param in enumerate(self._param_list):
             cosmo = param.cosmo(kwargs_cosmo)
@@ -101,6 +104,7 @@ class TestRaise(unittest.TestCase):
                 "w0": -0,
                 "gamma_ppn": 1,
                 "alpha": 1.45,
+                "rd": 150.0,
             }
             param.cosmo(kwargs_cosmo)
 
