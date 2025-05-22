@@ -34,7 +34,9 @@ class TestBAO(object):
             "cov": cov,
         }
 
-        self.likelihood = BAOLikelihood(sample_name="CUSTOM", **self.kwargs_bao_likelihood)
+        self.likelihood = BAOLikelihood(
+            sample_name="CUSTOM", **self.kwargs_bao_likelihood
+        )
         self.dists_true = dist_true
         self.rd_true = rd
         self.sigma_d_true = sigma_d
@@ -84,7 +86,7 @@ class TestBAO(object):
             self.likelihood.log_likelihood(self.cosmo_true)
 
         kwargs_bao_likelihood = self.kwargs_bao_likelihood.copy()
-        kwargs_bao_likelihood["distance_type"] = ['Unknown'] * self.num
+        kwargs_bao_likelihood["distance_type"] = ["Unknown"] * self.num
         test_L = BAOLikelihood(sample_name="CUSTOM", **kwargs_bao_likelihood)
 
         with pytest.raises(ValueError):
