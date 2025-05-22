@@ -96,7 +96,7 @@ class CosmoLikelihood(object):
             self._bao_likelihood = BAOLikelihood(
                 sample_name=bao_likelihood, **kwargs_bao_likelihood
             )
-            z_max = max(z_max,np.max(self._bao_likelihood._likelihood.z))
+            z_max = max(z_max, np.max(self._bao_likelihood._likelihood.z))
             self._bao_evaluate = True
         else:
             self._bao_evaluate = False
