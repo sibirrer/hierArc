@@ -3,6 +3,7 @@ import numpy.testing as npt
 
 from hierarc.Likelihood.BAOLikelihood.desi_dr2 import DESIDR2Data
 
+
 class TestDESIDR2Data(object):
     def setup_method(self):
         pass
