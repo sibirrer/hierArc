@@ -8,8 +8,8 @@ class TestBAO(object):
     def setup_method(self):
         np.random.seed(42)
         # define redshifts
-        num = 8  # number of BAO measurements
-        z = np.linspace(start=0.1, stop=0.8, num=num)
+        self.num = 8  # number of BAO measurements
+        z = np.linspace(start=0.1, stop=0.8, num=self.num)
 
         # define cosmology
         from astropy.cosmology import FlatLambdaCDM
@@ -20,21 +20,21 @@ class TestBAO(object):
 
         # compute BAO distances (DM only)
         dist_true = cosmo_true.comoving_transverse_distance(z).value / rd
-        dist_type = ["DM_over_rs"] * num
+        dist_type = ["DM_over_rs"] * self.num
 
         # draw from scatter
         sigma_d = np.sqrt(4e-02)
-        cov = np.diag(np.ones(num) * sigma_d**2)
+        cov = np.diag(np.ones(self.num) * sigma_d**2)
 
         dist_measured = np.random.multivariate_normal(dist_true, cov)
-        kwargs_bao_likelihood = {
+        self.kwargs_bao_likelihood = {
             "z": z,
             "d": dist_measured,
             "distance_type": dist_type,
             "cov": cov,
         }
 
-        self.likelihood = BAOLikelihood(sample_name="CUSTOM", **kwargs_bao_likelihood)
+        self.likelihood = BAOLikelihood(sample_name="CUSTOM", **self.kwargs_bao_likelihood)
         self.dists_true = dist_true
         self.rd_true = rd
         self.sigma_d_true = sigma_d
@@ -82,6 +82,13 @@ class TestBAO(object):
 
         with pytest.raises(NotImplementedError):
             self.likelihood.log_likelihood(self.cosmo_true)
+
+        kwargs_bao_likelihood = self.kwargs_bao_likelihood.copy()
+        kwargs_bao_likelihood["distance_type"] = ['Unknown'] * self.num
+        test_L = BAOLikelihood(sample_name="CUSTOM", **kwargs_bao_likelihood)
+
+        with pytest.raises(ValueError):
+            test_L.log_likelihood(self.cosmo_true, self.rd_true)
 
 
 if __name__ == "__main__":

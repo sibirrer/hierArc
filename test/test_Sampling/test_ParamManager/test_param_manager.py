@@ -15,6 +15,7 @@ class TestParamManager(object):
             "wa": -1,
             "w0": -2,
             "gamma_ppn": 0,
+            "rd": 0.0,
         }
         kwargs_lower_lens = {
             "lambda_mst": 0,
@@ -32,6 +33,7 @@ class TestParamManager(object):
             "wa": 1,
             "w0": 1,
             "gamma_ppn": 5,
+            "rd": 300.0,
         }
         kwargs_upper_lens = {
             "lambda_mst": 2,
@@ -49,6 +51,7 @@ class TestParamManager(object):
             "wa": -0,
             "w0": -0,
             "gamma_ppn": 1,
+            "rd": 150.0,
         }
         kwargs_fixed_lens = {
             "lambda_mst": 1,
@@ -65,6 +68,7 @@ class TestParamManager(object):
                     cosmology=cosmology,
                     ppn_sampling=True,
                     lambda_mst_sampling=True,
+                    rd_sampling=True,
                     lambda_mst_distribution="GAUSSIAN",
                     anisotropy_distribution="GAUSSIAN",
                     anisotropy_sampling=True,
@@ -96,6 +100,7 @@ class TestParamManager(object):
                     cosmology=cosmology,
                     ppn_sampling=True,
                     lambda_mst_sampling=True,
+                    rd_sampling=True,
                     lambda_mst_distribution="GAUSSIAN",
                     anisotropy_distribution="GAUSSIAN",
                     anisotropy_sampling=True,
@@ -127,7 +132,7 @@ class TestParamManager(object):
         list = self.param_list[0].param_list(latex_style=False)
         assert len(list) == 0
         num = self.param_list[1].num_param
-        assert num == 11
+        assert num == 12
         for param in self.param_list:
             list = param.param_list(latex_style=True)
             list = param.param_list(latex_style=False)
@@ -141,6 +146,7 @@ class TestParamManager(object):
             "wa": -0,
             "w0": -0,
             "gamma_ppn": 1,
+            "rd": 150.0,
         }
         kwargs_lens = {
             "lambda_mst": 1,
@@ -192,7 +198,7 @@ class TestParamManager(object):
         assert len(lower_limit) == 0
         lower_limit, upper_limit = self.param_list[1].param_bounds
         print(self.param_list[1].param_list())
-        assert len(lower_limit) == 11
+        assert len(lower_limit) == 12
 
 
 class TestRaise(unittest.TestCase):
