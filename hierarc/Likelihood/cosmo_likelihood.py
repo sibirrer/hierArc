@@ -91,6 +91,10 @@ class CosmoLikelihood(object):
             self._sne_evaluate = False
 
         if bao_likelihood is not None:
+            if interpolate_cosmo is True:
+                raise NotImplementedError(
+                    "BAO likelihood does not support interpolated cosmology yet. Please set interpolate_cosmo=False."
+                )
             if kwargs_bao_likelihood is None:
                 kwargs_bao_likelihood = {}
             self._bao_likelihood = BAOLikelihood(

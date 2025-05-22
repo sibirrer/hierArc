@@ -261,6 +261,17 @@ class TestCosmoLikelihood(object):
         logl = cosmoL.likelihood(args=args, verbose=True)
         assert logl < 0
 
+        with pytest.raises(NotImplementedError):
+            cosmoL = CosmoLikelihood(
+                [],
+                self.cosmology,
+                kwargs_model,
+                self.kwargs_bounds,
+                bao_likelihood="DESI_DR2",
+                interpolate_cosmo=True,
+                cosmo_fixed=None,
+            )
+
     def test_kde_likelihood_integration(self):
         chain = import_Planck_chain(
             _PATH_2_PLANCKDATA,

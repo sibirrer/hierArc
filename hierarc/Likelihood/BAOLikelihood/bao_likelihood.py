@@ -39,7 +39,7 @@ class BAOLikelihood(object):
         # TODO compute here the default case if rd is not sampled.
         if rd is None:
             raise NotImplementedError(
-                "Computation of rd is not implemented yet. Please provide rd."
+                "Computation of rd is not implemented yet. Please provide rd in the kwargs_cosmo and turn rd_sampling=True in the kwargs_model."
             )
 
         return self._likelihood.log_likelihood_bao(cosmo, rd)
