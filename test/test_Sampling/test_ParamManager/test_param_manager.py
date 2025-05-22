@@ -188,6 +188,7 @@ class TestParamManager(object):
             "wa": -0,
             "w0": -0,
             "gamma_ppn": 1,
+            "rd": 150.0,
         }
         for param in self.param_list:
             cosmo = param.cosmo(kwargs_cosmo)
