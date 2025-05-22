@@ -3,6 +3,7 @@ from hierarc.Sampling.ParamManager.param_manager import ParamManager
 from lenstronomy.Cosmo.cosmo_interp import CosmoInterp
 from hierarc.Likelihood.SneLikelihood.sne_likelihood import SneLikelihood
 from hierarc.Likelihood.KDELikelihood.kde_likelihood import KDELikelihood
+from hierarc.Likelihood.BAOLikelihood.bao_likelihood import BAOLikelihood
 from hierarc.Likelihood.KDELikelihood.chain import rescale_vector_to_unity
 import numpy as np
 
@@ -17,9 +18,11 @@ class CosmoLikelihood(object):
         kwargs_model,
         kwargs_bounds,
         sne_likelihood=None,
+        bao_likelihood=None,
         kwargs_sne_likelihood=None,
         KDE_likelihood_chain=None,
         kwargs_kde_likelihood=None,
+        kwargs_bao_likelihood=None,
         normalized=False,
         custom_prior=None,
         interpolate_cosmo=True,
@@ -42,7 +45,10 @@ class CosmoLikelihood(object):
         :param kwargs_kde_likelihood: keyword argument for the KDE likelihood, see KDELikelihood module for options
         :param sne_likelihood: (string), optional. Sampling supernovae relative expansion history likelihood, see
          SneLikelihood module for options
+         :param bao_likelihood: (string), optional. Sampling of BAO relative expansion history likelihood, see
+         BAOLikelihood module for options
         :param kwargs_sne_likelihood: keyword argument for the SNe likelihood, see SneLikelihood module for options
+        :param kwargs_bao_likelihood: keyword argument for the BAO likelihood, see BAOLikelihood module for options
         :param custom_prior: None or a definition that takes the keywords from the CosmoParam conventions and returns a
          log likelihood value (e.g. prior)
         :param interpolate_cosmo: bool, if True, uses interpolated comoving distance in the calculation for speed-up
@@ -79,10 +85,25 @@ class CosmoLikelihood(object):
             self._sne_likelihood = SneLikelihood(
                 sample_name=sne_likelihood, **kwargs_sne_likelihood
             )
-            z_max = np.max(self._sne_likelihood.zcmb)
+            z_max = max(z_max, np.max(self._sne_likelihood.zcmb))
             self._sne_evaluate = True
         else:
             self._sne_evaluate = False
+
+        if bao_likelihood is not None:
+            if interpolate_cosmo is True:
+                raise NotImplementedError(
+                    "BAO likelihood does not support interpolated cosmology yet. Please set interpolate_cosmo=False."
+                )
+            if kwargs_bao_likelihood is None:
+                kwargs_bao_likelihood = {}
+            self._bao_likelihood = BAOLikelihood(
+                sample_name=bao_likelihood, **kwargs_bao_likelihood
+            )
+            z_max = max(z_max, np.max(self._bao_likelihood._likelihood.z))
+            self._bao_evaluate = True
+        else:
+            self._bao_evaluate = False
 
         if KDE_likelihood_chain is not None:
             if kwargs_kde_likelihood is None:
@@ -174,6 +195,9 @@ class CosmoLikelihood(object):
                 cosmo_params, self._kde_likelihood.chain.rescale_dic, self._chain_params
             )
             log_l += self._kde_likelihood.kdelikelihood_samples(cosmo_params)[0]
+        if self._bao_evaluate is True:
+            rd = kwargs_cosmo.get("rd", None)
+            log_l += self._bao_likelihood.log_likelihood(cosmo=cosmo, rd=rd)
         if self._prior_add is True:
             log_l += self._custom_prior(
                 kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los

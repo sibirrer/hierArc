@@ -128,7 +128,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param gamma_pl_pivot: pivote power-law slope relative to which the Ddt scaling operates
         :param gamma_pl_ddt_slope: slope of Ddt / gamma_pl such that Ddt(gamma_pl) = Ddt_0 + slope * gamma_pl
         """
-        TransformedCosmography.__init__(self, gamma_pl_pivot=gamma_pl_pivot, gamma_pl_ddt_slope=gamma_pl_ddt_slope)
+        TransformedCosmography.__init__(
+            self, gamma_pl_pivot=gamma_pl_pivot, gamma_pl_ddt_slope=gamma_pl_ddt_slope
+        )
 
         KinScaling.__init__(
             self,
@@ -530,11 +532,15 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             lambda_mst, gamma_ppn, gamma_pl = (
                 kwargs_lens_draw["lambda_mst"],
                 kwargs_lens_draw["gamma_ppn"],
-                kwargs_lens_draw.get("gamma_pl", None)
+                kwargs_lens_draw.get("gamma_pl", None),
             )
             kappa_ext = self._los.draw_los(kwargs_los, size=1)[0]
             ddt_, dd_, _ = self.displace_prediction(
-                ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext,
+                ddt,
+                dd,
+                gamma_ppn=gamma_ppn,
+                lambda_mst=lambda_mst,
+                kappa_ext=kappa_ext,
                 gamma_pl=gamma_pl,
             )
             kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(
@@ -589,7 +595,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             )
             kappa_ext = self._los.draw_los(kwargs_los)
             ddt_, dd_, _ = self.displace_prediction(
-                ddt, dd, gamma_ppn=gamma_ppn, lambda_mst=lambda_mst, kappa_ext=kappa_ext, gamma_pl=gamma_pl
+                ddt,
+                dd,
+                gamma_ppn=gamma_ppn,
+                lambda_mst=lambda_mst,
+                kappa_ext=kappa_ext,
+                gamma_pl=gamma_pl,
             )
             ddt_draws.append(ddt_)
             dd_draws.append(dd_)
