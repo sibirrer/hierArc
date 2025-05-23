@@ -36,6 +36,7 @@ class DdtKinConstraints(KinConstraints):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        multi_light_profile=False,
         gamma_pl_scaling=None,
     ):
         """
@@ -68,6 +69,8 @@ class DdtKinConstraints(KinConstraints):
         :param kappa_ext_sigma: 1-sigma distribution uncertainty from which the ddt constraints are coming from
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
+        :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
+         as a list for each individual observation condition.
         :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
         """
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
@@ -98,6 +101,7 @@ class DdtKinConstraints(KinConstraints):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
+            multi_light_profile=multi_light_profile,
             gamma_pl_scaling=gamma_pl_scaling,
         )
 

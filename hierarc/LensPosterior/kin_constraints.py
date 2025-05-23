@@ -35,6 +35,7 @@ class KinConstraints(BaseLensConfig):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        multi_light_profile=False,
         cosmo_fiducial=None,
         gamma_in_scaling=None,
         log_m2l_scaling=None,
@@ -78,6 +79,8 @@ class KinConstraints(BaseLensConfig):
             light profile
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
+        :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
+         as a list for each individual observation condition.
         :param cosmo_fiducial: astropy.cosmology instance, if None,
             uses astropy's default
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
@@ -116,6 +119,7 @@ class KinConstraints(BaseLensConfig):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
+            multi_light_profile=multi_light_profile,
             cosmo_fiducial=cosmo_fiducial,
             gamma_in_scaling=gamma_in_scaling,
             log_m2l_scaling=log_m2l_scaling,

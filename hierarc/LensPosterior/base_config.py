@@ -32,6 +32,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        multi_light_profile=False,
         cosmo_fiducial=None,
         gamma_in_scaling=None,
         log_m2l_scaling=None,
@@ -57,6 +58,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
+        :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
+         as a list for each individual observation condition.
         :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
@@ -92,6 +95,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             kwargs_seeing=kwargs_seeing,
             kwargs_aperture=kwargs_aperture,
             multi_observations=multi_observations,
+            multi_light_profile=multi_light_profile,
         )
 
         analytic_kinematics = False
