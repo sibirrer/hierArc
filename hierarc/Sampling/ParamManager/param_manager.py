@@ -12,6 +12,7 @@ class ParamManager(object):
         self,
         cosmology,
         ppn_sampling=False,
+        rd_sampling=False,
         lambda_mst_sampling=False,
         lambda_mst_distribution="NONE",
         anisotropy_sampling=False,
@@ -58,6 +59,7 @@ class ParamManager(object):
 
         :param cosmology: string describing cosmological model
         :param ppn_sampling: post-newtonian parameter sampling
+        :param rd_sampling: sound horizon at drag epoch sampling (used only if the BAOLIkelihood is used)
         :param lambda_mst_sampling: bool, if True adds a global mass-sheet transform parameter in the sampling
         :param lambda_mst_distribution: string, distribution function of the MST transform
         :param lambda_ifu_sampling: bool, if True samples a separate lambda_mst for a second (e.g. IFU) data set
@@ -112,6 +114,7 @@ class ParamManager(object):
         self._cosmo_param = CosmoParam(
             cosmology=cosmology,
             ppn_sampling=ppn_sampling,
+            rd_sampling=rd_sampling,
             kwargs_fixed=kwargs_fixed_cosmo,
         )
         self._lens_param = LensParam(
