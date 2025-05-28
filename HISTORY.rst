@@ -33,3 +33,10 @@ History
 ------------------
 
 * composite model likelihood and fitting
+
+1.2.0 (2025-05-27)
+------------------
+
+* DES-Y5 SNe likelihood
+* DESI BAO likelihood
+* DDt-gamma covariances

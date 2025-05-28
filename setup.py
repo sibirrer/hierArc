@@ -39,16 +39,13 @@ PACKAGE_PATH = os.path.abspath(os.path.join(__file__, os.pardir))
 setup(
     author="Simon Birrer",
     author_email="sibirrer@gmail.com",
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
     description="Hierarchical analysis of strong lensing systems to infer lens properties and cosmological parameters simultaneously",
@@ -64,7 +61,7 @@ setup(
     test_suite="test",
     tests_require=test_requirements,
     url="https://github.com/sibirrer/hierarc",
-    version="1.1.3",
+    version="1.2.0",
     zip_safe=False,
     cmdclass={"test": PyTest},
 )
