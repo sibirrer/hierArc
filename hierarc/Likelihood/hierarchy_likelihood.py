@@ -330,6 +330,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                 exp_logl = np.exp(logl)
                 if np.isfinite(exp_logl) and exp_logl > 0:
                     likelihood += exp_logl
+
             if likelihood <= 0:
                 return -np.inf
             return np.log(likelihood / self._num_distribution_draws)
