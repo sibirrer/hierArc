@@ -8,12 +8,15 @@ _PATH_2_DATA = os.path.join(os.path.dirname(hierarc.__file__), "Data", "BAO")
 
 class DESIDR2Data(object):
     """
-    This class collect the data from teh DESI DR2 analysis presented in DESI collaboration et al. 2025 (https://arxiv.org/abs/2503.14738)
+    This class collect the data from teh DESI DR2 analysis presented in `DESI collaboration et al. 2025`_.
 
     The data covariances that are stored in hierArc are originally from `DESI DR2`_.
-    https://github.com/CobayaSampler/bao_data/tree/master/desi_bao_dr2
 
-    If you make use of these products, please cite `DESI collaboration et al. 2025`_
+    If you make use of these products, please cite `DESI collaboration et al. 2025`_.
+
+    .. _DESI DR2: https://github.com/CobayaSampler/bao_data/tree/master/desi_bao_dr2
+    .. _DESI collaboration et al. 2025: https://arxiv.org/abs/2503.14738
+
     """
 
     def __init__(self):

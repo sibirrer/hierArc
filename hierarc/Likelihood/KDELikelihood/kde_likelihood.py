@@ -18,7 +18,7 @@ class KDELikelihood(object):
     __warning:: This class is not fully tested for more than 5 free parameters. Use at your own risk.
 
     __note:: Parameters need to be rescaled between 0 and 1 for this to work optimally. Think about rescaling your Chain
-    with the 'rescale = True' option.
+    with the "rescale = True" option.
 
     """
 
@@ -34,11 +34,15 @@ class KDELikelihood(object):
         """
 
         :param chain: (Likelihood.chain.Chain). Chain object to be evaluated with a kernel density estimator
-        :param likelihood_type: (str). "kde_hist_nd" or "kde_full". Use "kde_hist_nd" in most cases as it is much faster and do not decrease much the precision
-        :param weight_type: (str). Name of the weight to use. You can provude several type of weights for your samples. This is usefull when you importance sampling
+        :param likelihood_type: (str). "kde_hist_nd" or "kde_full". Use "kde_hist_nd" in most cases as it is much
+         faster and do not decrease much the precision
+        :param weight_type: (str). Name of the weight to use. You can provide several type of weights for your samples.
+         This is usefull when you importance sampling
         :param kde_kernel: (str). Kernel type to be passed to scikit-learn. Default : 'gaussian'.
-        :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled between 0 and 1.
-        :param nbins_hist: (float). Number of bins to use before fitting KDE. Used only if likelihood_type = 'kde_hist_nd'.
+        :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled
+         between 0 and 1.
+        :param nbins_hist: (float). Number of bins to use before fitting KDE. Used only if
+         likelihood_type = 'kde_hist_nd'.
         """
 
         self.chain = chain
@@ -87,7 +91,8 @@ class KDELikelihood(object):
         """
 
         :param kde_kernel: kde_kernel: (str). Kernel type to be passed to scikit-learn. Default : 'gaussian'.
-        :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled between 0 and 1.
+        :param bandwidth: (float). Bandwidth of the kernel. Default : 0.01. Works well if parameters are rescaled
+         between 0 and 1.
         :return: scikit-learn KernelDensity
         """
         data = pd.DataFrame.from_dict(self.chain.params)

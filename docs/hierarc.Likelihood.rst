@@ -7,19 +7,13 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   hierarc.Likelihood.BAOLikelihood
+   hierarc.Likelihood.KDELikelihood
    hierarc.Likelihood.LensLikelihood
    hierarc.Likelihood.SneLikelihood
 
 Submodules
 ----------
-
-hierarc.Likelihood.anisotropy\_scaling module
----------------------------------------------
-
-.. automodule:: hierarc.Likelihood.anisotropy_scaling
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 hierarc.Likelihood.cosmo\_likelihood module
 -------------------------------------------
@@ -37,10 +31,26 @@ hierarc.Likelihood.hierarchy\_likelihood module
    :undoc-members:
    :show-inheritance:
 
+hierarc.Likelihood.kin\_scaling module
+--------------------------------------
+
+.. automodule:: hierarc.Likelihood.kin_scaling
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 hierarc.Likelihood.lens\_sample\_likelihood module
 --------------------------------------------------
 
 .. automodule:: hierarc.Likelihood.lens_sample_likelihood
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+hierarc.Likelihood.prior\_likelihood module
+-------------------------------------------
+
+.. automodule:: hierarc.Likelihood.prior_likelihood
    :members:
    :undoc-members:
    :show-inheritance:
