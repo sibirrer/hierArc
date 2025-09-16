@@ -57,6 +57,7 @@ class CosmoLikelihood(object):
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         """
+
         self._cosmology = cosmology
         self._kwargs_lens_list = kwargs_likelihood_list
         if kwargs_model.get("sigma_v_systematics", False) is True:
@@ -67,8 +68,10 @@ class CosmoLikelihood(object):
             kwargs_global_model=kwargs_model,
         )
         gamma_pl_num = self._likelihoodLensSample.gamma_pl_num
+        Ddt_sampling_num = self._likelihoodLensSample.Ddt_sampling_num
+        Dd_sampling_num = self._likelihoodLensSample.Dd_sampling_num
         self.param = ParamManager(
-            cosmology, gamma_pl_num=gamma_pl_num, **kwargs_model, **kwargs_bounds
+            cosmology, gamma_pl_num=gamma_pl_num, Dd_sampling_num=Dd_sampling_num, Ddt_sampling_num=Ddt_sampling_num, **kwargs_model, **kwargs_bounds
         )
         self._lower_limit, self._upper_limit = self.param.param_bounds
         self._prior_add = False
@@ -219,7 +222,10 @@ class CosmoLikelihood(object):
                 K=kwargs_cosmo.get("K", None),
             )
             return cosmo
-        if self._cosmo_fixed is None:
+
+        if self._cosmology == "FREE": 
+            cosmo = None
+        elif self._cosmo_fixed is None:
             cosmo = self.param.cosmo(kwargs_cosmo)
             if self._interpolate_cosmo is True:
                 cosmo = CosmoInterp(

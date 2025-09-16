@@ -32,6 +32,8 @@ class ParamManager(object):
         gamma_pl_num=0,
         gamma_pl_global_sampling=False,
         gamma_pl_global_dist="NONE",
+        Ddt_sampling_num=0,
+        Dd_sampling_num=0,
         sigma_v_systematics=False,
         sne_apparent_m_sampling=False,
         sne_distribution="GAUSSIAN",
@@ -133,6 +135,8 @@ class ParamManager(object):
             gamma_pl_num=gamma_pl_num,
             gamma_pl_global_sampling=gamma_pl_global_sampling,
             gamma_pl_global_dist=gamma_pl_global_dist,
+            Ddt_sampling_num=Ddt_sampling_num,
+            Dd_sampling_num=Dd_sampling_num,
             log_scatter=log_scatter,
             kwargs_fixed=kwargs_fixed_lens,
         )

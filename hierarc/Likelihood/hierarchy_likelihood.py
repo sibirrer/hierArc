@@ -208,6 +208,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         else:
             self._inclination_sampling = False
 
+        self._Ddt_sampling_index = Ddt_sampling_index
+        self._Dd_sampling_index = Dd_sampling_index
+
     def info(self):
         """Information about the lens.
 
@@ -246,7 +249,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         # here we compute the unperturbed angular diameter distances of the lens system given the cosmology
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
-        ddt, dd = self.angular_diameter_distances(cosmo)
+        if cosmo is None:
+            ddt, dd = kwargs_lens["Ddt_list"][self._Ddt_sampling_index], kwargs_lens["Dd_list"][self._Dd_sampling_index]
+        else:
+            ddt, dd = self.angular_diameter_distances(cosmo)
         beta_dsp = self.beta_dsp(cosmo)
         kwargs_source = self._kwargs_init(kwargs_source)
         z_apparent_m_anchor = kwargs_source.get("z_apparent_m_anchor", 0.1)

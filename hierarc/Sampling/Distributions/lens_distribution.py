@@ -115,6 +115,8 @@ class LensDistribution(object):
         gamma_pl_list=None,
         gamma_pl_mean=2,
         gamma_pl_sigma=0,
+        Ddt_list=None,
+        Dd_list=None,
     ):
         """Draws a realization of a specific model from the hyperparameter distribution.
 
