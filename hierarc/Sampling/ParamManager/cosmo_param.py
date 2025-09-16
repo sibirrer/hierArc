@@ -29,6 +29,7 @@ class CosmoParam(object):
             "oLCDM",
             "wphiCDM",
             "NONE",
+            "FREE",
         ]
         if cosmology not in self._supported_cosmologies:
             raise ValueError(
@@ -43,7 +44,7 @@ class CosmoParam(object):
         :return: list of the free parameters being sampled in the same order as the sampling
         """
         list = []
-        if self._cosmology not in ["NONE"]:
+        if self._cosmology not in ["NONE", "FREE"]:
             if "h0" not in self._kwargs_fixed:
                 if latex_style is True:
                     list.append(r"$H_0$")
@@ -112,7 +113,7 @@ class CosmoParam(object):
         :return: keyword argument list with parameter names
         """
         kwargs = {}
-        if self._cosmology not in ["NONE"]:
+        if self._cosmology not in ["NONE", "FREE"]:
             if "h0" in self._kwargs_fixed:
                 kwargs["h0"] = self._kwargs_fixed["h0"]
             else:
@@ -180,7 +181,7 @@ class CosmoParam(object):
         :return: sampling argument list in specified order
         """
         args = []
-        if self._cosmology not in ["NONE"]:
+        if self._cosmology not in ["NONE", "FREE"]:
             if "h0" not in self._kwargs_fixed:
                 args.append(kwargs["h0"])
             if self._cosmology in ["FLCDM", "FwCDM", "w0waCDM", "oLCDM", "wphiCDM"]:
@@ -244,6 +245,8 @@ class CosmoParam(object):
                 alpha=kwargs["alpha"],
             )
         elif self._cosmology == "NONE":
+            cosmo = None
+        elif self._cosmology == "FREE":
             cosmo = None
         else:
             raise ValueError("Cosmology %s is not supported" % self._cosmology)

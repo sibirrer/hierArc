@@ -48,6 +48,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         gamma_pl_index=None,
         gamma_pl_global_sampling=False,
         gamma_pl_global_dist="NONE",
+        Ddt_sampling_index=None,
+        Dd_sampling_index=None,
         # kinematic model quantities
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
@@ -112,6 +114,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
         :type gamma_pl_global_sampling: bool
         :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
+        :param Ddt_sampling_index: index of Ddt parameter associated with this lens (this used if cosmology='FREE', else None)
+        :param Dd_sampling_index: index of Dd parameter associated with this lens (this used if cosmology='FREE', else None)
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties

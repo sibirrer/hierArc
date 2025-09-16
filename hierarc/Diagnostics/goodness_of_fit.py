@@ -335,7 +335,8 @@ class GoodnessOfFit(object):
         if len(np.atleast_1d(bin_edges)) < 2:
             bin_edges = np.arange(len(sigma_v_measurement) + 1) * bin_edges
         r_bins = bin_edges[:-1] + np.diff(bin_edges) / 2
-
+        print(r_bins, "r_bins")
+        print(sigma_v_measurement, "sigma_v_measurement")
         ax.errorbar(
             x=r_bins,
             y=sigma_v_measurement,
