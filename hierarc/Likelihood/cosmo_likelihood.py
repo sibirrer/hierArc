@@ -71,7 +71,12 @@ class CosmoLikelihood(object):
         Ddt_sampling_num = self._likelihoodLensSample.Ddt_sampling_num
         Dd_sampling_num = self._likelihoodLensSample.Dd_sampling_num
         self.param = ParamManager(
-            cosmology, gamma_pl_num=gamma_pl_num, Dd_sampling_num=Dd_sampling_num, Ddt_sampling_num=Ddt_sampling_num, **kwargs_model, **kwargs_bounds
+            cosmology,
+            gamma_pl_num=gamma_pl_num,
+            Dd_sampling_num=Dd_sampling_num,
+            Ddt_sampling_num=Ddt_sampling_num,
+            **kwargs_model,
+            **kwargs_bounds
         )
         self._lower_limit, self._upper_limit = self.param.param_bounds
         self._prior_add = False
@@ -223,7 +228,7 @@ class CosmoLikelihood(object):
             )
             return cosmo
 
-        if self._cosmology == "FREE": 
+        if self._cosmology == "FREE":
             cosmo = None
         elif self._cosmo_fixed is None:
             cosmo = self.param.cosmo(kwargs_cosmo)

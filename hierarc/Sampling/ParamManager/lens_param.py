@@ -25,7 +25,6 @@ class LensParam(object):
         log_scatter=False,
         Ddt_sampling_num=0,
         Dd_sampling_num=0,
-
     ):
         """
 

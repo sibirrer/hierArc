@@ -250,7 +250,10 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
         if cosmo is None:
-            ddt, dd = kwargs_lens["Ddt_list"][self._Ddt_sampling_index], kwargs_lens["Dd_list"][self._Dd_sampling_index]
+            ddt, dd = (
+                kwargs_lens["Ddt_list"][self._Ddt_sampling_index],
+                kwargs_lens["Dd_list"][self._Dd_sampling_index],
+            )
         else:
             ddt, dd = self.angular_diameter_distances(cosmo)
         beta_dsp = self.beta_dsp(cosmo)

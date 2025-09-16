@@ -130,21 +130,20 @@ class LensSampleLikelihood(object):
 
     @property
     def Ddt_sampling_num(self):
-        """Number of time-delay distance parameters being sampled on individual
-        lenses.
+        """Number of time-delay distance parameters being sampled on individual lenses.
 
-        :return: number of time-delay distance parameters being sampled on
-            individual lenses
+        :return: number of time-delay distance parameters being sampled on individual
+            lenses
         """
         return self._Ddt_num
 
     @property
     def Dd_sampling_num(self):
-        """Number of angular diameter distance to the deflector parameters being sampled on individual
-        lenses.
+        """Number of angular diameter distance to the deflector parameters being sampled
+        on individual lenses.
 
-        :return: number of angular diameter distance to the deflector parameters being sampled on
-            individual lenses
+        :return: number of angular diameter distance to the deflector parameters being
+            sampled on individual lenses
         """
         return self._Dd_num
 
