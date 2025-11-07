@@ -1,7 +1,7 @@
 import copy
 
 import numpy as np
-from hierarc.LensPosterior.jam_base_config import JAMBaseLensConfig
+from hierarc.JAMLensPosterior.jam_base_config import JAMBaseLensConfig
 
 
 class JAMKinConstraints(JAMBaseLensConfig):
