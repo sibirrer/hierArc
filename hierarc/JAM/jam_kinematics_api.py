@@ -1,4 +1,4 @@
-__author__ = "sibirrer"
+__author__ = "sbirrer,furcelay"
 
 import numpy as np
 import copy
@@ -30,7 +30,6 @@ class JAMKinematicsAPI(object):
         multi_observations=False,
         multi_light_profile=False,
         kwargs_numerics_jam=None,
-        analytic_kinematics=False,
         Hernquist_approx=False,
         MGE_light=False,
         MGE_mass=False,
@@ -67,9 +66,6 @@ class JAMKinematicsAPI(object):
             as a list for each individual observation condition.
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
-        :param analytic_kinematics: boolean, if True, used the analytic JAM modeling for
-            a power-law profile on top of a Hernquist light profile
-            ATTENTION: This may not be accurate for your specific problem!
         :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
             to the half light radius of the deflector light profile to compute the
             kinematics
@@ -139,7 +135,6 @@ class JAMKinematicsAPI(object):
 
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
-        self._analytic_kinematics = analytic_kinematics
         self._Hernquist_approx = Hernquist_approx
         self._MGE_light = MGE_light
         self._MGE_mass = MGE_mass
@@ -156,9 +151,9 @@ class JAMKinematicsAPI(object):
         gamma=None,
         kappa_ext=0,
     ):
-        """API for both, analytic and numerical JAM to compute the velocity dispersion
-        [km/s] This routine uses the jam_setting() routine for the Galkin
-        configurations (see there what options and input is relevant.
+        """API for numerical JAM to compute the velocity dispersion
+        [km/s] This routine uses the jam_setting() routine for the JamPy
+        configurations (see there what options and input is relevant).
 
         :param kwargs_lens: lens model keyword arguments
         :param kwargs_lens_light: lens light model keyword arguments
@@ -198,7 +193,7 @@ class JAMKinematicsAPI(object):
         supersampling_factor=1,
         voronoi_bins=None,
     ):
-        """API for both, analytic and numerical JAM to compute the velocity dispersion
+        """API for numerical JAM to compute the velocity dispersion
         map with IFU data or multiple apertures [km/s]
 
         :param kwargs_lens: lens model keyword arguments
@@ -248,44 +243,6 @@ class JAMKinematicsAPI(object):
         sigma_v_map = self.transform_kappa_ext(sigma_v_map, kappa_ext=kappa_ext)
         return sigma_v_map
 
-    def velocity_dispersion_analytical(self, theta_E, gamma, r_eff, r_ani, kappa_ext=0):
-        """Computes the LOS velocity dispersion of the lens within a slit of size R_slit
-        x dR_slit and seeing psf_fwhm. The assumptions are a Hernquist light profile and
-        the spherical power-law lens model at the first position and an Osipkov and
-        Merritt ('OM') stellar anisotropy distribution.
-
-        Further information can be found in the AnalyticKinematics() class.
-
-        :param theta_E: Einstein radius
-        :param gamma: power-low slope of the mass profile (=2 corresponds to isothermal)
-        :param r_ani: anisotropy radius in units of angles
-        :param r_eff: projected half-light radius
-        :param kappa_ext: external convergence not accounted in the lens models
-        :return: velocity dispersion in units [km/s]
-        """
-        sigma_v = []
-        for i in range(len(self._kwargs_aperture_kin)):
-            jam = JAMWrapper(
-                kwargs_model={"anisotropy_model": "OM"},
-                kwargs_aperture=self._kwargs_aperture_kin[i],
-                kwargs_psf=self._kwargs_psf_kin[i],
-                kwargs_cosmo=self._kwargs_cosmo,
-                kwargs_numerics={},
-                analytic_kinematics=True,
-            )
-            kwargs_profile = {"theta_E": theta_E, "gamma": gamma}
-            kwargs_light = {"r_eff": r_eff}
-            kwargs_anisotropy = {"r_ani": r_ani}
-            sigma_v_ = jam.dispersion(
-                kwargs_profile,
-                kwargs_light,
-                kwargs_anisotropy,
-                sampling_number=self._sampling_number,
-            )
-            sigma_v = np.append(sigma_v, sigma_v_)
-        sigma_v = self.transform_kappa_ext(sigma_v, kappa_ext=kappa_ext)
-        return sigma_v
-
     def jam_settings(
         self, kwargs_lens, kwargs_lens_light, r_eff=None, theta_E=None, gamma=None
     ):
@@ -323,15 +280,6 @@ class JAMKinematicsAPI(object):
                 get_precision=False,
                 verbose=True,
             )
-        if gamma is None and self._analytic_kinematics is True:
-            gamma = self._lensMassProfile.profile_slope(
-                kwargs_lens,
-                theta_E,
-                center_x=None,
-                center_y=None,
-                model_list_bool=self._lens_model_kinematics_bool,
-                num_points=10,
-            )
 
         mass_profile_list, kwargs_profile = self.kinematic_lens_profiles(
             kwargs_lens,
@@ -340,7 +288,6 @@ class JAMKinematicsAPI(object):
             model_kinematics_bool=self._lens_model_kinematics_bool,
             kwargs_mge=self._kwargs_mge_mass,
             gamma=gamma,
-            analytic_kinematics=self._analytic_kinematics,
         )
         light_profile_list, kwargs_light = self.kinematic_light_profile(
             kwargs_lens_light,
@@ -349,7 +296,6 @@ class JAMKinematicsAPI(object):
             kwargs_mge=self._kwargs_mge_light,
             model_kinematics_bool=self._light_model_kinematics_bool,
             Hernquist_approx=self._Hernquist_approx,
-            analytic_kinematics=self._analytic_kinematics,
         )
 
         jam = []
@@ -367,7 +313,6 @@ class JAMKinematicsAPI(object):
                     kwargs_psf=self._kwargs_psf_kin[i],
                     kwargs_cosmo=self._kwargs_cosmo,
                     kwargs_numerics=self._kwargs_numerics_kin,
-                    analytic_kinematics=self._analytic_kinematics,
             )
             jam.append(jam_)
 
@@ -381,12 +326,8 @@ class JAMKinematicsAPI(object):
         :return: kwargs_1 with filled centers
         """
         if "center_x" in kwargs_2[0] and "center_y" in kwargs_2[0]:
-            if self._analytic_kinematics:
-                kwargs_1["center_x"] = kwargs_2[0]["center_x"]
-                kwargs_1["center_y"] = kwargs_2[0]["center_y"]
-            else:
-                kwargs_1[0]["center_x"] = kwargs_2[0]["center_x"]
-                kwargs_1[0]["center_y"] = kwargs_2[0]["center_y"]
+            kwargs_1[0]["center_x"] = kwargs_2[0]["center_x"]
+            kwargs_1[0]["center_y"] = kwargs_2[0]["center_y"]
         return kwargs_1
 
     def kinematic_lens_profiles(
@@ -397,7 +338,6 @@ class JAMKinematicsAPI(object):
         theta_E=None,
         gamma=None,
         kwargs_mge=None,
-        analytic_kinematics=False,
     ):
         """Translates the lenstronomy lens and mass profiles into a (sub) set of
         profiles that are compatible with the GalKin module to compute the kinematics
@@ -414,17 +354,8 @@ class JAMKinematicsAPI(object):
             does not numerically compute this quantity in this routine numerically
         :param gamma: local power-law slope at the Einstein radius (optional)
         :param kwargs_mge: keyword arguments that go into the MGE decomposition routine
-        :param analytic_kinematics: bool, if True, solves the Jeans equation
-            analytically for the power-law mass profile with Hernquist light profile
         :return: mass_profile_list, keyword argument list
         """
-        if analytic_kinematics is True:
-            if gamma is None or theta_E is None:
-                raise ValueError(
-                    "power-law slope and Einstein radius must be set to allow for analytic kinematics to "
-                    "be computed!"
-                )
-            return None, {"theta_E": theta_E, "gamma": gamma}
         mass_profile_list = []
         kwargs_profile = []
         if model_kinematics_bool is None:
@@ -497,7 +428,6 @@ class JAMKinematicsAPI(object):
         model_kinematics_bool=None,
         Hernquist_approx=False,
         kwargs_mge=None,
-        analytic_kinematics=False,
     ):
         """Setting up of the light profile to compute the kinematics in the GalKin
         module. The requirement is that the profiles are centered at (0, 0) and that for
@@ -514,19 +444,8 @@ class JAMKinematicsAPI(object):
         :param Hernquist_approx: boolean, if True replaces the actual light profile(s)
             with a Hernquist model with matched half-light radius.
         :param kwargs_mge: keyword arguments that go into the MGE decomposition routine
-        :param analytic_kinematics: bool, if True, solves the Jeans equation
-            analytically for the power-law mass profile with Hernquist light profile and
-            adjust the settings accordingly
         :return: deflector type list, keyword arguments list
         """
-        if analytic_kinematics is True:
-            if r_eff is None:
-                raise ValueError(
-                    'half light radius "r_eff" needs to be set to allow for analytic '
-                    "kinematics to be computed!"
-                )
-            self._multi_light_profile = False
-            return None, {"r_eff": r_eff}
         light_profile_list = []
         kwargs_light = []
         if Hernquist_approx is True:
@@ -565,7 +484,6 @@ class JAMKinematicsAPI(object):
         self,
         anisotropy_model,
         kwargs_numerics_jam,
-        analytic_kinematics=False,
         Hernquist_approx=False,
         MGE_light=False,
         MGE_mass=False,
@@ -579,9 +497,6 @@ class JAMKinematicsAPI(object):
 
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
-        :param analytic_kinematics: boolean, if True, used the analytic JAM modeling for
-            a power-law profile on top of a Hernquist light profile
-            ATTENTION: This may not be accurate for your specific problem!
         :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
             to the half light radius of the deflector light profile to compute the kinematics
         :param MGE_light: bool, if true performs the MGE for the light distribution
@@ -615,7 +530,6 @@ class JAMKinematicsAPI(object):
             self._kwargs_mge_light = kwargs_mge_light
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
-        self._analytic_kinematics = analytic_kinematics
         self._Hernquist_approx = Hernquist_approx
         self._MGE_light = MGE_light
         self._MGE_mass = MGE_mass
