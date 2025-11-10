@@ -41,7 +41,7 @@ class JAMAnisotropy:
             self.num_params = 2
             self.param_names = ["r_ani", "beta_inf"]
             self.use_logistic = True
-            self._logistic_kwargs = {"beta_0": 0.0, "beta_inf": 0.5, "alpha": 2.0}
+            self._logistic_kwargs = {"beta_0": 0.0, "alpha": 2.0}
         elif self._type == "Colin":
             # Colin et al. 2000: beta(r) = 0.5 * r / (r + r_ani)
             self.num_params = 1
@@ -64,7 +64,7 @@ class JAMAnisotropy:
         if self.use_logistic:
             return self.logistic_function_params(**anisotropy_params, **self._logistic_kwargs)
         else:
-            if self._type == "constant":
+            if self._type == "const":
                 constant_beta = anisotropy_params["beta"]
             else:
                 constant_beta = self._constant_beta
