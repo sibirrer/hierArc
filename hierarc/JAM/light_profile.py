@@ -12,6 +12,7 @@ class LightProfile:
         self,
         profile_list
     ):
+        self.profile_list = profile_list
         self.light_model = LightModel(profile_list)
 
     def radial_surface_brightness(self, r, kwargs_list):
@@ -28,7 +29,6 @@ class LightProfile:
         :param kwargs_list: list of keyword arguments of light profiles (see LightModule)
         :return: circularized arguments
         """
-        # TODO make sure averaging is done azimuthally
         kwargs_list_copy = deepcopy(kwargs_list)
         kwargs_list_new = []
         for kwargs in kwargs_list_copy:
