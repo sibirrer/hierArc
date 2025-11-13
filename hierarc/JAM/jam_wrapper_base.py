@@ -225,33 +225,74 @@ class JAMWrapperBase(GalkinObservation):
         if "mbh" not in jam_kwargs:
             jam_kwargs["mbh"] = 0.0
         if self.axisymmetric:
-            vmap = jam.axi.proj(
-                surf_lum,
-                sigma_lum,
-                q_lum,
-                surf_mass,
-                sigma_mass,
-                q_mass,
-                xbin=x,
-                ybin=y,
-                inc=inclination,
-                align=self.align,
-                distance=self.cosmo.dd,
-                beta=beta,
-                logistic=self._anisotropy.use_logistic,
-                sigmapsf=sigma_psf,
-                pixsize=pix_size,
-                quiet=True,
-                plot=False,
-                **jam_kwargs,
-            ).model
+            return self.call_jampy_axi(
+                surf_lum, sigma_lum, surf_mass, sigma_mass,
+                x, y, q_lum, q_mass, inclination, beta,
+                sigma_psf, pix_size, jam_kwargs
+            ).reshape(x_shape)
         else:
-            vmap = jam.sph.proj(
+            # TODO: evaluate at fixed radius and then interpolate for speed
+            r = np.sqrt(x**2 + y**2)
+            return self.call_jampy_sph(
+                surf_lum, sigma_lum, surf_mass, sigma_mass,
+                r, beta, sigma_psf, pix_size, jam_kwargs
+            ).reshape(x_shape)
+
+    def call_jampy_axi(
+        self,
+        surf_lum,
+        sigma_lum,
+        surf_mass,
+        sigma_mass,
+        x,
+        y,
+        q_lum=None,
+        q_mass=None,
+        inclination=90.0,
+        beta=None,
+        sigma_psf=0.0,
+        pix_size=0.0,
+        jam_kwargs=None,
+    ):
+        return jam.axi.proj(
+            surf_lum,
+            sigma_lum,
+            q_lum,
+            surf_mass,
+            sigma_mass,
+            q_mass,
+            xbin=x,
+            ybin=y,
+            inc=inclination,
+            align=self.align,
+            distance=self.cosmo.dd,
+            beta=beta,
+            logistic=self._anisotropy.use_logistic,
+            sigmapsf=sigma_psf,
+            pixsize=pix_size,
+            quiet=True,
+            plot=False,
+            **jam_kwargs,
+        ).model
+
+    def call_jampy_sph(
+        self,
+        surf_lum,
+        sigma_lum,
+        surf_mass,
+        sigma_mass,
+        r,
+        beta=None,
+        sigma_psf=0.0,
+        pix_size=0.0,
+        jam_kwargs=None,
+    ):
+        return jam.sph.proj(
                 surf_lum,
                 sigma_lum,
                 surf_mass,
                 sigma_mass,
-                rad=x,
+                rad=r,
                 distance=self.cosmo.dd,
                 beta=beta,
                 logistic=self._anisotropy.use_logistic,
@@ -261,7 +302,6 @@ class JAMWrapperBase(GalkinObservation):
                 plot=False,
                 **jam_kwargs,
             ).model
-        return vmap.reshape(x_shape)
 
     @staticmethod
     def _extract_center(kwargs):
