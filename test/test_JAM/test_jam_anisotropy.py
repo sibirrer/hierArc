@@ -4,7 +4,14 @@ import pytest
 from hierarc.JAM.jam_anisotropy import JAMAnisotropy
 
 
-class TestJAMAnisotropy:
+class TestJAMAnisotropy(object):
+
+    def setup_method(self):
+        self.r_test = np.logspace(-2, 1, 100)
+        self.r_ani = 2.0
+        self.beta_0 = -0.3
+        self.beta_inf = 0.8
+        self.alpha = 3.0
 
     @staticmethod
     def logistic_function(r, beta_0, beta_inf, r_ani, alpha):
@@ -26,54 +33,46 @@ class TestJAMAnisotropy:
         npt.assert_almost_equal(beta_params, np.full(10, 0.0))
 
     def test_om(self):
-        r_test = np.logspace(-2, 1, 100)
         jam_ani = JAMAnisotropy("OM")
-        r_ani = 2.0
-        beta_params = jam_ani.beta_params({"r_ani": r_ani})
+        beta_params = jam_ani.beta_params({"r_ani": self.r_ani})
         beta_r = self.logistic_function(
-            r_test, *beta_params
+            self.r_test, *beta_params
         )
-        expected_beta_r = r_test**2 / (r_test**2 + r_ani**2)
+        expected_beta_r = self.r_test**2 / (self.r_test**2 + self.r_ani**2)
         npt.assert_almost_equal(beta_r, expected_beta_r)
 
     def test_gom(self):
-        r_test = np.logspace(-2, 1, 100)
         jam_ani = JAMAnisotropy("GOM")
-        r_ani = 2.0
-        beta_inf = 0.8
-        beta_params = jam_ani.beta_params({"r_ani": r_ani, "beta_inf": beta_inf})
+        beta_params = jam_ani.beta_params({"r_ani": self.r_ani, "beta_inf": self.beta_inf})
         beta_r = self.logistic_function(
-            r_test, *beta_params
+            self.r_test, *beta_params
         )
-        expected_beta_r = beta_inf * r_test**2 / (r_test**2 + r_ani**2)
+        expected_beta_r = self.beta_inf * self.r_test**2 / (self.r_test**2 + self.r_ani**2)
         npt.assert_almost_equal(beta_r, expected_beta_r)
 
     def test_colin(self):
-        r_test = np.logspace(-2, 1, 100)
         jam_ani = JAMAnisotropy("Colin")
-        r_ani = 3.0
-        beta_params = jam_ani.beta_params({"r_ani": r_ani})
+        beta_params = jam_ani.beta_params({"r_ani": self.r_ani})
         beta_r = self.logistic_function(
-            r_test, *beta_params
+            self.r_test, *beta_params
         )
-        expected_beta_r = 0.5 * r_test / (r_test + r_ani)
+        expected_beta_r = 0.5 * self.r_test / (self.r_test + self.r_ani)
         npt.assert_almost_equal(beta_r, expected_beta_r)
 
     def test_logistic(self):
-        r_test = np.logspace(-2, 1, 100)
         jam_ani = JAMAnisotropy("logistic")
-        beta_0 = -0.3
-        beta_inf = 0.8
-        r_ani = 2.0
-        alpha = 3.0
         beta_params = jam_ani.beta_params(
-            {"beta_0": beta_0, "beta_inf": beta_inf, "r_ani": r_ani, "alpha": alpha}
+            {"beta_0": self.beta_0, "beta_inf": self.beta_inf, "r_ani": self.r_ani, "alpha": self.alpha}
         )
         beta_r = self.logistic_function(
-            r_test, *beta_params
+            self.r_test, *beta_params
         )
-        expected_beta_r = beta_0 + (beta_inf - beta_0) / (1 + (r_ani / r_test) ** alpha)
+        expected_beta_r = self.beta_0 + (self.beta_inf - self.beta_0) / (1 + (self.r_ani / self.r_test) ** self.alpha)
         npt.assert_almost_equal(beta_r, expected_beta_r)
+
+    def test_bad_type(self):
+        with npt.assert_raises(ValueError):
+            JAMAnisotropy("BAD_TYPE")
 
 
 if __name__ == "__main__":
