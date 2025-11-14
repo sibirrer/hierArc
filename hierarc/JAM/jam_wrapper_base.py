@@ -11,7 +11,6 @@ from hierarc.JAM.jam_anisotropy import JAMAnisotropy
 import mgefit as mge
 import jampy as jam
 import numpy as np
-import copy
 
 
 __all__ = ["JAMWrapperBase"]
@@ -403,7 +402,6 @@ class JAMWrapperBase(GalkinObservation):
         log10_radial_distance_from_center = np.log10(
             np.sqrt(x_grid_supersampled ** 2 + y_grid_supersmapled  ** 2)
         )
-
         return (
             x_grid_supersampled,
             y_grid_supersmapled,
