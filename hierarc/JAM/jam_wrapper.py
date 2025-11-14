@@ -75,6 +75,8 @@ class JAMWrapper(JAMWrapperBase):
         kwargs_light,
         kwargs_anisotropy,
         inclination=90.0,
+        convolved=True,
+        supersampling_factor=1,
         sampling_number=1000
     ):
         """Computes the averaged LOS velocity dispersion in the slit (convolved)
@@ -147,6 +149,8 @@ class JAMWrapper(JAMWrapperBase):
         kwargs_light,
         kwargs_anisotropy,
         inclination=90.0,
+        convolved=True,
+        supersampling_factor=1,
     ):
         pass
 
@@ -156,6 +160,7 @@ class JAMWrapper(JAMWrapperBase):
         kwargs_light,
         kwargs_anisotropy,
         inclination=90.0,
+        convolved=True,
         supersampling_factor=1,
         voronoi_bins=None,
     ):

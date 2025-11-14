@@ -4,7 +4,6 @@ from astropy.stats import gaussian_fwhm_to_sigma
 from lenstronomy.GalKin.observation import GalkinObservation
 from lenstronomy.GalKin.cosmo import Cosmo
 from lenstronomy.Util.param_util import ellipticity2phi_q
-from lenstronomy.Util import constants as const
 from hierarc.JAM.mass_profile import MassProfile
 from hierarc.JAM.light_profile import LightProfile
 from hierarc.JAM.jam_anisotropy import JAMAnisotropy
@@ -117,14 +116,15 @@ class JAMWrapperBase(GalkinObservation):
         # TODO: read light and mass mge parameters from cached values if available
 
         surf_lum, sigma_lum = self.mge_lum_tracer(kwargs_light)
-        surm_mass, sigma_mass = self.mge_mass(kwargs_mass)
+        surf_mass, sigma_mass = self.mge_mass(kwargs_mass)
+        # convert to units of M_sun / pc^2
+        surf_mass *= self.cosmo.epsilon_crit * 1e-12
         beta = self._anisotropy.beta_params(
             kwargs_anisotropy,
             n_gauss=self._mge_n_gauss
         )
-        phi_lum, q_lum = ellipticity2phi_q(*self._extract_ellipticity(kwargs_light))
-        phi_mass, q_mass = ellipticity2phi_q(*self._extract_ellipticity(kwargs_mass))
-
+        _, q_lum = ellipticity2phi_q(*self._extract_ellipticity(kwargs_light))
+        _, q_mass = ellipticity2phi_q(*self._extract_ellipticity(kwargs_mass))
         if convolved:
             seeing_fwhm = self._psf.fwhm
             delta_x, delta_y = self._delta_pix_xy()
@@ -134,10 +134,10 @@ class JAMWrapperBase(GalkinObservation):
             delta_pix = 0.0
 
         vrms = self.call_jampy(
-            surf_lum, sigma_lum, surm_mass, sigma_mass,
+            surf_lum, sigma_lum, surf_mass, sigma_mass,
             x=x, y=y,
             q_lum=q_lum * np.ones_like(surf_lum),
-            q_mass=q_mass * np.ones_like(surm_mass),
+            q_mass=q_mass * np.ones_like(surf_mass),
             inclination=inclination,
             beta=beta,
             sigma_psf=seeing_fwhm * gaussian_fwhm_to_sigma,
@@ -178,8 +178,6 @@ class JAMWrapperBase(GalkinObservation):
             self._mge_radial_points,
             kwargs_mass
         )
-        # times Sigma_crit to get surface mass density
-        radial_convergence *= self.cosmo.epsilon_crit * const.arcsec ** 2
         mge_mass = mge.fit_1d(
             self._mge_radial_points,
             radial_convergence,
@@ -352,12 +350,14 @@ class JAMWrapperBase(GalkinObservation):
 
         :return: delta_x, delta_y
         """
-        x_grid = self._aperture.x_grid
-        y_grid = self._aperture.y_grid
-        delta_x = x_grid[0, 1] - x_grid[0, 0]
-        delta_y = y_grid[1, 0] - y_grid[0, 0]
-
-        return delta_x, delta_y
+        if self.aperture_type == "IFU_grid":
+            x_grid = self._aperture.x_grid
+            y_grid = self._aperture.y_grid
+            delta_x = x_grid[0, 1] - x_grid[0, 0]
+            delta_y = y_grid[1, 0] - y_grid[0, 0]
+            return delta_x, delta_y
+        else:
+            return 0., 0.
 
     def _get_grid(self, kwargs_mass, supersampling_factor=1):
         """Compute the grid to compute the dispersion map on.
@@ -374,39 +374,44 @@ class JAMWrapperBase(GalkinObservation):
         delta_x, delta_y = self._delta_pix_xy()
         assert np.abs(delta_x) == np.abs(delta_y)
 
-        x_grid = self._aperture.x_grid
-        y_grid = self._aperture.y_grid
+        if self.aperture_type == "IFU_grid":
 
-        new_delta_x = delta_x / supersampling_factor
-        new_delta_y = delta_y / supersampling_factor
-        x_start = x_grid[0, 0] - delta_x / 2.0 * (1 - 1 / supersampling_factor)
-        x_end = x_grid[0, -1] + delta_x / 2.0 * (1 - 1 / supersampling_factor)
-        y_start = y_grid[0, 0] - delta_y / 2.0 * (1 - 1 / supersampling_factor)
-        y_end = y_grid[-1, 0] + delta_y / 2.0 * (1 - 1 / supersampling_factor)
+            x_grid = self._aperture.x_grid
+            y_grid = self._aperture.y_grid
 
-        xs = np.arange(x_start, x_end * (1 + 1e-6), new_delta_x)
-        ys = np.arange(y_start, y_end * (1 + 1e-6), new_delta_y)
+            new_delta_x = delta_x / supersampling_factor
+            new_delta_y = delta_y / supersampling_factor
+            x_start = x_grid[0, 0] - delta_x / 2.0 * (1 - 1 / supersampling_factor)
+            x_end = x_grid[0, -1] + delta_x / 2.0 * (1 - 1 / supersampling_factor)
+            y_start = y_grid[0, 0] - delta_y / 2.0 * (1 - 1 / supersampling_factor)
+            y_end = y_grid[-1, 0] + delta_y / 2.0 * (1 - 1 / supersampling_factor)
 
-        x_grid_supersampled, y_grid_supersmapled = np.meshgrid(xs, ys)
+            xs = np.arange(x_start, x_end * (1 + 1e-6), new_delta_x)
+            ys = np.arange(y_start, y_end * (1 + 1e-6), new_delta_y)
 
-        # shift to mass center
-        x_grid_supersampled -= mass_center_x
-        y_grid_supersmapled -= mass_center_y
+            x_grid_supersampled, y_grid_supersmapled = np.meshgrid(xs, ys)
 
-        # rotate grid according to mass ellipticity
-        e1_mass, e2_mass = self._extract_ellipticity(kwargs_mass)
-        x_grid_supersampled, y_grid_supersmapled = self._rotate_grid(
-            x_grid_supersampled, y_grid_supersmapled, e1_mass, e2_mass
-        )
+            # shift to mass center
+            x_grid_supersampled -= mass_center_x
+            y_grid_supersmapled -= mass_center_y
 
-        log10_radial_distance_from_center = np.log10(
-            np.sqrt(x_grid_supersampled ** 2 + y_grid_supersmapled  ** 2)
-        )
-        return (
-            x_grid_supersampled,
-            y_grid_supersmapled,
-            log10_radial_distance_from_center,
-        )
+            # rotate grid according to mass ellipticity
+            e1_mass, e2_mass = self._extract_ellipticity(kwargs_mass)
+            x_grid_supersampled, y_grid_supersmapled = self._rotate_grid(
+                x_grid_supersampled, y_grid_supersmapled, e1_mass, e2_mass
+            )
+
+            log10_radial_distance_from_center = np.log10(
+                np.sqrt(x_grid_supersampled ** 2 + y_grid_supersmapled  ** 2)
+            )
+            return (
+                x_grid_supersampled,
+                y_grid_supersmapled,
+                log10_radial_distance_from_center,
+            )
+        else:
+            # TODO: implement for other aperture types
+            return 0, 0, 0
 
     def _downsample_to_aperture(
         self,
