@@ -67,24 +67,16 @@ class JAMWrapperBase(GalkinObservation):
             }
 
         self._mge_n_gauss = kwargs_numerics.get("mge_n_gauss", 20)  # TODO: split into mass and light
-        self._mge_min_r = kwargs_numerics.get("mge_min_r", 1e-3)
-        self._mge_max_r = kwargs_numerics.get("mge_max_r", 100)
+        self._mge_min_r = kwargs_numerics.get("mge_min_r", 1e-3)  # in arcsec
+        self._mge_max_r = kwargs_numerics.get("mge_max_r", 100)   # in arcsec
         self._mge_n_radial = kwargs_numerics.get("mge_n_radial", 300)
-        self._mge_log_spacing = kwargs_numerics.get("mge_log_spacing", True) # TODO: remove option
         self._mge_kwargs_lum = kwargs_numerics.get("mge_kwargs_lum", {})
         self._mge_kwargs_mass = kwargs_numerics.get("mge_kwargs_mass", {"outer_slope": 2})
-        if kwargs_numerics.get("mge_log_spacing", True):
-            self._mge_radial_points = np.logspace(
-                np.log10(self._mge_min_r),
-                np.log10(self._mge_max_r),
-                self._mge_n_radial,
-            )
-        else:
-            self._mge_radial_points = np.linspace(
-                self._mge_min_r,
-                self._mge_max_r,
-                self._mge_n_radial,
-            )
+        self._mge_radial_points = np.logspace(  # this must be in logspace
+            np.log10(self._mge_min_r),
+            np.log10(self._mge_max_r),
+            self._mge_n_radial,
+        )
 
     def dispersion_points(
         self,
@@ -100,7 +92,7 @@ class JAMWrapperBase(GalkinObservation):
         ):
         """Computes the LOS velocity dispersion at given points (not convolved).
         :param x: array of x positions where to compute the dispersion [arcsec]
-        :param y: array of y positions where to compute the dispersion [arcsec].
+        :param y: array of y positions where to compute the dispersion [arcsec]
         :param kwargs_mass: mass model parameters (following lenstronomy lens model
             conventions)
         :param kwargs_light: deflector light parameters (following lenstronomy light
@@ -163,8 +155,9 @@ class JAMWrapperBase(GalkinObservation):
                 plot=False, quiet=True,
                 **self._mge_kwargs_lum,
             )
-            surf_lum = mge_lum.sol[0]
-            sigma_lum = mge_lum.sol[1]
+            sigma_lum = mge_lum.sol[1]  # in arcsec
+            # convert to surface brightness
+            surf_lum = mge_lum.sol[0] / (np.sqrt(2 * np.pi) * sigma_lum)
             if len(surf_lum) < self._mge_n_gauss: # TODO: maybe not needed
                 # pad with zeros
                 n_missing = self._mge_n_gauss - len(surf_lum)
@@ -174,19 +167,19 @@ class JAMWrapperBase(GalkinObservation):
 
     def mge_mass(self, kwargs_mass):
         # TODO: cache the MGE fit for repeated calls with same kwargs_mass
-        radial_convergence = self._mass_profile.radial_convergence(
+        radial_density = self._mass_profile.radial_density(
             self._mge_radial_points,
             kwargs_mass
         )
         mge_mass = mge.fit_1d(
             self._mge_radial_points,
-            radial_convergence,
+            radial_density,
             ngauss=self._mge_n_gauss,
             plot=False, quiet=True,
             **self._mge_kwargs_mass,
         )
-        surf_mass = mge_mass.sol[0]
-        sigma_mass = mge_mass.sol[1]
+        surf_mass = mge_mass.sol[0]   # mass convergence
+        sigma_mass = mge_mass.sol[1]  # in arcsec
         if len(surf_mass) < self._mge_n_gauss:
             # pad with zeros
             n_missing = self._mge_n_gauss - len(surf_mass)
