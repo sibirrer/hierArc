@@ -77,6 +77,12 @@ class JAMWrapperBase(GalkinObservation):
             np.log10(self._mge_max_r),
             self._mge_n_radial,
         )
+        if self.aperture_type == "IFU_grid":
+            delta_x, delta_y = self._delta_pix_xy()
+            self._delta_pix = (np.abs(delta_x) + np.abs(delta_y)) / 2
+        else:
+            # TODO: select the best value for other aperture type
+            self._delta_pix = kwargs_numerics.get("delta_pix", 0.2)  # in arcsec
 
     def dispersion_points(
         self,
@@ -119,8 +125,7 @@ class JAMWrapperBase(GalkinObservation):
         _, q_mass = ellipticity2phi_q(*self._extract_ellipticity(kwargs_mass))
         if convolved:
             seeing_fwhm = self._psf.fwhm
-            delta_x, delta_y = self._delta_pix_xy()
-            delta_pix = (delta_x + delta_y) / 2.0 / psf_supersampling_factor
+            delta_pix = self._delta_pix / psf_supersampling_factor
         else:
             seeing_fwhm = 0.0
             delta_pix = 0.0
@@ -319,25 +324,6 @@ class JAMWrapperBase(GalkinObservation):
             else:
                 return 0, 0
 
-    @staticmethod
-    def _rotate_grid(x_grid, y_grid, e1, e2):
-        """Rotate the grid according to the ellipticity parameters.
-
-        :param x_grid: x grid
-        :param y_grid: y grid
-        :param e1: e1 ellipticity parameter
-        :param e2: e2 ellipticity parameter
-        :return: x_rotated, y_rotated
-        """
-        phi = 0.5 * np.arctan2(e2, e1)
-        cos_phi = np.cos(phi)
-        sin_phi = np.sin(phi)
-
-        x_rotated = cos_phi * x_grid + sin_phi * y_grid
-        y_rotated = -sin_phi * x_grid + cos_phi * y_grid
-
-        return x_rotated, y_rotated
-
     def _delta_pix_xy(self):
         """Get the pixel scale of the grid.
 
@@ -351,68 +337,3 @@ class JAMWrapperBase(GalkinObservation):
             return delta_x, delta_y
         else:
             return 0., 0.
-
-    def _get_grid(self, kwargs_mass, supersampling_factor=1):
-        """Compute the grid to compute the dispersion map on.
-
-        The grid is supersampled and also shifted and rotated to align with the galaxy
-
-        :param kwargs_mass: keyword arguments of the mass model
-        :param supersampling_factor: sampling factor for the grid to do the 2D
-            convolution on
-        :return: x_grid, y_grid, log10_radial_distance_from_center
-        """
-        mass_center_x, mass_center_y = self._extract_center(kwargs_mass)
-
-        delta_x, delta_y = self._delta_pix_xy()
-        assert np.abs(delta_x) == np.abs(delta_y)
-
-        if self.aperture_type == "IFU_grid":
-
-            x_grid = self._aperture.x_grid
-            y_grid = self._aperture.y_grid
-
-            new_delta_x = delta_x / supersampling_factor
-            new_delta_y = delta_y / supersampling_factor
-            x_start = x_grid[0, 0] - delta_x / 2.0 * (1 - 1 / supersampling_factor)
-            x_end = x_grid[0, -1] + delta_x / 2.0 * (1 - 1 / supersampling_factor)
-            y_start = y_grid[0, 0] - delta_y / 2.0 * (1 - 1 / supersampling_factor)
-            y_end = y_grid[-1, 0] + delta_y / 2.0 * (1 - 1 / supersampling_factor)
-
-            xs = np.arange(x_start, x_end * (1 + 1e-6), new_delta_x)
-            ys = np.arange(y_start, y_end * (1 + 1e-6), new_delta_y)
-
-            x_grid_supersampled, y_grid_supersmapled = np.meshgrid(xs, ys)
-
-            # shift to mass center
-            x_grid_supersampled -= mass_center_x
-            y_grid_supersmapled -= mass_center_y
-
-            # rotate grid according to mass ellipticity
-            e1_mass, e2_mass = self._extract_ellipticity(kwargs_mass)
-            x_grid_supersampled, y_grid_supersmapled = self._rotate_grid(
-                x_grid_supersampled, y_grid_supersmapled, e1_mass, e2_mass
-            )
-
-            log10_radial_distance_from_center = np.log10(
-                np.sqrt(x_grid_supersampled ** 2 + y_grid_supersmapled  ** 2)
-            )
-            return (
-                x_grid_supersampled,
-                y_grid_supersmapled,
-                log10_radial_distance_from_center,
-            )
-        else:
-            # TODO: implement for other aperture types
-            return 0, 0, 0
-
-    def _downsample_to_aperture(
-        self,
-        high_res_map,
-        supersampling_factor,
-    ):
-        """Downsamples a high-resolution map to the aperture grid.
-        """
-        num_pix_x, num_pix_y = self._aperture.num_segments
-        return high_res_map.reshape(num_pix_y, supersampling_factor,
-                                    num_pix_x, supersampling_factor).mean(axis=(1, 3))
