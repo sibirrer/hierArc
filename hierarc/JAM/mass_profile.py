@@ -1,13 +1,10 @@
-from lenstronomy.LensModel.Profiles.spp import SPP as SPP
-from lenstronomy.LensModel.Profiles.epl import EPL as EPL
 from lenstronomy.LensModel.single_plane import SinglePlane
 from copy import deepcopy
-import numpy as np
 
 
 class MassProfile:
     """
-    Computes radial convergence for a list of lenstronomy mass profiles.
+    Computes radial 3D density for a list of lenstronomy mass profiles.
     Assumes that all the profiles share the same geometry.
     """
 
@@ -18,31 +15,16 @@ class MassProfile:
         self.profile_list = profile_list
         self.mass_model = SinglePlane(profile_list)
 
-    def radial_convergence(self, r, kwargs_list):
+    def radial_density(self, r, kwargs_list):
+        """
+        3D density at radius r
+        :param r: 3D radius in angular units
+        :param kwargs_list: list of keyword arguments of lens model parameters matching the
+            lens model classes
+        :return: mass density at radius r (in angular units, modulo epsilon_crit)
+        """
         kwargs_list = self._circularize_kwargs(kwargs_list)
-        r = np.array(r, dtype=float)
-        k_r = np.zeros_like(r)
-        for i, func in enumerate(self.mass_model.func_list):
-            k_r += self._component_convergence(r, func, kwargs_list[i])
-        return k_r
-
-    def _component_convergence(self, r, component, component_kwargs):
-        if isinstance(component, SPP) or isinstance(component, EPL):
-            return self.power_law_convergence(r, **component_kwargs)
-        else:
-            # not optimal but generic way to get the radial convergence
-            f_xx, f_xy, f_yx, f_yy = component.hessian(x=r, y=0, **component_kwargs)
-            return (f_xx + f_yy) / 2
-
-    @staticmethod
-    def power_law_convergence(r, theta_E, gamma, center_x=0, center_y=0):
-        """
-        :param r: projected radius [arcsec]
-        :param theta_E: Einstein radius [arcsec]
-        :param gamma: power-law slope
-        :return: convergence at radius r
-        """
-        return (3 - gamma) / 2 * (theta_E / r) ** (gamma - 1)
+        return self.mass_model.density(r, kwargs_list)
 
     @staticmethod
     def _circularize_kwargs(kwargs_list):
