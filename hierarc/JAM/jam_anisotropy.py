@@ -14,7 +14,8 @@ class JAMAnisotropy:
         self._constant_beta = None
 
         if self._type not in self._supported_types:
-            raise ValueError("anisotropy type %s not supported!" % self._type)
+            raise ValueError(f"anisotropy type {self._type} not supported!"
+                             f"\nchoose from {self._supported_types}")
 
         if self._type == "const":
             self.num_params = 1
@@ -31,7 +32,7 @@ class JAMAnisotropy:
             self.use_logistic = False
             self._constant_beta = 0.0
         elif self._type == "OM":
-            # Osipkov&Merrit
+            # Osipkov&Merrit: beta(r) = r**2 / (r**2 + r_ani**2)
             self.num_params = 1
             self.param_names = ["r_ani"]
             self.use_logistic = True
@@ -75,4 +76,4 @@ class JAMAnisotropy:
         """
         return the logistic function parameters for JAM beta(r) format
         """
-        return [beta_0, beta_inf, r_ani, alpha]
+        return [r_ani, beta_0, beta_inf, alpha]
