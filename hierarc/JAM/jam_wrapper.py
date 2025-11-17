@@ -1,5 +1,6 @@
 __author__ = "furcelay,sbirrer"
 
+from lenstronomy.Util.param_util import ellipticity2phi_q
 from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 import numpy as np
 
@@ -51,11 +52,21 @@ class JAMWrapper(JAMWrapperBase):
                 kwargs_anisotropy,
             )
         elif self.aperture_type == "IFU_shells":
-            return self.dispersion_shells(
-                kwargs_mass,
-                kwargs_light,
-                kwargs_anisotropy,
-            )
+            if self.symmetry == "spherical":
+                return self.dispersion_shells_spherical(
+                    kwargs_mass,
+                    kwargs_light,
+                    kwargs_anisotropy,
+                    inclination=inclination,
+                    convolved=convolved,
+                    supersampling_factor=supersampling_factor,
+                )
+            else:
+                return self.dispersion_shells_axisymmetric(
+                    kwargs_mass,
+                    kwargs_light,
+                    kwargs_anisotropy,
+                )
         elif self.aperture_type == "IFU_grid":
             return self.dispersion_grid(
                 kwargs_mass,
@@ -76,7 +87,6 @@ class JAMWrapper(JAMWrapperBase):
         kwargs_anisotropy,
         inclination=90.0,
         convolved=True,
-        supersampling_factor=1,
         sampling_number=1000
     ):
         """Computes the averaged LOS velocity dispersion in the slit (convolved)
@@ -89,8 +99,6 @@ class JAMWrapper(JAMWrapperBase):
             anisotropy type chosen. We refer to the Anisotropy() class for details on
             the parameters.
         :param inclination: inclination angle of the system [degrees]
-        :param sampling_number: int, number of spectral sampling of the light
-            distribution
         :return: integrated LOS velocity dispersion in units [km/s]
         """
         pass
@@ -115,7 +123,7 @@ class JAMWrapper(JAMWrapperBase):
             convolution on
         :return: ordered array of velocity dispersions [km/s] for each unit
         """
-        x_sup, y_sup, _ = self._get_grid(kwargs_mass, supersampling_factor=supersampling_factor)
+        x_sup, y_sup = self._get_grid(kwargs_mass, supersampling_factor)
         vrms_sup = self.dispersion_points(
             x_sup, y_sup,
             kwargs_mass,
@@ -125,9 +133,9 @@ class JAMWrapper(JAMWrapperBase):
             convolved=convolved,
             psf_supersampling_factor=supersampling_factor,
         )
-        vrms = self._downsample_to_aperture(
+        vrms = self._downsample_grid(
             vrms_sup,
-            supersampling_factor
+            supersampling_factor=supersampling_factor
         )
         return vrms
 
@@ -143,7 +151,7 @@ class JAMWrapper(JAMWrapperBase):
     ):
         pass
 
-    def dispersion_shells(
+    def dispersion_shells_spherical(
         self,
         kwargs_mass,
         kwargs_light,
@@ -152,9 +160,24 @@ class JAMWrapper(JAMWrapperBase):
         convolved=True,
         supersampling_factor=1,
     ):
-        pass
+        r_sup = self._get_shells_spherical(supersampling_factor)
+        vrms_sup = self.dispersion_points(
+            r_sup,
+            None,
+            kwargs_mass,
+            kwargs_light,
+            kwargs_anisotropy,
+            inclination=inclination,
+            convolved=convolved,
+            psf_supersampling_factor=supersampling_factor,
+        )
+        vrms = self._downsample_shells_radially(
+            vrms_sup,
+            supersampling_factor
+        )
+        return vrms
 
-    def dispersion_map_grid_convolved(
+    def dispersion_shells_axisymmetric(
         self,
         kwargs_mass,
         kwargs_light,
@@ -162,21 +185,27 @@ class JAMWrapper(JAMWrapperBase):
         inclination=90.0,
         convolved=True,
         supersampling_factor=1,
-        voronoi_bins=None,
     ):
-        """Computes the velocity dispersion in each Integral Field Unit.
-
-        :param kwargs_mass: keyword arguments of the mass model
-        :param kwargs_light: keyword argument of the light model
-        :param kwargs_anisotropy: anisotropy keyword arguments
-        :param inclination: inclination angle of the system [degrees]
-        :param supersampling_factor: sampling factor for the grid to do the 2D
-            convolution on
-        :param voronoi_bins: mapping of the voronoi bins, bin indices should start from
-            0, -1 values for pixels not binned
-        :return: ordered array of velocity dispersions [km/s] for each unit
-        """
-        pass
+        x_sup, y_sup, n_angular = self._get_shells_axisymmetric(kwargs_mass, supersampling_factor)
+        vrms_sup2 = self.dispersion_points(
+            x_sup,
+            y_sup,
+            kwargs_mass,
+            kwargs_light,
+            kwargs_anisotropy,
+            inclination=inclination,
+            convolved=convolved,
+            psf_supersampling_factor=supersampling_factor,
+        )
+        vrms_sup = self._downsample_shells_angularly(
+            vrms_sup2,
+            n_angular=n_angular
+        )
+        vrms = self._downsample_shells_radially(
+            vrms_sup,
+            supersampling_factor
+        )
+        return vrms
 
     def _draw_one_sigma2(self, kwargs_mass, kwargs_light, kwargs_anisotropy):
         """
@@ -190,3 +219,146 @@ class JAMWrapper(JAMWrapperBase):
         """
         pass
         # return sigma2_IR, IR
+
+    def _get_grid(self, kwargs_mass, supersampling_factor=1):
+        """Compute the grid to compute the dispersion map on.
+
+        The grid is supersampled and also shifted and rotated to align with the galaxy
+
+        :param kwargs_mass: keyword arguments of the mass model
+        :param supersampling_factor: sampling factor for the grid to do the 2D
+            convolution on
+        :return: x_grid, y_grid
+        """
+        mass_center_x, mass_center_y = self._extract_center(kwargs_mass)
+
+        delta_x, delta_y = self._delta_pix_xy()
+        assert np.abs(delta_x) == np.abs(delta_y)
+        x_grid = self._aperture.x_grid
+        y_grid = self._aperture.y_grid
+
+        new_delta_x = delta_x / supersampling_factor
+        new_delta_y = delta_y / supersampling_factor
+        x_start = x_grid[0, 0] - delta_x / 2.0 * (1 - 1 / supersampling_factor)
+        x_end = x_grid[0, -1] + delta_x / 2.0 * (1 - 1 / supersampling_factor)
+        y_start = y_grid[0, 0] - delta_y / 2.0 * (1 - 1 / supersampling_factor)
+        y_end = y_grid[-1, 0] + delta_y / 2.0 * (1 - 1 / supersampling_factor)
+
+        xs = np.arange(x_start, x_end * (1 + 1e-6), new_delta_x)
+        ys = np.arange(y_start, y_end * (1 + 1e-6), new_delta_y)
+
+        x_grid_supersampled, y_grid_supersmapled = np.meshgrid(xs, ys)
+
+        # shift to mass center
+        x_grid_supersampled -= mass_center_x
+        y_grid_supersmapled -= mass_center_y
+
+        # rotate grid according to light ellipticity
+        # TODO: maybe is better to use the light ellipticity?
+        e1_mass, e2_mass = self._extract_ellipticity(kwargs_mass)
+        phi_mass, q_mass = ellipticity2phi_q(e1_mass, e2_mass)
+        x_grid_supersampled, y_grid_supersmapled = self._rotate_grid(
+            x_grid_supersampled, y_grid_supersmapled, phi_mass
+        )
+        return x_grid_supersampled, y_grid_supersmapled
+
+    def _downsample_grid(
+        self,
+        high_res_map,
+        supersampling_factor=1,
+    ):
+        """Downsamples a high-resolution map to the aperture grid.
+        """
+        num_pix_x, num_pix_y = self._aperture.num_segments
+        return high_res_map.reshape(num_pix_y, supersampling_factor,
+                                    num_pix_x, supersampling_factor).sum(axis=(1, 3))
+
+    def _get_shells_spherical(self, supersampling_factor):
+        """radial shells with equal spacing in r for spherical shells
+        """
+        # create a radial grid
+        r_bins = self._aperture._r_bins
+        r_grid = np.arange(np.min(r_bins), np.max(r_bins) + 1e-6, self._delta_pix / supersampling_factor)
+        return r_grid
+
+    def _get_shells_axisymmetric(self, kwargs_mass, supersampling_factor):
+        """create a 2D grid in polar coordinates for spherical shells with axisymmetric model
+        shells are then integrated angularly
+        :param kwargs_mass: keyword arguments of the mass model
+        :param supersampling_factor: sampling factor for the grid
+        :return: x_grid, y_grid, n_angular (number of points per shell)
+        """
+        r_grid = self._get_shells_spherical(supersampling_factor)
+        #
+        # TODO: implement for elliptical shells
+        e1_mass, e2_mass = self._extract_ellipticity(kwargs_mass)
+        phi_mass, q_mass = ellipticity2phi_q(e1_mass, e2_mass)
+        x_grids, y_grids, n_angular = [], [], []
+        for r_shell in r_grid:
+            grid_x, grid_y = self._shells_grid_points(r_shell, supersampling_factor, phi_mass, q_shell=1.0)
+            x_grids.append(grid_x)
+            y_grids.append(grid_y)
+            n_angular.append(len(grid_x))
+        x_grids = np.concatenate(x_grids)
+        y_grids = np.concatenate(y_grids)
+        return x_grids, y_grids, n_angular
+
+    def _shells_grid_points(self, r_shell, supersampling, pos_angle=0.0, q_shell=1.0):
+        """Generate grid points in a shell at radius r_shell with elliptical geometry."""
+        a = r_shell
+        b = a * q_shell
+        n_points = 2 * np.pi * r_shell * supersampling / self._delta_pix
+        if np.ceil(n_points) > 1:
+            angle = np.linspace(0, np.pi / 2, int(np.ceil(n_points)))
+        else:
+            angle = np.array([np.pi / 4])
+        x, y = a * np.cos(angle), b * np.sin(angle)
+        return self._rotate_grid(x, y, pos_angle)
+
+    def _downsample_shells_radially(
+        self,
+        high_res_map,
+        supersampling_factor=1,
+    ):
+        """Downsamples a high-resolution map to the aperture grid.
+        """
+        r_shells = self._get_shells_spherical(supersampling_factor)
+        r_bins = self._aperture._r_bins
+        vel_disp = np.zeros(self._aperture.num_segments)
+        # iterate over bin edges and average masked values
+        for i in range(self._aperture.num_segments):
+            mask = (r_shells >= r_bins[i]) & (r_shells < r_bins[i+1])
+            vel_disp[i] = np.mean(high_res_map[mask])
+        return vel_disp
+
+    @staticmethod
+    def _downsample_shells_angularly(
+        high_res_map,
+        n_angular
+    ):
+        """Downsamples a high-resolution map to the aperture grid.
+        """
+        i = 0
+        vel_disp = []
+        for n in n_angular:
+            map_i = high_res_map[i:n]
+            vel_disp.append(np.mean(map_i))
+            i += n
+        return np.array(vel_disp)
+
+    @staticmethod
+    def _rotate_grid(x_grid, y_grid, phi):
+        """Rotate the grid according to the ellipticity parameters.
+
+        :param x_grid: x grid
+        :param y_grid: y grid
+        :param phi: angle in radians
+        :return: x_rotated, y_rotated
+        """
+        cos_phi = np.cos(phi)
+        sin_phi = np.sin(phi)
+
+        x_rotated = cos_phi * x_grid + sin_phi * y_grid
+        y_rotated = -sin_phi * x_grid + cos_phi * y_grid
+
+        return x_rotated, y_rotated

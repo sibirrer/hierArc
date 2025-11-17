@@ -6,6 +6,7 @@ from hierarc.JAM.jam_wrapper import JAMWrapper
 from astropy.cosmology import FlatLambdaCDM
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from lenstronomy.GalKin.galkin import Galkin
+from lenstronomy.GalKin.galkin_shells import GalkinShells
 
 
 class TestJAMWrapperSpherical(object):
@@ -14,8 +15,11 @@ class TestJAMWrapperSpherical(object):
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         lens_cosmo = LensCosmo(0.5, 1.2, cosmo=cosmo)
 
-        x = y = np.linspace(-5, 5, 20)
-        x_grid, y_grid = np.meshgrid(x, y)
+        self.kwargs_light_spherical = [{"Rs": 1.0, "amp": 1.0}]
+        self.kwargs_lens_mass_spherical = [
+            {"theta_E": 1.5, "gamma": 2.1, "center_x": 2.0, "center_y": -1.0}
+        ]
+        self.kwargs_anisotropy = {"beta": 0.3}
 
         kwargs_psf = {
                 "psf_type": "GAUSSIAN",
@@ -35,27 +39,22 @@ class TestJAMWrapperSpherical(object):
             "mge_min_r": 1e-3,
             "mge_max_r": 100,
             "mge_n_radial": 500,
-            "mge_log_spacing": True,
+
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
-        kwargs_aperture_shell = {
-                "aperture_type": "shell",
-                "r_in": 0,
-                "r_out": 3 / 2.0,
-                "center_ra": 0.0,
-                "center_dec": 0,
-            }
-        kwargs_aperture_grid = {
-            "aperture_type": "IFU_grid",
-            "x_grid": x_grid,
-            "y_grid": y_grid,
-        }
         kwargs_model = {
             "mass_profile_list": ["SPP"],
             "light_profile_list": ["HERNQUIST"],
             "anisotropy_model": "const",
         }
 
+        x = y = np.linspace(-5, 5, 20)
+        x_grid, y_grid = np.meshgrid(x, y)
+        kwargs_aperture_grid = {
+            "aperture_type": "IFU_grid",
+            "x_grid": x_grid,
+            "y_grid": y_grid,
+        }
         self.jam_spherical_grid = JAMWrapper(
             kwargs_model=kwargs_model | {"symmetry": "spherical"},
             kwargs_aperture=kwargs_aperture_grid,
@@ -63,12 +62,6 @@ class TestJAMWrapperSpherical(object):
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numeric_jam,
         )
-        self.kwargs_light_spherical = [{"Rs": 1.0, "amp": 1.0}]
-        self.kwargs_lens_mass_spherical = [
-            {"theta_E": 1.5, "gamma": 2.1, "center_x": 2.0, "center_y": -1.0}
-        ]
-        self.kwargs_anisotropy = {"beta": 0.3}
-
         self.galkin_grid = Galkin(
             kwargs_model=kwargs_model,
             kwargs_aperture=kwargs_aperture_grid,
@@ -78,14 +71,31 @@ class TestJAMWrapperSpherical(object):
             analytic_kinematics=False,
         )
 
-    def test_spherical_dispersion_slit(self):
-        pass
-
-    def test_spherical_dispersion_shells(self):
-        pass
+        r_bins = np.linspace(0.1, 5, 11)
+        kwargs_aperture_ifu_shells = {
+            "aperture_type": "IFU_shells",
+            "r_bins": r_bins,
+            "center_ra": 0.0,
+            "center_dec": 0.0,
+        }
+        self.jam_spherical_shells = JAMWrapper(
+            kwargs_model=kwargs_model | {"symmetry": "spherical"},
+            kwargs_aperture=kwargs_aperture_ifu_shells,
+            kwargs_psf=kwargs_psf,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numeric_jam,
+        )
+        self.galkin_shells = GalkinShells(
+            kwargs_model=kwargs_model,
+            kwargs_aperture=kwargs_aperture_ifu_shells,
+            kwargs_psf=kwargs_psf,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numerics_lenstronomy,
+            analytic_kinematics=False,
+        )
 
     def test_spherical_dispersion_grid(self):
-        sigma_v_jam = self.jam_spherical_grid.dispersion_grid(
+        sigma_v_jam = self.jam_spherical_grid.dispersion(
             self.kwargs_lens_mass_spherical,
             self.kwargs_light_spherical,
             self.kwargs_anisotropy,
@@ -96,32 +106,54 @@ class TestJAMWrapperSpherical(object):
             self.kwargs_light_spherical,
             self.kwargs_anisotropy,
         )
-        # import matplotlib.pyplot as plt
-        # plt.figure(figsize=(18, 6))
-        # plt.subplot(131)
-        # plt.imshow(sigma_v_galkin, vmin=200, vmax=330,
-        #            extent=(-5, 5, -5, 5), origin='lower')
-        # plt.colorbar()
-        # plt.scatter(self.kwargs_lens_mass_spherical[0]['center_x'],
-        #             self.kwargs_lens_mass_spherical[0]['center_y'],
-        #             color='red')
-        # plt.subplot(132)
-        # plt.imshow(sigma_v_jam, vmin=200, vmax=330,
-        #            extent=(-5, 5, -5, 5), origin='lower')
-        # plt.colorbar()
-        # plt.scatter(self.kwargs_lens_mass_spherical[0]['center_x'],
-        #             self.kwargs_lens_mass_spherical[0]['center_y'],
-        #             color='red')
-        # plt.subplot(133)
-        # plt.imshow((sigma_v_jam - sigma_v_galkin) / sigma_v_galkin,
-        #            vmin=-0.1, vmax=0.1,
-        #            extent=(-5, 5, -5, 5), origin='lower', cmap='coolwarm')
-        # plt.colorbar()
-        # plt.scatter(self.kwargs_lens_mass_spherical[0]['center_x'],
-        #             self.kwargs_lens_mass_spherical[0]['center_y'],
-        #             color='red')
-        # plt.show()
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=(18, 6))
+        plt.subplot(131)
+        plt.imshow(sigma_v_galkin, vmin=200, vmax=330,
+                   extent=(-5, 5, -5, 5), origin='lower')
+        plt.colorbar()
+        plt.scatter(self.kwargs_lens_mass_spherical[0]['center_x'],
+                    self.kwargs_lens_mass_spherical[0]['center_y'],
+                    color='red')
+        plt.subplot(132)
+        plt.imshow(sigma_v_jam, vmin=200, vmax=330,
+                   extent=(-5, 5, -5, 5), origin='lower')
+        plt.colorbar()
+        plt.scatter(self.kwargs_lens_mass_spherical[0]['center_x'],
+                    self.kwargs_lens_mass_spherical[0]['center_y'],
+                    color='red')
+        plt.subplot(133)
+        plt.imshow((sigma_v_jam - sigma_v_galkin) / sigma_v_galkin,
+                   vmin=-0.1, vmax=0.1,
+                   extent=(-5, 5, -5, 5), origin='lower', cmap='coolwarm')
+        plt.colorbar()
+        plt.scatter(self.kwargs_lens_mass_spherical[0]['center_x'],
+                    self.kwargs_lens_mass_spherical[0]['center_y'],
+                    color='red')
+        plt.show()
+        npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-1)
 
+    def test_spherical_dispersion_slit(self):
+        pass
+
+    def test_spherical_dispersion_shells(self):
+        sigma_v_jam = self.jam_spherical_shells.dispersion(
+            self.kwargs_lens_mass_spherical,
+            self.kwargs_light_spherical,
+            self.kwargs_anisotropy,
+            convolved=True,
+        )
+        sigma_v_galkin = self.galkin_shells.dispersion_map(
+            self.kwargs_lens_mass_spherical,
+            self.kwargs_light_spherical,
+            self.kwargs_anisotropy,
+        )
+        import matplotlib.pyplot as plt
+        r_bins = self.jam_spherical_shells._aperture._r_bins
+        r_bins_centers = 0.5 * (r_bins[1:] + r_bins[:-1])
+        plt.scatter(r_bins_centers, sigma_v_galkin)
+        plt.scatter(r_bins_centers, sigma_v_jam)
+        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-1)
 
     def test_spherical_voronoi(self):
