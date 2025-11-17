@@ -36,7 +36,6 @@ class TestJAMWrapperBaseIso(object):
             "mge_min_r": 1e-2,
             "mge_max_r": 100,
             "mge_n_radial": 500,
-            "mge_log_spacing": True,
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
         kwargs_aperture = { # not used in this test
@@ -144,7 +143,6 @@ class TestJAMWrapperBaseOM(object):
             "mge_min_r": 1e-2,
             "mge_max_r": 100,
             "mge_n_radial": 500,
-            "mge_log_spacing": True,
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
         kwargs_aperture = {  # not used in this test
@@ -219,7 +217,6 @@ class TestJAMWrapperBaseAnalytical(object):
             "mge_min_r": 1e-2,
             "mge_max_r": 100,
             "mge_n_radial": 500,
-            "mge_log_spacing": True,
         }
         kwargs_aperture = { # not used in this test
             "aperture_type": "slit",
