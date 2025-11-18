@@ -14,7 +14,7 @@ class TestJAMAnisotropy(object):
         self.alpha = 3.0
 
     @staticmethod
-    def logistic_function(r, beta_0, beta_inf, r_ani, alpha):
+    def logistic_function(r, r_ani, beta_0, beta_inf, alpha):
         return beta_0 + (beta_inf - beta_0) / (1 + (r_ani / r) ** alpha)
 
     def test_const(self):
