@@ -289,7 +289,7 @@ class JAMWrapper(JAMWrapperBase):
         :return: x_grid, y_grid, n_angular (number of points per shell)
         """
         r_grid = self._get_shells_spherical(supersampling_factor)
-        #
+
         # TODO: implement for elliptical shells
         e1_mass, e2_mass = self._extract_ellipticity(kwargs_mass)
         phi_mass, q_mass = ellipticity2phi_q(e1_mass, e2_mass)
@@ -304,7 +304,7 @@ class JAMWrapper(JAMWrapperBase):
         return x_grids, y_grids, n_angular
 
     def _shells_grid_points(self, r_shell, supersampling, pos_angle=0.0, q_shell=1.0):
-        """Generate grid points in a shell at radius r_shell with elliptical geometry."""
+        """Generate grid points in a shell at radius r_shell in elliptical polar coordinates."""
         a = r_shell
         b = a * q_shell
         n_points = 2 * np.pi * r_shell * supersampling / self._delta_pix
@@ -338,12 +338,13 @@ class JAMWrapper(JAMWrapperBase):
     ):
         """Downsamples a high-resolution map to the aperture grid.
         """
-        i = 0
+        i0 = i1 = 0
         vel_disp = []
         for n in n_angular:
-            map_i = high_res_map[i:n]
+            i1 += n
+            map_i = high_res_map[i0:i1]
             vel_disp.append(np.mean(map_i))
-            i += n
+            i0 = i1
         return np.array(vel_disp)
 
     @staticmethod

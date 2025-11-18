@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class JAMAnisotropy:
     _supported_types = ("const", "radial", "isotropic", "OM", "GOM", "Colin", "logistic")
 
@@ -69,7 +72,7 @@ class JAMAnisotropy:
                 constant_beta = anisotropy_params["beta"]
             else:
                 constant_beta = self._constant_beta
-            return [constant_beta] * n_gauss
+            return np.array([constant_beta] * n_gauss)
 
     @staticmethod
     def logistic_function_params(beta_0, beta_inf, r_ani, alpha):
