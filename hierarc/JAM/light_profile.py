@@ -23,19 +23,24 @@ class LightProfile:
             kwargs_list=kwargs_list
         )
 
-    @staticmethod
-    def _circularize_kwargs(kwargs_list):
+    def _circularize_kwargs(self, kwargs_list):
         """
         :param kwargs_list: list of keyword arguments of light profiles (see LightModule)
         :return: circularized arguments
         """
         kwargs_list_copy = deepcopy(kwargs_list)
         kwargs_list_new = []
-        for kwargs in kwargs_list_copy:
+        for kwargs, profile in zip(kwargs_list_copy, self.light_model.func_list):
             if "e1" in kwargs:
-                kwargs["e1"] = 0
+                if "e1" in profile.param_names:
+                    kwargs["e1"] = 0.0
+                else:
+                    kwargs.pop("e1")
             if "e2" in kwargs:
-                kwargs["e2"] = 0
+                if "e2" in profile.param_names:
+                    kwargs["e2"] = 0.0
+                else:
+                    kwargs.pop("e2")
             kwargs_list_new.append(
                 {
                     k: v
