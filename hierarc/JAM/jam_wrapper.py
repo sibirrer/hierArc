@@ -271,7 +271,7 @@ class JAMWrapper(JAMWrapperBase):
         """
         num_pix_x, num_pix_y = self._aperture.num_segments
         return high_res_map.reshape(num_pix_y, supersampling_factor,
-                                    num_pix_x, supersampling_factor).sum(axis=(1, 3))
+                                    num_pix_x, supersampling_factor).mean(axis=(1, 3))
 
     def _get_shells_spherical(self, supersampling_factor):
         """radial shells with equal spacing in r for spherical shells

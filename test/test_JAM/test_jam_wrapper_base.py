@@ -33,9 +33,10 @@ class TestJAMWrapperBaseIso(object):
             }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
-            "mge_min_r": 1e-2,
+            "mge_min_r": 1e-4,
             "mge_max_r": 100,
             "mge_n_radial": 500,
+            "mge_linear_solver": True,
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
         kwargs_aperture = { # not used in this test
@@ -104,7 +105,15 @@ class TestJAMWrapperBaseIso(object):
             kwargs_anisotropy=self.kwargs_anisotropy
         )
         sigma_v_galkin = np.sqrt(sigma2_IR_galkin / IR_galkin) / 1000
-        npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=0.1)
+        from matplotlib import pyplot as plt
+        plt.plot(self.r_test, sigma_v_jam, label="JamPy")
+        plt.plot(self.r_test, sigma_v_galkin, ls='--', label="Galkin")
+        plt.xscale('log')
+        plt.xlabel(r'$r$ [arcsec]')
+        plt.ylabel(r'$\sigma$ [km/s]')
+        plt.legend()
+        plt.show()
+        npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     @staticmethod
     def _gaussian(r, amp, sigma):
@@ -140,9 +149,10 @@ class TestJAMWrapperBaseOM(object):
         }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
-            "mge_min_r": 1e-2,
-            "mge_max_r": 100,
+            "mge_min_r": 1e-4,
+            "mge_max_r": 300,
             "mge_n_radial": 500,
+            "mge_linear_solver": True,
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
         kwargs_aperture = {  # not used in this test
@@ -192,7 +202,15 @@ class TestJAMWrapperBaseOM(object):
             kwargs_anisotropy=self.kwargs_anisotropy
         )
         sigma_v_galkin = np.sqrt(sigma2_IR_galkin / IR_galkin) / 1000
-        npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=0.1)
+        from matplotlib import pyplot as plt
+        plt.plot(self.r_test, sigma_v_jam, label="JamPy")
+        plt.plot(self.r_test, sigma_v_galkin, ls='--', label="Galkin")
+        plt.xscale('log')
+        plt.xlabel(r'$r$ [arcsec]')
+        plt.ylabel(r'$\sigma$ [km/s]')
+        plt.legend()
+        plt.show()
+        npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
 
 class TestJAMWrapperBaseAnalytical(object):
@@ -214,9 +232,10 @@ class TestJAMWrapperBaseAnalytical(object):
             }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
-            "mge_min_r": 1e-2,
-            "mge_max_r": 100,
+            "mge_min_r": 1e-4,
+            "mge_max_r": 300,
             "mge_n_radial": 500,
+            "mge_linear_solver": True,
         }
         kwargs_aperture = { # not used in this test
             "aperture_type": "slit",
@@ -261,6 +280,14 @@ class TestJAMWrapperBaseAnalytical(object):
             # convert arcsec to pc
             a=self.a * arcsec2pc,
         )
+        from matplotlib import pyplot as plt
+        plt.plot(r_test, sigma_v_jam, label="JamPy")
+        plt.plot(r_test, sigma_v_analytic, ls='--', label="Analytical Hernquist1990")
+        plt.xscale('log')
+        plt.xlabel(r'$r$ [arcsec]')
+        plt.ylabel(r'$\sigma$ [km/s]')
+        plt.legend()
+        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_analytic, rtol=1e-2)
 
     @staticmethod

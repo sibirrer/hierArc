@@ -67,9 +67,10 @@ class JAMWrapperBase(GalkinObservation):
             }
 
         self._mge_n_gauss = kwargs_numerics.get("mge_n_gauss", 20)  # TODO: split into mass and light
-        self._mge_min_r = kwargs_numerics.get("mge_min_r", 1e-3)  # in arcsec
-        self._mge_max_r = kwargs_numerics.get("mge_max_r", 100)   # in arcsec
-        self._mge_n_radial = kwargs_numerics.get("mge_n_radial", 300)
+        self._mge_min_r = kwargs_numerics.get("mge_min_r", 1e-4)  # in arcsec
+        self._mge_max_r = kwargs_numerics.get("mge_max_r", 300)   # in arcsec
+        self._mge_n_radial = kwargs_numerics.get("mge_n_radial", 500)
+        self._mge_linear_solver = kwargs_numerics.get("mge_linear_solver", True)  # use linear solver for MGE fit speed
         self._mge_kwargs_lum = kwargs_numerics.get("mge_kwargs_lum", {})
         self._mge_kwargs_mass = kwargs_numerics.get("mge_kwargs_mass", {"outer_slope": 2})
         self._mge_radial_points = np.logspace(  # this must be in logspace
@@ -157,6 +158,7 @@ class JAMWrapperBase(GalkinObservation):
                 self._mge_radial_points,
                 light_1d,
                 ngauss=self._mge_n_gauss,
+                linear=self._mge_linear_solver,
                 plot=False, quiet=True,
                 **self._mge_kwargs_lum,
             )
@@ -180,6 +182,7 @@ class JAMWrapperBase(GalkinObservation):
             self._mge_radial_points,
             radial_density,
             ngauss=self._mge_n_gauss,
+            linear=self._mge_linear_solver,
             plot=False, quiet=True,
             **self._mge_kwargs_mass,
         )
