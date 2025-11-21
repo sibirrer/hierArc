@@ -3,7 +3,8 @@ __author__ = "furcelay,sbirrer"
 from lenstronomy.Util.param_util import ellipticity2phi_q
 from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 import numpy as np
-
+from lenstronomy.Util import util
+from scipy import signal
 
 __all__ = ["JAMWrapper"]
 
@@ -43,13 +44,16 @@ class JAMWrapper(JAMWrapperBase):
         kwargs_anisotropy,
         inclination=90.0,
         convolved=True,
-        supersampling_factor=1,
+        **kwargs,
     ):
         if self.aperture_type == "slit":
             return self.dispersion_slit(
                 kwargs_mass,
                 kwargs_light,
                 kwargs_anisotropy,
+                inclination=inclination,
+                convolved=convolved,
+                **kwargs,
             )
         elif self.aperture_type == "IFU_shells":
             if self.symmetry == "spherical":
@@ -59,13 +63,16 @@ class JAMWrapper(JAMWrapperBase):
                     kwargs_anisotropy,
                     inclination=inclination,
                     convolved=convolved,
-                    supersampling_factor=supersampling_factor,
+                    **kwargs,
                 )
             else:
                 return self.dispersion_shells_axisymmetric(
                     kwargs_mass,
                     kwargs_light,
                     kwargs_anisotropy,
+                    inclination=inclination,
+                    convolved=convolved,
+                    **kwargs
                 )
         elif self.aperture_type == "IFU_grid":
             return self.dispersion_grid(
@@ -74,7 +81,7 @@ class JAMWrapper(JAMWrapperBase):
                 kwargs_anisotropy,
                 inclination=inclination,
                 convolved=convolved,
-                supersampling_factor=supersampling_factor,
+                **kwargs
             )
         else:
             raise ValueError("Invalid aperture type.")
@@ -101,7 +108,45 @@ class JAMWrapper(JAMWrapperBase):
         :param inclination: inclination angle of the system [degrees]
         :return: integrated LOS velocity dispersion in units [km/s]
         """
-        pass
+
+        x, y = self._draw_slit_points(
+            kwargs_mass,
+            sampling_number,
+            convolved=convolved,
+            fwhm_factor=3
+        )
+
+        IR = self._light_profile.light_model.surface_brightness(x, y, kwargs_light)
+        vrms = self.dispersion_points(
+            x,
+            y,
+            kwargs_mass,
+            kwargs_light,
+            kwargs_anisotropy,
+            inclination=inclination,
+            convolved=False,
+            psf_supersampling_factor=1,
+        )
+        sigma2_IR = vrms**2 * IR
+        return np.sqrt(sigma2_IR.sum() / IR.sum()), (x, y)
+        # # old implementation below
+        # x_slit, y_slit = self._get_slit_points(kwargs_mass, sampling_number)
+        # x_slit_displaced, y_slit_displaced = [], []
+        # for x, y in zip(x_slit.flatten(), y_slit.flatten()):
+        #     x_disp, y_disp = self.displace_psf(x, y)
+        #     x_slit_displaced.append(x_disp)
+        #     y_slit_displaced.append(y_disp)
+        # x_slit = np.array(x_slit_displaced)
+        # y_slit = np.array(y_slit_displaced)
+        # vrms_slit = self.dispersion_points(
+        #     x_slit, y_slit,
+        #     kwargs_mass,
+        #     kwargs_light,
+        #     kwargs_anisotropy,
+        #     inclination=inclination,
+        #     convolved=False,
+        # )
+        # return np.mean(vrms_slit)
 
     def dispersion_grid(
         self,
@@ -123,7 +168,7 @@ class JAMWrapper(JAMWrapperBase):
             convolution on
         :return: ordered array of velocity dispersions [km/s] for each unit
         """
-        x_sup, y_sup = self._get_grid(kwargs_mass, supersampling_factor)
+        x_sup, y_sup = self._get_IFU_grid(kwargs_mass, supersampling_factor)
         vrms_sup = self.dispersion_points(
             x_sup, y_sup,
             kwargs_mass,
@@ -150,6 +195,44 @@ class JAMWrapper(JAMWrapperBase):
         voronoi_bins=None,
     ):
         pass
+
+    def dispersion_shells_from_grid(
+        self,
+        kwargs_mass,
+        kwargs_light,
+        kwargs_anisotropy,
+        inclination=90.0,
+        convolved=True,
+        supersampling_factor=1,
+    ):
+        # this is an experiment to make it closer to the GalkinShells implementation
+        r_bins = self._aperture._r_bins
+        r_max = np.max(r_bins)
+        delta_pix = 1.5 * r_max * 2 / 100
+        x_grid, y_grid = util.make_grid(numPix=100 * supersampling_factor, deltapix=delta_pix/ supersampling_factor)
+        r_grid = np.sqrt(x_grid ** 2 + y_grid ** 2)
+        vrms_sup = self.dispersion_points(
+            x_grid, y_grid,
+            kwargs_mass,
+            kwargs_light,
+            kwargs_anisotropy,
+            inclination=inclination,
+            convolved=convolved,
+            psf_supersampling_factor=supersampling_factor,
+        )
+        # surf_bright = self._light_profile.light_model.surface_brightness(
+        #     x_grid, y_grid, kwargs_light
+        # )
+        # kernel = self.convolution_kernel_grid(x_grid, y_grid)
+        # surf_bright = signal.fftconvolve(surf_bright, kernel, mode="same")
+
+        vrms = np.zeros(self._aperture.num_segments)
+        # iterate over bin edges and average masked values
+        for i in range(self._aperture.num_segments):
+            mask = (r_grid >= r_bins[i]) & (r_grid < r_bins[i + 1])
+            # vrms[i] = np.sum(vrms_sup[mask] * surf_bright[mask]) / np.sum(surf_bright[mask])
+            vrms[i] = np.mean(vrms_sup[mask])
+        return vrms
 
     def dispersion_shells_spherical(
         self,
@@ -207,7 +290,15 @@ class JAMWrapper(JAMWrapperBase):
         )
         return vrms
 
-    def _draw_one_sigma2(self, kwargs_mass, kwargs_light, kwargs_anisotropy):
+    def _draw_one_sigma2(
+        self,
+        kwargs_mass,
+        kwargs_light,
+        kwargs_anisotropy,
+        inclination=90.0,
+        convolved=True,
+        fwhm_factor=3
+    ):
         """
 
         :param kwargs_mass: mass model parameters (following lenstronomy lens model conventions)
@@ -217,10 +308,74 @@ class JAMWrapper(JAMWrapperBase):
         :return: integrated LOS velocity dispersion in angular units for a single draw of the light distribution that
          falls in the aperture after displacing with the seeing
         """
-        pass
-        # return sigma2_IR, IR
+        while True:
+            x, y = np.random.uniform(-self._mge_max_r, self._mge_max_r, size=2)
+            if convolved:
+                x, y = self.displace_psf(x, y)
+            bool_ap, _ = self.aperture_select(x, y)
+            if bool_ap is True:
+                break
+        IR = self._light_profile.light_model.surface_brightness(x, y, kwargs_light)
+        vrms = self.dispersion_points(
+            x,
+            y,
+            kwargs_mass,
+            kwargs_light,
+            kwargs_anisotropy,
+            inclination=inclination,
+            convolved=False,
+            psf_supersampling_factor=1,
+        )
+        sigma2_IR = vrms**2 * IR
+        return sigma2_IR, IR
 
-    def _get_grid(self, kwargs_mass, supersampling_factor=1):
+    def _draw_slit_points(self, kwargs_mass, sampling_number, convolved=True, fwhm_factor=3):
+
+        def draw_point(dx, dy, slit_x, slit_y, slit_angle, lens_x, lens_y, lens_angle):
+            while True:
+                x, y = np.random.random(2)
+                x = (x - 0.5) * dx
+                y = (y - 0.5) * dy
+                if convolved:
+                    x, y = self.displace_psf(x, y)
+                x, y = self._rotate_grid(x, y, slit_angle)
+                x += slit_x
+                y += slit_y
+                bool_ap, _ = self.aperture_select(x, y)
+                if bool_ap is True:
+                    # shift to mass center
+                    x -= lens_x
+                    y -= lens_y
+                    # rotate grid according to mass major axis
+                    x, y = self._rotate_grid(x, y, -lens_angle)
+                    return x, y
+
+        x_samples, y_samples = [], []
+        mass_center_x, mass_center_y = self._extract_center(kwargs_mass)
+        mass_e1, mass_e2 = self._extract_center(kwargs_mass)
+        phi_mass, q_mass = ellipticity2phi_q(mass_e1, mass_e2)
+        length, width = self._aperture._length, self._aperture._width
+        slit_ra, slit_dec = self._aperture._center_ra, self._aperture._center_dec
+        slit_angle = self._aperture._angle
+
+        # sample including PSF displacement
+        sample_dx = length + fwhm_factor * self._psf._fwhm
+        sample_dy = width + fwhm_factor * self._psf._fwhm
+
+        for _ in range(sampling_number):
+            x_draw, y_draw = draw_point(
+                sample_dx, sample_dy,
+                slit_ra, slit_dec, slit_angle,
+                mass_center_x, mass_center_y, phi_mass
+            )
+            x_samples.append(x_draw)
+            y_samples.append(y_draw)
+        x_samples = np.array(x_samples)
+        y_samples = np.array(y_samples)
+        return x_samples, y_samples
+
+
+    def _get_IFU_grid(self, kwargs_mass, supersampling_factor=1):
         """Compute the grid to compute the dispersion map on.
 
         The grid is supersampled and also shifted and rotated to align with the galaxy
@@ -253,12 +408,12 @@ class JAMWrapper(JAMWrapperBase):
         x_grid_supersampled -= mass_center_x
         y_grid_supersmapled -= mass_center_y
 
-        # rotate grid according to light ellipticity
+        # rotate grid according to mass ellipticity
         # TODO: maybe is better to use the light ellipticity?
         e1_mass, e2_mass = self._extract_ellipticity(kwargs_mass)
         phi_mass, q_mass = ellipticity2phi_q(e1_mass, e2_mass)
         x_grid_supersampled, y_grid_supersmapled = self._rotate_grid(
-            x_grid_supersampled, y_grid_supersmapled, phi_mass
+            x_grid_supersampled, y_grid_supersmapled, -phi_mass
         )
         return x_grid_supersampled, y_grid_supersmapled
 
@@ -278,7 +433,7 @@ class JAMWrapper(JAMWrapperBase):
         """
         # create a radial grid
         r_bins = self._aperture._r_bins
-        r_grid = np.arange(np.min(r_bins), np.max(r_bins) + 1e-6, self._delta_pix / supersampling_factor)
+        r_grid = np.arange(np.min(r_bins), np.max(r_bins) * (1 + 1e-6), self._delta_pix / supersampling_factor)
         return r_grid
 
     def _get_shells_axisymmetric(self, kwargs_mass, supersampling_factor):
