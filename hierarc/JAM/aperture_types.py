@@ -1,12 +1,52 @@
-__author__ = "sibirrer,furcelay"
+__author__ = "furcelay,sibirrer"
 
 import numpy as np
 
 
-class Slit(object):
+class GeneralAperture(object):
+    """General aperture class."""
+
+    def __init__(self, x_cords, y_cords, bin_ids=None, delta_pix=0.1):
+        """
+
+        :param x_cords: x coordinates to compute the kinematics
+        :param y_cords: y coordinates to compute the kinematics
+        :param bin_ids: array with the same shape as x_cords/y_cords
+            defining the bin index for each coordinate
+        :param delta_pix: pixel scale of the coordinates, needed for PSF convolution
+        """
+        self._x_cords = x_cords
+        self._y_cords = y_cords
+        self._bin_ids = bin_ids
+        self._delta_pix = delta_pix
+
+    def aperture_sample(self):
+        return self._x_cords, self._y_cords
+
+    def aperture_downsample(self, high_res_map):
+        return downsample_cords_to_bins(
+            high_res_map,
+            self._bin_ids,
+            supersampling_factor=1,
+        )
+
+    @property
+    def num_segments(self):
+        """Number of segments with separate measurements of the velocity dispersion.
+
+        :return: int
+        """
+        return int(np.max(self._bin_ids)) + 1
+
+    @property
+    def delta_pix(self):
+        return self._delta_pix
+
+
+class Slit(GeneralAperture):
     """Slit aperture description."""
 
-    def __init__(self, length, width, center_ra=0, center_dec=0, angle=0):
+    def __init__(self, length, width, center_ra=0, center_dec=0, angle=0, delta_pix=0.1):
         """
 
         :param length: length of slit
@@ -14,31 +54,37 @@ class Slit(object):
         :param center_ra: center of slit
         :param center_dec: center of slit
         :param angle: orientation angle of slit, angle=0 corresponds length in RA direction
+        :param delta_pix: pixel scale of the coordinates, needed for PSF convolution
         """
         self._length = length
         self._width = width
         self._center_ra, self._center_dec = center_ra, center_dec
         self._angle = angle
 
-    def aperture_select(self, ra, dec):
-        """
+        slit_grid_x, slit_grid_y = self._make_slit_grid(delta_pix)
+        super().__init__(slit_grid_x.flatten(), slit_grid_y.flatten(), delta_pix=delta_pix)
 
-        :param ra: angular coordinate of photon/ray
-        :param dec: angular coordinate of photon/ray
-        :return: bool, True if photon/ray is within the slit, False otherwise
-        """
-        return (
-            slit_select(
-                ra,
-                dec,
-                self._length,
-                self._width,
-                self._center_ra,
-                self._center_dec,
-                self._angle,
-            ),
-            0,
+    def _make_slit_grid(self, delta_pix):
+        slit_x = np.arange(
+            (-self._length + delta_pix) / 2,
+            self._length / 2,
+            delta_pix
         )
+        slit_y = np.arange(
+            (-self._width + delta_pix) / 2,
+            self._width / 2,
+            delta_pix
+        )
+        grid_x, grid_y = np.meshgrid(slit_x, slit_y)
+        # rotate
+        grid_x, grid_y = _rotate(grid_x, grid_y, angle=-self._angle)
+        # shift
+        grid_x = grid_x + self._center_ra
+        grid_y = grid_y + self._center_dec
+        return grid_x.flatten(), grid_y.flatten()
+
+    def aperture_downsample(self, high_res_map):
+        return np.sum(high_res_map)
 
     @property
     def num_segments(self):
@@ -49,30 +95,11 @@ class Slit(object):
         return 1
 
 
-def slit_select(ra, dec, length, width, center_ra=0, center_dec=0, angle=0):
-    """
-
-    :param ra: angular coordinate of photon/ray
-    :param dec: angular coordinate of photon/ray
-    :param length: length of slit
-    :param width: width of slit
-    :param center_ra: center of slit
-    :param center_dec: center of slit
-    :param angle: orientation angle of slit, angle=0 corresponds length in RA direction
-    :return: bool, True if photon/ray is within the slit, False otherwise
-    """
-    ra_ = ra - center_ra
-    dec_ = dec - center_dec
-    x = np.cos(angle) * ra_ + np.sin(angle) * dec_
-    y = -np.sin(angle) * ra_ + np.cos(angle) * dec_
-    return (abs(x) < length / 2.0) & (abs(y) < width / 2.0)
-
-
-class Frame(object):
+class Frame(GeneralAperture):
     """Rectangular box with a hole in the middle (also rectangular), effectively a
     frame."""
 
-    def __init__(self, width_outer, width_inner, center_ra=0, center_dec=0, angle=0):
+    def __init__(self, width_outer, width_inner, center_ra=0, center_dec=0, angle=0, delta_pix=0.1):
         """
 
         :param width_outer: width of box to the outer parts
@@ -80,31 +107,52 @@ class Frame(object):
         :param center_ra: center of slit
         :param center_dec: center of slit
         :param angle: orientation angle of slit, angle=0 corresponds length in RA direction
+        :param delta_pix: pixel scale of the coordinates, needed for PSF convolution
         """
         self._width_outer = width_outer
         self._width_inner = width_inner
         self._center_ra, self._center_dec = center_ra, center_dec
         self._angle = angle
 
-    def aperture_select(self, ra, dec):
-        """
+        x_grid, y_grid = self.make_frame_grid(delta_pix)
+        super().__init__(x_grid, y_grid, delta_pix=delta_pix)
 
-        :param ra: angular coordinate of photon/ray
-        :param dec: angular coordinate of photon/ray
-        :return: bool, True if photon/ray is within the slit, False otherwise
+    def make_frame_grid(self, delta_pix):
         """
-        return (
-            frame_select(
-                ra,
-                dec,
-                self._width_outer,
-                self._width_inner,
-                self._center_ra,
-                self._center_dec,
-                self._angle,
-            ),
-            0,
+        make a grid of coordinates within the frame aperture
+        first create a grid for the outer box, then mask out the inner box
+        :return: x_grid, y_grid
+        """
+        x_outer = np.arange(
+            (-self._width_outer + delta_pix) / 2,
+            self._width_outer / 2,
+            delta_pix
         )
+        y_outer = np.arange(
+            (-self._width_outer + delta_pix) / 2,
+            self._width_outer / 2,
+            delta_pix
+        )
+        x_outer_grid, y_outer_grid = np.meshgrid(x_outer, y_outer)
+        # rotate
+        x_outer_grid, y_outer_grid = _rotate(x_outer_grid, y_outer_grid,
+                                             angle=-self._angle
+                                             )
+
+        # create inner box mask
+        mask_inner = (np.abs(x_outer_grid) < self._width_inner / 2) & (
+            np.abs(y_outer_grid) < self._width_inner / 2
+        )
+        # apply mask
+        x_grid = x_outer_grid[~mask_inner]
+        y_grid = y_outer_grid[~mask_inner]
+        # shift
+        x_grid = x_grid + self._center_ra
+        y_grid = y_grid + self._center_dec
+        return x_grid, y_grid
+
+    def aperture_downsample(self, high_res_map, *args, **kwargs):
+        return np.sum(high_res_map)
 
     @property
     def num_segments(self):
@@ -115,56 +163,38 @@ class Frame(object):
         return 1
 
 
-def frame_select(ra, dec, width_outer, width_inner, center_ra=0, center_dec=0, angle=0):
-    """
-
-    :param ra: angular coordinate of photon/ray
-    :param dec: angular coordinate of photon/ray
-    :param width_outer: width of box to the outer parts
-    :param width_inner: width of inner removed box
-    :param center_ra: center of slit
-    :param center_dec: center of slit
-    :param angle: orientation angle of slit, angle=0 corresponds length in RA direction
-    :return: bool, True if photon/ray is within the box with a hole, False otherwise
-    """
-    ra_ = ra - center_ra
-    dec_ = dec - center_dec
-    x = np.cos(angle) * ra_ + np.sin(angle) * dec_
-    y = -np.sin(angle) * ra_ + np.cos(angle) * dec_
-
-    cond_outer = (abs(x) < width_outer / 2.0) & (abs(y) < width_outer / 2.0)
-    cond_inner = (abs(x) < width_inner / 2.0) & (abs(y) < width_inner / 2.0)
-
-    return cond_outer & ~cond_inner
-
-
-class Shell(object):
+class Shell(GeneralAperture):
     """Shell aperture."""
 
-    def __init__(self, r_in, r_out, center_ra=0, center_dec=0):
+    def __init__(self, r_in, r_out, center_ra=0, center_dec=0, delta_pix=0.1):
         """
 
         :param r_in: innermost radius to be selected
         :param r_out: outermost radius to be selected
         :param center_ra: center of the sphere
         :param center_dec: center of the sphere
+        :param delta_pix: pixel scale of the coordinates, needed for PSF convolution
         """
         self._r_in, self._r_out = r_in, r_out
         self._center_ra, self._center_dec = center_ra, center_dec
 
-    def aperture_select(self, ra, dec):
-        """
+        shell_x, shell_y = self.make_shell_grid(delta_pix)
+        super().__init__(shell_x, shell_y, delta_pix=delta_pix)
 
-        :param ra: angular coordinate of photon/ray
-        :param dec: angular coordinate of photon/ray
-        :return: bool, True if photon/ray is within the slit, False otherwise
+    def make_shell_grid(self, delta_pix):
         """
-        return (
-            shell_select(
-                ra, dec, self._r_in, self._r_out, self._center_ra, self._center_dec
-            ),
-            0,
-        )
+        make a grid of coordinates within the shell aperture
+        :return: x_grid, y_grid
+        """
+        r_vals = np.arange(self._r_in, self._r_out, delta_pix)
+        theta_vals = np.arange(0, 2 * np.pi, delta_pix / self._r_out)
+        r_grid, theta_grid = np.meshgrid(r_vals, theta_vals)
+        x_grid = r_grid * np.cos(theta_grid) + self._center_ra
+        y_grid = r_grid * np.sin(theta_grid) + self._center_dec
+        return x_grid.flatten(), y_grid.flatten()
+
+    def aperture_downsample(self, high_res_map):
+        return np.sum(high_res_map)
 
     @property
     def num_segments(self):
@@ -175,89 +205,11 @@ class Shell(object):
         return 1
 
 
-def shell_select(ra, dec, r_in, r_out, center_ra=0, center_dec=0):
-    """
-
-    :param ra: angular coordinate of photon/ray
-    :param dec: angular coordinate of photon/ray
-    :param r_in: innermost radius to be selected
-    :param r_out: outermost radius to be selected
-    :param center_ra: center of the sphere
-    :param center_dec: center of the sphere
-    :return: boolean, True if within the radial range, False otherwise
-    """
-    x = ra - center_ra
-    y = dec - center_dec
-    r = np.sqrt(x**2 + y**2)
-    return (r >= r_in) & (r < r_out)
-
-
-class IFUShells(object):
-    """Class for an Integral Field Unit spectrograph with azimuthal shells where the
-    kinematics are measured."""
-
-    def __init__(self, r_bins, center_ra=0, center_dec=0, ifu_grid=None):
-        """
-
-        :param r_bins: array of radial bins to average the dispersion spectra in ascending order.
-         It starts with the innermost edge to the outermost edge.
-        :param center_ra: center of the sphere
-        :param center_dec: center of the sphere
-        """
-        self._r_bins = r_bins
-        self._center_ra, self._center_dec = center_ra, center_dec
-        if ifu_grid is None:
-            ifu_num_pix = 100
-            r_max = np.max(r_bins)
-            delta_pix = 1.5 * r_max * 2 / ifu_num_pix
-            ifu_x = ifu_y = np.linspace(
-                -ifu_num_pix / 2 * delta_pix,
-                ifu_num_pix / 2 * delta_pix,
-                ifu_num_pix,
-            )
-            ifu_x_grid, ifu_y_grid = np.meshgrid(ifu_x, ifu_y)
-        else:
-            ifu_x_grid, ifu_y_grid = ifu_grid
-        self._ifu_grid = IFUGrid(ifu_x_grid, ifu_y_grid)
-
-    def aperture_select(self, ra, dec):
-        """
-
-        :param ra: angular coordinate of photon/ray
-        :param dec: angular coordinate of photon/ray
-        :return: bool, True if photon/ray is within the slit, False otherwise, index of shell
-        """
-        return shell_ifu_select(
-            ra, dec, self._r_bins, self._center_ra, self._center_dec
-        )
-
-    def aperture_sample(self, supersampling_factor):
-        x_grid, y_grid = self._ifu_grid.aperture_sample(supersampling_factor)
-        return x_grid, y_grid
-
-    def aperture_downsample(self, high_res_map, supersampling_factor):
-        downsampled_map = np.zeros(self.num_segments)
-        x_grid, y_grid = self._ifu_grid.aperture_sample(supersampling_factor)
-        r_grid = np.sqrt(x_grid ** 2 + y_grid ** 2)
-        r_bins = self._r_bins
-        # iterate over bin edges and average masked values
-        for i in range(self.num_segments):
-            mask = (r_grid >= r_bins[i]) & (r_grid < r_bins[i + 1])
-            downsampled_map[i] = np.mean(high_res_map[mask])
-        return downsampled_map
-
-    @property
-    def num_segments(self):
-        """Number of segments with separate measurements of the velocity dispersion
-        :return: int."""
-        return len(self._r_bins) - 1
-
-
-class IFUGrid(object):
+class IFUGrid(GeneralAperture):
     """Class for an Integral Field Unit spectrograph with rectangular grid where the
     kinematics are measured."""
 
-    def __init__(self, x_grid, y_grid):
+    def __init__(self, x_grid, y_grid, supersampling_factor=1):
         """
 
         :param x_grid: x coordinates of the grid
@@ -269,16 +221,10 @@ class IFUGrid(object):
         if np.abs(delta_x) != np.abs(delta_y):
             raise ValueError("IFU grid pixels must be square!")
 
-    def aperture_select(self, ra, dec):
-        """
+        x_grid_supersampled, y_grid_supersampled = self.make_supersampled_grid(supersampling_factor)
+        super().__init__(x_grid_supersampled, y_grid_supersampled, delta_pix=delta_x / supersampling_factor)
 
-        :param ra: angular coordinate of photon/ray
-        :param dec: angular coordinate of photon/ray
-        :return: bool, True if photon/ray is within the slit, False otherwise, index of shell
-        """
-        return grid_ifu_select(ra, dec, self._x_grid, self._y_grid)
-
-    def aperture_sample(self, supersampling_factor):
+    def make_supersampled_grid(self, supersampling_factor):
         delta_x, delta_y = self.delta_pix_xy
         x_grid = self._x_grid
         y_grid = self._y_grid
@@ -296,14 +242,15 @@ class IFUGrid(object):
         x_grid_supersampled, y_grid_supersampled = np.meshgrid(xs, ys)
         return x_grid_supersampled, y_grid_supersampled
 
-    def aperture_downsample(self, high_res_map, supersampling_factor):
+
+    def aperture_downsample(self, high_res_map, supersampling_factor=1):
         """Downsample a high-resolution map to the IFU grid by averaging over the
         supersampling factor.
         :param high_res_map: 2D array of high-resolution map to be downsampled
-        :param supersampling_factor: int, factor by which the high-res map is sampled
+        :param supersampling_factor: factor by which the high-res map is supersampled
         :return: 2D array of downsampled map
         """
-        num_pix_x, num_pix_y = self.num_segments
+        num_pix_y, num_pix_x = self.grid_shape
         return high_res_map.reshape(num_pix_y, supersampling_factor,
                                     num_pix_x, supersampling_factor).mean(axis=(1, 3))
 
@@ -313,7 +260,12 @@ class IFUGrid(object):
 
         :return: int
         """
-        return self._x_grid.shape[0], self._x_grid.shape[1]
+        return self._x_grid.size
+
+    @property
+    def grid_shape(self):
+        """Shape of the IFU grid."""
+        return self._x_grid.shape
 
     @property
     def x_grid(self):
@@ -334,47 +286,86 @@ class IFUGrid(object):
         return delta_x, delta_y
 
 
-def grid_ifu_select(ra, dec, x_grid, y_grid):
-    """
+class IFUShells(GeneralAperture):
+    """Class for an Integral Field Unit spectrograph with azimuthal shells where the
+    kinematics are measured."""
 
-    :param ra: angular coordinate of photon/ray
-    :param dec: angular coordinate of photon/ray
-    :param x_grid: array of x_grid bins
-    :param y_grid: array of y_grid bins
-    :return: boolean, True if within the grid range, False otherwise
-    """
-    x_pixel_size = x_grid[0, 1] - x_grid[0, 0]
-    y_pixel_size = y_grid[1, 0] - y_grid[0, 0]
+    def __init__(self, r_bins, center_ra=0, center_dec=0, ifu_grid_kwargs=None, delta_pix=None):
+        """
 
-    for i in range(x_grid.shape[0]):
-        for j in range(x_grid.shape[1]):
-            x_down = x_grid[i, j] - x_pixel_size / 2
-            x_up = x_grid[i, j] + x_pixel_size / 2
+        :param r_bins: array of radial bins to average the dispersion spectra in ascending order.
+         It starts with the innermost edge to the outermost edge.
+        :param center_ra: center of the sphere
+        :param center_dec: center of the sphere
+        :param ifu_grid_kwargs: kwargs to create the IFU grid, if None a default grid is created.
+        :param delta_pix: pixel scale of the IFU grid, only used if ifu_grid is None.
+        """
+        self._r_bins = r_bins
+        self._center_ra, self._center_dec = center_ra, center_dec
+        if ifu_grid_kwargs is None:
+            ifu_num_pix = 100
+            r_max = np.max(r_bins)
+            if delta_pix is None:
+                delta_pix = 1.5 * r_max * 2 / ifu_num_pix
+            ifu_x = ifu_y = np.linspace(
+                -ifu_num_pix / 2 * delta_pix,
+                ifu_num_pix / 2 * delta_pix,
+                ifu_num_pix,
+            )
+            ifu_x_grid, ifu_y_grid = np.meshgrid(ifu_x, ifu_y)
+            ifu_grid_kwargs = {
+                'x_grid': ifu_x_grid,
+                'y_grid': ifu_y_grid,
+                'supersampling_factor': 1
+            }
+        self._ifu_grid = IFUGrid(**ifu_grid_kwargs)
 
-            y_down = y_grid[i, j] - y_pixel_size / 2
-            y_up = y_grid[i, j] + y_pixel_size / 2
+        super().__init__(self._ifu_grid.x_grid, self._ifu_grid.y_grid, delta_pix=self._ifu_grid.delta_pix)
 
-            if (x_down <= ra <= x_up) and (y_down <= dec <= y_up):
-                return True, (i, j)
+    def aperture_sample(self):
+        x_grid, y_grid = self._ifu_grid.aperture_sample()
+        return x_grid, y_grid
 
-    return False, None
+    def aperture_downsample(self, high_res_map):
+        downsampled_map = np.zeros(self.num_segments)
+        x_grid, y_grid = self._ifu_grid.aperture_sample()
+        x_grid -= self._center_ra
+        y_grid -= self._center_dec
+        r_grid = np.sqrt(x_grid ** 2 + y_grid ** 2)
+        r_bins = self._r_bins
+        # iterate over bin edges and average masked values
+        for i in range(self.num_segments):
+            mask = (r_grid >= r_bins[i]) & (r_grid < r_bins[i + 1])
+            downsampled_map[i] = np.mean(high_res_map[mask])
+        return downsampled_map
+
+    @property
+    def num_segments(self):
+        """Number of segments with separate measurements of the velocity dispersion
+        :return: int."""
+        return len(self._r_bins) - 1
+
+    @property
+    def delta_pix_xy(self):
+        """Get the pixel scale of the IFU grid.
+        """
+        return self._ifu_grid.delta_pix_xy
 
 
-def shell_ifu_select(ra, dec, r_bin, center_ra=0, center_dec=0):
-    """
+def _rotate(x, y, angle):
+    x_rot = np.cos(angle) * x + np.sin(angle) * y
+    y_rot = -np.sin(angle) * x + np.cos(angle) * y
+    return x_rot, y_rot
 
-    :param ra: angular coordinate of photon/ray
-    :param dec: angular coordinate of photon/ray
-    :param r_bin: array of radial bins to average the dispersion spectra in ascending order.
-     It starts with the inner-most edge to the outermost edge.
-    :param center_ra: center of the sphere
-    :param center_dec: center of the sphere
-    :return: boolean, True if within the radial range, False otherwise
-    """
-    x = ra - center_ra
-    y = dec - center_dec
-    r = np.sqrt(x**2 + y**2)
-    for i in range(0, len(r_bin) - 1):
-        if (r >= r_bin[i]) and (r < r_bin[i + 1]):
-            return True, i
-    return False, None
+
+def downsample_cords_to_bins(vrms_grid, bins, supersampling_factor=1):
+    n_bins = int(np.max(bins)) + 1
+    supersampled_bins = bins.repeat(
+        supersampling_factor, axis=0
+    ).repeat(supersampling_factor, axis=1)
+    vrms = np.zeros(n_bins)
+    for n in range(n_bins):
+        vrms[n] = np.mean(
+            vrms_grid[supersampled_bins == n]
+        )
+    return vrms

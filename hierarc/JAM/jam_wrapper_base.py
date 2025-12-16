@@ -1,9 +1,10 @@
 __author__ = "furcelay,sbirrer"
 
 from astropy.stats import gaussian_fwhm_to_sigma
-from lenstronomy.GalKin.observation import GalkinObservation
+from lenstronomy.GalKin.psf import PSF
 from lenstronomy.GalKin.cosmo import Cosmo
 from lenstronomy.Util.param_util import ellipticity2phi_q
+from hierarc.JAM.aperture import Aperture
 from hierarc.JAM.mass_profile import MassProfile
 from hierarc.JAM.light_profile import LightProfile
 from hierarc.JAM.jam_anisotropy import JAMAnisotropy
@@ -15,7 +16,7 @@ import numpy as np
 __all__ = ["JAMWrapperBase"]
 
 
-class JAMWrapperBase(GalkinObservation):
+class JAMWrapperBase(PSF, Aperture):
     """
     Wrapper class to use jampy JAM functionality similar to lenstronomy's Galkin class.
 
@@ -57,33 +58,42 @@ class JAMWrapperBase(GalkinObservation):
         else:
             raise ValueError("Invalid symmetry type for JAMWrapper, "
                              "options are 'spherical', 'axi_sph' or 'axi_cyl'.")
-        GalkinObservation.__init__(
-            self, kwargs_aperture=kwargs_aperture, kwargs_psf=kwargs_psf
-        )
+        Aperture.__init__(self, **kwargs_aperture)
+        PSF.__init__(self, **kwargs_psf)
+        self.psf_fwhm = kwargs_psf["fwhm"]
         self.cosmo = Cosmo(**kwargs_cosmo)
 
         if kwargs_numerics is None:
             kwargs_numerics = {
             }
 
-        self._mge_n_gauss = kwargs_numerics.get("mge_n_gauss", 20)  # TODO: split into mass and light
-        self._mge_min_r = kwargs_numerics.get("mge_min_r", 1e-4)  # in arcsec
-        self._mge_max_r = kwargs_numerics.get("mge_max_r", 300)   # in arcsec
-        self._mge_n_radial = kwargs_numerics.get("mge_n_radial", 500)
+        mge_n_gauss = kwargs_numerics.get("mge_n_gauss", 20)
+        self._mge_n_gauss_mass = kwargs_numerics.get("mge_n_gauss_light", mge_n_gauss)
+        self._mge_n_gauss_light = kwargs_numerics.get("mge_n_gauss_mass", mge_n_gauss)
+
+        mge_min_r = kwargs_numerics.get("mge_min_r", 1e-4)  # TODO: check if this is ok
+        mge_max_r = kwargs_numerics.get("mge_max_r", 300)   # TODO: check if this is ok
+        mge_n_radial = kwargs_numerics.get("mge_n_radial", 500)  # TODO: check if this is ok
+        mge_min_r_mass = kwargs_numerics.get("mge_min_r_mass", mge_min_r)  # relative to theta_E
+        mge_max_r_mass = kwargs_numerics.get("mge_max_r_mass", mge_max_r)
+        mge_n_radial_mass = kwargs_numerics.get("mge_n_radial_mass", mge_n_radial)
+        mge_min_r_light = kwargs_numerics.get("mge_min_r_light", mge_min_r)  # relative to r_eff
+        mge_max_r_light = kwargs_numerics.get("mge_max_r_light", mge_max_r)
+        mge_n_radial_light = kwargs_numerics.get("mge_n_radial_light", mge_n_radial)
+        self._mge_radial_points_mass = np.logspace(  # this must be in logspace
+            np.log10(mge_min_r_mass),
+            np.log10(mge_max_r_mass),
+            mge_n_radial_mass,
+        )
+        self._mge_radial_points_light = np.logspace(
+            np.log10(mge_min_r_light),
+            np.log10(mge_max_r_light),
+            mge_n_radial_light,
+        )
         self._mge_linear_solver = kwargs_numerics.get("mge_linear_solver", True)  # use linear solver for MGE fit speed
         self._mge_kwargs_lum = kwargs_numerics.get("mge_kwargs_lum", {})
         self._mge_kwargs_mass = kwargs_numerics.get("mge_kwargs_mass", {"outer_slope": 2})
-        self._mge_radial_points = np.logspace(  # this must be in logspace
-            np.log10(self._mge_min_r),
-            np.log10(self._mge_max_r),
-            self._mge_n_radial,
-        )
-        if self.aperture_type == "IFU_grid":
-            delta_x, delta_y = self._delta_pix_xy()
-            self._delta_pix = (np.abs(delta_x) + np.abs(delta_y)) / 2
-        else:
-            # TODO: select the best value for other aperture type
-            self._delta_pix = kwargs_numerics.get("delta_pix", 0.2)  # in arcsec
+
 
     def dispersion_points(
         self,
@@ -94,7 +104,6 @@ class JAMWrapperBase(GalkinObservation):
         kwargs_anisotropy,
         inclination=90.0,
         convolved=False,
-        psf_supersampling_factor=1,
         jam_kwargs=None,
         ):
         """Computes the LOS velocity dispersion at given points (not convolved).
@@ -107,7 +116,6 @@ class JAMWrapperBase(GalkinObservation):
         :param kwargs_anisotropy: anisotropy parameters, may vary according to
             anisotropy type chosen.
         :param inclination: inclination angle of the system [degrees]
-        :param psf_supersampling_factor: int, supersampling factor for PSF convolution
         :param convolved: bool, if True the PSF convolution is applied
         :param jam_kwargs: keyword arguments for JAM call
         :return: array of LOS velocity dispersion at each (x,y) position [km/s]
@@ -118,20 +126,19 @@ class JAMWrapperBase(GalkinObservation):
         surf_mass, sigma_mass = self.mge_mass(kwargs_mass)
         # convert to units of M_sun / pc^2
         surf_mass *= self.cosmo.epsilon_crit * 1e-12
-        beta = self._anisotropy.beta_params(
-            kwargs_anisotropy,
-            n_gauss=self._mge_n_gauss
-        )
+        beta = self._anisotropy.beta_params(kwargs_anisotropy)
+        if not self._anisotropy.use_logistic:
+            beta = beta * np.ones_like(surf_lum)
         _, q_lum = ellipticity2phi_q(*self._extract_ellipticity(kwargs_light))
         _, q_mass = ellipticity2phi_q(*self._extract_ellipticity(kwargs_mass))
         if convolved:
             seeing_fwhm = self._psf.fwhm
-            delta_pix = self._delta_pix / psf_supersampling_factor
+            delta_pix = self.delta_pix
         else:
             seeing_fwhm = 0.0
             delta_pix = 0.0
 
-        vrms = self.call_jampy(
+        vrms, surf_bright = self.call_jampy(
             surf_lum, sigma_lum, surf_mass, sigma_mass,
             x=x, y=y,
             q_lum=q_lum * np.ones_like(surf_lum),
@@ -142,7 +149,7 @@ class JAMWrapperBase(GalkinObservation):
             pix_size=delta_pix,
             jam_kwargs=jam_kwargs,
         )
-        return vrms
+        return vrms, surf_bright
 
     def mge_lum_tracer(self, kwargs_light):
         # TODO: cache the MGE fit for repeated calls with same kwargs_light
@@ -150,14 +157,15 @@ class JAMWrapperBase(GalkinObservation):
             surf_lum = kwargs_light[0]['amp']
             sigma_lum = kwargs_light[0]['sigma']
         else:
+            r_eff = self._light_profile.effective_radius(kwargs_light)
             light_1d = self._light_profile.radial_surface_brightness(
-                self._mge_radial_points,
+                self._mge_radial_points_light * r_eff,
                 kwargs_light
             )
             mge_lum = mge.fit_1d(
-                self._mge_radial_points,
+                self._mge_radial_points_light * r_eff,
                 light_1d,
-                ngauss=self._mge_n_gauss,
+                ngauss=self._mge_n_gauss_light,
                 linear=self._mge_linear_solver,
                 plot=False, quiet=True,
                 **self._mge_kwargs_lum,
@@ -165,34 +173,29 @@ class JAMWrapperBase(GalkinObservation):
             sigma_lum = mge_lum.sol[1]  # in arcsec
             # convert to surface brightness
             surf_lum = mge_lum.sol[0] / (np.sqrt(2 * np.pi) * sigma_lum)
-            if len(surf_lum) < self._mge_n_gauss: # TODO: maybe not needed
-                # pad with zeros
-                n_missing = self._mge_n_gauss - len(surf_lum)
-                surf_lum = np.concatenate([surf_lum, np.zeros(n_missing)])
-                sigma_lum = np.concatenate([sigma_lum, np.ones(n_missing)])
         return surf_lum, sigma_lum
 
     def mge_mass(self, kwargs_mass):
         # TODO: cache the MGE fit for repeated calls with same kwargs_mass
-        radial_density = self._mass_profile.radial_density(
-            self._mge_radial_points,
-            kwargs_mass
-        )
-        mge_mass = mge.fit_1d(
-            self._mge_radial_points,
-            radial_density,
-            ngauss=self._mge_n_gauss,
-            linear=self._mge_linear_solver,
-            plot=False, quiet=True,
-            **self._mge_kwargs_mass,
-        )
-        surf_mass = mge_mass.sol[0]   # mass convergence
-        sigma_mass = mge_mass.sol[1]  # in arcsec
-        if len(surf_mass) < self._mge_n_gauss:
-            # pad with zeros
-            n_missing = self._mge_n_gauss - len(surf_mass)
-            surf_mass = np.concatenate([surf_mass, np.zeros(n_missing)])
-            sigma_mass = np.concatenate([sigma_mass, np.ones(n_missing)])
+        if self._mass_profile.profile_list == ['MULTI_GAUSSIAN']:
+            surf_mass = kwargs_mass[0]['amp']
+            sigma_mass = kwargs_mass[0]['sigma']
+        else:
+            theta_E = self._mass_profile.einstein_radius(kwargs_mass)
+            radial_density = self._mass_profile.radial_density(
+                self._mge_radial_points_mass * theta_E,
+                kwargs_mass
+            )
+            mge_mass = mge.fit_1d(
+                self._mge_radial_points_mass * theta_E,
+                radial_density,
+                ngauss=self._mge_n_gauss_mass,
+                linear=self._mge_linear_solver,
+                plot=False, quiet=True,
+                **self._mge_kwargs_mass,
+            )
+            surf_mass = mge_mass.sol[0]   # mass convergence
+            sigma_mass = mge_mass.sol[1]  # in arcsec
         return surf_mass, sigma_mass
 
     def call_jampy(
@@ -223,18 +226,21 @@ class JAMWrapperBase(GalkinObservation):
         if "mbh" not in jam_kwargs:
             jam_kwargs["mbh"] = 0.0
         if self.axisymmetric:
-            return self.call_jampy_axi(
+            vrms, surf_bright = self.call_jampy_axi(
                 surf_lum, sigma_lum, surf_mass, sigma_mass,
                 x, y, q_lum, q_mass, inclination, beta,
                 sigma_psf, pix_size, jam_kwargs
-            ).reshape(x_shape)
+            )
         else:
             # TODO: evaluate at fixed radius and then interpolate for speed
             r = np.sqrt(x**2 + y**2)
-            return self.call_jampy_sph(
+            vrms, surf_bright = self.call_jampy_sph(
                 surf_lum, sigma_lum, surf_mass, sigma_mass,
                 r, beta, sigma_psf, pix_size, jam_kwargs
-            ).reshape(x_shape)
+            )
+        vrms = vrms.reshape(x_shape)
+        surf_bright = surf_bright.reshape(x_shape)
+        return vrms, surf_bright
 
     def call_jampy_axi(
         self,
@@ -252,7 +258,9 @@ class JAMWrapperBase(GalkinObservation):
         pix_size=0.0,
         jam_kwargs=None,
     ):
-        return jam.axi.proj(
+        if jam_kwargs is None:
+            jam_kwargs = {}
+        jam_model = jam.axi.proj(
             surf_lum,
             sigma_lum,
             q_lum,
@@ -271,7 +279,10 @@ class JAMWrapperBase(GalkinObservation):
             quiet=True,
             plot=False,
             **jam_kwargs,
-        ).model
+        )
+        vrms = jam_model.model
+        surf_bright = jam_model.flux
+        return vrms, surf_bright
 
     def call_jampy_sph(
         self,
@@ -285,7 +296,9 @@ class JAMWrapperBase(GalkinObservation):
         pix_size=0.0,
         jam_kwargs=None,
     ):
-        return jam.sph.proj(
+        if jam_kwargs is None:
+            jam_kwargs = {}
+        jam_model = jam.sph.proj(
                 surf_lum,
                 sigma_lum,
                 surf_mass,
@@ -299,7 +312,11 @@ class JAMWrapperBase(GalkinObservation):
                 quiet=True,
                 plot=False,
                 **jam_kwargs,
-            ).model
+            )
+        vrms = jam_model.model
+        surf_bright = jam_model.flux
+        return vrms, surf_bright
+
 
     @staticmethod
     def _extract_center(kwargs):
@@ -327,16 +344,27 @@ class JAMWrapperBase(GalkinObservation):
             else:
                 return 0, 0
 
-    def _delta_pix_xy(self):
-        """Get the pixel scale of the grid.
+    @staticmethod
+    def _rotate_grid(x_grid, y_grid, phi):
+        """Rotate the grid according to the ellipticity parameters.
 
-        :return: delta_x, delta_y
+        :param x_grid: x grid
+        :param y_grid: y grid
+        :param phi: angle in radians
+        :return: x_rotated, y_rotated
         """
-        if self.aperture_type == "IFU_grid":
-            x_grid = self._aperture.x_grid
-            y_grid = self._aperture.y_grid
-            delta_x = x_grid[0, 1] - x_grid[0, 0]
-            delta_y = y_grid[1, 0] - y_grid[0, 0]
-            return delta_x, delta_y
-        else:
-            return 0., 0.
+        cos_phi = np.cos(phi)
+        sin_phi = np.sin(phi)
+
+        x_rotated = cos_phi * x_grid + sin_phi * y_grid
+        y_rotated = -sin_phi * x_grid + cos_phi * y_grid
+
+        return x_rotated, y_rotated
+
+    def _shift_and_rotate(self, x, y, kwargs):
+        center_x, center_y = self._extract_center(kwargs)
+        x_shifted = x - center_x
+        y_shifted = y - center_y
+        e1, e2 = self._extract_ellipticity(kwargs)
+        phi, q = ellipticity2phi_q(e1, e2)
+        return self._rotate_grid(x_shifted, y_shifted, phi)

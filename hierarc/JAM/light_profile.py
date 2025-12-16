@@ -1,4 +1,5 @@
 from lenstronomy.LightModel.light_model import LightModel
+from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from copy import deepcopy
 
 
@@ -21,6 +22,24 @@ class LightProfile:
             x=r,
             y=0,
             kwargs_list=kwargs_list
+        )
+
+    def effective_radius(self, kwargs_list):
+        if len(self.profile_list) == 1:
+            if self.profile_list[0] in ['SERSIC', 'SERSIC_ELLIPSE']:
+                return kwargs_list[0]['R_sersic']
+            elif self.profile_list[0] in ['HERNQUIST']:
+                return 1.8153 * kwargs_list[0]['Rs']
+        light_analysis = LightProfileAnalysis(self.light_model)
+        center_x = self.profile_list[0]['center_x']
+        center_y = self.profile_list[0]['center_y']
+        kwargs_list = self._circularize_kwargs(kwargs_list)
+        return light_analysis.half_light_radius(
+            kwargs_light=kwargs_list,
+            center_x=center_x,
+            center_y=center_y,
+            grid_spacing=0.02,
+            grid_num=200,
         )
 
     def _circularize_kwargs(self, kwargs_list):

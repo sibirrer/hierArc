@@ -59,7 +59,7 @@ class JAMAnisotropy:
             self.use_logistic = True
             self._logistic_kwargs = {}
 
-    def beta_params(self, kwargs_anisotropy, n_gauss=None):
+    def beta_params(self, kwargs_anisotropy):
         """
         anisotropy parameters converted to the JAM beta(r) format
         it can be a logistic function or one beta per MGE component
@@ -72,7 +72,7 @@ class JAMAnisotropy:
                 constant_beta = anisotropy_params["beta"]
             else:
                 constant_beta = self._constant_beta
-            return np.array([constant_beta] * n_gauss)
+            return constant_beta
 
     @staticmethod
     def logistic_function_params(beta_0, beta_inf, r_ani, alpha):
