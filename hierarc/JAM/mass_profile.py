@@ -35,6 +35,9 @@ class MassProfile:
             return kwargs_list[0]['theta_E']
         else:
             analysis = LensProfileAnalysis(LensModel(self.profile_list))
+            if 'center_x' not in kwargs_list[0]:
+                kwargs_list[0]['center_x'] = 0.0
+                kwargs_list[0]['center_y'] = 0.0
             return analysis.effective_einstein_radius(kwargs_list)
 
     def _circularize_kwargs(self, kwargs_list):
