@@ -1,9 +1,9 @@
 from hierarc.JAM.jam_td_cosmography import JAMTDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
-from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
+from hierarc.JAMLensPosterior.jam_kin_scaling_config import JAMKinScalingConfig
 
 
-class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig):
+class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConfig):
     """This class contains and manages the base configurations of the lens posteriors
     and makes sure that they are universally applied consistently through the different
     likelihood definitions."""
@@ -37,6 +37,8 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig)
         gamma_in_scaling=None,
         log_m2l_scaling=None,
         gamma_pl_scaling=None,
+        q_intrinsic_scaling=None,
+
     ):
         """
 
@@ -72,6 +74,8 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig)
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         :param gamma_pl_scaling: array of power-law density profile slopes to be interpolated (optional, otherwise None)
+        :param q_intrinsic_scaling: array of intrinsic axis ratios to be interpolated (optional, otherwise None)
+            this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
         """
         if lens_light_model_list is None:
             lens_light_model_list = ["HERNQUIST"]
@@ -118,7 +122,7 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig)
         ImageModelPosterior.__init__(
             self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error
         )
-        KinScalingConfig.__init__(
+        JAMKinScalingConfig.__init__(
             self,
             anisotropy_model,
             r_eff,
@@ -126,4 +130,5 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig)
             log_m2l_scaling=log_m2l_scaling,
             gamma_pl_scaling=gamma_pl_scaling,
             gamma_pl_mean=gamma,
+            q_intrinsic_scaling=q_intrinsic_scaling,
         )
