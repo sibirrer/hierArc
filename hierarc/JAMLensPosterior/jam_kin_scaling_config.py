@@ -15,7 +15,6 @@ class JAMKinScalingConfig(JAMKinScalingParamManager):
         gamma_pl_scaling=None,
         q_intrinsic_scaling=None,
         gamma_pl_mean=None,
-        q_intrinsic_mean=None,
     ):
         """
 
@@ -28,7 +27,6 @@ class JAMKinScalingConfig(JAMKinScalingParamManager):
         :param q_intrinsic_scaling: array of intrinsic axis ratio to be interpolated,
             used for computing the inclination angle in axisymmetric modeling (optional, otherwise None)
         :param gamma_pl_mean: mean gamma_pl upon which the covariances are calculated
-        :param q_intrinsic_mean: mean intrinsic axis ratio upon which the covariances are calculated
         """
         self._r_eff = r_eff
         self._anisotropy_model = anisotropy_model
@@ -60,7 +58,6 @@ class JAMKinScalingConfig(JAMKinScalingParamManager):
         self._gamma_pl_scaling = gamma_pl_scaling
         self._q_intrinsic_scaling = q_intrinsic_scaling
         self._gamma_pl_mean = gamma_pl_mean
-        self._q_intrinsic_mean = q_intrinsic_mean
 
         if gamma_in_scaling is not None:
             self._param_name_list.append("gamma_in")
@@ -125,10 +122,7 @@ class JAMKinScalingConfig(JAMKinScalingParamManager):
         """
         kwargs_base = {}
         if "q_intrinsic" in self._param_name_list:
-            if self._q_intrinsic_mean is not None:
-                kwargs_base["q_intrinsic"] = self._q_intrinsic_mean
-            else:
-                kwargs_base["q_intrinsic"] = np.mean(self._q_intrinsic_scaling)
+            kwargs_base["q_intrinsic"] = np.mean(self._q_intrinsic_scaling)
         return kwargs_base
 
     @property
