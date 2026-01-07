@@ -18,9 +18,11 @@ class TestJAMWrapperSpherical(object):
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         lens_cosmo = LensCosmo(0.5, 1.2, cosmo=cosmo)
 
-        self.kwargs_light = [{"Rs": 1.0, "amp": 1.0}]
+        center_x = 0.0
+        center_y = 0.0
+        self.kwargs_light = [{"Rs": 1.0, "amp": 1.0, "center_x": center_x, "center_y": center_y}]
         self.kwargs_lens_mass = [
-            {"theta_E": 1.5, "gamma": 2.1, "center_x": 2.0, "center_y": -1.0}
+            {"theta_E": 1.5, "gamma": 2.1, "center_x": center_x, "center_y": center_y}
         ]
         self.kwargs_anisotropy = {"beta": 0.3}
         kwargs_psf = {
@@ -73,24 +75,24 @@ class TestJAMWrapperSpherical(object):
             analytic_kinematics=False,
         )
 
-        wargs_aperture_slit = {
+        kwargs_aperture_slit = {
             "aperture_type": "slit",
-            "length": 2.0,
-            "width": 0.7,
-            "center_ra": 1.0,
-            "center_dec": -0.5,
+            "length": 3.0,
+            "width": 0.5,
+            "center_ra": center_x - 0.3,
+            "center_dec": center_y + 0.4,
             "angle": np.deg2rad(30),
         }
         self.jam_spherical_slit = JAMWrapper(
             kwargs_model=kwargs_model | {"symmetry": "spherical"},
-            kwargs_aperture=wargs_aperture_slit,
+            kwargs_aperture=kwargs_aperture_slit,
             kwargs_psf=kwargs_psf,
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numeric_jam,
         )
         self.galkin_slit = Galkin(
             kwargs_model=kwargs_model,
-            kwargs_aperture=wargs_aperture_slit,
+            kwargs_aperture=kwargs_aperture_slit,
             kwargs_psf=kwargs_psf,
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numerics_lenstronomy,
@@ -101,8 +103,8 @@ class TestJAMWrapperSpherical(object):
         kwargs_aperture_ifu_shells = {
             "aperture_type": "IFU_shells",
             "r_bins": r_bins,
-            "center_ra": 0.0,
-            "center_dec": 0.0,
+            "center_ra": center_x,
+            "center_dec": center_y,
         }
         self.jam_spherical_shells = JAMWrapper(
             kwargs_model=kwargs_model | {"symmetry": "spherical"},
@@ -131,78 +133,38 @@ class TestJAMWrapperSpherical(object):
             self.kwargs_lens_mass,
             self.kwargs_light,
             self.kwargs_anisotropy,
-            supersampling_factor=1,
+            supersampling_factor=5,
         )
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=(18, 6))
-        plt.subplot(131)
-        plt.imshow(sigma_v_galkin, vmin=200, vmax=330,
-                   extent=(-5, 5, -5, 5), origin='lower')
-        plt.colorbar()
-        plt.subplot(132)
-        plt.imshow(sigma_v_jam, vmin=200, vmax=330,
-                   extent=(-5, 5, -5, 5), origin='lower')
-        plt.colorbar()
-        plt.subplot(133)
-        plt.imshow((sigma_v_jam - sigma_v_galkin) / sigma_v_galkin,
-                   vmin=-0.1, vmax=0.1,
-                   extent=(-5, 5, -5, 5), origin='lower', cmap='coolwarm')
-        plt.colorbar()
-        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_spherical_dispersion_slit(self):
-        sigma_v_jam, (slit_x, slit_y ) = self.jam_spherical_slit.dispersion(
+        np.random.seed(0)
+        sigma_v_jam = self.jam_spherical_slit.dispersion(
             self.kwargs_lens_mass,
             self.kwargs_light,
             self.kwargs_anisotropy,
             convolved=True,
-            sampling_number=1000,
         )
         sigma_v_galkin = self.galkin_slit.dispersion(
             self.kwargs_lens_mass,
             self.kwargs_light,
             self.kwargs_anisotropy,
-            sampling_number=1000,
+            sampling_number=5000,
         )
-        sigma_v_grid = self.galkin_grid.dispersion_map_grid_convolved(
-            self.kwargs_lens_mass,
-            self.kwargs_light,
-            self.kwargs_anisotropy,
-        )
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=(6, 6))
-        plt.imshow(sigma_v_grid, vmin=200, vmax=330, extent=(-5, 5, -5, 5), origin='lower')
-        slit_x = slit_x.flatten() + 2
-        slit_y = slit_y.flatten() - 1
-        plt.scatter(slit_x, slit_y, c='r', s=1)
-        plt.show()
-        in_aperture = [self.jam_spherical_slit._aperture.aperture_select(x, y) for x, y in zip(slit_x, slit_y)]
-        print(np.count_nonzero(in_aperture))
-        print("Spherical slit dispersion JAM:", sigma_v_jam)
-        print("Spherical slit dispersion Galkin:", sigma_v_galkin)
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_spherical_dispersion_shells(self):
-        sigma_v_jam = self.jam_spherical_shells.dispersion_shells_from_grid( # self.jam_spherical_shells.dispersion(
+        sigma_v_jam = self.jam_spherical_shells.dispersion( # self.jam_spherical_shells.dispersion(
             self.kwargs_lens_mass,
             self.kwargs_light,
             self.kwargs_anisotropy,
             convolved=True,
-            supersampling_factor=10,
         )
         sigma_v_galkin = self.galkin_shells.dispersion_map(
             self.kwargs_lens_mass,
             self.kwargs_light,
             self.kwargs_anisotropy,
         )
-        import matplotlib.pyplot as plt
-        r_bins = self.jam_spherical_shells._aperture._r_bins
-        r_bins_centers = 0.5 * (r_bins[1:] + r_bins[:-1])
-        plt.scatter(r_bins_centers, sigma_v_galkin, label='galkin')
-        plt.scatter(r_bins_centers, sigma_v_jam, label='jam')
-        plt.legend()
-        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_spherical_voronoi(self):
@@ -297,6 +259,30 @@ class TestJAMWrapperAxiSph(object):
             analytic_kinematics=False,
         )
 
+        kwargs_aperture_slit = {
+            "aperture_type": "slit",
+            "length": 3.0,
+            "width": 0.5,
+            "center_ra": 0.0,
+            "center_dec": 0.0,
+            "angle": np.deg2rad(0),
+        }
+        self.jam_axi_sph_slit = JAMWrapper(
+            kwargs_model=kwargs_model | {"symmetry": "axi_sph"},
+            kwargs_aperture=kwargs_aperture_slit,
+            kwargs_psf=kwargs_psf,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numeric_jam,
+        )
+        self.galkin_slit = Galkin(
+            kwargs_model=kwargs_model,
+            kwargs_aperture=kwargs_aperture_slit,
+            kwargs_psf=kwargs_psf,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numerics_lenstronomy,
+            analytic_kinematics=False,
+        )
+
     def test_axi_dispersion_grid(self):
         sigma_v_jam = self.jam_axi_sph_grid.dispersion(
             [self.kwargs_lens_mass_spherical | self.ellipticities],
@@ -310,26 +296,23 @@ class TestJAMWrapperAxiSph(object):
             self.kwargs_anisotropy,
             supersampling_factor=5
         )
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=(18, 6))
-        plt.subplot(131)
-        plt.imshow(sigma_v_galkin, vmin=200, vmax=330,
-                   extent=(-5, 5, -5, 5), origin='lower')
-        plt.colorbar()
-        plt.subplot(132)
-        plt.imshow(sigma_v_jam, vmin=200, vmax=330,
-                   extent=(-5, 5, -5, 5), origin='lower')
-        plt.colorbar()
-        plt.subplot(133)
-        plt.imshow((sigma_v_jam - sigma_v_galkin) / sigma_v_galkin,
-                   vmin=-0.1, vmax=0.1,
-                   extent=(-5, 5, -5, 5), origin='lower', cmap='coolwarm')
-        plt.colorbar()
-        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_axi_dispersion_slit(self):
-        pass
+        np.random.seed(0)
+        sigma_v_jam = self.jam_axi_sph_slit.dispersion(
+            [self.kwargs_lens_mass_spherical | self.ellipticities],
+            [self.kwargs_light_spherical | self.ellipticities],
+            self.kwargs_anisotropy,
+            convolved=True,
+        )
+        sigma_v_galkin = self.galkin_slit.dispersion(
+            [self.kwargs_lens_mass_spherical],
+            [self.kwargs_light_spherical],
+            self.kwargs_anisotropy,
+            sampling_number=5000,
+        )
+        npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_axi_dispersion_shells(self):
         sigma_v_jam = self.jam_axi_sph_shells.dispersion(
@@ -343,13 +326,6 @@ class TestJAMWrapperAxiSph(object):
             [self.kwargs_light_spherical],
             self.kwargs_anisotropy,
         )
-        import matplotlib.pyplot as plt
-        r_bins = self.jam_axi_sph_shells._aperture._r_bins
-        r_bins_centers = 0.5 * (r_bins[1:] + r_bins[:-1])
-        plt.scatter(r_bins_centers, sigma_v_galkin, label='galkin')
-        plt.scatter(r_bins_centers, sigma_v_jam, label='jam')
-        plt.legend()
-        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_axi_voronoi(self):
@@ -444,6 +420,30 @@ class TestJAMWrapperAxiCylIso(object):
             analytic_kinematics=False,
         )
 
+        kwargs_aperture_slit = {
+            "aperture_type": "slit",
+            "length": 3.0,
+            "width": 0.5,
+            "center_ra": 0.0,
+            "center_dec": 0.0,
+            "angle": np.deg2rad(0),
+        }
+        self.jam_axi_cyl_slit = JAMWrapper(
+            kwargs_model=kwargs_model | {"symmetry": "axi_cyl"},
+            kwargs_aperture=kwargs_aperture_slit,
+            kwargs_psf=kwargs_psf,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numeric_jam,
+        )
+        self.galkin_slit = Galkin(
+            kwargs_model=kwargs_model,
+            kwargs_aperture=kwargs_aperture_slit,
+            kwargs_psf=kwargs_psf,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numerics_lenstronomy,
+            analytic_kinematics=False,
+        )
+
     def test_axi_dispersion_grid(self):
         sigma_v_jam = self.jam_axi_cyl_grid.dispersion(
             [self.kwargs_lens_mass_spherical | self.ellipticities],
@@ -457,26 +457,23 @@ class TestJAMWrapperAxiCylIso(object):
             self.kwargs_anisotropy,
             supersampling_factor=5,
         )
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=(18, 6))
-        plt.subplot(131)
-        plt.imshow(sigma_v_galkin, vmin=200, vmax=330,
-                   extent=(-5, 5, -5, 5), origin='lower')
-        plt.colorbar()
-        plt.subplot(132)
-        plt.imshow(sigma_v_jam, vmin=200, vmax=330,
-                   extent=(-5, 5, -5, 5), origin='lower')
-        plt.colorbar()
-        plt.subplot(133)
-        plt.imshow((sigma_v_jam - sigma_v_galkin) / sigma_v_galkin,
-                   vmin=-0.1, vmax=0.1,
-                   extent=(-5, 5, -5, 5), origin='lower', cmap='coolwarm')
-        plt.colorbar()
-        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_axi_dispersion_slit(self):
-        pass
+        np.random.seed(0)
+        sigma_v_jam = self.jam_axi_cyl_slit.dispersion(
+            [self.kwargs_lens_mass_spherical | self.ellipticities],
+            [self.kwargs_light_spherical | self.ellipticities],
+            self.kwargs_anisotropy,
+            convolved=True,
+        )
+        sigma_v_galkin = self.galkin_slit.dispersion(
+            [self.kwargs_lens_mass_spherical],
+            [self.kwargs_light_spherical],
+            self.kwargs_anisotropy,
+            sampling_number=5000,
+        )
+        npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_axi_dispersion_shells(self):
         sigma_v_jam = self.jam_axi_cyl_shells.dispersion(
@@ -490,18 +487,17 @@ class TestJAMWrapperAxiCylIso(object):
             [self.kwargs_light_spherical],
             self.kwargs_anisotropy,
         )
-        import matplotlib.pyplot as plt
-        r_bins = self.jam_axi_cyl_shells._aperture._r_bins
-        r_bins_centers = 0.5 * (r_bins[1:] + r_bins[:-1])
-        plt.scatter(r_bins_centers, sigma_v_galkin, label='galkin')
-        plt.scatter(r_bins_centers, sigma_v_jam, label='jam')
-        plt.legend()
-        plt.show()
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_axi_voronoi(self):
         pass
 
+
+# TODO: implement test against JamPy analytical Hernquist x2 - OM case
+
+# TODO: implement test for non-spherical cases with simulated data comparison
+
+# TODO: implement test for voronoi binning
 
 if __name__ == "__main__":
     pytest.main()
