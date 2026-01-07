@@ -1,7 +1,7 @@
-from hierarc.LensPosterior.kin_constraints import KinConstraints
+from hierarc.JAMLensPosterior.jam_kin_constraints import JAMKinConstraints
 
 
-class DdtGaussKinConstraints(KinConstraints):
+class JAMDdtGaussKinConstraints(JAMKinConstraints):
     """Class for sampling Ds/Dds posteriors from imaging data and kinematic constraints
     with additional constraints on the time-delay distance Ddt."""
 
@@ -69,7 +69,7 @@ class DdtGaussKinConstraints(KinConstraints):
         """
         self._ddt_mean, self._ddt_sigma = ddt_mean, ddt_sigma
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
-        super(DdtGaussKinConstraints, self).__init__(
+        super(JAMDdtGaussKinConstraints, self).__init__(
             z_lens,
             z_source,
             theta_E,

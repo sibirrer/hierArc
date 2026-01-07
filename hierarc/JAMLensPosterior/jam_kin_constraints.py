@@ -318,9 +318,24 @@ class JAMKinConstraints(JAMBaseLensConfig):
                         )
                         for s, j_kin in enumerate(j_kin_ani):
                             ani_scaling_array_list[s][i, j, k] = j_kin / j_ani_0[s]
+        elif num == 4:
+            for i, param_i in enumerate(self.kin_scaling_param_array[0]):
+                for j, param_j in enumerate(self.kin_scaling_param_array[1]):
+                    for k, param_k in enumerate(self.kin_scaling_param_array[2]):
+                        for l, param_l in enumerate(self.kin_scaling_param_array[3]):
+                            param_array = [param_i, param_j, param_k, param_l]
+                            kwargs_ani, kwargs_lens = self.param_array2kwargs(
+                                param_array=param_array
+                            )
+                            kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
+                            j_kin_ani = self.j_kin_draw(
+                                kwargs_anisotropy, no_error=True, **kwargs_lens
+                            )
+                            for s, j_kin in enumerate(j_kin_ani):
+                                ani_scaling_array_list[s][i, j, k, l] = j_kin / j_ani_0[s]
         else:
             ValueError(
-                "Kin scaling with parameter dimension %s not supported, chose between 1-3."
+                "Kin scaling with parameter dimension %s not supported, chose between 1-4."
                 % num
             )
 

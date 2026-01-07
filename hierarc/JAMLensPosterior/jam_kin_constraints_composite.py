@@ -3,14 +3,14 @@ __author__ = "ajshjib"
 import copy
 
 import numpy as np
-from hierarc.LensPosterior.kin_constraints import KinConstraints
+from hierarc.JAMLensPosterior.jam_kin_constraints import JAMKinConstraints
 from lenstronomy.Util import constants as const
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.LightModel.light_model import LightModel
 from lenstronomy.LensModel.Profiles.gnfw import GNFW
 
 
-class KinConstraintsComposite(KinConstraints):
+class JAMKinConstraintsComposite(JAMKinConstraints):
     def __init__(
         self,
         z_lens,
@@ -36,7 +36,7 @@ class KinConstraintsComposite(KinConstraints):
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
         kwargs_lens_light=None,
-        lens_light_model_list=["HERNQUIST"],
+        lens_light_model_list=None,
         kwargs_mge_light=None,
         sampling_number=1000,
         num_psf_sampling=100,
@@ -94,6 +94,8 @@ class KinConstraintsComposite(KinConstraints):
         :param r_s_array: array of halo scale radii in Mpc
         """
 
+        if lens_light_model_list is None:
+            lens_light_model_list = ["HERNQUIST"]
         if (
             len(lens_light_model_list) == 1
             and lens_light_model_list[0] == "MULTI_GAUSSIAN"
@@ -124,7 +126,7 @@ class KinConstraintsComposite(KinConstraints):
         else:
             log_m2l_scaling = None
 
-        super(KinConstraintsComposite, self).__init__(
+        super(JAMKinConstraintsComposite, self).__init__(
             z_lens,
             z_source,
             theta_E,

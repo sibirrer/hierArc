@@ -1,4 +1,4 @@
-from hierarc.LensPosterior.ddt_kin_gauss_constraints import DdtGaussKinConstraints
+from hierarc.JAMLensPosterior.jam_ddt_kin_gauss_constraints import JAMDdtGaussKinConstraints as DdtGaussKinConstraints
 from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
