@@ -4,7 +4,6 @@ import numpy as np
 import copy
 from hierarc.JAM.jam_wrapper import JAMWrapper
 from lenstronomy.GalKin.galkin import Galkin
-from lenstronomy.GalKin.galkin_shells import GalkinShells
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from lenstronomy.Util import class_creator
 from lenstronomy.Analysis.lens_profile import LensProfileAnalysis
@@ -309,8 +308,8 @@ class JAMKinematicsAPI(object):
             )
 
     def velocity_dispersion_analytical(self, theta_E, gamma, r_eff, r_ani, kappa_ext=0):
-        """Computes the LOS velocity dispersion of the lens within a slit of size R_slit
-        x dR_slit and seeing psf_fwhm. The assumptions are a Hernquist light profile and
+        """Computes the LOS velocity dispersion of the lens within any aperture.
+        The assumptions are a Hernquist light profile and
         the spherical power-law lens model at the first position and an Osipkov and
         Merritt ('OM') stellar anisotropy distribution.
 
@@ -380,7 +379,7 @@ class JAMKinematicsAPI(object):
         kwargs_anisotropy = {"r_ani": r_ani}
 
         galkin, kwargs_profile, kwargs_light = self.jam_settings(
-            kwargs_lens, kwargs_lens_light, r_eff=r_eff, theta_E=theta_E, gamma=gamma
+            kwargs_lens, kwargs_lens_light, r_eff=r_eff, theta_E=theta_E, gamma=gamma, analytic_kinematics=True
         )
 
         sigma_v_map = []
@@ -482,17 +481,7 @@ class JAMKinematicsAPI(object):
 
         if analytic_kinematics is True:
             for i in range(len(self._kwargs_aperture_kin)):
-                if self._kwargs_aperture_kin[i]["aperture_type"] == "IFU_shells":
-                    galkin_ = GalkinShells(
-                        kwargs_model={"anisotropy_model": "OM"},
-                        kwargs_aperture=self._kwargs_aperture_kin[i],
-                        kwargs_psf=self._kwargs_psf_kin[i],
-                        kwargs_cosmo=self._kwargs_cosmo,
-                        kwargs_numerics={},
-                        analytic_kinematics=True,
-                    )
-                else:
-                    galkin_ = Galkin(
+                galkin_ = Galkin(
                         kwargs_model={"anisotropy_model": "OM"},
                         kwargs_aperture=self._kwargs_aperture_kin[i],
                         kwargs_psf=self._kwargs_psf_kin[i],
