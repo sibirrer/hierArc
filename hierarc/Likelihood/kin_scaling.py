@@ -56,7 +56,7 @@ class KinScalingParamManager(object):
         """
         kwargs_anisotropy, kwargs_lens = {}, {}
         for i, param in enumerate(self._param_list):
-            if param in ["gamma_in", "gamma_pl", "log_m2l", "q_intrinsic"]:
+            if param in ["gamma_in", "gamma_pl", "log_m2l"]:
                 kwargs_lens[param] = param_array[i]
             else:
                 kwargs_anisotropy[param] = param_array[i]
