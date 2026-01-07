@@ -1,7 +1,5 @@
-from hierarc.LensPosterior.kin_constraints_composite import KinConstraintsComposite
-from lenstronomy.Analysis.kinematics_api import KinematicsAPI
+from hierarc.JAMLensPosterior.jam_kin_constraints_composite import JAMKinConstraintsComposite as KinConstraintsComposite
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
-import numpy.testing as npt
 import numpy as np
 import pytest
 import unittest

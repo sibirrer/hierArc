@@ -24,7 +24,7 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig)
         anisotropy_model,
         lens_model_list=None,
         kwargs_lens_light=None,
-        lens_light_model_list=["HERNQUIST"],
+        lens_light_model_list=None,
         MGE_light=False,
         kwargs_mge_light=None,
         hernquist_approx=True,
@@ -62,6 +62,7 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig)
          as a list for each individual observation condition.
         :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
+        :param lens_light_model_list: list of lens light model profiles (optional, default HERNQUIST)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
@@ -72,6 +73,8 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, KinScalingConfig)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         :param gamma_pl_scaling: array of power-law density profile slopes to be interpolated (optional, otherwise None)
         """
+        if lens_light_model_list is None:
+            lens_light_model_list = ["HERNQUIST"]
         self._z_lens, self._z_source = z_lens, z_source
 
         if lens_model_list is None:

@@ -1,3 +1,4 @@
+import numpy as np
 from lenstronomy.LensModel.single_plane import SinglePlane
 from lenstronomy.LensModel.lens_model import LensModel
 from lenstronomy.Analysis.lens_profile import LensProfileAnalysis
@@ -28,7 +29,19 @@ class MassProfile:
         :return: mass density at radius r (in angular units, modulo epsilon_crit)
         """
         kwargs_list = self._circularize_kwargs(kwargs_list)
-        return self.mass_model.density(r, kwargs_list)
+        density = np.zeros_like(r)
+        for i, func in enumerate(self.mass_model.func_list):
+            kwargs_i = {
+                k: v
+                for k, v in kwargs_list[i].items()
+                if k not in ["center_x", "center_y"]
+            }
+            try:
+                density_i = func.density_lens(r, **kwargs_i)
+            except ValueError:
+                density_i = func.density(r, **kwargs_i)
+            density += density_i
+        return density
 
     def einstein_radius(self, kwargs_list):
         if (len(self.profile_list) == 1) and ('theta_E' in kwargs_list[0]):
@@ -69,16 +82,3 @@ class MassProfile:
 
     def __repr__(self):
         return f"MassProfile[{','.join(self.profile_list)}]"
-
-
-if __name__ == "__main__":
-    mass_profile = MassProfile(['NFW', 'SHEAR'])
-    print(mass_profile)
-    r = 1.0
-    kwargs_list = [
-        {'Rs': 10.0, 'alpha_Rs': 3, 'center_x': 0.0, 'center_y': 0.0},
-        {'gamma1': 0.1, 'gamma2': 0.0}]
-    density = mass_profile.radial_density(r, kwargs_list)
-    einstein_radius = mass_profile.einstein_radius(kwargs_list)
-    print(f"Density at r={r}: {density}")
-    print(f"Einstein radius: {einstein_radius}")
