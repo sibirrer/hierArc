@@ -1,4 +1,4 @@
-__author__ = "furcelay,sbirrer"
+__author__ = "furcelay", "sibirrer"
 
 from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 from hierarc.JAM.aperture import downsample_cords_to_bins

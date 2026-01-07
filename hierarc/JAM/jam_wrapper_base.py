@@ -1,4 +1,4 @@
-__author__ = "furcelay,sbirrer"
+__author__ = "furcelay", "sibirrer"
 
 from astropy.stats import gaussian_fwhm_to_sigma
 from lenstronomy.GalKin.psf import PSF

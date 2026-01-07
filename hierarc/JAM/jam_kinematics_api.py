@@ -1,4 +1,4 @@
-__author__ = "sbirrer,furcelay"
+__author__ = "sibirrer", "furcelay"
 
 import numpy as np
 import copy
