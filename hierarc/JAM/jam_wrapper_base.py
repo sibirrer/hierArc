@@ -56,8 +56,9 @@ class JAMWrapperBase(PSF, Aperture):
             self.axisymmetric = True
             self.align = 'cyl'
         else:
-            raise ValueError("Invalid symmetry type for JAMWrapper, "
-                             "options are 'spherical', 'axi_sph' or 'axi_cyl'.")
+            msg = (f"Invalid symmetry type '{self.symmetry}' for JAMWrapper, "
+                   f"options are 'spherical', 'axi_sph' or 'axi_cyl'.")
+            raise ValueError(msg)
         Aperture.__init__(self, **kwargs_aperture)
         PSF.__init__(self, **kwargs_psf)
         self.psf_fwhm = kwargs_psf["fwhm"]

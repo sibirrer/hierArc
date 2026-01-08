@@ -72,7 +72,7 @@ class JAMAnisotropy:
                 constant_beta = anisotropy_params["beta"]
             else:
                 constant_beta = self._constant_beta
-            return constant_beta
+            return np.minimum(constant_beta, 0.999)  # JAM requires beta < 1
 
     @staticmethod
     def logistic_function_params(beta_0, beta_inf, r_ani, alpha):
