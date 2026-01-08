@@ -121,8 +121,8 @@ class TestKinConstraints(object):
         kwargs_likelihood["normalized"] = False
         ln_class = JAMLensLikelihood(
             gamma_pl_index=0,
-            deprojection_sampling=True,
-            deprojection_distribution="GAUSSIAN",
+            q_intrinsic_global_sampling=True,
+            q_intrinsic_global_distribution="GAUSSIAN",
             deprojection_parameterization="q_intrinsic",
             **kwargs_likelihood
         )
