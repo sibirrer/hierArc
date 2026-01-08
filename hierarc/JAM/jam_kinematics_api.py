@@ -26,6 +26,7 @@ class JAMKinematicsAPI(object):
         kwargs_aperture,
         kwargs_seeing,
         anisotropy_model,
+        axial_symmetry="axi_sph",
         cosmo=None,
         lens_model_kinematics_bool=None,
         light_model_kinematics_bool=None,
@@ -70,6 +71,7 @@ class JAMKinematicsAPI(object):
             as a list for each individual observation condition.
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param axial_symmetry: string, symmetry assumption for JAM modeling. Options are spherical, axi_sph and axi_cyl.
         :param analytic_kinematics: boolean, if True, used the analytic JAM modeling for
             a power-law profile on top of a Hernquist light profile
             ATTENTION: This may not be accurate for your specific problem!
@@ -164,6 +166,7 @@ class JAMKinematicsAPI(object):
 
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
+        self._axial_symmetry = axial_symmetry
         self._analytic_kinematics = analytic_kinematics
         self._Hernquist_approx = Hernquist_approx
         self._MGE_light = MGE_light
@@ -183,7 +186,7 @@ class JAMKinematicsAPI(object):
         theta_E=None,
         gamma=None,
         kappa_ext=0,
-        inclination=90.0,
+        q_intrinsic=1.0,
         voronoi_bins=None,
     ):
         """
@@ -236,7 +239,7 @@ class JAMKinematicsAPI(object):
                         kwargs_profile,
                         kwargs_light_,
                         kwargs_anisotropy,
-                        inclination=inclination,
+                        q_intrinsic=q_intrinsic,
                         voronoi_bins=voronoi_bins,
                     )
                 sigma_v = np.append(sigma_v, sigma_v_)
@@ -252,7 +255,7 @@ class JAMKinematicsAPI(object):
         theta_E=None,
         gamma=None,
         kappa_ext=0,
-        inclination=90.0,
+        q_intrinsic=1.0,
         supersampling_factor=1,
         voronoi_bins=None,
     ):
@@ -273,7 +276,7 @@ class JAMKinematicsAPI(object):
             either be computed in this function with default settings or not required
         :param gamma: power-law slope at the Einstein radius, optional
         :param kappa_ext: external convergence
-        :param inclination: inclination angle of the system (optional, default: 90 deg)
+        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the inclination angle
         :param supersampling_factor: supersampling factor for 2D integration grid
             NOTE: this parameter is ignored as JamPy does its own internal supersampling
         :param voronoi_bins: mapping of the voronoi bins, -1 values for pixels not
@@ -303,7 +306,7 @@ class JAMKinematicsAPI(object):
                 theta_E=theta_E,
                 gamma=gamma,
                 kappa_ext=kappa_ext,
-                inclination=inclination,
+                q_intrinsic=q_intrinsic,
                 voronoi_bins=voronoi_bins,
             )
 
@@ -496,6 +499,7 @@ class JAMKinematicsAPI(object):
                     "mass_profile_list": mass_profile_list,
                     "light_profile_list": light_profile_list,
                     "anisotropy_model": self._anisotropy_model,
+                    "symmetry": self._axial_symmetry,
                 }
                 model_i = JAMWrapper(
                         kwargs_model=kwargs_model,
@@ -699,6 +703,7 @@ class JAMKinematicsAPI(object):
     def kinematics_modeling_settings(
         self,
         anisotropy_model,
+        axial_symmetry="axi_sph",
         kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
         analytic_kinematics=False,
@@ -769,6 +774,7 @@ class JAMKinematicsAPI(object):
         self._kwargs_mge_light = kwargs_mge_light
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
+        self._axial_symmetry = axial_symmetry
         self._analytic_kinematics = analytic_kinematics
         self._Hernquist_approx = Hernquist_approx
         self._MGE_light = MGE_light
@@ -801,15 +807,14 @@ class JAMKinematicsAPI(object):
         for i, light_model in enumerate(self._lens_light_model_list):
             if model_kinematics_bool[i] is True:
                 light_profile_list.append(light_model)
-                kwargs_lens_light_i = {
-                    k: v
-                    for k, v in kwargs_lens_light[i].items()
-                    if not k in ["center_x", "center_y"]
-                }
-                if "e1" in kwargs_lens_light_i:
-                    kwargs_lens_light_i["e1"] = 0
-                    kwargs_lens_light_i["e2"] = 0
-                kwargs_light.append(kwargs_lens_light_i)
+                kwargs_light_i = kwargs_lens_light[i].copy()
+                # if "center_x" not in kwargs_light_i:
+                #     kwargs_light_i["center_x"] = 0.0
+                #     kwargs_light_i["center_y"] = 0.0
+                # if "e1" not in kwargs_light_i:
+                #     kwargs_light_i["e1"] = 0.0
+                #     kwargs_light_i["e2"] = 0.0
+                kwargs_light.append(kwargs_light_i)
 
         if MGE_fit is True:
             if kwargs_mge is None:

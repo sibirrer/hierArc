@@ -1,5 +1,5 @@
 import numpy as np
-from hierarc.JAMLensPosterior.jam_kin_scaling_manager import JAMKinScalingParamManager
+from hierarc.JAMLikelihood.jam_kin_scaling import JAMKinScalingParamManager
 
 
 class JAMKinScalingConfig(JAMKinScalingParamManager):
@@ -115,7 +115,7 @@ class JAMKinScalingConfig(JAMKinScalingParamManager):
         return kwargs_base
 
     @property
-    def axisymmetric_jam_base(self):
+    def kwargs_axisymmetry_base(self):
         """
 
         :return: keyword arguments of axisymmetric JAM parameters that are getting interpolated

@@ -20,8 +20,9 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
         r_eff_error,
         kwargs_aperture,
         kwargs_seeing,
-        kwargs_numerics_galkin,
+        kwargs_numerics_jam,
         anisotropy_model,
+        axial_symmetry="axi_sph",
         lens_model_list=None,
         kwargs_lens_light=None,
         lens_light_model_list=None,
@@ -54,10 +55,11 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
         lenstronomy.Galkin.aperture for options
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
             to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
-        :param kwargs_numerics_galkin: numerical settings for the integrated
+        :param kwargs_numerics_jam: numerical settings for the integrated
             line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
         :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
@@ -107,8 +109,9 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
 
         analytic_kinematics = False
         self.kinematics_modeling_settings(
-            anisotropy_model,
-            kwargs_numerics_galkin,
+            anisotropy_model=anisotropy_model,
+            axial_symmetry=axial_symmetry,
+            kwargs_numerics_jam=kwargs_numerics_jam,
             analytic_kinematics=analytic_kinematics,
             Hernquist_approx=hernquist_approx,
             MGE_light=MGE_light,

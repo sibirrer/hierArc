@@ -32,6 +32,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
         kwargs_seeing=None,
         kwargs_aperture=None,
         anisotropy_model=None,
+        axial_symmetry='axi_sph',
         **kwargs_kin_api
     ):
         """
@@ -47,6 +48,8 @@ class JAMTDCosmography(JAMKinematicsAPI):
         :param kwargs_seeing: seeing conditions (see observation class in Galkin)
         :param kwargs_aperture: aperture keyword arguments (see aperture class in Galkin)
         :param anisotropy_model: string, anisotropy model type
+        :param axial_symmetry: string, axial symmetry assumption for JAM modeling,
+            either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param kwargs_kin_api: additional keyword arguments for KinematicsAPI class instance
         """
 
@@ -79,6 +82,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
             kwargs_seeing=kwargs_seeing,
             kwargs_aperture=kwargs_aperture,
             anisotropy_model=anisotropy_model,
+            axial_symmetry=axial_symmetry,
             **kwargs_kin_api
         )
 
@@ -143,6 +147,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
         kwargs_lens,
         kwargs_lens_light,
         kwargs_anisotropy,
+        q_intrinsic=1.0,
         r_eff=None,
         theta_E=None,
         gamma=None,
@@ -156,6 +161,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
         :param kwargs_lens: lens model keyword arguments
         :param kwargs_lens_light: lens light model keyword arguments
         :param kwargs_anisotropy: stellar anisotropy keyword arguments
+        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the inclination angle
         :param r_eff: projected half-light radius of the stellar light associated with
             the deflector galaxy, optional, if set to None will be computed in this
             function with default settings that may not be accurate.
@@ -167,6 +173,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
             kwargs_anisotropy=kwargs_anisotropy,
+            q_intrinsic=q_intrinsic,
             r_eff=r_eff,
             theta_E=theta_E,
             gamma=gamma,
@@ -180,6 +187,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
         kwargs_lens,
         kwargs_lens_light,
         kwargs_anisotropy,
+        q_intrinsic=1.0,
         r_eff=None,
         theta_E=None,
         gamma=None,
@@ -196,6 +204,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
         :param kwargs_lens: lens model keyword arguments
         :param kwargs_lens_light: lens light model keyword arguments
         :param kwargs_anisotropy: stellar anisotropy keyword arguments
+        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the inclination angle
         :param r_eff: projected half-light radius of the stellar light associated
             with the deflector galaxy, optional, if set to None will be computed in this
             function with default settings that may not be accurate.
@@ -208,6 +217,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_lens_light,
             kwargs_anisotropy=kwargs_anisotropy,
+            q_intrinsic=q_intrinsic,
             r_eff=r_eff,
             theta_E=theta_E,
             gamma=gamma,

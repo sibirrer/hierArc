@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from hierarc.JAMLensPosterior.jam_kin_scaling_manager import (
+from hierarc.JAMLikelihood.jam_kin_scaling import (
     JAMKinScaling,
     JAMKinScalingParamManager,
 )
