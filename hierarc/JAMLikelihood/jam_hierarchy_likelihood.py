@@ -51,8 +51,8 @@ class JAMLensLikelihood(TransformedCosmography, LensLikelihoodBase, JAMKinScalin
         gamma_pl_index=None,
         gamma_pl_global_sampling=False,
         gamma_pl_global_dist="NONE",
-        deprojection_sampling=False,
-        deprojection_distribution="NONE", # TODO: make sure input is provided
+        q_intrinsic_global_sampling=False,
+        q_intrinsic_global_distribution="NONE", # TODO: make sure input is provided
         # kinematic model quantities
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
@@ -107,8 +107,8 @@ class JAMLensLikelihood(TransformedCosmography, LensLikelihoodBase, JAMKinScalin
         :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
         :type gamma_pl_global_sampling: bool
         :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
-        :param deprojection_sampling: bool, if True samples the population q_intrinsic for the axisymmetric deprojection
-        :param deprojection_distribution: distribution of global q_intrinsic for the axisymmetric deprojection
+        :param q_intrinsic_global_sampling: bool, if True samples the population q_intrinsic for the axisymmetric deprojection
+        :param q_intrinsic_global_distribution: distribution of global q_intrinsic for the axisymmetric deprojection
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
@@ -184,8 +184,8 @@ class JAMLensLikelihood(TransformedCosmography, LensLikelihoodBase, JAMKinScalin
             parameterization=anisotropy_parameterization,
         )
         self._deprojection_distribution = DeprojectionDistribution(
-            deprojection_sampling=deprojection_sampling,
-            distribution_function=deprojection_distribution,
+            deprojection_sampling=q_intrinsic_global_sampling,
+            distribution_function=q_intrinsic_global_distribution,
             kwargs_deprojection_min=kwargs_min,
             kwargs_deprojection_max=kwargs_max,
             parameterization="q_intrinsic",
