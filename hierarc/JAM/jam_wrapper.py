@@ -2,6 +2,7 @@ __author__ = "furcelay", "sibirrer"
 
 from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 from hierarc.JAM.aperture import downsample_cords_to_bins
+from lenstronomy.Util.param_util import ellipticity2phi_q
 import numpy as np
 
 __all__ = ["JAMWrapper"]
@@ -40,7 +41,7 @@ class JAMWrapper(JAMWrapperBase):
         kwargs_mass,
         kwargs_light,
         kwargs_anisotropy,
-        inclination=90.0,
+        q_intrinsic=1.0,
         convolved=True,
         voronoi_bins=None,
     ):
@@ -52,7 +53,7 @@ class JAMWrapper(JAMWrapperBase):
         :param kwargs_mass: keyword arguments of the mass model
         :param kwargs_light: keyword argument of the light model
         :param kwargs_anisotropy: anisotropy keyword arguments
-        :param inclination: inclination angle of the system [degrees]
+        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the inclination angle
         :param convolved: bool, if True the PSF convolution is applied
         :param voronoi_bins: None or 2D array with same shape as the IFU grid defining the Voronoi
             bins. If None, no Voronoi binning is applied. Only relevant if aperture is of type 'IFU_grid'.
@@ -61,6 +62,7 @@ class JAMWrapper(JAMWrapperBase):
         x_sup, y_sup = self.aperture_sample()
         # shift and rotate to align with light profile
         x_gal_sup, y_gal_sup = self._shift_and_rotate(x_sup, y_sup, kwargs_light)
+        inclination = self._get_inclination_angle(kwargs_light[0], q_intrinsic)
         vrms_sup, surf_bright_sup = self.dispersion_points(
             x_gal_sup, y_gal_sup,
             kwargs_mass,
@@ -92,3 +94,23 @@ class JAMWrapper(JAMWrapperBase):
             )
             vrms = np.sqrt(sigma2_lum_weighted / surf_bright)
         return vrms
+
+    def _get_inclination_angle(self, obs_kwargs, q_intrinsic):
+        """Compute inclination angle from observed ellipticity and intrinsic axis ratio.
+
+        :param obs_kwargs: dictionary with observed ellipticity parameters 'e1' and 'e2'
+        :param q_intrinsic: intrinsic axis ratio
+        :return: inclination angle in degrees
+        """
+        if (not self.axisymmetric) or q_intrinsic == 1.0:
+            return 90.0  # spherical case
+        e1_obs = obs_kwargs.get("e1", 0.0)
+        e2_obs = obs_kwargs.get("e2", 0.0)
+        phi_obs, q_obs = ellipticity2phi_q(e1_obs, e2_obs)
+        if q_obs == 1.0:
+            raise ValueError("Cannot determine inclination angle for circular observed profile."
+                             " Provide q_intrinsic=1.0 or set symmetry='spherical' for spherical case.")
+        cos_i_squared = (q_obs ** 2 - q_intrinsic ** 2) / (1 - q_intrinsic ** 2)
+        cos_i_squared = np.clip(cos_i_squared, 0, 1)
+        inclination_angle = np.arccos(np.sqrt(cos_i_squared))
+        return np.rad2deg(inclination_angle)
