@@ -492,9 +492,6 @@ class JAMKinematicsAPI(object):
         MGE_mass=False,
         kwargs_mge_light=None,
         kwargs_mge_mass=None,
-        sampling_number=1000,
-        num_kin_sampling=1000,
-        num_psf_sampling=100,
     ):
         """Return the settings for the kinematic modeling.
 
@@ -548,12 +545,6 @@ class JAMKinematicsAPI(object):
         self._Hernquist_approx = Hernquist_approx
         self._MGE_light = MGE_light
         self._MGE_mass = MGE_mass
-
-        if (sampling_number is not None) or (num_kin_sampling is not None) or (num_psf_sampling is not None):
-            warnings.warn("sampling_number, num_kin_sampling and num_psf_sampling are deprecated and will be "
-                          "removed in future versions. "
-                          "Please set delta_pix in the aperture options to manage the aperture sampling.",
-                          DeprecationWarning)
 
     @staticmethod
     def transform_kappa_ext(sigma_v, kappa_ext=0):
