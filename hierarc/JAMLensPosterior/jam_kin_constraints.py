@@ -24,9 +24,11 @@ class JAMKinConstraints(JAMBaseLensConfig):
         sigma_v_measured,
         kwargs_aperture,
         kwargs_seeing,
-        kwargs_numerics_jam,
         anisotropy_model,
+        kwargs_numerics_jam=None,
+        kwargs_numerics_galkin=None,
         axial_symmetry="axi_sph",
+        kinematics_backend="jampy",
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
@@ -73,11 +75,14 @@ class JAMKinConstraints(JAMBaseLensConfig):
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
             to kwargs_psf in the GalKin
          module specified in lenstronomy.GalKin.psf
-        :param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param kwargs_numerics_jam: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_backend)
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
+        :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
         :param lens_model_list: keyword argument list of lens model (optional)
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param lens_light_model_list: list of lens light model types (optional, default is HERNQUIST)
@@ -109,19 +114,21 @@ class JAMKinConstraints(JAMBaseLensConfig):
 
         JAMBaseLensConfig.__init__(
             self,
-            z_lens,
-            z_source,
-            theta_E,
-            theta_E_error,
-            gamma,
-            gamma_error,
-            r_eff,
-            r_eff_error,
-            kwargs_aperture,
-            kwargs_seeing,
-            kwargs_numerics_jam,
-            anisotropy_model,
+            z_lens=z_lens,
+            z_source=z_source,
+            theta_E=theta_E,
+            theta_E_error=theta_E_error,
+            gamma=gamma,
+            gamma_error=gamma_error,
+            r_eff=r_eff,
+            r_eff_error=r_eff_error,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            kwargs_numerics_jam=kwargs_numerics_jam,
+            kwargs_numerics_galkin=kwargs_numerics_galkin,
             axial_symmetry=axial_symmetry,
+            kinematics_backend=kinematics_backend,
             lens_model_list=lens_model_list,
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
@@ -140,17 +147,17 @@ class JAMKinConstraints(JAMBaseLensConfig):
             q_intrinsic_scaling=q_intrinsic_scaling,
         )
 
-    def j_kin_draw(self, kwargs_anisotropy, gamma_pl=None, no_error=False, q_intrinsic=1.0):
+    def j_kin_draw(self, kwargs_anisotropy, gamma_pl=None, q_intrinsic=1.0, no_error=False):
         """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param gamma_pl: power law slope, if None, draws from measurement uncertainty,
             otherwise takes at fixed value
+        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the
+            inclination angle
         :type gamma_pl: float or None
         :param no_error: bool, if True, does not render from the uncertainty but uses
             the mean values instead
-        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the
-            inclination angle
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
         """
         theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(

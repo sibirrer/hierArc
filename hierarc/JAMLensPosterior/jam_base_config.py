@@ -1,9 +1,9 @@
-from hierarc.JAM.jam_td_cosmography import JAMTDCosmography
+from hierarc.JAM.kinematics_backend import KinematicsBackend
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
 from hierarc.JAMLensPosterior.jam_kin_scaling_config import JAMKinScalingConfig
 
 
-class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConfig):
+class JAMBaseLensConfig(KinematicsBackend, ImageModelPosterior, JAMKinScalingConfig):
     """This class contains and manages the base configurations of the lens posteriors
     and makes sure that they are universally applied consistently through the different
     likelihood definitions."""
@@ -20,9 +20,11 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
         r_eff_error,
         kwargs_aperture,
         kwargs_seeing,
-        kwargs_numerics_jam,
         anisotropy_model,
+        kwargs_numerics_jam=None,
+        kwargs_numerics_galkin=None,  # deprecated
         axial_symmetry="axi_sph",
+        kinematics_backend="jampy",
         lens_model_list=None,
         kwargs_lens_light=None,
         lens_light_model_list=None,
@@ -55,10 +57,12 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
         lenstronomy.Galkin.aperture for options
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
             to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
-        :param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        param kwargs_numerics_jam: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_backend)
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
@@ -93,11 +97,13 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
                 "lens_model_list": lens_model_list,
                 "lens_light_model_list": lens_light_model_list,
             }
-        JAMTDCosmography.__init__(
+        KinematicsBackend.__init__(
             self,
             z_lens,
             z_source,
             kwargs_model,
+            kinematics_backend=kinematics_backend,
+            axial_symmetry=axial_symmetry,
             cosmo_fiducial=cosmo_fiducial,
             lens_model_kinematics_bool=None,
             light_model_kinematics_bool=None,
@@ -105,14 +111,10 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
             kwargs_aperture=kwargs_aperture,
             multi_observations=multi_observations,
             multi_light_profile=multi_light_profile,
-        )
-
-        analytic_kinematics = False
-        self.kinematics_modeling_settings(
             anisotropy_model=anisotropy_model,
-            axial_symmetry=axial_symmetry,
             kwargs_numerics_jam=kwargs_numerics_jam,
-            analytic_kinematics=analytic_kinematics,
+            kwargs_numerics_galkin=kwargs_numerics_galkin,
+            analytic_kinematics=False,
             Hernquist_approx=hernquist_approx,
             MGE_light=MGE_light,
             MGE_mass=False,
@@ -121,6 +123,7 @@ class JAMBaseLensConfig(JAMTDCosmography, ImageModelPosterior, JAMKinScalingConf
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
         )
+
         self._kwargs_lens_light = kwargs_lens_light
         ImageModelPosterior.__init__(
             self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error

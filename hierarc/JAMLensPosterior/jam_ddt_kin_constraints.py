@@ -20,8 +20,11 @@ class JAMDdtKinConstraints(JAMKinConstraints):
         sigma_v_measured,
         kwargs_aperture,
         kwargs_seeing,
-        kwargs_numerics_galkin,
         anisotropy_model,
+        kwargs_numerics_jam=None,
+        kwargs_numerics_galkin=None,
+        axial_symmetry="axi_sph",
+        kinematics_backend="jampy",
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
@@ -38,6 +41,7 @@ class JAMDdtKinConstraints(JAMKinConstraints):
         multi_observations=False,
         multi_light_profile=False,
         gamma_pl_scaling=None,
+        q_intrinsic_scaling=None,
     ):
         """
 
@@ -60,8 +64,11 @@ class JAMDdtKinConstraints(JAMKinConstraints):
         :param gamma_error: 1-sigma uncertainty on power-law slope
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
-        :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
+        :param kwargs_numerics_jam: numerical settings for the integrated line-of-sight velocity dispersion
+        :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion (deprecated, use kwargs_numerics_backend)
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
+        :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
@@ -72,6 +79,8 @@ class JAMDdtKinConstraints(JAMKinConstraints):
         :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
          as a list for each individual observation condition.
         :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
+        :param q_intrinsic_scaling: array of intrinsic axis ratio values (optional, otherwise None)
+            this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
         """
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
@@ -87,7 +96,10 @@ class JAMDdtKinConstraints(JAMKinConstraints):
             sigma_v_measured=sigma_v_measured,
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
+            kwargs_numerics_jam=kwargs_numerics_jam,
             kwargs_numerics_galkin=kwargs_numerics_galkin,
+            axial_symmetry=axial_symmetry,
+            kinematics_backend=kinematics_backend,
             anisotropy_model=anisotropy_model,
             sigma_v_error_independent=sigma_v_error_independent,
             sigma_v_error_covariant=sigma_v_error_covariant,
@@ -103,6 +115,7 @@ class JAMDdtKinConstraints(JAMKinConstraints):
             multi_observations=multi_observations,
             multi_light_profile=multi_light_profile,
             gamma_pl_scaling=gamma_pl_scaling,
+            q_intrinsic_scaling=q_intrinsic_scaling,
         )
 
     def hierarchy_configuration(self, num_sample_model=20):
