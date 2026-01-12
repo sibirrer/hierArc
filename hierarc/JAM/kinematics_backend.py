@@ -1,5 +1,6 @@
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.JAM.jam_td_cosmography import JAMTDCosmography
+import warnings
 
 
 class KinematicsBackend:
@@ -22,7 +23,8 @@ class KinematicsBackend:
         analytic_kinematics=False,
         axial_symmetry="axi_sph",
         backend=None,
-        kwargs_numerics_backend=None,
+        kwargs_numerics_jam=None,
+        kwargs_numerics_galkin=None,
         **kwargs_kin_api
     ):
 
@@ -42,6 +44,20 @@ class KinematicsBackend:
             if backend is None:
                 backend = "galkin"
 
+        if kwargs_numerics_galkin is not None:
+            warnings.warn(
+                "`kwargs_numerics_galkin` is deprecated, please use `kwargs_numerics_backend` instead.",
+                DeprecationWarning
+            )
+            if kwargs_numerics_jam is not None:
+                warnings.warn(
+                    "Both `kwargs_numerics_backend` and `kwargs_numerics_galkin` are provided. "
+                    "only `kwargs_numerics_backend` will be used.",
+                    UserWarning
+                )
+            else:
+                kwargs_numerics_jam = kwargs_numerics_galkin
+
         if backend == "jampy":
             kinematics_backend = JAMTDCosmography(
                 z_lens,
@@ -54,7 +70,7 @@ class KinematicsBackend:
                 kwargs_aperture=kwargs_aperture,
                 anisotropy_model=anisotropy_model,
                 axial_symmetry=axial_symmetry,
-                kwargs_numerics_jam=kwargs_numerics_backend,
+                kwargs_numerics_jam=kwargs_numerics_jam,
                 **kwargs_kin_api
             )
         elif backend == "galkin":
@@ -69,7 +85,7 @@ class KinematicsBackend:
                 kwargs_aperture=kwargs_aperture,
                 anisotropy_model=anisotropy_model,
                 analytic_kinematics=analytic_kinematics,
-                kwargs_numerics_galkin=kwargs_numerics_backend,
+                kwargs_numerics_galkin=kwargs_numerics_jam,
                 **kwargs_kin_api
             )
         else:
@@ -426,8 +442,8 @@ class KinematicsBackend:
     def kinematics_modeling_settings(
         self,
         anisotropy_model,
-        axial_symmetry="axi_sph",
         kwargs_numerics_backend=None,
+        kwargs_numerics_galkin=None,  # deprecated
         analytic_kinematics=False,
         Hernquist_approx=False,
         MGE_light=False,
@@ -442,10 +458,10 @@ class KinematicsBackend:
 
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
-        :param axial_symmetry: axial symmetry assumption for JAM modeling, either
-            'spherical', 'axi_sph' or 'axi_cyl'.
         :param kwargs_numerics_backend: numerical settings for the integrated
             line-of-sight velocity dispersion
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_backend)
         :param analytic_kinematics: boolean, if True, used the analytic JAM modeling for
             a power-law profile on top of a Hernquist light profile
             ATTENTION: This may not be accurate for your specific problem!
@@ -463,6 +479,20 @@ class KinematicsBackend:
             rendering on the IFU
         :return: updated settings
         """
+        if kwargs_numerics_galkin is not None:
+            warnings.warn(
+                "`kwargs_numerics_galkin` is deprecated, please use `kwargs_numerics_backend` instead.",
+                DeprecationWarning
+            )
+            if kwargs_numerics_backend is not None:
+                warnings.warn(
+                    "Both `kwargs_numerics_backend` and `kwargs_numerics_galkin` are provided. "
+                    "only `kwargs_numerics_backend` will be used.",
+                    UserWarning
+                )
+            else:
+                kwargs_numerics_backend = kwargs_numerics_galkin
+
         if self.backend == 'galkin':
             self.kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,
@@ -478,9 +508,12 @@ class KinematicsBackend:
             )
 
         else:
+            if analytic_kinematics:
+                raise ValueError(
+                    "Analytic kinematics not supported for axisymmetric JAM models with JamPy backend."
+                )
             self.kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,
-                axial_symmetry=axial_symmetry,
                 kwargs_numerics_jam=kwargs_numerics_backend,
                 MGE_light=MGE_light,
                 kwargs_mge_light=kwargs_mge_light,
