@@ -102,7 +102,7 @@ class JAMBaseLensConfig(KinematicsBackend, ImageModelPosterior, JAMKinScalingCon
             z_lens,
             z_source,
             kwargs_model,
-            kinematics_backend=kinematics_backend,
+            backend=kinematics_backend,
             axial_symmetry=axial_symmetry,
             cosmo_fiducial=cosmo_fiducial,
             lens_model_kinematics_bool=None,

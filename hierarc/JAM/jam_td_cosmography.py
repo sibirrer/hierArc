@@ -33,7 +33,14 @@ class JAMTDCosmography(JAMKinematicsAPI):
         kwargs_aperture=None,
         anisotropy_model=None,
         axial_symmetry='axi_sph',
-        **kwargs_kin_api
+        multi_observations=False,
+        multi_light_profile=False,
+        kwargs_numerics_jam=None,
+        Hernquist_approx=False,
+        MGE_light=False,
+        MGE_mass=False,
+        kwargs_mge_light=None,
+        kwargs_mge_mass=None,
     ):
         """
 
@@ -50,7 +57,24 @@ class JAMTDCosmography(JAMKinematicsAPI):
         :param anisotropy_model: string, anisotropy model type
         :param axial_symmetry: string, axial symmetry assumption for JAM modeling,
             either 'spherical', 'axi_sph' or 'axi_cyl'.
-        :param kwargs_kin_api: additional keyword arguments for KinematicsAPI class instance
+        :param multi_observations: bool, if True uses multi-observation to predict a set
+            of different observations with the GalkinMultiObservation() class.
+            kwargs_aperture and kwargs_seeing require to be lists of the individual
+            observations.
+        :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
+            as a list for each individual observation condition.
+        :param axial_symmetry: string, symmetry assumption for JAM modeling. Options are spherical, axi_sph and axi_cyl.
+        :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
+            to the half light radius of the deflector light profile to compute the
+            kinematics
+        :param MGE_light: bool, if true performs the MGE for the light distribution
+        :param MGE_mass: bool, if true performs the MGE for the mass distribution
+        :param kwargs_numerics_jam: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
+            routine
+        :param kwargs_mge_mass: keyword arguments that go into the MGE decomposition
+            routine
         """
 
         if cosmo_fiducial is None:
@@ -83,7 +107,14 @@ class JAMTDCosmography(JAMKinematicsAPI):
             kwargs_aperture=kwargs_aperture,
             anisotropy_model=anisotropy_model,
             axial_symmetry=axial_symmetry,
-            **kwargs_kin_api
+            multi_observations=multi_observations,
+            multi_light_profile=multi_light_profile,
+            kwargs_numerics_jam=kwargs_numerics_jam,
+            Hernquist_approx=Hernquist_approx,
+            MGE_light=MGE_light,
+            MGE_mass=MGE_mass,
+            kwargs_mge_light=kwargs_mge_light,
+            kwargs_mge_mass=kwargs_mge_mass,
         )
 
     def time_delays(
