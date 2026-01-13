@@ -25,7 +25,16 @@ class KinematicsBackend:
         backend=None,
         kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
-        **kwargs_kin_api
+        multi_observations=False,
+        multi_light_profile=False,
+        Hernquist_approx=False,
+        MGE_light=False,
+        MGE_mass=False,
+        kwargs_mge_light=None,
+        kwargs_mge_mass=None,
+        sampling_number=1000,
+        num_kin_sampling=1000,
+        num_psf_sampling=100,
     ):
 
         if axial_symmetry != "spherical":
@@ -71,7 +80,13 @@ class KinematicsBackend:
                 anisotropy_model=anisotropy_model,
                 axial_symmetry=axial_symmetry,
                 kwargs_numerics_jam=kwargs_numerics_jam,
-                **kwargs_kin_api
+                multi_observations=multi_observations,
+                multi_light_profile=multi_light_profile,
+                Hernquist_approx=Hernquist_approx,
+                MGE_light=MGE_light,
+                MGE_mass=MGE_mass,
+                kwargs_mge_light=kwargs_mge_light,
+                kwargs_mge_mass=kwargs_mge_mass,
             )
         elif backend == "galkin":
             kinematics_backend = TDCosmography(
@@ -86,12 +101,21 @@ class KinematicsBackend:
                 anisotropy_model=anisotropy_model,
                 analytic_kinematics=analytic_kinematics,
                 kwargs_numerics_galkin=kwargs_numerics_jam,
-                **kwargs_kin_api
+                multi_observations=multi_observations,
+                multi_light_profile=multi_light_profile,
+                Hernquist_approx=Hernquist_approx,
+                MGE_light=MGE_light,
+                MGE_mass=MGE_mass,
+                kwargs_mge_light=kwargs_mge_light,
+                kwargs_mge_mass=kwargs_mge_mass,
+                sampling_number=sampling_number,
+                num_kin_sampling=num_kin_sampling,
+                num_psf_sampling=num_psf_sampling,
             )
         else:
             raise ValueError("Kinematics backend %s not recognized." % backend)
 
-        self.kinematics_backend = kinematics_backend
+        self._kinematics_backend = kinematics_backend
         self.backend = backend
         self.axial_symmetry = axial_symmetry
 
@@ -111,7 +135,7 @@ class KinematicsBackend:
                 ordered) in case of the lens equation solver
             :return: time delays at image positions for the fixed cosmology in units of days
             """
-            return self.kinematics_backend.time_delays(
+            return self._kinematics_backend.time_delays(
                 kwargs_lens,
                 kwargs_ps,
                 kappa_ext=kappa_ext,
@@ -130,7 +154,7 @@ class KinematicsBackend:
         :return: Fermat potential of all the image positions in the first point source
             list entry
         """
-        return self.kinematics_backend.fermat_potential(
+        return self._kinematics_backend.fermat_potential(
             kwargs_lens,
             kwargs_ps,
             original_ps_position=original_ps_position,
@@ -164,7 +188,7 @@ class KinematicsBackend:
         :return: dimensionless velocity dispersion (see e.g. Birrer et al. 2016, 2019)
         """
         if self.backend == 'galkin':
-            return self.kinematics_backend.velocity_dispersion_dimension_less(
+            return self._kinematics_backend.velocity_dispersion_dimension_less(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -173,7 +197,7 @@ class KinematicsBackend:
                 gamma=gamma,
             )
         else:
-            return self.kinematics_backend.velocity_dispersion_dimension_less(
+            return self._kinematics_backend.velocity_dispersion_dimension_less(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -215,7 +239,7 @@ class KinematicsBackend:
         :return: dimensionless velocity dispersion (see e.g. Birrer et al. 2016, 2019)
         """
         if self.backend == 'galkin':
-            return self.kinematics_backend.velocity_dispersion_map_dimension_less(
+            return self._kinematics_backend.velocity_dispersion_map_dimension_less(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -226,7 +250,7 @@ class KinematicsBackend:
                 voronoi_bins=voronoi_bins,
             )
         else:
-            return self.kinematics_backend.velocity_dispersion_map_dimension_less(
+            return self._kinematics_backend.velocity_dispersion_map_dimension_less(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -253,7 +277,7 @@ class KinematicsBackend:
         :param kappa_d: external convergence form observer to lens
         :return: D_dt, time-delay distance
         """
-        return self.kinematics_backend.ddt_from_time_delay(
+        return self._kinematics_backend.ddt_from_time_delay(
             d_fermat_model, dt_measured, kappa_s=kappa_s, kappa_ds=kappa_ds, kappa_d=kappa_d
         )
 
@@ -265,7 +289,7 @@ class KinematicsBackend:
         :param J: dimensionless kinematic constraint (see Birrer et al. 2016, 2019)
         :return: Ds/Dds
         """
-        return self.kinematics_backend.ds_dds_from_kinematics(
+        return self._kinematics_backend.ds_dds_from_kinematics(
             sigma_v, J, kappa_s=kappa_s, kappa_ds=kappa_ds
         )
 
@@ -290,7 +314,7 @@ class KinematicsBackend:
         :param kappa_d: LOS convergence from observer to deflector
         :return: D_dt, D_d
         """
-        return self.kinematics_backend.ddt_dd_from_time_delay_and_kinematics(
+        return self._kinematics_backend.ddt_dd_from_time_delay_and_kinematics(
             d_fermat_model,
             dt_measured,
             sigma_v_measured,
@@ -329,7 +353,7 @@ class KinematicsBackend:
         :return: velocity dispersion [km/s]
         """
         if self.backend == 'galkin':
-            return self.kinematics_backend.velocity_dispersion(
+            return self._kinematics_backend.velocity_dispersion(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -340,7 +364,7 @@ class KinematicsBackend:
                 voronoi_bins=voronoi_bins,
             )
         else:
-            return self.kinematics_backend.velocity_dispersion(
+            return self._kinematics_backend.velocity_dispersion(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -391,7 +415,7 @@ class KinematicsBackend:
             in [km/s] unit
         """
         if self.backend == 'galkin':
-            return self.kinematics_backend.velocity_dispersion_map(
+            return self._kinematics_backend.velocity_dispersion_map(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -403,7 +427,7 @@ class KinematicsBackend:
                 voronoi_bins=voronoi_bins,
             )
         else:
-            return self.kinematics_backend.velocity_dispersion_map(
+            return self._kinematics_backend.velocity_dispersion_map(
                 kwargs_lens,
                 kwargs_lens_light,
                 kwargs_anisotropy,
@@ -435,7 +459,7 @@ class KinematicsBackend:
             raise ValueError(
                 "Analytical velocity dispersion calculation is only supported with the Galkin backend."
             )
-        return self.kinematics_backend.velocity_dispersion_analytical(
+        return self._kinematics_backend.velocity_dispersion_analytical(
             theta_E, gamma, r_eff, r_ani, kappa_ext=kappa_ext
         )
 
@@ -494,7 +518,7 @@ class KinematicsBackend:
                 kwargs_numerics_backend = kwargs_numerics_galkin
 
         if self.backend == 'galkin':
-            self.kinematics_backend.kinematics_modeling_settings(
+            self._kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,
                 analytic_kinematics=analytic_kinematics,
                 Hernquist_approx=Hernquist_approx,
@@ -512,7 +536,7 @@ class KinematicsBackend:
                 raise ValueError(
                     "Analytic kinematics not supported for axisymmetric JAM models with JamPy backend."
                 )
-            self.kinematics_backend.kinematics_modeling_settings(
+            self._kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,
                 kwargs_numerics_jam=kwargs_numerics_backend,
                 MGE_light=MGE_light,
