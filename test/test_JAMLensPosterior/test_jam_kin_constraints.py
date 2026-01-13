@@ -123,7 +123,6 @@ class TestKinConstraints(object):
             gamma_pl_index=0,
             q_intrinsic_global_sampling=True,
             q_intrinsic_global_distribution="GAUSSIAN",
-            deprojection_parameterization="q_intrinsic",
             **kwargs_likelihood
         )
         kwargs_kin = {"a_ani": anisotropy_beta}

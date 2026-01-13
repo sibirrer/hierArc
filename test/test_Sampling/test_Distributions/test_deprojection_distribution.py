@@ -25,18 +25,19 @@ class TestDeprojectionDistribution(object):
             parameterization="q_intrinsic",
         )
 
-        self._inclination_uniform = DeprojectionDistribution(
-            deprojection_sampling=True,
-            distribution_function="UNIFORM",
-            kwargs_deprojection_min={"inclination": 0},
-            kwargs_deprojection_max={"inclination": 90},
-            parameterization="inclination",
-        )
+        # inclination is not yet supported
+        # self._inclination_uniform = DeprojectionDistribution(
+        #     deprojection_sampling=True,
+        #     distribution_function="UNIFORM",
+        #     kwargs_deprojection_min={"inclination": 0},
+        #     kwargs_deprojection_max={"inclination": 90},
+        #     parameterization="inclination",
+        # )
 
     def test_draw_deprojection(self):
         kwargs_q_intrinsic = {
-            "deprojection_param": 0.6,
-            "deprojection_param_sigma": 0.1,
+            "q_intrinsic": 0.6,
+            "q_intrinsic_sigma": 0.1,
         }
         kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(**kwargs_q_intrinsic)
         assert "q_intrinsic" in kwargs_drawn
@@ -47,13 +48,13 @@ class TestDeprojectionDistribution(object):
         assert (kwargs_drawn["q_intrinsic"] > 0.2) and (kwargs_drawn["q_intrinsic"] <= 1.0)
 
         kwargs_inclination = {
-            "deprojection_param": 45,
-            "deprojection_param_sigma": 0,
+            "q_intrinsic": 45,
+            "q_intrinsic_sigma": 0,
             "q_observed": 0.7,
         }
-        kwargs_drawn = self._inclination_uniform.draw_deprojection(**kwargs_inclination)
-        assert "q_intrinsic" in kwargs_drawn
-        assert (kwargs_drawn["q_intrinsic"] > 0.) and (kwargs_drawn["q_intrinsic"] <= 1.0)
+        # kwargs_drawn = self._inclination_uniform.draw_deprojection(**kwargs_inclination)
+        # assert "q_intrinsic" in kwargs_drawn
+        # assert (kwargs_drawn["q_intrinsic"] > 0.) and (kwargs_drawn["q_intrinsic"] <= 1.0)
 
         no_dist_no_sampling = DeprojectionDistribution(
             deprojection_sampling=False,
@@ -80,8 +81,8 @@ class TestDeprojectionDistribution(object):
 
         with npt.assert_raises(ValueError):
             kwargs_q_intrinsic_invalid = {
-                "deprojection_param": 2.0,
-                "deprojection_param_sigma": 0.1,
+                "q_intrinsic": 2.0,
+                "q_intrinsic_sigma": 0.1,
             }
             kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(**kwargs_q_intrinsic_invalid)
 

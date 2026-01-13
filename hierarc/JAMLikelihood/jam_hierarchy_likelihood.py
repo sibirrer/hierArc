@@ -35,7 +35,7 @@ class JAMLensLikelihood(TransformedCosmography, LensLikelihoodBase, JAMKinScalin
         # global distributions
         anisotropy_model="NONE",
         anisotropy_sampling=False,
-        anisotropy_distribution="NONE",  # TODO: make sure input is provided
+        anisotropy_distribution="NONE",  # make sure input is provided
         anisotropy_parameterization="beta",
         los_distributions=None,
         lambda_mst_distribution="NONE",
@@ -52,7 +52,7 @@ class JAMLensLikelihood(TransformedCosmography, LensLikelihoodBase, JAMKinScalin
         gamma_pl_global_sampling=False,
         gamma_pl_global_dist="NONE",
         q_intrinsic_global_sampling=False,
-        q_intrinsic_global_distribution="NONE", # TODO: make sure input is provided
+        q_intrinsic_global_distribution="NONE",
         # kinematic model quantities
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
