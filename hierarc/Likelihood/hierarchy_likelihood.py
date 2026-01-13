@@ -6,6 +6,7 @@ from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
 from hierarc.Sampling.Distributions.anisotropy_distributions import (
     AnisotropyDistribution,
 )
+from hierarc.Sampling.Distributions.deprojection_distributions import DeprojectionDistribution
 from hierarc.Util.distribution_util import PDFSampling, DistributionSampling
 from hierarc.Sampling.Distributions.lens_distribution import LensDistribution
 import numpy as np
@@ -14,7 +15,14 @@ import copy
 
 class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
     """Master class containing the likelihood definitions of different analysis for a
-    single lens."""
+    single lens.
+    Axisymmetric JAM kinematics can be done explicitly through the JAMKinScaling class
+    with models computed using JAMPy. For this, use q_intrinsic_sampling option,
+    and use 'jampy' with 'axi_sph' as kinematics backend.
+    Alternatively, the spherical models can be correction following Huang et al. 2025.
+    For this, use 'spherical' modeling (either with jampy or galkin backend) and
+    set a distribution for the axisymmetric correction
+    """
 
     def __init__(
         self,
@@ -48,13 +56,15 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         gamma_pl_index=None,
         gamma_pl_global_sampling=False,
         gamma_pl_global_dist="NONE",
+        q_intrinsic_sampling=False,
+        q_intrinsic_distribution="NONE",
         # kinematic model quantities
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
         j_kin_scaling_grid_list=None,
-        bin_edges_vel_disp_scaling=None,
-        pdf_array_vel_disp_scaling=None,
-        vel_disp_scaling_distributions=None,
+        bin_edges_axisymmetric_correction=None,
+        pdf_array_axisymmetric_correction=None,
+        axisymmetric_correction_distributions=None,
         # likelihood evaluation quantities
         num_distribution_draws=50,
         normalized=True,
@@ -79,11 +89,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param j_kin_scaling_grid_list: list of array with the scalings of J() for each IFU
         :param j_kin_scaling_param_name_list: list of strings for the parameters as they are interpolated in the same
          order as j_kin_scaling_grid
-        :param bin_edges_vel_disp_scaling: bin edges of histogram with PDF of scaling of sigma_axis/sigma_spherical
+        :param bin_edges_axisymmetric_correction: bin edges of histogram with PDF of scaling of sigma_axis/sigma_spherical
          in velocity dispersion prediction
-        :param pdf_array_vel_disp_scaling: histogram for the bin edges to calculate the PDF of the
+        :param pdf_array_axisymmetric_correction: histogram for the bin edges to calculate the PDF of the
          sigma_axis/sigma_spherical velocity dispersion prediction
-        :param vel_disp_scaling_distributions: list of samples that describes sigma_axis/sigma_spherical velocity
+        :param axisymmetric_correction_distributions: list of samples that describes sigma_axis/sigma_spherical velocity
          dispersion prediction. Distribution can be single values or an array of length of the velocity dispersion
          measurements.
         :param num_distribution_draws: int, number of distribution draws from the likelihood that are being averaged
@@ -112,6 +122,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
         :type gamma_pl_global_sampling: bool
         :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
+        :param q_intrinsic_sampling: bool, if True samples the population q_intrinsic for the axisymmetric deprojection
+        :param q_intrinsic_distribution: distribution of global q_intrinsic for the axisymmetric deprojection
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
@@ -186,23 +198,36 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_anisotropy_max=kwargs_max,
             parameterization=anisotropy_parameterization,
         )
+        self._deprojection_distribution = DeprojectionDistribution(
+            deprojection_sampling=q_intrinsic_sampling,
+            distribution_function=q_intrinsic_distribution,
+            kwargs_deprojection_min=kwargs_min,
+            kwargs_deprojection_max=kwargs_max,
+            parameterization="q_intrinsic",
+        )
         self._prior = PriorLikelihood(prior_list=prior_list)
-        if vel_disp_scaling_distributions is not None:
-            self._inclination_sampling_class = DistributionSampling(
-                distributions=vel_disp_scaling_distributions
+        if axisymmetric_correction_distributions is not None:
+            self._axisymmetric_correction_sampling_class = DistributionSampling(
+                distributions=axisymmetric_correction_distributions
             )
-            self._inclination_sampling = True
+            self._axisymmetric_correction_sampling = True
         elif (
-            bin_edges_vel_disp_scaling is not None
-            and pdf_array_vel_disp_scaling is not None
+            bin_edges_axisymmetric_correction is not None
+            and pdf_array_axisymmetric_correction is not None
         ):
-            self._inclination_sampling = True
-            self._inclination_sampling_class = PDFSampling(
-                bin_edges=bin_edges_vel_disp_scaling,
-                pdf_array=pdf_array_vel_disp_scaling,
+            self._axisymmetric_correction_sampling = True
+            self._axisymmetric_correction_sampling_class = PDFSampling(
+                bin_edges=bin_edges_axisymmetric_correction,
+                pdf_array=pdf_array_axisymmetric_correction,
             )
         else:
-            self._inclination_sampling = False
+            self._axisymmetric_correction_sampling = False
+        if self._axisymmetric_correction_sampling and q_intrinsic_sampling:
+            raise ValueError(
+                "Cannot have both axisymmetric correction and q_intrinsic_sampling "
+                "If using spherical modeling with axisymmetric correction, set q_intrinsic_sampling to False. "
+                "If using axisymmetric modeling, unset the axisymmetric correction distribution."
+            )
 
     def info(self):
         """Information about the lens.
@@ -221,6 +246,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         cosmo,
         kwargs_lens=None,
         kwargs_kin=None,
+        kwargs_deprojection=None,
         kwargs_source=None,
         kwargs_los=None,
         verbose=False,
@@ -231,6 +257,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
+        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection distribution:
+            deprojection_param and deprojection_param_sigma for q_intrinsic/inclination
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
@@ -256,6 +284,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             beta_dsp=beta_dsp,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
+            kwargs_axisymmetry=kwargs_deprojection,
             kwargs_source=kwargs_source,
             kwargs_los=kwargs_los,
             cosmo=cosmo,
@@ -272,6 +301,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         beta_dsp=None,
         kwargs_lens=None,
         kwargs_kin=None,
+        kwargs_axisymmetry=None,
         kwargs_source=None,
         kwargs_los=None,
         cosmo=None,
@@ -286,6 +316,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
+        :param kwargs_axisymmetry: keyword arguments of axisymmetric deprojection distribution:
+            mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
@@ -295,6 +327,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         """
         kwargs_lens = self._kwargs_init(kwargs_lens)
         kwargs_kin = self._kwargs_init(kwargs_kin)
+        kwargs_axisymmetry = self._kwargs_init(kwargs_axisymmetry)
         kwargs_source = self._kwargs_init(kwargs_source)
         kwargs_kin_copy = copy.deepcopy(kwargs_kin)
         sigma_v_sys_error = kwargs_kin_copy.pop("sigma_v_sys_error", None)
@@ -309,6 +342,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                 beta_dsp=beta_dsp,
                 kwargs_lens=kwargs_lens,
                 kwargs_kin=kwargs_kin_copy,
+                kwargs_axisymmetry=kwargs_axisymmetry,
                 kwargs_source=kwargs_source,
                 kwargs_los=kwargs_los,
                 sigma_v_sys_error=sigma_v_sys_error,
@@ -323,6 +357,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                     beta_dsp=beta_dsp,
                     kwargs_lens=kwargs_lens,
                     kwargs_kin=kwargs_kin_copy,
+                    kwargs_axisymmetry=kwargs_axisymmetry,
                     kwargs_source=kwargs_source,
                     kwargs_los=kwargs_los,
                     sigma_v_sys_error=sigma_v_sys_error,
@@ -342,6 +377,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         beta_dsp,
         kwargs_lens,
         kwargs_kin,
+        kwargs_axisymmetry,
         kwargs_source,
         kwargs_los=None,
         sigma_v_sys_error=None,
@@ -356,6 +392,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
+        :param kwargs_axisymmetry: keyword arguments of axisymmetric deprojection distribution:
+            mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword arguments of source brightness
         :param kwargs_los: line of sight list of dictionaries
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion
@@ -386,10 +424,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
 
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
 
-        kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
+        kwargs_axisymmetry_draw = self._deprojection_distribution.draw_deprojection(
+            **kwargs_axisymmetry
+        )
+
+        kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw, **kwargs_axisymmetry_draw}
         kin_scaling = self.kin_scaling(kwargs_param)
-        if self._inclination_sampling is True:
-            inclination_scaling = self._inclination_sampling_class.draw_one
+        if self._axisymmetric_correction_sampling is True:
+            inclination_scaling = self._axisymmetric_correction_sampling_class.draw_one
             kin_scaling *= inclination_scaling**2
         lnlikelihood = self.log_likelihood(
             ddt_,
@@ -474,7 +516,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             and sne_sigma == 0
             and gamma_pl_sigma == 0
             and not draw_kappa_bool
-            and not self._inclination_sampling
+            and not self._axisymmetric_correction_sampling
         ):
             return True
         return False
@@ -548,8 +590,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             )
             kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
             kin_scaling = self.kin_scaling(kwargs_param)
-            if self._inclination_sampling is True:
-                inclination_scaling = self._inclination_sampling_class.draw_one
+            if self._axisymmetric_correction_sampling is True:
+                inclination_scaling = self._axisymmetric_correction_sampling_class.draw_one
                 kin_scaling *= inclination_scaling**2
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(
                 ddt_, dd_, kin_scaling=kin_scaling

@@ -37,7 +37,7 @@ class TestLensLikelihood(object):
         log_m2l_distribution = ("NONE",)
 
         vel_disp_scaling = np.random.normal(loc=1, scale=0.1, size=1000)
-        pdf_array_vel_disp_scaling, bin_edges_vel_disp_scaling = np.histogram(
+        pdf_array_axisymmetric_correction, bin_edges_axisymmetric_correction = np.histogram(
             vel_disp_scaling
         )
 
@@ -49,8 +49,8 @@ class TestLensLikelihood(object):
             kin_scaling_param_list=["a_ani"],
             j_kin_scaling_param_axes=ani_param_array,
             j_kin_scaling_grid_list=[ani_scaling_array],
-            bin_edges_vel_disp_scaling=None,
-            pdf_array_vel_disp_scaling=None,
+            bin_edges_axisymmetric_correction=None,
+            pdf_array_axisymmetric_correction=None,
             num_distribution_draws=200,
             los_distributions=["GAUSSIAN"],
             global_los_distribution=0,
@@ -69,8 +69,8 @@ class TestLensLikelihood(object):
             kin_scaling_param_list=["a_ani"],
             j_kin_scaling_param_axes=ani_param_array,
             j_kin_scaling_grid_list=[ani_scaling_array],
-            bin_edges_vel_disp_scaling=bin_edges_vel_disp_scaling,
-            pdf_array_vel_disp_scaling=pdf_array_vel_disp_scaling,
+            bin_edges_axisymmetric_correction=bin_edges_axisymmetric_correction,
+            pdf_array_axisymmetric_correction=pdf_array_axisymmetric_correction,
             num_distribution_draws=200,
             los_distributions=["GAUSSIAN"],
             global_los_distribution=0,
@@ -89,9 +89,9 @@ class TestLensLikelihood(object):
             kin_scaling_param_list=["a_ani"],
             j_kin_scaling_param_axes=ani_param_array,
             j_kin_scaling_grid_list=[ani_scaling_array],
-            bin_edges_vel_disp_scaling=None,
-            pdf_array_vel_disp_scaling=None,
-            vel_disp_scaling_distributions=vel_disp_scaling,
+            bin_edges_axisymmetric_correction=None,
+            pdf_array_axisymmetric_correction=None,
+            axisymmetric_correction_distributions=vel_disp_scaling,
             num_distribution_draws=200,
             los_distributions=["GAUSSIAN"],
             global_los_distribution=0,
@@ -224,6 +224,28 @@ class TestLensLikelihood(object):
             **kwargs_model
         )
 
+        # axisymmetric q_intrinsic case
+        q_intrinsic_array = np.linspace(start=0.5, stop=1.0, num=5)
+        param_scaling_array = np.multiply.outer(
+            np.ones_like(ani_param_array), np.ones_like(q_intrinsic_array)
+        )
+        j_kin_scaling_param_axes = [ani_param_array, q_intrinsic_array]
+        self.likelihood_q_intrinsic = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtDdGaussian",
+            kin_scaling_param_list=["a_ani", "q_intrinsic"],
+            j_kin_scaling_param_axes=j_kin_scaling_param_axes,
+            j_kin_scaling_grid_list=[param_scaling_array],
+            num_distribution_draws=200,
+            mst_ifu=True,
+            q_intrinsic_sampling=True,
+            q_intrinsic_distribution="GAUSSIAN",
+            **kwargs_likelihood,
+            **kwargs_model
+        )
+
     def test_lens_log_likelihood(self):
         np.random.seed(42)
         kwargs_lens = {
@@ -347,6 +369,26 @@ class TestLensLikelihood(object):
         # )
 
         # assert ln_likelihood < -10000000
+
+        # axisymmetric q_intrinsic test
+        kwargs_lens = {
+            "lambda_mst": 1,
+            "lambda_mst_sigma": 0.,
+            "lambda_ifu": 1,
+            "lambda_ifu_sigma": 0.,
+        }
+        kwargs_kin = {"a_ani": 1}
+        kwargs_los = [{"mean": 0, "sigma": 0.03}]
+        kwargs_deprojection = {"q_intrinsic": 1, "q_intrinsic_sigma": 0.1}
+
+        ln_likelihood_q_int = self.likelihood_q_intrinsic.lens_log_likelihood(
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_los=kwargs_los,
+            kwargs_deprojection=kwargs_deprojection,
+        )
+        npt.assert_almost_equal(ln_likelihood_q_int, -0.0, decimal=1)
 
     def test_lum_dist_likelihood(self):
         "Mag"

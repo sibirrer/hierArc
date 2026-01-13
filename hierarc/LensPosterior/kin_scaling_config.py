@@ -13,6 +13,7 @@ class KinScalingConfig(KinScalingParamManager):
         gamma_in_scaling=None,
         log_m2l_scaling=None,
         gamma_pl_scaling=None,
+        q_intrinsic_scaling=None,
         gamma_pl_mean=None,
     ):
         """
@@ -23,6 +24,8 @@ class KinScalingConfig(KinScalingParamManager):
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         :param gamma_pl_scaling: array of power-law density profile slopes to be interpolated (optional, otherwise None)
+        :param q_intrinsic_scaling: array of intrinsic axis ratio to be interpolated,
+            used for computing the inclination angle in axisymmetric modeling (optional, otherwise None)
         :param gamma_pl_mean: mean gamma_pl upon which the covariances are calculated
         """
         self._r_eff = r_eff
@@ -53,6 +56,7 @@ class KinScalingConfig(KinScalingParamManager):
         self._gamma_in_scaling = gamma_in_scaling
         self._log_m2l_scaling = log_m2l_scaling
         self._gamma_pl_scaling = gamma_pl_scaling
+        self._q_intrinsic_scaling = q_intrinsic_scaling
         self._gamma_pl_mean = gamma_pl_mean
 
         if gamma_in_scaling is not None:
@@ -64,6 +68,9 @@ class KinScalingConfig(KinScalingParamManager):
         if gamma_pl_scaling is not None:
             self._param_name_list.append("gamma_pl")
             self._ani_param_array.append(np.array(gamma_pl_scaling))
+        if q_intrinsic_scaling is not None:
+            self._param_name_list.append("q_intrinsic")
+            self._ani_param_array.append(np.array(q_intrinsic_scaling))
         KinScalingParamManager.__init__(
             self, j_kin_scaling_param_name_list=self._param_name_list
         )
@@ -105,6 +112,17 @@ class KinScalingConfig(KinScalingParamManager):
             kwargs_base["log_m2l"] = np.mean(self._log_m2l_scaling)
         if "gamma_pl" in self._param_name_list:
             kwargs_base["gamma_pl"] = self._gamma_pl_mean
+        return kwargs_base
+
+    @property
+    def kwargs_axisymmetry_base(self):
+        """
+
+        :return: keyword arguments of axisymmetric JAM parameters that are getting interpolated
+        """
+        kwargs_base = {}
+        if "q_intrinsic" in self._param_name_list:
+            kwargs_base["q_intrinsic"] = np.mean(self._q_intrinsic_scaling)
         return kwargs_base
 
     @property

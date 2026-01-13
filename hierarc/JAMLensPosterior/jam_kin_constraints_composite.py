@@ -3,14 +3,14 @@ __author__ = "ajshjib"
 import copy
 
 import numpy as np
-from hierarc.JAMLensPosterior.jam_kin_constraints import JAMKinConstraints
+from hierarc.JAMLensPosterior.jam_kin_constraints import KinConstraints
 from lenstronomy.Util import constants as const
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.LightModel.light_model import LightModel
 from lenstronomy.LensModel.Profiles.gnfw import GNFW
 
 
-class JAMKinConstraintsComposite(JAMKinConstraints):
+class JAMKinConstraintsComposite(KinConstraints):
     def __init__(
         self,
         z_lens,

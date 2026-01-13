@@ -144,4 +144,6 @@ _input_param_list = [
     "gamma_pl_global_sampling",
     "gamma_pl_global_dist",
     "log_scatter",
+    "q_intrinsic_sampling",
+    "q_intrinsic_dist",
 ]

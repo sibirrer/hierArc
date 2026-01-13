@@ -1,3 +1,5 @@
+__author__ = "furcelay"
+
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.JAM.jam_td_cosmography import JAMTDCosmography
 import warnings

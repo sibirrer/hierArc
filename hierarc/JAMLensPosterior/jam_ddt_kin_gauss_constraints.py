@@ -1,7 +1,7 @@
-from hierarc.JAMLensPosterior.jam_kin_constraints import JAMKinConstraints
+from hierarc.JAMLensPosterior.jam_kin_constraints import KinConstraints
 
 
-class JAMDdtGaussKinConstraints(JAMKinConstraints):
+class JAMDdtGaussKinConstraints(KinConstraints):
     """Class for sampling Ds/Dds posteriors from imaging data and kinematic constraints
     with additional constraints on the time-delay distance Ddt."""
 
