@@ -1,4 +1,4 @@
-from hierarc.JAMLensPosterior.jam_kin_constraints import KinConstraints
+from hierarc.LensPosterior.kin_constraints import KinConstraints
 
 
 class JAMDdtGaussKinConstraints(KinConstraints):

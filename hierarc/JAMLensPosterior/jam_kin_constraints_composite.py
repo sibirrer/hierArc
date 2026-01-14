@@ -3,7 +3,7 @@ __author__ = "ajshjib"
 import copy
 
 import numpy as np
-from hierarc.JAMLensPosterior.jam_kin_constraints import KinConstraints
+from hierarc.LensPosterior.kin_constraints import KinConstraints
 from lenstronomy.Util import constants as const
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
 from lenstronomy.LightModel.light_model import LightModel

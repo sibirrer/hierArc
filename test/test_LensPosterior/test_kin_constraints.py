@@ -262,7 +262,7 @@ class TestKinConstraints(object):
 
         # axial symmetry
         axial_symmetry = "axi_sph"
-        q_intrinsic = 0.85
+        q_intrinsic = 0.80
         q_observed = 0.86
         e1, e2 = phi_q2_ellipticity(0, q_observed)
 
@@ -331,7 +331,7 @@ class TestKinConstraints(object):
             gamma_pl_scaling=np.linspace(1.8, 2.2, 2),
             # axisymmetric JAM modeling
             axial_symmetry="axi_sph",
-            q_intrinsic_scaling=np.linspace(0.4, 0.8, 3),
+            q_intrinsic_scaling=np.linspace(0.4, 0.9, 3),
             kwargs_lens_light=kwargs_lens_light,
             **kwargs_kin_api_settings
         )
@@ -345,7 +345,8 @@ class TestKinConstraints(object):
         )
         kwargs_kin = {"a_ani": anisotropy_beta}
         kwargs_lens = {"gamma_pl_list": [gamma]}
-        kwargs_deprojection = {"q_intrinsic": 0.6, "q_intrinsic_sigma": 0.1}
+        kwargs_deprojection = {"q_intrinsic": q_intrinsic, "q_intrinsic_sigma": 0.01}
+        np.random.seed(53)
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_deprojection=kwargs_deprojection
         )

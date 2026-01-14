@@ -16,8 +16,8 @@ import copy
 class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
     """Master class containing the likelihood definitions of different analysis for a
     single lens.
-    Axisymmetric JAM kinematics can be done explicitly through the JAMKinScaling class
-    with models computed using JAMPy. For this, use q_intrinsic_sampling option,
+    Axisymmetric JAM kinematics can be done explicitly through the KinScaling class
+    with models computed using jampy. For this, use q_intrinsic_sampling option,
     and use 'jampy' with 'axi_sph' as kinematics backend.
     Alternatively, the spherical models can be correction following Huang et al. 2025.
     For this, use 'spherical' modeling (either with jampy or galkin backend) and
