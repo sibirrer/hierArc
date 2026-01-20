@@ -435,21 +435,6 @@ class TestKinConstraints(object):
             voronoi_bins=voronoi_bins,
         )
 
-        def paint_map(bin_map, values):
-            """
-            Paint per-bin values back to a 2D map.
-            """
-            out = np.full_like(bin_map, np.nan, dtype=float)
-            bins = np.unique(bin_map[bin_map > 0])
-            for i, b in enumerate(bins):
-                out[bin_map == b] = values[i]
-            return out
-
-        import matplotlib.pyplot as plt
-        plt.imshow(paint_map(voronoi_bins, sigma_v_map_voronoi))
-        plt.colorbar()
-        plt.show()
-
         # compute likelihood
         kin_constraints = KinConstraints(
             z_lens=z_lens,
