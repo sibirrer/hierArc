@@ -38,6 +38,7 @@ class DdtKinConstraints(KinConstraints):
         multi_observations=False,
         multi_light_profile=False,
         gamma_pl_scaling=None,
+        voronoi_bins=None,
     ):
         """
 
@@ -72,6 +73,8 @@ class DdtKinConstraints(KinConstraints):
         :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
          as a list for each individual observation condition.
         :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
+        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
+            bin indices should start from 0, -1 values for pixels not binned
         """
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
@@ -103,6 +106,7 @@ class DdtKinConstraints(KinConstraints):
             multi_observations=multi_observations,
             multi_light_profile=multi_light_profile,
             gamma_pl_scaling=gamma_pl_scaling,
+            voronoi_bins=voronoi_bins,
         )
 
     def hierarchy_configuration(self, num_sample_model=20):

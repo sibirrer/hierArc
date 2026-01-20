@@ -46,6 +46,7 @@ class KinConstraintsComposite(KinConstraints):
         kappa_s_array=None,
         r_s_array=None,
         is_m2l_population_level=True,
+        voronoi_bins=None,
     ):
         """
 
@@ -92,6 +93,8 @@ class KinConstraintsComposite(KinConstraints):
         :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
         :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
         :param r_s_array: array of halo scale radii in Mpc
+        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
+            bin indices should start from 0, -1 values for pixels not binned
         """
 
         if (
@@ -153,6 +156,7 @@ class KinConstraintsComposite(KinConstraints):
             multi_observations=multi_observations,
             gamma_in_scaling=gamma_in_array,
             log_m2l_scaling=log_m2l_scaling,
+            voronoi_bins=voronoi_bins,
         )
 
         if self._check_arrays(alpha_Rs_array, r_s_angle_array):
