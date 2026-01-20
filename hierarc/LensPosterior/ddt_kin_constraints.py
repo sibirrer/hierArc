@@ -42,6 +42,7 @@ class DdtKinConstraints(KinConstraints):
         multi_light_profile=False,
         gamma_pl_scaling=None,
         q_intrinsic_scaling=None,
+        voronoi_bins=None,
     ):
         """
 
@@ -81,6 +82,8 @@ class DdtKinConstraints(KinConstraints):
         :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
         :param q_intrinsic_scaling: array of intrinsic axis ratio values (optional, otherwise None)
             this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
+        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
+            bin indices should start from 0, -1 values for pixels not binned
         """
         self._ddt_sample, self._ddt_weights = ddt_samples, ddt_weights
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
@@ -116,6 +119,7 @@ class DdtKinConstraints(KinConstraints):
             multi_light_profile=multi_light_profile,
             gamma_pl_scaling=gamma_pl_scaling,
             q_intrinsic_scaling=q_intrinsic_scaling,
+            voronoi_bins=voronoi_bins,
         )
 
     def hierarchy_configuration(self, num_sample_model=20):

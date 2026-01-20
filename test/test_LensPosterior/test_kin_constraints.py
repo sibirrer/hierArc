@@ -353,6 +353,128 @@ class TestKinConstraints(object):
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
 
+    def test_likelihoodconfiguration_voronoi_bins(self):
+        anisotropy_model = "const"
+        x = y = np.linspace(-5, 5, 20)
+        x_grid, y_grid = np.meshgrid(x, y)
+        kwargs_aperture = {
+            "aperture_type": "IFU_grid",
+            "x_grid": x_grid,
+            "y_grid": y_grid,
+        }
+        voronoi_bins = np.ones_like(x_grid) * -1
+        voronoi_bins[3:-2, 3:-2] = np.kron(np.arange(25).reshape(5,5), np.ones((3,3))).astype(int)
+        kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
+
+        # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
+        kwargs_numerics_galkin = {
+            "interpol_grid_num": 1000,  # numerical interpolation, should converge -> infinity
+            "log_integration": True,
+            # log or linear interpolation of surface brightness and mass models
+            "max_integrate": 100,
+            "min_integrate": 0.001,
+        }  # lower/upper bound of numerical integrals
+
+        # redshift
+        z_lens = 0.5
+        z_source = 1.5
+
+        # lens model
+        from astropy.cosmology import FlatLambdaCDM
+
+        cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
+        theta_E = 1.0
+        r_eff = 1
+        gamma = 2.1
+
+        # kwargs_model
+        lens_light_model_list = ["HERNQUIST"]
+        lens_model_list = ["SPP"]
+        kwargs_model = {
+            "lens_model_list": lens_model_list,
+            "lens_light_model_list": lens_light_model_list,
+        }
+
+        # settings for kinematics calculation with KinematicsAPI of lenstronomy
+        kwargs_kin_api_settings = {
+            "multi_observations": False,
+            "kwargs_numerics_galkin": kwargs_numerics_galkin,
+            "MGE_light": False,
+            "kwargs_mge_light": None,
+            "sampling_number": 1000,
+            "num_kin_sampling": 1000,
+            "num_psf_sampling": 100,
+        }
+
+        kin_api = KinematicsBackend(
+            z_lens,
+            z_source,
+            kwargs_model,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            cosmo_fiducial=cosmo,
+            **kwargs_kin_api_settings
+        )
+
+        # compute kinematics with fiducial cosmology
+        kwargs_lens = [
+            {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
+        ]
+        beta_inf = 0.9
+        kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
+        kwargs_anisotropy = {"beta": 0.0}
+        sigma_v_map_voronoi = kin_api.velocity_dispersion_map(
+            kwargs_lens,
+            kwargs_lens_light,
+            kwargs_anisotropy,
+            r_eff=r_eff,
+            theta_E=theta_E,
+            gamma=gamma,
+            kappa_ext=0,
+            voronoi_bins=voronoi_bins,
+        )
+
+        def paint_map(bin_map, values):
+            """
+            Paint per-bin values back to a 2D map.
+            """
+            out = np.full_like(bin_map, np.nan, dtype=float)
+            bins = np.unique(bin_map[bin_map > 0])
+            for i, b in enumerate(bins):
+                out[bin_map == b] = values[i]
+            return out
+
+        import matplotlib.pyplot as plt
+        plt.imshow(paint_map(voronoi_bins, sigma_v_map_voronoi))
+        plt.colorbar()
+        plt.show()
+
+        # compute likelihood
+        kin_constraints = KinConstraints(
+            z_lens=z_lens,
+            z_source=z_source,
+            theta_E=theta_E,
+            theta_E_error=0.01,
+            gamma=gamma,
+            gamma_error=0.02,
+            r_eff=r_eff,
+            r_eff_error=0.05,
+            sigma_v_measured=sigma_v_map_voronoi,
+            sigma_v_error_independent=np.ones(sigma_v_map_voronoi.size) * 10,
+            sigma_v_error_cov_matrix=np.eye(sigma_v_map_voronoi.size) * 100,
+            sigma_v_error_covariant=0,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            gamma_pl_scaling=np.linspace(1.8, 2.2, 5),
+            voronoi_bins=voronoi_bins,
+            **kwargs_kin_api_settings
+        )
+
+        kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
+        assert len(kwargs_likelihood["j_kin_scaling_grid_list"]) == len(np.unique(voronoi_bins[voronoi_bins > -1]))
+
 
 class TestRaise(unittest.TestCase):
     def test_raise(self):

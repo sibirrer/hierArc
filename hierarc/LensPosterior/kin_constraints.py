@@ -47,6 +47,7 @@ class KinConstraints(BaseLensConfig):
         log_m2l_scaling=None,
         gamma_pl_scaling=None,
         q_intrinsic_scaling=None,
+        voronoi_bins=None,
     ):
         """
 
@@ -100,6 +101,8 @@ class KinConstraints(BaseLensConfig):
         :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
         :param q_intrinsic_scaling: array of intrinsic axis ratio values (optional, otherwise None)
             this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
+        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
+            bin indices should start from 0, -1 values for pixels not binned
         """
         if lens_light_model_list is None:
             lens_light_model_list = ["HERNQUIST"]
@@ -110,6 +113,8 @@ class KinConstraints(BaseLensConfig):
 
         self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
+
+        self._voronoi_bins = voronoi_bins
 
         BaseLensConfig.__init__(
             self,
@@ -190,6 +195,7 @@ class KinConstraints(BaseLensConfig):
             r_eff=r_eff_draw,
             theta_E=theta_E_draw,
             gamma=gamma_draw,
+            voronoi_bins=self._voronoi_bins,
         )
         return j_kin
 

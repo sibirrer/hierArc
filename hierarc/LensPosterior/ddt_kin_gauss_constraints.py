@@ -36,6 +36,7 @@ class DdtGaussKinConstraints(KinConstraints):
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
+        voronoi_bins=None,
     ):
         """
 
@@ -66,6 +67,8 @@ class DdtGaussKinConstraints(KinConstraints):
         :param kappa_ext_sigma: 1-sigma distribution uncertainty from which the ddt constraints are coming from
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
+        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
+            bin indices should start from 0, -1 values for pixels not binned
         """
         self._ddt_mean, self._ddt_sigma = ddt_mean, ddt_sigma
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
@@ -95,6 +98,7 @@ class DdtGaussKinConstraints(KinConstraints):
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
+            voronoi_bins=voronoi_bins,
         )
 
     def hierarchy_configuration(self, num_sample_model=20):
