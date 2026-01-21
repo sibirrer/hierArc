@@ -27,7 +27,7 @@ class PantheonPlusData(object):
             _PATH_2_DATA, "Pantheon+SH0ES", "Pantheon+SH0ES_STAT+SYS.cov"
         )
 
-        data = pd.read_csv(self._data_file, delim_whitespace=True)
+        data = pd.read_csv(self._data_file, sep='\s+')
         self.origlen = len(data)
 
         self.ww = data["zHD"] > 0.01
