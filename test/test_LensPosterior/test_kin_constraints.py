@@ -238,7 +238,9 @@ class TestKinConstraints(object):
             "y_grid": y_grid,
         }
         voronoi_bins = np.ones_like(x_grid) * -1
-        voronoi_bins[3:-2, 3:-2] = np.kron(np.arange(25).reshape(5,5), np.ones((3,3))).astype(int)
+        voronoi_bins[3:-2, 3:-2] = np.kron(
+            np.arange(25).reshape(5, 5), np.ones((3, 3))
+        ).astype(int)
         kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
 
         # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
@@ -333,7 +335,9 @@ class TestKinConstraints(object):
         )
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
-        assert len(kwargs_likelihood["j_kin_scaling_grid_list"]) == len(np.unique(voronoi_bins[voronoi_bins > -1]))
+        assert len(kwargs_likelihood["j_kin_scaling_grid_list"]) == len(
+            np.unique(voronoi_bins[voronoi_bins > -1])
+        )
 
 
 class TestRaise(unittest.TestCase):
