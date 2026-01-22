@@ -39,7 +39,7 @@ class KinematicsBackend:
         num_psf_sampling=100,
     ):
 
-        if axial_symmetry != "spherical":
+        if axial_symmetry in ["axi_sph", "axi_cyl"]:
             if backend is None:
                 backend = "jampy"
             else:
@@ -51,10 +51,13 @@ class KinematicsBackend:
                 raise ValueError(
                     "Analytic kinematics not supported for axisymmetric JAM models with JamPy backend."
                 )
-        else:
+        elif axial_symmetry == "spherical":
             if backend is None:
                 backend = "galkin"
-
+        else:
+            raise ValueError(
+                "Axial symmetry option %s not recognized." % axial_symmetry
+            )
         if kwargs_numerics_galkin is not None:
             warnings.warn(
                 "`kwargs_numerics_galkin` is deprecated, please use `kwargs_numerics_backend` instead.",
