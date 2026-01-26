@@ -155,8 +155,8 @@ class JAMWrapperBase(PSF, Aperture):
     def mge_lum_tracer(self, kwargs_light):
         # TODO: cache the MGE fit for repeated calls with same kwargs_light
         if self._light_profile.profile_list == ['MULTI_GAUSSIAN']:
-            surf_lum = kwargs_light[0]['amp']
-            sigma_lum = kwargs_light[0]['sigma']
+            surf_lum = np.asarray(kwargs_light[0]['amp'])
+            sigma_lum = np.asarray(kwargs_light[0]['sigma'])
         else:
             r_eff = self._light_profile.effective_radius(kwargs_light)
             light_1d = self._light_profile.radial_surface_brightness(
@@ -179,8 +179,8 @@ class JAMWrapperBase(PSF, Aperture):
     def mge_mass(self, kwargs_mass):
         # TODO: cache the MGE fit for repeated calls with same kwargs_mass
         if self._mass_profile.profile_list == ['MULTI_GAUSSIAN']:
-            surf_mass = kwargs_mass[0]['amp']
-            sigma_mass = kwargs_mass[0]['sigma']
+            surf_mass = np.asarray(kwargs_mass[0]['amp'])
+            sigma_mass = np.asarray(kwargs_mass[0]['sigma'])
         else:
             theta_E = self._mass_profile.einstein_radius(kwargs_mass)
             radial_density = self._mass_profile.radial_density(
