@@ -88,10 +88,6 @@ class KinematicsBackend:
                 multi_observations=multi_observations,
                 multi_light_profile=multi_light_profile,
                 Hernquist_approx=Hernquist_approx,
-                MGE_light=MGE_light,
-                MGE_mass=MGE_mass,
-                kwargs_mge_light=kwargs_mge_light,
-                kwargs_mge_mass=kwargs_mge_mass,
             )
         elif backend == "galkin":
             kinematics_backend = TDCosmography(

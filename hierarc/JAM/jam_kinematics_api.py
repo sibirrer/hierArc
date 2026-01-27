@@ -7,7 +7,6 @@ from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from lenstronomy.Util import class_creator
 from lenstronomy.Analysis.lens_profile import LensProfileAnalysis
 from lenstronomy.Analysis.light_profile import LightProfileAnalysis
-import lenstronomy.Util.multi_gauss_expansion as mge
 import warnings
 
 __all__ = ["JAMKinematicsAPI"]
@@ -33,10 +32,6 @@ class JAMKinematicsAPI(object):
         multi_light_profile=False,
         kwargs_numerics_jam=None,
         Hernquist_approx=False,
-        MGE_light=False,
-        MGE_mass=False,
-        kwargs_mge_light=None,
-        kwargs_mge_mass=None,
     ):
         """Initialize the class with the lens model and cosmology.
 
@@ -69,13 +64,6 @@ class JAMKinematicsAPI(object):
         :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
             to the half light radius of the deflector light profile to compute the
             kinematics
-        :param MGE_light: bool, if true performs the MGE for the light distribution
-        :param MGE_mass: bool, if true performs the MGE for the mass distribution
-        :param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
-        :param kwargs_mge_mass: keyword arguments that go into the MGE decomposition
-            routine
-        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
         """
         self.z_d = z_lens
@@ -107,38 +95,10 @@ class JAMKinematicsAPI(object):
         self._lens_model_kinematics_bool = lens_model_kinematics_bool
         self._light_model_kinematics_bool = light_model_kinematics_bool
 
-        self._kwargs_mge_mass = kwargs_mge_mass
-        self._kwargs_mge_light = kwargs_mge_light
-
-        if MGE_mass:
-            warnings.warn("Explicit MGE fitting of the mass profile should be avoided as JamPy does it internally",
-                          UserWarning)
-        if MGE_light:
-            warnings.warn("Explicit MGE fitting of the light profile should be avoided as JamPy does it internally",
-                          UserWarning)
-
-        if kwargs_mge_mass is None:
-            self._kwargs_mge_mass = {"n_comp": 20}
-        else:
-            self._kwargs_mge_mass = kwargs_mge_mass
-
-        if kwargs_mge_light is None:
-            self._kwargs_mge_light = {
-                "grid_spacing": 0.01,
-                "grid_num": 100,
-                "n_comp": 20,
-                "center_x": None,
-                "center_y": None,
-            }
-        else:
-            self._kwargs_mge_light = kwargs_mge_light
-
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
         self._axial_symmetry = axial_symmetry
         self._Hernquist_approx = Hernquist_approx
-        self._MGE_light = MGE_light
-        self._MGE_mass = MGE_mass
         self._multi_observations = multi_observations
         self._multi_light_profile = multi_light_profile
 
@@ -171,7 +131,7 @@ class JAMKinematicsAPI(object):
         :return: velocity dispersion [km/s]
         """
         jam, kwargs_profile, kwargs_light = self.jam_settings(
-            kwargs_lens, kwargs_lens_light, r_eff=r_eff, theta_E=theta_E, gamma=gamma
+            kwargs_lens, kwargs_lens_light, r_eff=r_eff,
         )
 
         sigma_v = []
@@ -247,15 +207,13 @@ class JAMKinematicsAPI(object):
         )
 
     def jam_settings(
-        self, kwargs_lens, kwargs_lens_light, r_eff=None, theta_E=None, gamma=None,
+        self, kwargs_lens, kwargs_lens_light, r_eff=None,
     ):
         """
 
         :param kwargs_lens: lens model keyword argument list
         :param kwargs_lens_light: deflector light keyword argument list
         :param r_eff: half-light radius (optional)
-        :param theta_E: Einstein radius (optional)
-        :param gamma: local power-law slope at the Einstein radius (optional)
         :return: JAMWrapper() instance and mass and light profiles configured for JamPy
         """
         if r_eff is None:
@@ -271,31 +229,14 @@ class JAMKinematicsAPI(object):
                 center_y=None,
                 model_bool_list=self._light_model_kinematics_bool,
             )
-        if theta_E is None:
-            theta_E = self._lensMassProfile.effective_einstein_radius_grid(
-                kwargs_lens,
-                center_x=None,
-                center_y=None,
-                model_bool_list=self._lens_model_kinematics_bool,
-                grid_num=200,
-                grid_spacing=0.05,
-                get_precision=False,
-                verbose=True,
-            )
 
         mass_profile_list, kwargs_profile = self.kinematic_lens_profiles(
             kwargs_lens,
-            MGE_fit=self._MGE_mass,
-            theta_E=theta_E,
             model_kinematics_bool=self._lens_model_kinematics_bool,
-            kwargs_mge=self._kwargs_mge_mass,
-            gamma=gamma,
         )
         light_profile_list, kwargs_light = self.kinematic_light_profile(
             kwargs_lens_light,
             r_eff=r_eff,
-            MGE_fit=self._MGE_light,
-            kwargs_mge=self._kwargs_mge_light,
             model_kinematics_bool=self._light_model_kinematics_bool,
             Hernquist_approx=self._Hernquist_approx,
         )
@@ -335,11 +276,7 @@ class JAMKinematicsAPI(object):
     def kinematic_lens_profiles(
         self,
         kwargs_lens,
-        MGE_fit=False,
         model_kinematics_bool=None,
-        theta_E=None,
-        gamma=None,
-        kwargs_mge=None,
     ):
         """Translates the lenstronomy lens and mass profiles into a (sub) set of
         profiles that are compatible with the JAMWrapper module to compute the kinematics
@@ -347,15 +284,10 @@ class JAMKinematicsAPI(object):
         for all profile types there exists a 3d de-projected analytical representation.
 
         :param kwargs_lens: lens model parameters
-        :param MGE_fit: bool, if true performs the MGE for the mass distribution
         :param model_kinematics_bool: bool list of length of the lens model. Only takes
             a subset of all the models as part of the kinematics computation (can be
             used to ignore substructure, shear etc that do not describe the main
             deflector potential
-        :param theta_E: (optional float) estimate of the Einstein radius. If present,
-            does not numerically compute this quantity in this routine numerically
-        :param gamma: local power-law slope at the Einstein radius (optional)
-        :param kwargs_mge: keyword arguments that go into the MGE decomposition routine
         :return: mass_profile_list, keyword argument list
         """
         mass_profile_list = []
@@ -385,39 +317,6 @@ class JAMKinematicsAPI(object):
                     }
                 kwargs_profile.append(kwargs_lens_i)
 
-        if MGE_fit is True:
-            if kwargs_mge is None:
-                raise ValueError("kwargs_mge needs to be specified!")
-            if theta_E is None:
-                raise ValueError(
-                    "rough estimate of the Einstein radius needs to be provided to "
-                    "compute the MGE!"
-                )
-            r_array = np.logspace(-4, 2, 200) * theta_E
-            if self._lens_model_list[0] in ["INTERPOL", "INTERPOL_SCLAED"]:
-                center_x, center_y = self._lensMassProfile.convergence_peak(
-                    kwargs_lens,
-                    model_bool_list=model_kinematics_bool,
-                    grid_num=200,
-                    grid_spacing=0.01,
-                    center_x_init=0,
-                    center_y_init=0,
-                )
-            else:
-                center_x, center_y = None, None
-            mass_r = self._lensMassProfile.radial_lens_profile(
-                r_array,
-                kwargs_lens,
-                center_x=center_x,
-                center_y=center_y,
-                model_bool_list=model_kinematics_bool,
-            )
-            amps, sigmas, norm = mge.mge_1d(
-                r_array, mass_r, N=kwargs_mge.get("n_comp", 20)
-            )
-            mass_profile_list = ["MULTI_GAUSSIAN"]
-            kwargs_profile = [{"amp": amps, "sigma": sigmas}]
-
         kwargs_profile = self._copy_centers(kwargs_profile, kwargs_lens)
 
         return mass_profile_list, kwargs_profile
@@ -426,10 +325,8 @@ class JAMKinematicsAPI(object):
         self,
         kwargs_lens_light,
         r_eff=None,
-        MGE_fit=False,
         model_kinematics_bool=None,
         Hernquist_approx=False,
-        kwargs_mge=None,
     ):
         """Setting up of the light profile to compute the kinematics in the JAMWrapper
         module. The requirement is that the profiles are centered at (0, 0) and that for
@@ -439,17 +336,12 @@ class JAMKinematicsAPI(object):
         :param r_eff: (optional float, else=None) Pre-calculated projected half-light
             radius of the deflector profile. If not provided, numerical calculation is
             done in this routine if required.
-        :param MGE_fit: boolean, if True performs a Multi-Gaussian expansion of the
-            radial light profile and returns this solution.
         :param model_kinematics_bool: list of booleans to indicate a subset of light
             profiles to be part of the physical deflector light.
         :param Hernquist_approx: boolean, if True replaces the actual light profile(s)
             with a Hernquist model with matched half-light radius.
-        :param kwargs_mge: keyword arguments that go into the MGE decomposition routine
-        :return: deflector type list, keyword arguments list
         """
         light_profile_list = []
-        kwargs_light = []
         if Hernquist_approx is True:
             if r_eff is None:
                 raise ValueError(
@@ -470,14 +362,11 @@ class JAMKinematicsAPI(object):
                 light_profile_list, kwargs_light_ = self._setup_light_parameters(
                     kwargs_lens_light_,
                     model_kinematics_bool,
-                    r_eff,
-                    kwargs_mge,
-                    MGE_fit,
                 )
                 kwargs_light.append(kwargs_light_)
         else:
             light_profile_list, kwargs_light = self._setup_light_parameters(
-                kwargs_lens_light, model_kinematics_bool, r_eff, kwargs_mge, MGE_fit
+                kwargs_lens_light, model_kinematics_bool
             )
 
         return light_profile_list, kwargs_light
@@ -488,63 +377,21 @@ class JAMKinematicsAPI(object):
         axial_symmetry="axi_sph",
         kwargs_numerics_jam=None,
         Hernquist_approx=False,
-        MGE_light=False,
-        MGE_mass=False,
-        kwargs_mge_light=None,
-        kwargs_mge_mass=None,
     ):
         """Return the settings for the kinematic modeling.
 
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param axial_symmetry: for axisymmetric JAM modeling
+        :kwargs_numerics_jam: kwargs for JamWrapper MGE decomposition
         :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
             to the half light radius of the deflector light profile to compute the kinematics
-        :param MGE_light: bool, if true performs the MGE for the light distribution
-        :param MGE_mass: bool, if true performs the MGE for the mass distribution
-        :param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
-        :param kwargs_mge_mass: keyword arguments that go into the MGE decomposition
-            routine
-        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
-            routine
-        :param sampling_number: number of spectral rendering on a single slit
-        :param num_kin_sampling: number of kinematic renderings on a total IFU
-        :param num_psf_sampling: number of PSF displacements for each kinematic
-            rendering on the IFU
         :return: updated settings
         """
-        if any("IFU" in ap["aperture_type"] for ap in self._kwargs_aperture_kin):
-            if MGE_mass:
-                warnings.warn("Explicit MGE fitting of the mass profile should be avoided as JamPy does it internally",
-                              UserWarning)
-            if MGE_light:
-                warnings.warn("Explicit MGE fitting of the light profile should be avoided as JamPy does it internally",
-                              UserWarning)
-
-        if kwargs_mge_mass is None:
-            self._kwargs_mge_mass = {"n_comp": 20}
-        else:
-            self._kwargs_mge_mass = kwargs_mge_mass
-
-        if kwargs_mge_light is None:
-            self._kwargs_mge_light = {
-                "grid_spacing": 0.01,
-                "grid_num": 100,
-                "n_comp": 20,
-                "center_x": None,
-                "center_y": None,
-            }
-        else:
-            self._kwargs_mge_light = kwargs_mge_light
-
-        self._kwargs_mge_mass = kwargs_mge_mass
-        self._kwargs_mge_light = kwargs_mge_light
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
         self._axial_symmetry = axial_symmetry
         self._Hernquist_approx = Hernquist_approx
-        self._MGE_light = MGE_light
-        self._MGE_mass = MGE_mass
 
     @staticmethod
     def transform_kappa_ext(sigma_v, kappa_ext=0):
@@ -559,8 +406,7 @@ class JAMKinematicsAPI(object):
         return sigma_v_mst
 
     def _setup_light_parameters(
-        self, kwargs_lens_light, model_kinematics_bool, r_eff, kwargs_mge, MGE_fit
-    ):
+        self, kwargs_lens_light, model_kinematics_bool):
         light_profile_list = []
         kwargs_light = []
 
@@ -576,21 +422,4 @@ class JAMKinematicsAPI(object):
                 #     kwargs_light_i["e2"] = 0.0
                 kwargs_light.append(kwargs_light_i)
 
-        if MGE_fit is True:
-            if kwargs_mge is None:
-                raise ValueError("kwargs_mge must be provided to compute the MGE")
-            (
-                amps,
-                sigmas,
-                center_x,
-                center_y,
-            ) = self._lensLightProfile.multi_gaussian_decomposition(
-                kwargs_lens_light,
-                model_bool_list=model_kinematics_bool,
-                r_h=r_eff,
-                **kwargs_mge
-            )
-            light_profile_list = ["MULTI_GAUSSIAN"]
-            kwargs_light = [{"amp": amps, "sigma": sigmas}]
-            kwargs_light = self._copy_centers(kwargs_light, kwargs_lens_light)
         return light_profile_list, kwargs_light
