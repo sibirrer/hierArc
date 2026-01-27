@@ -37,10 +37,6 @@ class JAMTDCosmography(JAMKinematicsAPI):
         multi_light_profile=False,
         kwargs_numerics_jam=None,
         Hernquist_approx=False,
-        MGE_light=False,
-        MGE_mass=False,
-        kwargs_mge_light=None,
-        kwargs_mge_mass=None,
     ):
         """
 
@@ -67,14 +63,6 @@ class JAMTDCosmography(JAMKinematicsAPI):
         :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
             to the half light radius of the deflector light profile to compute the
             kinematics
-        :param MGE_light: bool, if true performs the MGE for the light distribution
-        :param MGE_mass: bool, if true performs the MGE for the mass distribution
-        :param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
-        :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
-            routine
-        :param kwargs_mge_mass: keyword arguments that go into the MGE decomposition
-            routine
         """
 
         if cosmo_fiducial is None:
@@ -111,10 +99,6 @@ class JAMTDCosmography(JAMKinematicsAPI):
             multi_light_profile=multi_light_profile,
             kwargs_numerics_jam=kwargs_numerics_jam,
             Hernquist_approx=Hernquist_approx,
-            MGE_light=MGE_light,
-            MGE_mass=MGE_mass,
-            kwargs_mge_light=kwargs_mge_light,
-            kwargs_mge_mass=kwargs_mge_mass,
         )
 
     def time_delays(

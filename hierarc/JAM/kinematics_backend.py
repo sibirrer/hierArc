@@ -88,10 +88,6 @@ class KinematicsBackend:
                 multi_observations=multi_observations,
                 multi_light_profile=multi_light_profile,
                 Hernquist_approx=Hernquist_approx,
-                MGE_light=MGE_light,
-                MGE_mass=MGE_mass,
-                kwargs_mge_light=kwargs_mge_light,
-                kwargs_mge_mass=kwargs_mge_mass,
             )
         elif backend == "galkin":
             kinematics_backend = TDCosmography(
@@ -531,6 +527,7 @@ class KinematicsBackend:
                 MGE_mass=MGE_mass,
                 kwargs_numerics_galkin=kwargs_numerics_backend,
                 kwargs_mge_light=kwargs_mge_light,
+                kwargs_mge_mass=kwargs_mge_mass,
                 sampling_number=sampling_number,
                 num_kin_sampling=num_kin_sampling,
                 num_psf_sampling=num_psf_sampling,
@@ -541,11 +538,14 @@ class KinematicsBackend:
                 raise ValueError(
                     "Analytic kinematics not supported for axisymmetric JAM models with JamPy backend."
                 )
+            if MGE_light or MGE_mass:
+                warnings.warn(
+                "MGE_light and MGE_mass are ignored as MGE decomposition "
+                "is internally managed by the JamPy backend.",
+                DeprecationWarning
+                )
             self._kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,
                 kwargs_numerics_jam=kwargs_numerics_backend,
-                MGE_light=MGE_light,
-                kwargs_mge_light=kwargs_mge_light,
-                MGE_mass=MGE_mass,
-                kwargs_mge_mass=kwargs_mge_mass,
+                Hernquist_approx=Hernquist_approx,
             )
