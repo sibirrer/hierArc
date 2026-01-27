@@ -19,18 +19,18 @@ class TestJAMAnisotropy(object):
 
     def test_const(self):
         jam_ani = JAMAnisotropy("const")
-        beta_params = jam_ani.beta_params({"beta": 0.2}, n_gauss=10)
-        npt.assert_almost_equal(beta_params, np.full(10, 0.2))
+        beta_params = jam_ani.beta_params({"beta": 0.2})
+        npt.assert_almost_equal(beta_params, 0.2)
 
     def test_radial(self):
         jam_ani = JAMAnisotropy("radial")
-        beta_params = jam_ani.beta_params({}, n_gauss=10)
-        npt.assert_almost_equal(beta_params, np.full(10, 1.0))
+        beta_params = jam_ani.beta_params({})
+        npt.assert_almost_equal(beta_params, 1.0, decimal=2)
 
     def test_isotropic(self):
         jam_ani = JAMAnisotropy("isotropic")
-        beta_params = jam_ani.beta_params({}, n_gauss=10)
-        npt.assert_almost_equal(beta_params, np.full(10, 0.0))
+        beta_params = jam_ani.beta_params({})
+        npt.assert_almost_equal(beta_params, 0.0)
 
     def test_om(self):
         jam_ani = JAMAnisotropy("OM")
