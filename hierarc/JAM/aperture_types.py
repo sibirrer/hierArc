@@ -187,11 +187,25 @@ class Shell(GeneralAperture):
         :return: x_grid, y_grid
         """
         r_vals = np.arange(self._r_in, self._r_out, delta_pix)
-        theta_vals = np.arange(0, 2 * np.pi, delta_pix / self._r_out)
-        r_grid, theta_grid = np.meshgrid(r_vals, theta_vals)
-        x_grid = r_grid * np.cos(theta_grid) + self._center_ra
-        y_grid = r_grid * np.sin(theta_grid) + self._center_dec
-        return x_grid.flatten(), y_grid.flatten()
+        x_grid, y_grid = [], []
+        for r in r_vals:
+            x, y = _sample_circle_uniform(r, delta_pix)
+            x_grid.append(x)
+            y_grid.append(y)
+        x_grid = np.concatenate(x_grid) + self._center_ra
+        y_grid = np.concatenate(y_grid) + self._center_dec
+        return x_grid, y_grid
+
+    # def make_shell_grid(self, delta_pix):
+    #     """
+    #     make a grid of coordinates within the shell aperture
+    #     :return: x_grid, y_grid
+    #     """
+    #     x = y = np.arange(-self._r_out + delta_pix / 2, self._r_out, delta_pix)
+    #     x_grid, y_grid = np.meshgrid(x, y)
+    #     r2_grid = x_grid**2 + y_grid**2
+    #     mask_shell = (r2_grid > self._r_in**2) & (r2_grid < self._r_out**2)
+    #     return x_grid[mask_shell] + self._center_ra, y_grid[mask_shell] + self._center_dec
 
     def aperture_downsample(self, high_res_map):
         return np.sum(high_res_map)
@@ -303,14 +317,15 @@ class IFUShells(GeneralAperture):
         self._r_bins = r_bins
         self._center_ra, self._center_dec = center_ra, center_dec
         if ifu_grid_kwargs is None:
-            ifu_num_pix = 100
+            # make an IFU grid
             r_max = np.max(r_bins)
             if delta_pix is None:
-                delta_pix = 1.5 * r_max * 2 / ifu_num_pix
-            ifu_x = ifu_y = np.linspace(
-                -ifu_num_pix / 2 * delta_pix,
-                ifu_num_pix / 2 * delta_pix,
-                ifu_num_pix,
+                # the same as in GalKin
+                delta_pix = r_max * 1.5 * 2 / 100
+            ifu_x = ifu_y = np.arange(
+                -r_max + delta_pix / 2,
+                r_max,
+                delta_pix,
             )
             ifu_x_grid, ifu_y_grid = np.meshgrid(ifu_x, ifu_y)
             ifu_grid_kwargs = {
@@ -356,6 +371,15 @@ def _rotate(x, y, angle):
     x_rot = np.cos(angle) * x + np.sin(angle) * y
     y_rot = -np.sin(angle) * x + np.cos(angle) * y
     return x_rot, y_rot
+
+
+def _sample_circle_uniform(r_shell, step):
+    n_points = 2 * np.pi * r_shell / step
+    if np.ceil(n_points) > 1:
+        angle = np.linspace(0, 2 * np.pi, int(np.ceil(n_points)))
+    else:
+        angle = np.array([0])
+    return r_shell * np.cos(angle), r_shell * np.sin(angle)
 
 
 def downsample_cords_to_bins(vrms_grid, bins, supersampling_factor=1):

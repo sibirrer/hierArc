@@ -59,9 +59,13 @@ class JAMWrapperBase(PSF, Aperture):
             msg = (f"Invalid symmetry type '{self.symmetry}' for JAMWrapper, "
                    f"options are 'spherical', 'axi_sph' or 'axi_cyl'.")
             raise ValueError(msg)
+        self.psf_fwhm = kwargs_psf["fwhm"]
+        if ("delta_pix" not in kwargs_aperture) and ("IFU" not in kwargs_aperture["aperture_type"]):
+            # set the sampling of the aperture to FWHM/4
+            kwargs_aperture = kwargs_aperture.copy()
+            kwargs_aperture["delta_pix"] = min(self.psf_fwhm / 4, 0.1)
         Aperture.__init__(self, **kwargs_aperture)
         PSF.__init__(self, **kwargs_psf)
-        self.psf_fwhm = kwargs_psf["fwhm"]
         self.cosmo = Cosmo(**kwargs_cosmo)
 
         if kwargs_numerics is None:
@@ -154,9 +158,10 @@ class JAMWrapperBase(PSF, Aperture):
 
     def mge_lum_tracer(self, kwargs_light):
         # TODO: cache the MGE fit for repeated calls with same kwargs_light
-        if self._light_profile.profile_list == ['MULTI_GAUSSIAN']:
-            surf_lum = np.asarray(kwargs_light[0]['amp'])
+        profs = self._light_profile.profile_list
+        if (len(profs) == 1) and (profs[0] in ['MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE']):
             sigma_lum = np.asarray(kwargs_light[0]['sigma'])
+            surf_lum = np.asarray(kwargs_light[0]['amp']) / (2 * np.pi * sigma_lum**2)
         else:
             r_eff = self._light_profile.effective_radius(kwargs_light)
             light_1d = self._light_profile.radial_surface_brightness(
@@ -179,8 +184,8 @@ class JAMWrapperBase(PSF, Aperture):
     def mge_mass(self, kwargs_mass):
         # TODO: cache the MGE fit for repeated calls with same kwargs_mass
         if self._mass_profile.profile_list == ['MULTI_GAUSSIAN']:
-            surf_mass = np.asarray(kwargs_mass[0]['amp'])
             sigma_mass = np.asarray(kwargs_mass[0]['sigma'])
+            surf_mass = np.asarray(kwargs_mass[0]['amp']) / (2 * np.pi * sigma_mass)
         else:
             theta_E = self._mass_profile.einstein_radius(kwargs_mass)
             radial_density = self._mass_profile.radial_density(
