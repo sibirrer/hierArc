@@ -162,6 +162,10 @@ class JAMWrapperBase(PSF, Aperture):
         if (len(profs) == 1) and (profs[0] in ['MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE']):
             sigma_lum = np.asarray(kwargs_light[0]['sigma'])
             surf_lum = np.asarray(kwargs_light[0]['amp']) / (2 * np.pi * sigma_lum**2)
+            # clean zero amplitudes as Jampy doesn't like them
+            zero_surf = surf_lum == 0
+            surf_lum = surf_lum[~zero_surf]
+            sigma_lum = sigma_lum[~zero_surf]
         else:
             r_eff = self._light_profile.effective_radius(kwargs_light)
             light_1d = self._light_profile.radial_surface_brightness(
@@ -186,6 +190,10 @@ class JAMWrapperBase(PSF, Aperture):
         if self._mass_profile.profile_list == ['MULTI_GAUSSIAN']:
             sigma_mass = np.asarray(kwargs_mass[0]['sigma'])
             surf_mass = np.asarray(kwargs_mass[0]['amp']) / (2 * np.pi * sigma_mass)
+            # clean zero amplitudes as Jampy doesn't like them
+            zero_surf = surf_mass == 0
+            surf_mass = surf_mass[~zero_surf]
+            sigma_mass = sigma_mass[~zero_surf]
         else:
             theta_E = self._mass_profile.einstein_radius(kwargs_mass)
             radial_density = self._mass_profile.radial_density(
@@ -231,18 +239,20 @@ class JAMWrapperBase(PSF, Aperture):
             jam_kwargs = {}
         if "mbh" not in jam_kwargs:
             jam_kwargs["mbh"] = 0.0
-        if self.axisymmetric:
+        if (not self.axisymmetric) or (inclination is None):
+            # spherical modeling
+            # TODO: evaluate at fixed radius and then interpolate for speed
+            r = np.sqrt(x ** 2 + y ** 2)
+            vrms, surf_bright = self.call_jampy_sph(
+                surf_lum, sigma_lum, surf_mass, sigma_mass,
+                r, beta, sigma_psf, pix_size, jam_kwargs
+            )
+        else:
+            # axisymmetric modeling
             vrms, surf_bright = self.call_jampy_axi(
                 surf_lum, sigma_lum, surf_mass, sigma_mass,
                 x, y, q_lum, q_mass, inclination, beta,
                 sigma_psf, pix_size, jam_kwargs
-            )
-        else:
-            # TODO: evaluate at fixed radius and then interpolate for speed
-            r = np.sqrt(x**2 + y**2)
-            vrms, surf_bright = self.call_jampy_sph(
-                surf_lum, sigma_lum, surf_mass, sigma_mass,
-                r, beta, sigma_psf, pix_size, jam_kwargs
             )
         vrms = vrms.reshape(x_shape)
         surf_bright = surf_bright.reshape(x_shape)
