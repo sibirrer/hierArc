@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 """The setup script."""
+
 import os
 import sys
 from setuptools.command.test import test as TestCommand
