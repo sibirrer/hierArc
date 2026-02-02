@@ -1,5 +1,7 @@
 __author__ = "furcelay", "sibirrer"
 
+import warnings
+
 from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 from hierarc.JAM.aperture import downsample_cords_to_bins
 from lenstronomy.Util.param_util import ellipticity2phi_q
@@ -108,8 +110,9 @@ class JAMWrapper(JAMWrapperBase):
         e2_obs = obs_kwargs.get("e2", 0.0)
         phi_obs, q_obs = ellipticity2phi_q(e1_obs, e2_obs)
         if q_obs == 1.0:
-            raise ValueError("Cannot determine inclination angle for circular observed profile."
-                             " Provide q_intrinsic=1.0 or set symmetry='spherical' for spherical case.")
+            warnings.warn("Cannot determine inclination angle for circular observed profile (q_obs=1.0)."
+                          " Spherical symmetry will be assumed.")
+            return None
         cos_i_squared = (q_obs ** 2 - q_intrinsic ** 2) / (1 - q_intrinsic ** 2)
         cos_i_squared = np.clip(cos_i_squared, 0, 1)
         inclination_angle = np.arccos(np.sqrt(cos_i_squared))

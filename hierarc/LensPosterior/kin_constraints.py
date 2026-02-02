@@ -172,18 +172,28 @@ class KinConstraints(BaseLensConfig):
             kwargs_light = [{"Rs": r_eff_draw * 0.551, "amp": 1.0}]
         else:
             kwargs_light = copy.deepcopy(self._kwargs_lens_light)
-            for kwargs in kwargs_light:
-                if "Rs" in kwargs:
-                    kwargs["Rs"] *= delta_r_eff
-                if "R_sersic" in kwargs:
-                    kwargs["R_sersic"] *= delta_r_eff
+            if self.multi_observations:
+                kwargs_light_0 = self._kwargs_lens_light[0][0]
+                for kwargs_obs in kwargs_light:
+                    for kwargs in kwargs_obs:
+                        if "Rs" in kwargs:
+                            kwargs["Rs"] *= delta_r_eff
+                        if "R_sersic" in kwargs:
+                            kwargs["R_sersic"] *= delta_r_eff
+            else:
+                kwargs_light_0 = self._kwargs_lens_light[0]
+                for kwargs in kwargs_light:
+                    if "Rs" in kwargs:
+                        kwargs["Rs"] *= delta_r_eff
+                    if "R_sersic" in kwargs:
+                        kwargs["R_sersic"] *= delta_r_eff
             # TODO: for now assumes that mass and light share the same geometry
             if self.axial_symmetry in ['axi_sph', 'axi_cyl']:
                 kwargs_lens_geometry = {
-                    'center_x': self._kwargs_lens_light[0].get('center_x', 0.0),
-                    'center_y': self._kwargs_lens_light[0].get('center_y', 0.0),
-                    'e1': self._kwargs_lens_light[0].get('e1', 0.0),
-                    'e2': self._kwargs_lens_light[0].get('e2', 0.0),
+                    'center_x': kwargs_light_0.get('center_x', 0.0),
+                    'center_y': kwargs_light_0.get('center_y', 0.0),
+                    'e1': kwargs_light_0.get('e1', 0.0),
+                    'e2': kwargs_light_0.get('e2', 0.0),
                 }
         kwargs_lens = [
             {"theta_E": theta_E_draw, "gamma": gamma_draw} | kwargs_lens_geometry
