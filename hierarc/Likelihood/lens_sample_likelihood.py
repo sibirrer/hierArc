@@ -51,6 +51,7 @@ class LensSampleLikelihood(object):
         cosmo,
         kwargs_lens=None,
         kwargs_kin=None,
+        kwargs_deprojection=None,
         kwargs_source=None,
         kwargs_los=None,
         verbose=False,
@@ -60,6 +61,8 @@ class LensSampleLikelihood(object):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model
+        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection distribution:
+            deprojection_param and deprojection_param_sigma for q_intrinsic/inclination
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: line of sight keyword argument list
         :param verbose: If true, prints intermediate outputs of likelihood calculation
@@ -72,6 +75,7 @@ class LensSampleLikelihood(object):
                 cosmo=cosmo,
                 kwargs_lens=kwargs_lens,
                 kwargs_kin=kwargs_kin,
+                kwargs_deprojection=kwargs_deprojection,
                 kwargs_source=kwargs_source,
                 kwargs_los=kwargs_los,
                 verbose=verbose,

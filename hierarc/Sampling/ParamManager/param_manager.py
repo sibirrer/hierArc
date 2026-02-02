@@ -224,37 +224,37 @@ class ParamManager(object):
         kwargs_cosmo, i = self._cosmo_param.args2kwargs(args, i=i)
         kwargs_lens, i = self._lens_param.args2kwargs(args, i=i)
         kwargs_kin, i = self._kin_param.args2kwargs(args, i=i)
+        kwargs_deprojection, i = self._deprojection_param.args2kwargs(args, i=i)
         kwargs_source, i = self._source_param.args2kwargs(args, i=i)
         kwargs_los, i = self._los_param.args2kwargs(args, i=i)
-        kwargs_deprojection, i = self._deprojection_param.args2kwargs(args, i=i)
-        return kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
+        return kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
 
     def kwargs2args(
         self,
         kwargs_cosmo=None,
         kwargs_lens=None,
         kwargs_kin=None,
+        kwargs_deprojection=None,
         kwargs_source=None,
         kwargs_los=None,
-        kwargs_deprojection=None,
     ):
         """
 
         :param kwargs_cosmo: keyword argument list of parameters for cosmology sampling
         :param kwargs_lens: keyword argument list of parameters for lens model sampling
         :param kwargs_kin: keyword argument list of parameters for kinematic sampling
+        :param kwargs_deprojection: keyword arguments of parameters of deprojection
         :param kwargs_source: keyword arguments of parameters of source brightness
         :param kwargs_los: keyword arguments of parameters of the line of sight
-        :param kwargs_deprojection: keyword arguments of parameters of deprojection
         :return: sampling argument list in specified order
         """
         args = []
         args += self._cosmo_param.kwargs2args(kwargs_cosmo)
         args += self._lens_param.kwargs2args(kwargs_lens)
         args += self._kin_param.kwargs2args(kwargs_kin)
+        args += self._deprojection_param.kwargs2args(kwargs_deprojection)
         args += self._source_param.kwargs2args(kwargs_source)
         args += self._los_param.kwargs2args(kwargs_los)
-        args += self._deprojection_param.kwargs2args(kwargs_source)
         return args
 
     def cosmo(self, kwargs_cosmo):
@@ -276,16 +276,16 @@ class ParamManager(object):
             kwargs_cosmo=self._kwargs_lower_cosmo,
             kwargs_lens=self._kwargs_lower_lens,
             kwargs_kin=self._kwargs_lower_kin,
+            kwargs_deprojection=self._kwargs_lower_deprojection,
             kwargs_source=self._kwargs_lower_source,
             kwargs_los=self._kwargs_lower_los,
-            kwargs_deprojection=self._kwargs_lower_deprojection,
         )
         upper_limit = self.kwargs2args(
             kwargs_cosmo=self._kwargs_upper_cosmo,
             kwargs_lens=self._kwargs_upper_lens,
             kwargs_kin=self._kwargs_upper_kin,
+            kwargs_deprojection=self._kwargs_upper_deprojection,
             kwargs_source=self._kwargs_upper_source,
             kwargs_los=self._kwargs_upper_los,
-            kwargs_deprojection=self._kwargs_upper_deprojection,
         )
         return lower_limit, upper_limit

@@ -284,7 +284,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             beta_dsp=beta_dsp,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
-            kwargs_axisymmetry=kwargs_deprojection,
+            kwargs_deprojection=kwargs_deprojection,
             kwargs_source=kwargs_source,
             kwargs_los=kwargs_los,
             cosmo=cosmo,
@@ -301,7 +301,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         beta_dsp=None,
         kwargs_lens=None,
         kwargs_kin=None,
-        kwargs_axisymmetry=None,
+        kwargs_deprojection=None,
         kwargs_source=None,
         kwargs_los=None,
         cosmo=None,
@@ -316,7 +316,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_axisymmetry: keyword arguments of axisymmetric deprojection distribution:
+        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection distribution:
             mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
@@ -327,7 +327,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         """
         kwargs_lens = self._kwargs_init(kwargs_lens)
         kwargs_kin = self._kwargs_init(kwargs_kin)
-        kwargs_axisymmetry = self._kwargs_init(kwargs_axisymmetry)
+        kwargs_deprojection = self._kwargs_init(kwargs_deprojection)
         kwargs_source = self._kwargs_init(kwargs_source)
         kwargs_kin_copy = copy.deepcopy(kwargs_kin)
         sigma_v_sys_error = kwargs_kin_copy.pop("sigma_v_sys_error", None)
@@ -342,7 +342,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                 beta_dsp=beta_dsp,
                 kwargs_lens=kwargs_lens,
                 kwargs_kin=kwargs_kin_copy,
-                kwargs_axisymmetry=kwargs_axisymmetry,
+                kwargs_deprojection=kwargs_deprojection,
                 kwargs_source=kwargs_source,
                 kwargs_los=kwargs_los,
                 sigma_v_sys_error=sigma_v_sys_error,
@@ -357,7 +357,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                     beta_dsp=beta_dsp,
                     kwargs_lens=kwargs_lens,
                     kwargs_kin=kwargs_kin_copy,
-                    kwargs_axisymmetry=kwargs_axisymmetry,
+                    kwargs_deprojection=kwargs_deprojection,
                     kwargs_source=kwargs_source,
                     kwargs_los=kwargs_los,
                     sigma_v_sys_error=sigma_v_sys_error,
@@ -377,7 +377,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         beta_dsp,
         kwargs_lens,
         kwargs_kin,
-        kwargs_axisymmetry,
+        kwargs_deprojection,
         kwargs_source,
         kwargs_los=None,
         sigma_v_sys_error=None,
@@ -392,7 +392,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_axisymmetry: keyword arguments of axisymmetric deprojection distribution:
+        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection distribution:
             mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword arguments of source brightness
         :param kwargs_los: line of sight list of dictionaries
@@ -424,11 +424,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
 
         kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
 
-        kwargs_axisymmetry_draw = self._deprojection_distribution.draw_deprojection(
-            **kwargs_axisymmetry
+        kwargs_deprojection_draw = self._deprojection_distribution.draw_deprojection(
+            **kwargs_deprojection
         )
 
-        kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw, **kwargs_axisymmetry_draw}
+        kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw, **kwargs_deprojection_draw}
         kin_scaling = self.kin_scaling(kwargs_param)
         if self._axisymmetric_correction_sampling is True:
             inclination_scaling = self._axisymmetric_correction_sampling_class.draw_one

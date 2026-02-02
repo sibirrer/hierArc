@@ -145,7 +145,7 @@ class CosmoLikelihood(object):
                     )
                 return -np.inf
 
-        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los = (
+        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los = (
             self.param.args2kwargs(args)
         )
         if self._cosmology == "oLCDM":
@@ -173,6 +173,7 @@ class CosmoLikelihood(object):
             cosmo=cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
+            kwargs_deprojection=kwargs_deprojection,
             kwargs_source=kwargs_source,
             kwargs_los=kwargs_los,
             verbose=verbose,
