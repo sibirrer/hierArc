@@ -122,6 +122,36 @@ class TestJAMWrapperSpherical(object):
             analytic_kinematics=False,
         )
 
+        kwargs_psf_multi_gaussian = {
+            "psf_type": "MULTI-GAUSSIAN",
+            "fwhm": 0.5,
+            "sigmas": np.arange(1, 6),
+            "amplitudes": np.arange(1, 6) / np.sum(np.arange(1, 6)),
+            }
+        self.jam_spherical_grid_multi_gaussian = JAMWrapper(
+            kwargs_model=kwargs_model | {"symmetry": "spherical"},
+            kwargs_aperture=kwargs_aperture_grid,
+            kwargs_psf=kwargs_psf_multi_gaussian,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numeric_jam,
+        )
+
+        pix_kernel = np.zeros((11, 11))
+        pix_kernel[5, 5] = 1
+        kwargs_psf_pixel = {
+            "psf_type": "PIXEL",
+            "fwhm": 0.5,
+            "kernel": pix_kernel,
+            "supersampling_factor": 2,
+        }
+        self.jam_spherical_grid_pixel = JAMWrapper(
+            kwargs_model=kwargs_model | {"symmetry": "spherical"},
+            kwargs_aperture=kwargs_aperture_grid,
+            kwargs_psf=kwargs_psf_pixel,
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numeric_jam,
+        )
+
     def test_spherical_dispersion_grid(self):
         sigma_v_jam = self.jam_spherical_grid.dispersion(
             self.kwargs_lens_mass,
@@ -169,6 +199,25 @@ class TestJAMWrapperSpherical(object):
 
     def test_spherical_voronoi(self):
         pass
+        # TODO: implement this test
+
+    def test_spherical_multi_gaussian_psf(self):
+        sigma_v_jam = self.jam_spherical_grid_multi_gaussian.dispersion(  # self.jam_spherical_shells.dispersion(
+            self.kwargs_lens_mass,
+            self.kwargs_light,
+            self.kwargs_anisotropy,
+            convolved=True,
+        )
+        # TODO: test against JamPy model
+
+    def test_spherical_pixel_psf(self):
+        sigma_v_jam = self.jam_spherical_grid_pixel.dispersion(  # self.jam_spherical_shells.dispersion(
+            self.kwargs_lens_mass,
+            self.kwargs_light,
+            self.kwargs_anisotropy,
+            convolved=True,
+        )
+        # TODO: test against JamPy model
 
 
 class TestJAMWrapperAxiSph(object):

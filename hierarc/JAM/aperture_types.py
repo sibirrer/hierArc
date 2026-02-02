@@ -223,7 +223,7 @@ class IFUGrid(GeneralAperture):
     """Class for an Integral Field Unit spectrograph with rectangular grid where the
     kinematics are measured."""
 
-    def __init__(self, x_grid, y_grid, supersampling_factor=1):
+    def __init__(self, x_grid, y_grid, supersampling_factor=1, padding=0):
         """
 
         :param x_grid: x coordinates of the grid
@@ -231,24 +231,35 @@ class IFUGrid(GeneralAperture):
         """
         self._x_grid = x_grid
         self._y_grid = y_grid
+        self._supersampling_factor = supersampling_factor
+        self._padding = padding
         delta_x, delta_y = self.delta_pix_xy
         if np.abs(delta_x) != np.abs(delta_y):
             raise ValueError("IFU grid pixels must be square!")
 
-        x_grid_supersampled, y_grid_supersampled = self.make_supersampled_grid(supersampling_factor)
+        x_grid_supersampled, y_grid_supersampled = self.make_supersampled_grid(supersampling_factor, padding)
         super().__init__(x_grid_supersampled, y_grid_supersampled, delta_pix=delta_x / supersampling_factor)
 
-    def make_supersampled_grid(self, supersampling_factor):
+    def make_supersampled_grid(self, supersampling_factor, padding):
+        """Creates a new grid, supersampled and with padding for PSF convolution"""
+
         delta_x, delta_y = self.delta_pix_xy
         x_grid = self._x_grid
         y_grid = self._y_grid
 
+        # New (supersampled) pixel size
         new_delta_x = delta_x / supersampling_factor
         new_delta_y = delta_y / supersampling_factor
-        x_start = x_grid[0, 0] - delta_x / 2.0 * (1 - 1 / supersampling_factor)
-        x_end = x_grid[0, -1] + delta_x / 2.0 * (1 - 1 / supersampling_factor)
-        y_start = y_grid[0, 0] - delta_y / 2.0 * (1 - 1 / supersampling_factor)
-        y_end = y_grid[-1, 0] + delta_y / 2.0 * (1 - 1 / supersampling_factor)
+
+        # padding
+        pad_x = padding * delta_x
+        pad_y = padding * delta_y
+
+        # grid bounds (pixel-centered)
+        x_start = x_grid[0, 0] - 0.5 * delta_x * (1 - 1 / supersampling_factor) - pad_x
+        x_end = x_grid[0, -1] + 0.5 * delta_x * (1 - 1 / supersampling_factor) + pad_x
+        y_start = y_grid[0, 0] - 0.5 * delta_y * (1 - 1 / supersampling_factor) - pad_y
+        y_end = y_grid[-1, 0] + 0.5 * delta_y * (1 - 1 / supersampling_factor) + pad_y
 
         xs = np.arange(x_start, x_end * (1 + 1e-6), new_delta_x)
         ys = np.arange(y_start, y_end * (1 + 1e-6), new_delta_y)
@@ -256,17 +267,16 @@ class IFUGrid(GeneralAperture):
         x_grid_supersampled, y_grid_supersampled = np.meshgrid(xs, ys)
         return x_grid_supersampled, y_grid_supersampled
 
-
-    def aperture_downsample(self, high_res_map, supersampling_factor=1):
+    def aperture_downsample(self, high_res_map):
         """Downsample a high-resolution map to the IFU grid by averaging over the
         supersampling factor.
         :param high_res_map: 2D array of high-resolution map to be downsampled
-        :param supersampling_factor: factor by which the high-res map is supersampled
         :return: 2D array of downsampled map
         """
         num_pix_y, num_pix_x = self.grid_shape
-        return high_res_map.reshape(num_pix_y, supersampling_factor,
-                                    num_pix_x, supersampling_factor).mean(axis=(1, 3))
+        high_res_map = _unpad_map(high_res_map, self._padding)
+        return high_res_map.reshape(num_pix_y, self._supersampling_factor,
+                                    num_pix_x, self._supersampling_factor).mean(axis=(1, 3))
 
     @property
     def num_segments(self):
@@ -382,7 +392,15 @@ def _sample_circle_uniform(r_shell, step):
     return r_shell * np.cos(angle), r_shell * np.sin(angle)
 
 
-def downsample_cords_to_bins(vrms_grid, bins, supersampling_factor=1):
+def _unpad_map(padded_map, padding):
+    if padding > 0:
+        return padded_map[padding:-padding, padding:-padding]
+    else:
+        return padded_map
+
+def downsample_cords_to_bins(vrms_grid, bins, supersampling_factor=1, padding=0):
+    # remove padding from the grid
+    vrms_grid = _unpad_map(vrms_grid, padding)
     n_bins = int(np.max(bins)) + 1
     supersampled_bins = bins.repeat(
         supersampling_factor, axis=0

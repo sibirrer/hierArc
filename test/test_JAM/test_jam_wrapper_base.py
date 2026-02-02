@@ -2,7 +2,7 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from hierarc.JAM.jam_wrapper import JAMWrapper
+from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 from astropy.cosmology import FlatLambdaCDM
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from lenstronomy.GalKin.galkin import Galkin
@@ -50,10 +50,8 @@ class TestJAMWrapperBase(object):
             "anisotropy_model": "const",
         }
 
-        self.jam_spherical = JAMWrapper(
+        self.jam_spherical = JAMWrapperBase(
             kwargs_model=kwargs_model | {"symmetry": "spherical"},
-            kwargs_aperture=kwargs_aperture,
-            kwargs_psf=kwargs_psf,
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numeric_jam,
         )
@@ -175,10 +173,8 @@ class TestJAMWrapperBaseOM(object):
             "anisotropy_model": "OM",
         }
 
-        self.jam_spherical = JAMWrapper(
+        self.jam_spherical = JAMWrapperBase(
             kwargs_model=kwargs_model | {"symmetry": "spherical"},
-            kwargs_aperture=kwargs_aperture,
-            kwargs_psf=kwargs_psf,
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numeric_jam,
         )
@@ -249,10 +245,8 @@ class TestJAMWrapperBaseAnalytical(object):
             "anisotropy_model": "isotropic",
         }
 
-        self.jam_spherical = JAMWrapper(
+        self.jam_spherical = JAMWrapperBase(
             kwargs_model=kwargs_model | {"symmetry": "spherical"},
-            kwargs_aperture=kwargs_aperture,
-            kwargs_psf=kwargs_psf,
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numerics_mge,
         )
@@ -341,10 +335,8 @@ class TestJAMWrapperBaseAxiSph(object):
             "anisotropy_model": "const",
         }
 
-        self.jam_spherical = JAMWrapper(
+        self.jam_spherical = JAMWrapperBase(
             kwargs_model=kwargs_model | {"symmetry": "axi_sph"},
-            kwargs_aperture=kwargs_aperture,
-            kwargs_psf=kwargs_psf,
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numeric_jam,
         )
@@ -448,10 +440,8 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
             "anisotropy_model": "const",
         }
 
-        self.jam_spherical = JAMWrapper(
+        self.jam_spherical = JAMWrapperBase(
             kwargs_model=kwargs_model | {"symmetry": "axi_cyl"},
-            kwargs_aperture=kwargs_aperture,
-            kwargs_psf=kwargs_psf,
             kwargs_cosmo=kwargs_cosmo,
             kwargs_numerics=kwargs_numeric_jam,
         )

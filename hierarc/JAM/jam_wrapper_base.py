@@ -1,10 +1,8 @@
 __author__ = "furcelay", "sibirrer"
 
-from astropy.stats import gaussian_fwhm_to_sigma
-from lenstronomy.GalKin.psf import PSF
 from lenstronomy.GalKin.cosmo import Cosmo
 from lenstronomy.Util.param_util import ellipticity2phi_q
-from hierarc.JAM.aperture import Aperture
+
 from hierarc.JAM.mass_profile import MassProfile
 from hierarc.JAM.light_profile import LightProfile
 from hierarc.JAM.jam_anisotropy import JAMAnisotropy
@@ -16,13 +14,11 @@ import numpy as np
 __all__ = ["JAMWrapperBase"]
 
 
-class JAMWrapperBase(PSF, Aperture):
+class JAMWrapperBase(object):
     """
     Wrapper class to use jampy JAM functionality similar to lenstronomy's Galkin class.
 
     :param kwargs_model: keyword arguments describing the model components
-    :param kwargs_aperture: keyword arguments describing the spectroscopic aperture, see Aperture() class
-    :param kwargs_psf: keyword argument specifying the PSF of the observation
     :param kwargs_cosmo: keyword arguments that define the cosmology in terms of the angular diameter distances
      involved
     :param kwargs_numerics: numerics keyword arguments
@@ -30,8 +26,6 @@ class JAMWrapperBase(PSF, Aperture):
     def __init__(
         self,
         kwargs_model,
-        kwargs_aperture,
-        kwargs_psf,
         kwargs_cosmo,
         kwargs_numerics=None,
     ):
@@ -59,13 +53,7 @@ class JAMWrapperBase(PSF, Aperture):
             msg = (f"Invalid symmetry type '{self.symmetry}' for JAMWrapper, "
                    f"options are 'spherical', 'axi_sph' or 'axi_cyl'.")
             raise ValueError(msg)
-        self.psf_fwhm = kwargs_psf["fwhm"]
-        if ("delta_pix" not in kwargs_aperture) and ("IFU" not in kwargs_aperture["aperture_type"]):
-            # set the sampling of the aperture to FWHM/4
-            kwargs_aperture = kwargs_aperture.copy()
-            kwargs_aperture["delta_pix"] = min(self.psf_fwhm / 4, 0.1)
-        Aperture.__init__(self, **kwargs_aperture)
-        PSF.__init__(self, **kwargs_psf)
+
         self.cosmo = Cosmo(**kwargs_cosmo)
 
         if kwargs_numerics is None:
@@ -109,6 +97,9 @@ class JAMWrapperBase(PSF, Aperture):
         kwargs_anisotropy,
         inclination=90.0,
         convolved=False,
+        psf_sigmas=0,
+        psf_amplitudes=1,
+        delta_pix=0,
         jam_kwargs=None,
         ):
         """Computes the LOS velocity dispersion at given points (not convolved).
@@ -122,6 +113,9 @@ class JAMWrapperBase(PSF, Aperture):
             anisotropy type chosen.
         :param inclination: inclination angle of the system [degrees]
         :param convolved: bool, if True the PSF convolution is applied
+        :param psf_sigmas: float or array with PSF gaussian sigmas [arcsec]
+        :param psf_amplitudes: 1 or array with PSF amplitudes
+        :param delta_pix: delta pix
         :param jam_kwargs: keyword arguments for JAM call
         :return: array of LOS velocity dispersion at each (x,y) position [km/s]
         """
@@ -136,11 +130,8 @@ class JAMWrapperBase(PSF, Aperture):
             beta = beta * np.ones_like(surf_lum)
         _, q_lum = ellipticity2phi_q(*self._extract_ellipticity(kwargs_light))
         _, q_mass = ellipticity2phi_q(*self._extract_ellipticity(kwargs_mass))
-        if convolved:
-            seeing_fwhm = self._psf.fwhm
-            delta_pix = self.delta_pix
-        else:
-            seeing_fwhm = 0.0
+        if not convolved:
+            psf_sigmas = 0.0
             delta_pix = 0.0
 
         vrms, surf_bright = self.call_jampy(
@@ -150,7 +141,8 @@ class JAMWrapperBase(PSF, Aperture):
             q_mass=q_mass * np.ones_like(surf_mass),
             inclination=inclination,
             beta=beta,
-            sigma_psf=seeing_fwhm * gaussian_fwhm_to_sigma,
+            sigma_psf=psf_sigmas,
+            norm_psf=psf_amplitudes,
             pix_size=delta_pix,
             jam_kwargs=jam_kwargs,
         )
@@ -225,6 +217,7 @@ class JAMWrapperBase(PSF, Aperture):
         inclination=90.0,
         beta=None,
         sigma_psf=0.0,
+        norm_psf=1.0,
         pix_size=0.0,
         jam_kwargs=None,
     ):
@@ -245,14 +238,14 @@ class JAMWrapperBase(PSF, Aperture):
             r = np.sqrt(x ** 2 + y ** 2)
             vrms, surf_bright = self.call_jampy_sph(
                 surf_lum, sigma_lum, surf_mass, sigma_mass,
-                r, beta, sigma_psf, pix_size, jam_kwargs
+                r, beta, sigma_psf, norm_psf, pix_size, jam_kwargs
             )
         else:
             # axisymmetric modeling
             vrms, surf_bright = self.call_jampy_axi(
                 surf_lum, sigma_lum, surf_mass, sigma_mass,
                 x, y, q_lum, q_mass, inclination, beta,
-                sigma_psf, pix_size, jam_kwargs
+                sigma_psf, norm_psf, pix_size, jam_kwargs
             )
         vrms = vrms.reshape(x_shape)
         surf_bright = surf_bright.reshape(x_shape)
@@ -271,6 +264,7 @@ class JAMWrapperBase(PSF, Aperture):
         inclination=90.0,
         beta=None,
         sigma_psf=0.0,
+        norm_psf=1.0,
         pix_size=0.0,
         jam_kwargs=None,
     ):
@@ -291,6 +285,7 @@ class JAMWrapperBase(PSF, Aperture):
             beta=beta,
             logistic=self._anisotropy.use_logistic,
             sigmapsf=sigma_psf,
+            normpsf=norm_psf,
             pixsize=pix_size,
             quiet=True,
             plot=False,
@@ -309,6 +304,7 @@ class JAMWrapperBase(PSF, Aperture):
         r,
         beta=None,
         sigma_psf=0.0,
+        norm_psf=1.0,
         pix_size=0.0,
         jam_kwargs=None,
     ):
@@ -324,6 +320,7 @@ class JAMWrapperBase(PSF, Aperture):
                 beta=beta,
                 logistic=self._anisotropy.use_logistic,
                 sigmapsf=sigma_psf,
+                normpsf=norm_psf,
                 pixsize=pix_size,
                 quiet=True,
                 plot=False,

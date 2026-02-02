@@ -5,12 +5,14 @@ import warnings
 from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 from hierarc.JAM.aperture import downsample_cords_to_bins
 from lenstronomy.Util.param_util import ellipticity2phi_q
+from hierarc.JAM.psf import PSF
+from hierarc.JAM.aperture import Aperture
 import numpy as np
 
 __all__ = ["JAMWrapper"]
 
 
-class JAMWrapper(JAMWrapperBase):
+class JAMWrapper(JAMWrapperBase, PSF, Aperture):
     """
     Wrapper class to use jampy JAM functionality similar to lenstronomy's Galkin class.
 
@@ -32,11 +34,23 @@ class JAMWrapper(JAMWrapperBase):
 
         super(JAMWrapper, self).__init__(
             kwargs_model,
-            kwargs_aperture,
-            kwargs_psf,
             kwargs_cosmo,
             kwargs_numerics
         )
+
+        PSF.__init__(self, **kwargs_psf)
+
+        if ("delta_pix" not in kwargs_aperture) and ("IFU" not in kwargs_aperture["aperture_type"]):
+            # set the sampling of the aperture to FWHM / 4
+            kwargs_aperture = kwargs_aperture.copy()
+            kwargs_aperture["delta_pix"] = min(self.psf_fwhm / 4, 0.1)
+
+        if kwargs_aperture["aperture_type"] == "IFU_GRID":
+            kwargs_aperture = kwargs_aperture.copy()
+            kwargs_aperture["supersampling_factor"] = self.psf_supersampling_factor
+            kwargs_aperture["padding"] = self.psf_padding
+
+        Aperture.__init__(self, **kwargs_aperture)
 
     def dispersion(
         self,
@@ -65,26 +79,43 @@ class JAMWrapper(JAMWrapperBase):
         # shift and rotate to align with light profile
         x_gal_sup, y_gal_sup = self._shift_and_rotate(x_sup, y_sup, kwargs_light)
         inclination = self._get_inclination_angle(kwargs_light[0], q_intrinsic)
-        vrms_sup, surf_bright_sup = self.dispersion_points(
-            x_gal_sup, y_gal_sup,
-            kwargs_mass,
-            kwargs_light,
-            kwargs_anisotropy,
-            inclination=inclination,
-            convolved=convolved,
-        )
+        if self.psf_type == "PIXEL":
+            vrms_sup_unconv, surf_bright_sup_unconv = self.dispersion_points(
+                x_gal_sup, y_gal_sup,
+                kwargs_mass,
+                kwargs_light,
+                kwargs_anisotropy,
+                inclination=inclination,
+                convolved=False,
+            )
+            vrms_sup = self.convolve(vrms_sup_unconv)
+            surf_bright_sup = self.convolve(surf_bright_sup_unconv)
+        else:
+            vrms_sup, surf_bright_sup = self.dispersion_points(
+                x_gal_sup, y_gal_sup,
+                kwargs_mass,
+                kwargs_light,
+                kwargs_anisotropy,
+                inclination=inclination,
+                convolved=convolved,
+                psf_sigmas=self.psf_sigmas,
+                psf_amplitudes=self.psf_amplitudes,
+                delta_pix=self.delta_pix,
+            )
         sigma2_lum_weighted_sup = vrms_sup**2 * surf_bright_sup
 
         if voronoi_bins is not None:
             sigma2_lum_weighted = downsample_cords_to_bins(
                 sigma2_lum_weighted_sup,
                 voronoi_bins,
-                supersampling_factor=1,
+                supersampling_factor=self.psf_supersampling_factor,
+                padding=self.psf_padding,
             )
             surf_bright = downsample_cords_to_bins(
                 surf_bright_sup,
                 voronoi_bins,
-                supersampling_factor=1,
+                supersampling_factor=self.psf_supersampling_factor,
+                padding=self.psf_padding,
             )
             vrms = np.sqrt(sigma2_lum_weighted / surf_bright)
         else:
