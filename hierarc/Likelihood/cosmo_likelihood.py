@@ -201,7 +201,7 @@ class CosmoLikelihood(object):
             log_l += self._bao_likelihood.log_likelihood(cosmo=cosmo, rd=rd)
         if self._prior_add is True:
             log_l += self._custom_prior(
-                kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
+                kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
             )
         return log_l
 
