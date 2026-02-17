@@ -3,12 +3,14 @@ from astropy.cosmology import FLRW, FlatFLRWMixin
 from scipy.special import exp1
 from astropy.cosmology.core import dataclass_decorator
 from astropy.cosmology.parameter import Parameter
+
 try:
     # AstroPy 7
     from astropy.cosmology._src.utils import aszarr
 except:
     # AstroPy 6
     from astropy.cosmology._utils import aszarr
+
 
 @dataclass_decorator
 class wPhiCDM(FlatFLRWMixin, FLRW):
