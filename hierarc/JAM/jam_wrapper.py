@@ -5,6 +5,7 @@ import warnings
 from hierarc.JAM.jam_wrapper_base import JAMWrapperBase
 from hierarc.JAM.aperture import downsample_cords_to_bins
 from lenstronomy.Util.param_util import ellipticity2phi_q
+from astropy.stats import gaussian_fwhm_to_sigma
 from hierarc.JAM.psf import PSF
 from hierarc.JAM.aperture import Aperture
 import numpy as np
@@ -41,16 +42,21 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
         PSF.__init__(self, **kwargs_psf)
 
         if ("delta_pix" not in kwargs_aperture) and ("IFU" not in kwargs_aperture["aperture_type"]):
-            # set the sampling of the aperture to FWHM / 4
+            # set the sampling of the aperture to FWHM / 3
             kwargs_aperture = kwargs_aperture.copy()
-            kwargs_aperture["delta_pix"] = min(self.psf_fwhm / 4, 0.1)
+            kwargs_aperture["delta_pix"] = min(self.psf_fwhm/ 3, 0.1)
 
-        if kwargs_aperture["aperture_type"] == "IFU_GRID":
+        if kwargs_aperture["aperture_type"] == "IFU_grid":
             kwargs_aperture = kwargs_aperture.copy()
             kwargs_aperture["supersampling_factor"] = self.psf_supersampling_factor
-            kwargs_aperture["padding"] = self.psf_padding
+            # add a padding of 3 times the PSF sigma for convolution
+            kwargs_aperture["padding_arcsec"] = gaussian_fwhm_to_sigma * self.psf_fwhm * 3
+            Aperture.__init__(self, **kwargs_aperture)
+            self.convolution_padding = self._aperture.padding
+        else:
+            Aperture.__init__(self, **kwargs_aperture)
+            self.convolution_padding = 0
 
-        Aperture.__init__(self, **kwargs_aperture)
 
     def dispersion(
         self,
@@ -58,6 +64,7 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
         kwargs_light,
         kwargs_anisotropy,
         q_intrinsic=1.0,
+        black_hole_mass=0.0,
         convolved=True,
         voronoi_bins=None,
     ):
@@ -70,6 +77,7 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
         :param kwargs_light: keyword argument of the light model
         :param kwargs_anisotropy: anisotropy keyword arguments
         :param q_intrinsic: intrinsic axis ratio of the light profile to compute the inclination angle
+        :param black_hole_mass: mass of the central SMBH [solar masses]
         :param convolved: bool, if True the PSF convolution is applied
         :param voronoi_bins: None or 2D array with same shape as the IFU grid defining the Voronoi
             bins. If None, no Voronoi binning is applied. Only relevant if aperture is of type 'IFU_grid'.
@@ -80,17 +88,19 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
         x_gal_sup, y_gal_sup = self._shift_and_rotate(x_sup, y_sup, kwargs_light)
         inclination = self._get_inclination_angle(kwargs_light[0], q_intrinsic)
         if self.psf_type == "PIXEL":
-            vrms_sup_unconv, surf_bright_sup_unconv = self.dispersion_points(
+            vrms_sup, surf_bright_sup = self.dispersion_points(
                 x_gal_sup, y_gal_sup,
                 kwargs_mass,
                 kwargs_light,
                 kwargs_anisotropy,
                 inclination=inclination,
+                black_hole_mass=black_hole_mass,
                 convolved=False,
             )
-            sigma2_lum_weighted_sup_unconv = vrms_sup_unconv ** 2 * surf_bright_sup_unconv
-            sigma2_lum_weighted_sup = self.convolve(sigma2_lum_weighted_sup_unconv)
-            surf_bright_sup = self.convolve(surf_bright_sup_unconv)
+            sigma2_lum_weighted_sup = vrms_sup ** 2 * surf_bright_sup
+            if convolved:
+                sigma2_lum_weighted_sup = self.convolve(sigma2_lum_weighted_sup)
+                surf_bright_sup = self.convolve(surf_bright_sup)
         else:
             vrms_sup, surf_bright_sup = self.dispersion_points(
                 x_gal_sup, y_gal_sup,
@@ -99,6 +109,7 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
                 kwargs_anisotropy,
                 inclination=inclination,
                 convolved=convolved,
+                black_hole_mass=black_hole_mass,
                 psf_sigmas=self.psf_sigmas,
                 psf_amplitudes=self.psf_amplitudes,
                 delta_pix=self.delta_pix,
@@ -106,17 +117,18 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
             sigma2_lum_weighted_sup = vrms_sup**2 * surf_bright_sup
 
         if voronoi_bins is not None:
+            # this would be deprecated and replaced by IFU_binned aperture
             sigma2_lum_weighted = downsample_cords_to_bins(
                 sigma2_lum_weighted_sup,
                 voronoi_bins,
                 supersampling_factor=self.psf_supersampling_factor,
-                padding=self.psf_padding,
+                padding=self.convolution_padding,
             )
             surf_bright = downsample_cords_to_bins(
                 surf_bright_sup,
                 voronoi_bins,
                 supersampling_factor=self.psf_supersampling_factor,
-                padding=self.psf_padding,
+                padding=self.convolution_padding,
             )
             vrms = np.sqrt(sigma2_lum_weighted / surf_bright)
         else:

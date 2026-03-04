@@ -100,6 +100,7 @@ class JAMWrapperBase(object):
         psf_sigmas=0,
         psf_amplitudes=1,
         delta_pix=0,
+        black_hole_mass=0,
         jam_kwargs=None,
         ):
         """Computes the LOS velocity dispersion at given points (not convolved).
@@ -116,6 +117,7 @@ class JAMWrapperBase(object):
         :param psf_sigmas: float or array with PSF gaussian sigmas [arcsec]
         :param psf_amplitudes: 1 or array with PSF amplitudes
         :param delta_pix: delta pix
+        :param black_hole_mass: mass of the central SMBH [solar masses]
         :param jam_kwargs: keyword arguments for JAM call
         :return: array of LOS velocity dispersion at each (x,y) position [km/s]
         """
@@ -144,6 +146,7 @@ class JAMWrapperBase(object):
             sigma_psf=psf_sigmas,
             norm_psf=psf_amplitudes,
             pix_size=delta_pix,
+            black_hole_mass=black_hole_mass,
             jam_kwargs=jam_kwargs,
         )
         return vrms, surf_bright
@@ -219,6 +222,7 @@ class JAMWrapperBase(object):
         sigma_psf=0.0,
         norm_psf=1.0,
         pix_size=0.0,
+        black_hole_mass=0.0,
         jam_kwargs=None,
     ):
         x = np.asarray(x)
@@ -230,22 +234,22 @@ class JAMWrapperBase(object):
         y = y.flatten()
         if jam_kwargs is None:
             jam_kwargs = {}
-        if "mbh" not in jam_kwargs:
-            jam_kwargs["mbh"] = 0.0
         if (not self.axisymmetric) or (inclination is None):
             # spherical modeling
             # TODO: evaluate at fixed radius and then interpolate for speed
             r = np.sqrt(x ** 2 + y ** 2)
             vrms, surf_bright = self.call_jampy_sph(
                 surf_lum, sigma_lum, surf_mass, sigma_mass,
-                r, beta, sigma_psf, norm_psf, pix_size, jam_kwargs
+                r, beta, sigma_psf, norm_psf, pix_size,
+                black_hole_mass, jam_kwargs
             )
         else:
             # axisymmetric modeling
             vrms, surf_bright = self.call_jampy_axi(
                 surf_lum, sigma_lum, surf_mass, sigma_mass,
                 x, y, q_lum, q_mass, inclination, beta,
-                sigma_psf, norm_psf, pix_size, jam_kwargs
+                sigma_psf, norm_psf, pix_size,
+                black_hole_mass, jam_kwargs
             )
         vrms = vrms.reshape(x_shape)
         surf_bright = surf_bright.reshape(x_shape)
@@ -266,6 +270,7 @@ class JAMWrapperBase(object):
         sigma_psf=0.0,
         norm_psf=1.0,
         pix_size=0.0,
+        black_hole_mass=0.0,
         jam_kwargs=None,
     ):
         if jam_kwargs is None:
@@ -284,6 +289,7 @@ class JAMWrapperBase(object):
             distance=self.cosmo.dd,
             beta=beta,
             logistic=self._anisotropy.use_logistic,
+            mbh=black_hole_mass,
             sigmapsf=sigma_psf,
             normpsf=norm_psf,
             pixsize=pix_size,
@@ -306,6 +312,7 @@ class JAMWrapperBase(object):
         sigma_psf=0.0,
         norm_psf=1.0,
         pix_size=0.0,
+        black_hole_mass=0.0,
         jam_kwargs=None,
     ):
         if jam_kwargs is None:
@@ -319,6 +326,7 @@ class JAMWrapperBase(object):
                 distance=self.cosmo.dd,
                 beta=beta,
                 logistic=self._anisotropy.use_logistic,
+                mbh=black_hole_mass,
                 sigmapsf=sigma_psf,
                 normpsf=norm_psf,
                 pixsize=pix_size,
