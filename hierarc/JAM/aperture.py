@@ -1,6 +1,7 @@
 __author__ = "sibirrer,furcelay"
 
-from hierarc.JAM.aperture_types import GeneralAperture, Shell, Slit, IFUShells, Frame, IFUGrid, downsample_cords_to_bins
+from hierarc.JAM.aperture_types import GeneralAperture, Shell, Slit, IFUShells, Frame, IFUGrid, IFUBinned, \
+    downsample_cords_to_bins
 
 __all__ = ["Aperture", "downsample_cords_to_bins"]
 """Class that defines the aperture of the measurement (e.g. slit, integral field
@@ -13,8 +14,9 @@ Available aperture types:
 'slit': length, width, center_ra, center_dec, angle, delta_pix
 'shell': r_in, r_out, center_ra, center_dec, delta_pix
 'frame': width_outer, width_inner, center_ra, center_dec, angle, delta_pix
-'IFU_grid': x_grid, y_grid
-'IFU_shells': r_bins, center_ra, center_dec, (ifu_grid_x, ifu_grid_y), delta_pix
+'IFU_grid': x_grid, y_grid, supersampling_factor, padding_arcsec
+'IFU_shells': r_bins, center_ra, center_dec, ifu_grid_kwargs, delta_pix
+'IFU_binned': x_grid, y_grid, bins, supersampling_factor, padding_arcsec
 """
 
 
@@ -40,9 +42,12 @@ class Aperture(object):
             self._aperture = Frame(**kwargs_aperture)
         elif aperture_type == "IFU_grid":
             self._aperture = IFUGrid(**kwargs_aperture)
+        elif aperture_type == "IFU_binned":
+            self._aperture = IFUBinned(**kwargs_aperture)
         else:
             raise ValueError(
-                "aperture type %s not implemented! Available are 'general' 'slit', 'shell', 'IFU_grid', 'IFU_shells'. "
+                "aperture type %s not implemented! Available are "
+                "'general' 'slit', 'shell', 'IFU_grid', 'IFU_shells' 'IFU_binned'. "
                 % aperture_type
             )
         self.aperture_type = aperture_type

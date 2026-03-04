@@ -223,22 +223,26 @@ class IFUGrid(GeneralAperture):
     """Class for an Integral Field Unit spectrograph with rectangular grid where the
     kinematics are measured."""
 
-    def __init__(self, x_grid, y_grid, supersampling_factor=1, padding=0):
+    def __init__(self, x_grid, y_grid, supersampling_factor=1, padding_arcsec=0):
         """
 
         :param x_grid: x coordinates of the grid
         :param y_grid: y coordinates of the grid
+        :param supersampling_factor: supersampling factor
+        :param padding_arcsec: padding around the grid in arcsec
         """
         self._x_grid = x_grid
         self._y_grid = y_grid
         self._supersampling_factor = supersampling_factor
-        self._padding = padding
         delta_x, delta_y = self.delta_pix_xy
         if np.abs(delta_x) != np.abs(delta_y):
             raise ValueError("IFU grid pixels must be square!")
+        delta_pix_sup = np.abs(delta_x) / supersampling_factor
+        # padding in pixels
+        self._padding = int(padding_arcsec / delta_pix_sup)
 
-        x_grid_supersampled, y_grid_supersampled = self.make_supersampled_grid(supersampling_factor, padding)
-        super().__init__(x_grid_supersampled, y_grid_supersampled, delta_pix=delta_x / supersampling_factor)
+        x_grid_supersampled, y_grid_supersampled = self.make_supersampled_grid(supersampling_factor, self._padding)
+        super().__init__(x_grid_supersampled, y_grid_supersampled, delta_pix=delta_pix_sup)
 
     def make_supersampled_grid(self, supersampling_factor, padding):
         """Creates a new grid, supersampled and with padding for PSF convolution"""
@@ -251,9 +255,9 @@ class IFUGrid(GeneralAperture):
         new_delta_x = delta_x / supersampling_factor
         new_delta_y = delta_y / supersampling_factor
 
-        # padding
-        pad_x = padding * delta_x
-        pad_y = padding * delta_y
+        # the padding is in supersampled pixels
+        pad_x = padding * new_delta_x
+        pad_y = padding * new_delta_y
 
         # grid bounds (pixel-centered)
         x_start = x_grid[0, 0] - 0.5 * delta_x * (1 - 1 / supersampling_factor) - pad_x
@@ -302,6 +306,16 @@ class IFUGrid(GeneralAperture):
         return self._y_grid
 
     @property
+    def supersampling_factor(self):
+        """Supersampling factor of the IFU grid."""
+        return self._supersampling_factor
+
+    @property
+    def padding(self):
+        """Padding around the grid for convolution."""
+        return self._padding
+
+    @property
     def delta_pix_xy(self):
         """Get the pixel scale of the grid.
         """
@@ -310,7 +324,7 @@ class IFUGrid(GeneralAperture):
         return delta_x, delta_y
 
 
-class IFUShells(GeneralAperture):
+class IFUShells(IFUGrid):
     """Class for an Integral Field Unit spectrograph with azimuthal shells where the
     kinematics are measured."""
 
@@ -341,19 +355,14 @@ class IFUShells(GeneralAperture):
             ifu_grid_kwargs = {
                 'x_grid': ifu_x_grid,
                 'y_grid': ifu_y_grid,
-                'supersampling_factor': 1
+                'supersampling_factor': 1,
+                'padding_arcsec': 0,
             }
-        self._ifu_grid = IFUGrid(**ifu_grid_kwargs)
-
-        super().__init__(self._ifu_grid.x_grid, self._ifu_grid.y_grid, delta_pix=self._ifu_grid.delta_pix)
-
-    def aperture_sample(self):
-        x_grid, y_grid = self._ifu_grid.aperture_sample()
-        return x_grid, y_grid
+        super().__init__(**ifu_grid_kwargs)
 
     def aperture_downsample(self, high_res_map):
         downsampled_map = np.zeros(self.num_segments)
-        x_grid, y_grid = self._ifu_grid.aperture_sample()
+        x_grid, y_grid = self.aperture_sample()
         x_grid -= self._center_ra
         y_grid -= self._center_dec
         r_grid = np.sqrt(x_grid ** 2 + y_grid ** 2)
@@ -370,11 +379,43 @@ class IFUShells(GeneralAperture):
         :return: int."""
         return len(self._r_bins) - 1
 
-    @property
-    def delta_pix_xy(self):
-        """Get the pixel scale of the IFU grid.
+
+class IFUBinned(IFUGrid):
+    """Class for an Integral Field Unit spectrograph, with a binned (e.g. Voronoi)
+    rectangular grid.
+
+    It has the same grid definition as IFUGrid, and a matrix of bin ids, indicating to
+    which bin each pixel belongs.
+    """
+
+    def __init__(self, x_grid, y_grid, bins):
         """
-        return self._ifu_grid.delta_pix_xy
+        :param x_grid: float array of shape (n_y, n_x) with the x coordinates of the grid
+        :param y_grid: float array of shape (n_y, n_x) with the y coordinates of the grid
+        :param bins: int array of shape (n_y, n_x) with the bin ids (0, 1, ...), and -1 for excluded pixels.
+        """
+        super(IFUBinned, self).__init__(x_grid, y_grid)
+        self._bins = bins.astype(int)
+
+    def aperture_downsample(self, high_res_map):
+        downsampled_map = downsample_cords_to_bins(
+            high_res_map, self._bins, self.supersampling_factor, self.padding
+        )
+        return downsampled_map
+
+    @property
+    def num_segments(self):
+        """Number of segments with separate measurements of the velocity dispersion.
+        This is the number of unique bin ids.
+
+        :return: int.
+        """
+        unique_bins = np.unique(self._bins[self.bins > -1])
+        return len(unique_bins)
+
+    @property
+    def bins(self):
+        return self._bins
 
 
 def _rotate(x, y, angle):
