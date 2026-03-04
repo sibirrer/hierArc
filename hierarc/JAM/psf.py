@@ -13,7 +13,8 @@ class PSF(object):
     def __init__(self, psf_type, **kwargs_psf):
         """
 
-        :param psf_type: string, point spread function type, current support for 'GAUSSIAN' and 'MOFFAT'
+        :param psf_type: string, point spread function type, current support for 'GAUSSIAN', 'MOFFAT', 'MULTI-GAUSSIAN',
+            and 'PIXEL'
         :param kwargs_psf: keyword argument describing the relevant parameters of the PSF.
         """
         self.psf_type = psf_type
@@ -46,11 +47,6 @@ class PSF(object):
     @property
     def psf_amplitudes(self):
         return self._psf.amplitudes
-
-    @property
-    def psf_padding(self):
-        """Retrieve padding for convolution stored as a private variable."""
-        return self._psf.padding
 
     @property
     def psf_supersampling_factor(self):
@@ -92,11 +88,6 @@ class PSFGaussian(object):
     def amplitudes(self):
         """Retrieve amplitude of PSF if stored as a private variable."""
         return 1.0
-
-    @property
-    def padding(self):
-        """Retrieve padding for convolution stored as a private variable."""
-        return 0
 
     @property
     def supersampling_factor(self):
@@ -147,11 +138,6 @@ class PSFMultiGaussian(object):
         return self._amplitudes
 
     @property
-    def padding(self):
-        """Retrieve padding for convolution stored as a private variable."""
-        return 0
-
-    @property
     def supersampling_factor(self):
         """Retrieve supersampling factor if stored as a private variable."""
         return 1
@@ -182,11 +168,6 @@ class PSFPixel(object):
     def amplitudes(self):
         """Retrieve amplitudes of PSF if stored as a private variable."""
         return None
-
-    @property
-    def padding(self):
-        """Retrieve size of kernel if stored as a private variable."""
-        return self._kernel_size // 2
 
     @property
     def supersampling_factor(self):

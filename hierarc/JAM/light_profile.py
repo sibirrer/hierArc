@@ -13,6 +13,8 @@ class LightProfile:
         self,
         profile_list
     ):
+        # we only need the radial profile, so no ellipticity is considered
+        profile_list = [p.replace('_ELLIPSE', '') for p in profile_list]
         self.profile_list = profile_list
         self.light_model = LightModel(profile_list)
 
@@ -26,13 +28,13 @@ class LightProfile:
 
     def effective_radius(self, kwargs_list):
         if len(self.profile_list) == 1:
-            if self.profile_list[0] in ['SERSIC', 'SERSIC_ELLIPSE']:
+            if self.profile_list[0] == 'SERSIC':
                 return kwargs_list[0]['R_sersic']
-            elif self.profile_list[0] in ['HERNQUIST']:
+            elif self.profile_list[0] == 'HERNQUIST':
                 return 1.8153 * kwargs_list[0]['Rs']
         light_analysis = LightProfileAnalysis(self.light_model)
-        center_x = self.profile_list[0]['center_x']
-        center_y = self.profile_list[0]['center_y']
+        center_x = kwargs_list[0].get('center_x', 0.0)
+        center_y = kwargs_list[0].get('center_y', 0.0)
         kwargs_list = self._circularize_kwargs(kwargs_list)
         return light_analysis.half_light_radius(
             kwargs_light=kwargs_list,

@@ -17,6 +17,9 @@ class MassProfile:
     ):
         # exclude convergence and shear profiles as they do not have 3D density or Einstein radius
         profile_list = [p for p in profile_list if p not in ['CONVERGENCE', 'SHEAR']]
+        # we only need the radial profile, so no ellipticity is considered
+        profile_list = [p.replace('_ELLIPSE', '') for p in profile_list]
+        profile_list = [p.replace('_CSE', '') for p in profile_list]
         self.profile_list = profile_list
         self.mass_model = SinglePlane(profile_list)
 
@@ -48,6 +51,7 @@ class MassProfile:
             return kwargs_list[0]['theta_E']
         else:
             analysis = LensProfileAnalysis(LensModel(self.profile_list))
+            kwargs_list = self._circularize_kwargs(kwargs_list)
             if 'center_x' not in kwargs_list[0]:
                 kwargs_list[0]['center_x'] = 0.0
                 kwargs_list[0]['center_y'] = 0.0

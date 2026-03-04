@@ -115,7 +115,7 @@ class JAMKinematicsAPI(object):
         voronoi_bins=None,
     ):
         """
-        For any aperture (single or IFU), uses JamPy with axisymmetric JAM modeling
+        For any aperture (single or IFU), uses JamPy with axisymmetric JAM modeling.
 
         API for numerical JAM to compute the velocity dispersion [km/s]
 
@@ -168,7 +168,8 @@ class JAMKinematicsAPI(object):
     ):
         """
         For a IFU measurements (regular or binned grid, or shells),
-        it uses JamPy with  axisymmetric JAM modeling
+        it uses JamPy with  axisymmetric JAM modeling. Note that this function does the same as velocity_dispersion,
+        but both are kept for compatibility.
 
         API for numerical JAM to compute the velocity dispersion
         map with IFU data or multiple apertures [km/s]
