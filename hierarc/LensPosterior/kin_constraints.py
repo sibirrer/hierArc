@@ -80,7 +80,7 @@ class KinConstraints(BaseLensConfig):
         :param kwargs_numerics_jam: numerical settings for the integrated
             line-of-sight velocity dispersion
         :param kwargs_numerics_galkin: numerical settings for the integrated
-            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_backend)
+            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_jam)
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
         :param lens_model_list: keyword argument list of lens model (optional)

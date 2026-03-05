@@ -62,7 +62,7 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
         param kwargs_numerics_jam: numerical settings for the integrated
             line-of-sight velocity dispersion
         :param kwargs_numerics_galkin: numerical settings for the integrated
-            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_backend)
+            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_jam)
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
