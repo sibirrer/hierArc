@@ -6,8 +6,9 @@ from hierarc.LensPosterior.base_config import BaseLensConfig
 
 class KinConstraints(BaseLensConfig):
     """Class that manages constraints from Integral Field Unit spectral observations.
-    using axisymmetric Jeans modeling (JAM, Cappellari 2008) with JamPy to compute
-    the dimensionless kinematic component J()
+
+    using axisymmetric Jeans modeling (JAM, Cappellari 2008) with JamPy to compute the
+    dimensionless kinematic component J()
     """
 
     def __init__(
@@ -151,7 +152,9 @@ class KinConstraints(BaseLensConfig):
             q_intrinsic_scaling=q_intrinsic_scaling,
         )
 
-    def j_kin_draw(self, kwargs_anisotropy, gamma_pl=None, q_intrinsic=1.0, no_error=False):
+    def j_kin_draw(
+        self, kwargs_anisotropy, gamma_pl=None, q_intrinsic=1.0, no_error=False
+    ):
         """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
@@ -188,12 +191,12 @@ class KinConstraints(BaseLensConfig):
                     if "R_sersic" in kwargs:
                         kwargs["R_sersic"] *= delta_r_eff
             # TODO: for now assumes that mass and light share the same geometry
-            if self.axial_symmetry in ['axi_sph', 'axi_cyl']:
+            if self.axial_symmetry in ["axi_sph", "axi_cyl"]:
                 kwargs_lens_geometry = {
-                    'center_x': kwargs_light_0.get('center_x', 0.0),
-                    'center_y': kwargs_light_0.get('center_y', 0.0),
-                    'e1': kwargs_light_0.get('e1', 0.0),
-                    'e2': kwargs_light_0.get('e2', 0.0),
+                    "center_x": kwargs_light_0.get("center_x", 0.0),
+                    "center_y": kwargs_light_0.get("center_y", 0.0),
+                    "e1": kwargs_light_0.get("e1", 0.0),
+                    "e2": kwargs_light_0.get("e2", 0.0),
                 }
         kwargs_lens = [
             {"theta_E": theta_E_draw, "gamma": gamma_draw} | kwargs_lens_geometry
@@ -264,7 +267,10 @@ class KinConstraints(BaseLensConfig):
         )  # matrix that contains the sampled J() distribution
         for i in range(num_sample_model):
             j_kin = self.j_kin_draw(
-                self.kwargs_anisotropy_base, no_error=False, **self.kwargs_lens_base, **self.kwargs_axisymmetry_base
+                self.kwargs_anisotropy_base,
+                no_error=False,
+                **self.kwargs_lens_base,
+                **self.kwargs_axisymmetry_base
             )
             j_kin_matrix[i, :] = j_kin
 
@@ -308,7 +314,10 @@ class KinConstraints(BaseLensConfig):
         :return: anisotropy scaling grid along the axes defined by ani_param_array
         """
         j_ani_0 = self.j_kin_draw(
-            self.kwargs_anisotropy_base, no_error=True, **self.kwargs_lens_base, **self.kwargs_axisymmetry_base
+            self.kwargs_anisotropy_base,
+            no_error=True,
+            **self.kwargs_lens_base,
+            **self.kwargs_axisymmetry_base
         )
         return self._anisotropy_scaling_relative(j_ani_0)
 
@@ -331,7 +340,10 @@ class KinConstraints(BaseLensConfig):
                 )
                 kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
                 j_kin_ani = self.j_kin_draw(
-                    kwargs_anisotropy, no_error=True, **kwargs_lens, **kwargs_axisymmetry
+                    kwargs_anisotropy,
+                    no_error=True,
+                    **kwargs_lens,
+                    **kwargs_axisymmetry
                 )
                 for s, j_kin in enumerate(j_kin_ani):
                     ani_scaling_array_list[s][i] = j_kin / j_ani_0[s]
@@ -339,12 +351,15 @@ class KinConstraints(BaseLensConfig):
             for i, param_i in enumerate(self.kin_scaling_param_array[0]):
                 for j, param_j in enumerate(self.kin_scaling_param_array[1]):
                     param_array = [param_i, param_j]
-                    kwargs_ani, kwargs_lens, kwargs_axisymmetry = self.param_array2kwargs(
-                        param_array=param_array
+                    kwargs_ani, kwargs_lens, kwargs_axisymmetry = (
+                        self.param_array2kwargs(param_array=param_array)
                     )
                     kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
                     j_kin_ani = self.j_kin_draw(
-                        kwargs_anisotropy, no_error=True, **kwargs_lens, **kwargs_axisymmetry
+                        kwargs_anisotropy,
+                        no_error=True,
+                        **kwargs_lens,
+                        **kwargs_axisymmetry
                     )
                     # loop over IFU bins
                     for s, j_kin in enumerate(j_kin_ani):
@@ -354,12 +369,15 @@ class KinConstraints(BaseLensConfig):
                 for j, param_j in enumerate(self.kin_scaling_param_array[1]):
                     for k, param_k in enumerate(self.kin_scaling_param_array[2]):
                         param_array = [param_i, param_j, param_k]
-                        kwargs_ani, kwargs_lens, kwargs_axisymmetry = self.param_array2kwargs(
-                            param_array=param_array
+                        kwargs_ani, kwargs_lens, kwargs_axisymmetry = (
+                            self.param_array2kwargs(param_array=param_array)
                         )
                         kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
                         j_kin_ani = self.j_kin_draw(
-                            kwargs_anisotropy, no_error=True, **kwargs_lens, **kwargs_axisymmetry
+                            kwargs_anisotropy,
+                            no_error=True,
+                            **kwargs_lens,
+                            **kwargs_axisymmetry
                         )
                         for s, j_kin in enumerate(j_kin_ani):
                             ani_scaling_array_list[s][i, j, k] = j_kin / j_ani_0[s]
@@ -369,15 +387,20 @@ class KinConstraints(BaseLensConfig):
                     for k, param_k in enumerate(self.kin_scaling_param_array[2]):
                         for l, param_l in enumerate(self.kin_scaling_param_array[3]):
                             param_array = [param_i, param_j, param_k, param_l]
-                            kwargs_ani, kwargs_lens, kwargs_axisymmetry = self.param_array2kwargs(
-                                param_array=param_array
+                            kwargs_ani, kwargs_lens, kwargs_axisymmetry = (
+                                self.param_array2kwargs(param_array=param_array)
                             )
                             kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
                             j_kin_ani = self.j_kin_draw(
-                                kwargs_anisotropy, no_error=True, **kwargs_lens, **kwargs_axisymmetry
+                                kwargs_anisotropy,
+                                no_error=True,
+                                **kwargs_lens,
+                                **kwargs_axisymmetry
                             )
                             for s, j_kin in enumerate(j_kin_ani):
-                                ani_scaling_array_list[s][i, j, k, l] = j_kin / j_ani_0[s]
+                                ani_scaling_array_list[s][i, j, k, l] = (
+                                    j_kin / j_ani_0[s]
+                                )
         else:
             ValueError(
                 "Kin scaling with parameter dimension %s not supported, chose between 1-4."

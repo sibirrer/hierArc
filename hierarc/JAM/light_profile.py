@@ -4,37 +4,30 @@ from copy import deepcopy
 
 
 class LightProfile:
-    """
-    Computes radial surface brightness for a list of lenstronomy mass profiles.
+    """Computes radial surface brightness for a list of lenstronomy mass profiles.
+
     Assumes that all the profiles share the same geometry.
     """
 
-    def __init__(
-        self,
-        profile_list
-    ):
+    def __init__(self, profile_list):
         # we only need the radial profile, so no ellipticity is considered
-        profile_list = [p.replace('_ELLIPSE', '') for p in profile_list]
+        profile_list = [p.replace("_ELLIPSE", "") for p in profile_list]
         self.profile_list = profile_list
         self.light_model = LightModel(profile_list)
 
     def radial_surface_brightness(self, r, kwargs_list):
         kwargs_list = self._circularize_kwargs(kwargs_list)
-        return self.light_model.surface_brightness(
-            x=r,
-            y=0,
-            kwargs_list=kwargs_list
-        )
+        return self.light_model.surface_brightness(x=r, y=0, kwargs_list=kwargs_list)
 
     def effective_radius(self, kwargs_list):
         if len(self.profile_list) == 1:
-            if self.profile_list[0] == 'SERSIC':
-                return kwargs_list[0]['R_sersic']
-            elif self.profile_list[0] == 'HERNQUIST':
-                return 1.8153 * kwargs_list[0]['Rs']
+            if self.profile_list[0] == "SERSIC":
+                return kwargs_list[0]["R_sersic"]
+            elif self.profile_list[0] == "HERNQUIST":
+                return 1.8153 * kwargs_list[0]["Rs"]
         light_analysis = LightProfileAnalysis(self.light_model)
-        center_x = kwargs_list[0].get('center_x', 0.0)
-        center_y = kwargs_list[0].get('center_y', 0.0)
+        center_x = kwargs_list[0].get("center_x", 0.0)
+        center_y = kwargs_list[0].get("center_y", 0.0)
         kwargs_list = self._circularize_kwargs(kwargs_list)
         return light_analysis.half_light_radius(
             kwargs_light=kwargs_list,
@@ -63,10 +56,6 @@ class LightProfile:
                 else:
                     kwargs.pop("e2")
             kwargs_list_new.append(
-                {
-                    k: v
-                    for k, v in kwargs.items()
-                    if k not in ["center_x", "center_y"]
-                }
+                {k: v for k, v in kwargs.items() if k not in ["center_x", "center_y"]}
             )
         return kwargs_list_new

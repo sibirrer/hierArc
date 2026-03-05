@@ -39,13 +39,21 @@ class TestDeprojectionDistribution(object):
             "q_intrinsic": 0.6,
             "q_intrinsic_sigma": 0.1,
         }
-        kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(**kwargs_q_intrinsic)
+        kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(
+            **kwargs_q_intrinsic
+        )
         assert "q_intrinsic" in kwargs_drawn
-        assert (kwargs_drawn["q_intrinsic"] > 0.2) and (kwargs_drawn["q_intrinsic"] <= 1.0)
+        assert (kwargs_drawn["q_intrinsic"] > 0.2) and (
+            kwargs_drawn["q_intrinsic"] <= 1.0
+        )
 
-        kwargs_drawn = self._q_intrinsic_gaussian_scaled.draw_deprojection(**kwargs_q_intrinsic)
+        kwargs_drawn = self._q_intrinsic_gaussian_scaled.draw_deprojection(
+            **kwargs_q_intrinsic
+        )
         assert "q_intrinsic" in kwargs_drawn
-        assert (kwargs_drawn["q_intrinsic"] > 0.2) and (kwargs_drawn["q_intrinsic"] <= 1.0)
+        assert (kwargs_drawn["q_intrinsic"] > 0.2) and (
+            kwargs_drawn["q_intrinsic"] <= 1.0
+        )
 
         kwargs_inclination = {
             "q_intrinsic": 45,
@@ -75,7 +83,9 @@ class TestDeprojectionDistribution(object):
         assert kwargs_drawn["q_intrinsic"] == 0.6
 
         for i in range(100):
-            kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(**kwargs_q_intrinsic)
+            kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(
+                **kwargs_q_intrinsic
+            )
 
     def test_raises(self):
 
@@ -84,7 +94,9 @@ class TestDeprojectionDistribution(object):
                 "q_intrinsic": 2.0,
                 "q_intrinsic_sigma": 0.1,
             }
-            kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(**kwargs_q_intrinsic_invalid)
+            kwargs_drawn = self._q_intrinsic_gaussian.draw_deprojection(
+                **kwargs_q_intrinsic_invalid
+            )
 
         with npt.assert_raises(ValueError):
             DeprojectionDistribution(
@@ -100,8 +112,9 @@ class TestDeprojectionDistribution(object):
                 distribution_function="GAUSSIAN",
                 kwargs_deprojection_min={"q_intrinsic": 0.2},
                 kwargs_deprojection_max={"q_intrinsic": 1.0},
-                parameterization="invalid_param"
+                parameterization="invalid_param",
             )
+
 
 if __name__ == "__main__":
     pytest.main()

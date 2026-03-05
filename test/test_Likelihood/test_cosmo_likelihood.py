@@ -91,7 +91,12 @@ class TestCosmoLikelihood(object):
         )
 
         def custom_prior(
-            kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
+            kwargs_cosmo,
+            kwargs_lens,
+            kwargs_kin,
+            kwargs_deprojection,
+            kwargs_source,
+            kwargs_los,
         ):
             return -1
 

@@ -6,7 +6,9 @@ from hierarc.Sampling.Distributions.los_distributions import LOSDistribution
 from hierarc.Sampling.Distributions.anisotropy_distributions import (
     AnisotropyDistribution,
 )
-from hierarc.Sampling.Distributions.deprojection_distributions import DeprojectionDistribution
+from hierarc.Sampling.Distributions.deprojection_distributions import (
+    DeprojectionDistribution,
+)
 from hierarc.Util.distribution_util import PDFSampling, DistributionSampling
 from hierarc.Sampling.Distributions.lens_distribution import LensDistribution
 import numpy as np
@@ -16,12 +18,13 @@ import copy
 class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
     """Master class containing the likelihood definitions of different analysis for a
     single lens.
-    Axisymmetric JAM kinematics can be done explicitly through the KinScaling class
-    with models computed using jampy. For this, use q_intrinsic_sampling option,
-    and use 'jampy' with 'axi_sph' as kinematics backend.
-    Alternatively, the spherical models can be correction following Huang et al. 2025.
-    For this, use 'spherical' modeling (either with jampy or galkin backend) and
-    set a distribution for the axisymmetric correction
+
+    Axisymmetric JAM kinematics can be done explicitly through the KinScaling class with
+    models computed using jampy. For this, use q_intrinsic_sampling option, and use
+    'jampy' with 'axi_sph' as kinematics backend. Alternatively, the spherical models
+    can be correction following Huang et al. 2025. For this, use 'spherical' modeling
+    (either with jampy or galkin backend) and set a distribution for the axisymmetric
+    correction
     """
 
     def __init__(
@@ -257,8 +260,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection distribution:
-            deprojection_param and deprojection_param_sigma for q_intrinsic/inclination
+        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection
+            distribution: deprojection_param and deprojection_param_sigma for
+            q_intrinsic/inclination
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
@@ -316,8 +320,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection distribution:
-            mean and scale for q_intrinsic/inclination
+        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection
+            distribution: mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
@@ -392,8 +396,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection distribution:
-            mean and scale for q_intrinsic/inclination
+        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection
+            distribution: mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword arguments of source brightness
         :param kwargs_los: line of sight list of dictionaries
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion
@@ -428,7 +432,11 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             **kwargs_deprojection
         )
 
-        kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw, **kwargs_deprojection_draw}
+        kwargs_param = {
+            **kwargs_lens_draw,
+            **kwargs_kin_draw,
+            **kwargs_deprojection_draw,
+        }
         kin_scaling = self.kin_scaling(kwargs_param)
         if self._axisymmetric_correction_sampling is True:
             inclination_scaling = self._axisymmetric_correction_sampling_class.draw_one
@@ -591,7 +599,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             kwargs_param = {**kwargs_lens_draw, **kwargs_kin_draw}
             kin_scaling = self.kin_scaling(kwargs_param)
             if self._axisymmetric_correction_sampling is True:
-                inclination_scaling = self._axisymmetric_correction_sampling_class.draw_one
+                inclination_scaling = (
+                    self._axisymmetric_correction_sampling_class.draw_one
+                )
                 kin_scaling *= inclination_scaling**2
             sigma_v_predict_i, cov_error_predict_i = self.sigma_v_prediction(
                 ddt_, dd_, kin_scaling=kin_scaling

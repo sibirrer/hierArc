@@ -2,7 +2,15 @@ import numpy as np
 
 
 class JAMAnisotropy:
-    _supported_types = ("const", "radial", "isotropic", "OM", "GOM", "Colin", "logistic")
+    _supported_types = (
+        "const",
+        "radial",
+        "isotropic",
+        "OM",
+        "GOM",
+        "Colin",
+        "logistic",
+    )
 
     def __init__(self, anisotropy_type):
         """
@@ -17,8 +25,10 @@ class JAMAnisotropy:
         self._constant_beta = None
 
         if self._type not in self._supported_types:
-            raise ValueError(f"anisotropy type {self._type} not supported!"
-                             f"\nchoose from {self._supported_types}")
+            raise ValueError(
+                f"anisotropy type {self._type} not supported!"
+                f"\nchoose from {self._supported_types}"
+            )
 
         if self._type == "const":
             self.num_params = 1
@@ -60,13 +70,15 @@ class JAMAnisotropy:
             self._logistic_kwargs = {}
 
     def beta_params(self, kwargs_anisotropy):
-        """
-        anisotropy parameters converted to the JAM beta(r) format
-        it can be a logistic function or one beta per MGE component
-        """
-        anisotropy_params = {k: v for k, v in kwargs_anisotropy.items() if k in self.param_names}
+        """Anisotropy parameters converted to the JAM beta(r) format it can be a
+        logistic function or one beta per MGE component."""
+        anisotropy_params = {
+            k: v for k, v in kwargs_anisotropy.items() if k in self.param_names
+        }
         if self.use_logistic:
-            return self.logistic_function_params(**anisotropy_params, **self._logistic_kwargs)
+            return self.logistic_function_params(
+                **anisotropy_params, **self._logistic_kwargs
+            )
         else:
             if self._type == "const":
                 constant_beta = anisotropy_params["beta"]
@@ -76,7 +88,5 @@ class JAMAnisotropy:
 
     @staticmethod
     def logistic_function_params(beta_0, beta_inf, r_ani, alpha):
-        """
-        return the logistic function parameters for JAM beta(r) format
-        """
+        """Return the logistic function parameters for JAM beta(r) format."""
         return [r_ani, beta_0, beta_inf, alpha]

@@ -17,7 +17,9 @@ class TestJAMApertureSlit(object):
 
         center_x = 2.0
         center_y = -1.0
-        self.kwargs_light = [{"Rs": 1.0, "amp": 1.0, "center_x": center_x, "center_y": center_y}]
+        self.kwargs_light = [
+            {"Rs": 1.0, "amp": 1.0, "center_x": center_x, "center_y": center_y}
+        ]
         self.kwargs_lens_mass = [
             {"theta_E": 1.5, "gamma": 2.1, "center_x": center_x, "center_y": center_y}
         ]
@@ -27,7 +29,9 @@ class TestJAMApertureSlit(object):
             "fwhm": 0.5,
         }
         kwargs_cosmo = {
-            'd_d': lens_cosmo.dd, 'd_s': lens_cosmo.ds, 'd_ds': lens_cosmo.dds
+            "d_d": lens_cosmo.dd,
+            "d_s": lens_cosmo.ds,
+            "d_ds": lens_cosmo.dds,
         }
         kwargs_numerics_lenstronomy = {
             "interpol_grid_num": 2000,
@@ -49,13 +53,9 @@ class TestJAMApertureSlit(object):
             "anisotropy_model": "const",
         }
 
-        kwargs_aperture_grid = {
-        }
+        kwargs_aperture_grid = {}
 
-        self.aperture_grid = Aperture(
-            **kwargs_aperture_grid
-        )
-
+        self.aperture_grid = Aperture(**kwargs_aperture_grid)
 
     def test_IFU_grid_aperture(self):
         pass

@@ -61,13 +61,13 @@ class KinematicsBackend:
         if kwargs_numerics_galkin is not None:
             warnings.warn(
                 "`kwargs_numerics_galkin` is deprecated, please use `kwargs_numerics_jam` instead.",
-                DeprecationWarning
+                DeprecationWarning,
             )
             if kwargs_numerics_jam is not None:
                 warnings.warn(
                     "Both `kwargs_numerics_jam` and `kwargs_numerics_galkin` are provided. "
                     "only `kwargs_numerics_jam` will be used.",
-                    UserWarning
+                    UserWarning,
                 )
             else:
                 kwargs_numerics_jam = kwargs_numerics_galkin
@@ -125,25 +125,25 @@ class KinematicsBackend:
     def time_delays(
         self, kwargs_lens, kwargs_ps, kappa_ext=0, original_ps_position=False
     ):
-            """Predicts the time delays of the image positions given the fiducial cosmology
-            relative to a straight line without lensing. Negative values correspond to
-            images arriving earlier, and positive signs correspond to images arriving later.
+        """Predicts the time delays of the image positions given the fiducial cosmology
+        relative to a straight line without lensing. Negative values correspond to
+        images arriving earlier, and positive signs correspond to images arriving later.
 
-            :param kwargs_lens: lens model parameters
-            :param kwargs_ps: point source parameters
-            :param kappa_ext: external convergence (optional)
-            :param original_ps_position: boolean (only applies when first point source model
-                is of type 'LENSED_POSITION'), uses the image positions in the model
-                parameters and does not re-compute images (which might be differently
-                ordered) in case of the lens equation solver
-            :return: time delays at image positions for the fixed cosmology in units of days
-            """
-            return self._kinematics_backend.time_delays(
-                kwargs_lens,
-                kwargs_ps,
-                kappa_ext=kappa_ext,
-                original_ps_position=original_ps_position,
-            )
+        :param kwargs_lens: lens model parameters
+        :param kwargs_ps: point source parameters
+        :param kappa_ext: external convergence (optional)
+        :param original_ps_position: boolean (only applies when first point source model
+            is of type 'LENSED_POSITION'), uses the image positions in the model
+            parameters and does not re-compute images (which might be differently
+            ordered) in case of the lens equation solver
+        :return: time delays at image positions for the fixed cosmology in units of days
+        """
+        return self._kinematics_backend.time_delays(
+            kwargs_lens,
+            kwargs_ps,
+            kappa_ext=kappa_ext,
+            original_ps_position=original_ps_position,
+        )
 
     def fermat_potential(self, kwargs_lens, kwargs_ps, original_ps_position=False):
         """Fermat potential (negative sign means earlier arrival time)
@@ -190,7 +190,7 @@ class KinematicsBackend:
         :param gamma: pre-computed power-law slope of mass profile
         :return: dimensionless velocity dispersion (see e.g. Birrer et al. 2016, 2019)
         """
-        if self.backend == 'galkin':
+        if self.backend == "galkin":
             return self._kinematics_backend.velocity_dispersion_dimension_less(
                 kwargs_lens,
                 kwargs_lens_light,
@@ -241,7 +241,7 @@ class KinematicsBackend:
             binned
         :return: dimensionless velocity dispersion (see e.g. Birrer et al. 2016, 2019)
         """
-        if self.backend == 'galkin':
+        if self.backend == "galkin":
             return self._kinematics_backend.velocity_dispersion_map_dimension_less(
                 kwargs_lens,
                 kwargs_lens_light,
@@ -281,7 +281,11 @@ class KinematicsBackend:
         :return: D_dt, time-delay distance
         """
         return self._kinematics_backend.ddt_from_time_delay(
-            d_fermat_model, dt_measured, kappa_s=kappa_s, kappa_ds=kappa_ds, kappa_d=kappa_d
+            d_fermat_model,
+            dt_measured,
+            kappa_s=kappa_s,
+            kappa_ds=kappa_ds,
+            kappa_d=kappa_d,
         )
 
     def ds_dds_from_kinematics(self, sigma_v, J, kappa_s=0, kappa_ds=0):
@@ -339,8 +343,7 @@ class KinematicsBackend:
         q_intrinsic=1.0,
         voronoi_bins=None,
     ):
-        """
-        For any aperture (single or IFU), uses JamPy with axisymmetric JAM modeling
+        """For any aperture (single or IFU), uses JamPy with axisymmetric JAM modeling.
 
         API for numerical JAM to compute the velocity dispersion [km/s]
 
@@ -355,7 +358,7 @@ class KinematicsBackend:
         :param kappa_ext: external convergence (optional)
         :return: velocity dispersion [km/s]
         """
-        if self.backend == 'galkin':
+        if self.backend == "galkin":
             return self._kinematics_backend.velocity_dispersion(
                 kwargs_lens,
                 kwargs_lens_light,
@@ -392,9 +395,8 @@ class KinematicsBackend:
         supersampling_factor=1,
         voronoi_bins=None,
     ):
-        """
-        For a IFU measurements (regular or binned grid, or shells),
-        it uses JamPy with  axisymmetric JAM modeling
+        """For a IFU measurements (regular or binned grid, or shells), it uses JamPy
+        with  axisymmetric JAM modeling.
 
         API for numerical JAM to compute the velocity dispersion
         map with IFU data or multiple apertures [km/s]
@@ -417,7 +419,7 @@ class KinematicsBackend:
         :return: velocity dispersion map in specified bins or grid in `kwargs_aperture`,
             in [km/s] unit
         """
-        if self.backend == 'galkin':
+        if self.backend == "galkin":
             return self._kinematics_backend.velocity_dispersion_map(
                 kwargs_lens,
                 kwargs_lens_light,
@@ -458,7 +460,7 @@ class KinematicsBackend:
         :param kappa_ext: external convergence not accounted in the lens models
         :return: velocity dispersion in units [km/s]
         """
-        if self.backend != 'galkin':
+        if self.backend != "galkin":
             raise ValueError(
                 "Analytical velocity dispersion calculation is only supported with the Galkin backend."
             )
@@ -509,18 +511,18 @@ class KinematicsBackend:
         if kwargs_numerics_galkin is not None:
             warnings.warn(
                 "`kwargs_numerics_galkin` is deprecated, please use `kwargs_numerics_jam` instead.",
-                DeprecationWarning
+                DeprecationWarning,
             )
             if kwargs_numerics_jam is not None:
                 warnings.warn(
                     "Both `kwargs_numerics_jam` and `kwargs_numerics_galkin` are provided. "
                     "only `kwargs_numerics_jam` will be used.",
-                    UserWarning
+                    UserWarning,
                 )
             else:
                 kwargs_numerics_jam = kwargs_numerics_galkin
 
-        if self.backend == 'galkin':
+        if self.backend == "galkin":
             self._kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,
                 analytic_kinematics=analytic_kinematics,
@@ -542,9 +544,9 @@ class KinematicsBackend:
                 )
             if MGE_light or MGE_mass:
                 warnings.warn(
-                "MGE_light and MGE_mass are ignored as MGE decomposition "
-                "is internally managed by the JamPy backend.",
-                DeprecationWarning
+                    "MGE_light and MGE_mass are ignored as MGE decomposition "
+                    "is internally managed by the JamPy backend.",
+                    DeprecationWarning,
                 )
             self._kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,

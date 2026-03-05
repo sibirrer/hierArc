@@ -93,7 +93,9 @@ class ParameterScalingSingleMeasurement(object):
                 )
             elif self._dim_scaling == 2:
                 self._f_ani = r = RectBivariateSpline(
-                    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid,
+                    param_grid_axes[0],
+                    param_grid_axes[1],
+                    j_kin_scaling_grid,
                     kx=min(len(param_grid_axes[0]) - 1, 3),
                     ky=min(len(param_grid_axes[1]) - 1, 3),
                 )

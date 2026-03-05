@@ -18,19 +18,18 @@ class TestJAMWrapperBase(object):
 
         self.r_test = np.logspace(-1.5, 1.5, 100)  # arcsec
 
-        kwargs_psf = {
-                "psf_type": "GAUSSIAN",
-                "fwhm": 0.5
-            }
+        kwargs_psf = {"psf_type": "GAUSSIAN", "fwhm": 0.5}
         kwargs_cosmo = {
-                'd_d': self.cosmo.dd, 'd_s': self.cosmo.ds, 'd_ds': self.cosmo.dds
-            }
+            "d_d": self.cosmo.dd,
+            "d_s": self.cosmo.ds,
+            "d_ds": self.cosmo.dds,
+        }
         kwargs_numerics_lenstronomy = {
-                "interpol_grid_num": 2000,
-                "log_integration": True,
-                "max_integrate": 1e3,
-                "min_integrate": 1e-3,
-            }
+            "interpol_grid_num": 2000,
+            "log_integration": True,
+            "max_integrate": 1e3,
+            "min_integrate": 1e-3,
+        }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
             "mge_min_r": 1e-4,
@@ -39,7 +38,7 @@ class TestJAMWrapperBase(object):
             "mge_linear_solver": True,
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
-        kwargs_aperture = { # not used in this test
+        kwargs_aperture = {  # not used in this test
             "aperture_type": "slit",
             "length": 3,
             "width": 0.2,
@@ -72,14 +71,16 @@ class TestJAMWrapperBase(object):
     def test_mge_lum(self):
         surf_lum, sigma_lum = self.jam_spherical.mge_lum_tracer(self.kwargs_light)
         mge_surf_1d = self._mge(self.r_test, surf_lum, sigma_lum)
-        galkin_surf_1d = self.galkin.numerics.lightProfile.light_2d(self.r_test, self.kwargs_light)
+        galkin_surf_1d = self.galkin.numerics.lightProfile.light_2d(
+            self.r_test, self.kwargs_light
+        )
         npt.assert_allclose(mge_surf_1d, galkin_surf_1d, rtol=1e-2)
 
     def test_mge_mass(self):
         surf_mass, sigma_mass = self.jam_spherical.mge_mass(self.kwargs_lens_mass)
         mge_surf_1d = self._mge(self.r_test, surf_mass, sigma_mass)
-        theta_E = self.kwargs_lens_mass[0]['theta_E']
-        gamma = self.kwargs_lens_mass[0]['gamma']
+        theta_E = self.kwargs_lens_mass[0]["theta_E"]
+        gamma = self.kwargs_lens_mass[0]["gamma"]
         rho0 = self.spp.theta2rho(theta_E, gamma)
         galkin_surf_1d = self.spp.density_2d(self.r_test, 0, rho0, gamma)
         # the fit is not perfect at the largest radii due to constant slope of power law
@@ -100,7 +101,7 @@ class TestJAMWrapperBase(object):
             self.r_test,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
-            kwargs_anisotropy=self.kwargs_anisotropy
+            kwargs_anisotropy=self.kwargs_anisotropy,
         )
         sigma_v_galkin = np.sqrt(sigma2_IR_galkin / IR_galkin) / 1000
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
@@ -118,7 +119,7 @@ class TestJAMWrapperBase(object):
             self.r_test,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
-            kwargs_anisotropy=self.kwargs_anisotropy
+            kwargs_anisotropy=self.kwargs_anisotropy,
         )
         npt.assert_allclose(IR_jam, IR_galkin, rtol=5e-2)
 
@@ -141,12 +142,11 @@ class TestJAMWrapperBaseOM(object):
 
         self.r_test = np.logspace(-1.5, 1.5, 100)  # arcsec
 
-        kwargs_psf = {
-            "psf_type": "GAUSSIAN",
-            "fwhm": 0.5
-        }
+        kwargs_psf = {"psf_type": "GAUSSIAN", "fwhm": 0.5}
         kwargs_cosmo = {
-            'd_d': self.cosmo.dd, 'd_s': self.cosmo.ds, 'd_ds': self.cosmo.dds
+            "d_d": self.cosmo.dd,
+            "d_s": self.cosmo.ds,
+            "d_ds": self.cosmo.dds,
         }
         kwargs_numerics_lenstronomy = {
             "interpol_grid_num": 2000,
@@ -204,7 +204,7 @@ class TestJAMWrapperBaseOM(object):
             self.r_test,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
-            kwargs_anisotropy=self.kwargs_anisotropy
+            kwargs_anisotropy=self.kwargs_anisotropy,
         )
         sigma_v_galkin = np.sqrt(sigma2_IR_galkin / IR_galkin) / 1000
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
@@ -213,20 +213,17 @@ class TestJAMWrapperBaseOM(object):
 class TestJAMWrapperBaseAnalytical(object):
 
     def setup_method(self):
-        """
-        comparison with analytical solution for the spherical isotropic
-        case with self-consistent Hernquist profile
-        """
+        """Comparison with analytical solution for the spherical isotropic case with
+        self-consistent Hernquist profile."""
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         self.cosmo = LensCosmo(0.5, 1.2, cosmo=cosmo)
 
-        kwargs_psf = {
-                "psf_type": "GAUSSIAN",
-                "fwhm": 0.5
-            }
+        kwargs_psf = {"psf_type": "GAUSSIAN", "fwhm": 0.5}
         kwargs_cosmo = {
-                'd_d': self.cosmo.dd, 'd_s': self.cosmo.ds, 'd_ds': self.cosmo.dds
-            }
+            "d_d": self.cosmo.dd,
+            "d_s": self.cosmo.ds,
+            "d_ds": self.cosmo.dds,
+        }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
             "mge_min_r": 1e-4,
@@ -234,7 +231,7 @@ class TestJAMWrapperBaseAnalytical(object):
             "mge_n_radial": 500,
             "mge_linear_solver": True,
         }
-        kwargs_aperture = { # not used in this test
+        kwargs_aperture = {  # not used in this test
             "aperture_type": "slit",
             "length": 3,
             "width": 0.2,
@@ -251,9 +248,11 @@ class TestJAMWrapperBaseAnalytical(object):
             kwargs_numerics=kwargs_numerics_mge,
         )
         self.M = 1e11  # M_sun
-        self.a = 0.5   # arcsec
+        self.a = 0.5  # arcsec
         rho0 = self.M / (2 * np.pi * self.a**3)  # M_sun / arcsec^3
-        sigma0 = Hernquist.rho2sigma(rho0, self.a) / self.cosmo.sigma_crit_angle  # convergence units
+        sigma0 = (
+            Hernquist.rho2sigma(rho0, self.a) / self.cosmo.sigma_crit_angle
+        )  # convergence units
         self.kwargs_light = [{"Rs": self.a, "amp": 1.0}]
         self.kwargs_lens_mass = [{"Rs": self.a, "sigma0": sigma0}]
         self.kwargs_anisotropy = {}
@@ -285,13 +284,32 @@ class TestJAMWrapperBaseAnalytical(object):
         G = 0.004301  # (km/s)^2 pc / Msun
         s = r / a
         w = s < 1
-        xs = np.hstack([np.arccosh(1 / s[w]) / np.sqrt(1 - s[w] ** 2),  # H90 eq. (33)
-                        np.arccos(1 / s[~w]) / np.sqrt(s[~w] ** 2 - 1)])  # H90 eq. (34)
-        IR = M * ((2 + s ** 2) * xs - 3) / (2 * np.pi * a ** 2 * (1 - s ** 2) ** 2)  # H90 eq. (32)
-        sigma_v = np.sqrt(G * M ** 2 / (12 * np.pi * a ** 3 * IR)  # H90 equation (41)
-                                * (0.5 / (1 - s ** 2) ** 3
-                                   * (-3 * s ** 2 * xs * (8 * s ** 6 - 28 * s ** 4 + 35 * s ** 2 - 20)
-                                      - 24 * s ** 6 + 68 * s ** 4 - 65 * s ** 2 + 6) - 6 * np.pi * s))
+        xs = np.hstack(
+            [
+                np.arccosh(1 / s[w]) / np.sqrt(1 - s[w] ** 2),  # H90 eq. (33)
+                np.arccos(1 / s[~w]) / np.sqrt(s[~w] ** 2 - 1),
+            ]
+        )  # H90 eq. (34)
+        IR = (
+            M * ((2 + s**2) * xs - 3) / (2 * np.pi * a**2 * (1 - s**2) ** 2)
+        )  # H90 eq. (32)
+        sigma_v = np.sqrt(
+            G
+            * M**2
+            / (12 * np.pi * a**3 * IR)  # H90 equation (41)
+            * (
+                0.5
+                / (1 - s**2) ** 3
+                * (
+                    -3 * s**2 * xs * (8 * s**6 - 28 * s**4 + 35 * s**2 - 20)
+                    - 24 * s**6
+                    + 68 * s**4
+                    - 65 * s**2
+                    + 6
+                )
+                - 6 * np.pi * s
+            )
+        )
         return sigma_v
 
 
@@ -303,19 +321,18 @@ class TestJAMWrapperBaseAxiSph(object):
 
         self.r_test = np.logspace(-1.5, 1.5, 100)  # arcsec
 
-        kwargs_psf = {
-                "psf_type": "GAUSSIAN",
-                "fwhm": 0.5
-            }
+        kwargs_psf = {"psf_type": "GAUSSIAN", "fwhm": 0.5}
         kwargs_cosmo = {
-                'd_d': self.cosmo.dd, 'd_s': self.cosmo.ds, 'd_ds': self.cosmo.dds
-            }
+            "d_d": self.cosmo.dd,
+            "d_s": self.cosmo.ds,
+            "d_ds": self.cosmo.dds,
+        }
         kwargs_numerics_lenstronomy = {
-                "interpol_grid_num": 2000,
-                "log_integration": True,
-                "max_integrate": 1e3,
-                "min_integrate": 1e-3,
-            }
+            "interpol_grid_num": 2000,
+            "log_integration": True,
+            "max_integrate": 1e3,
+            "min_integrate": 1e-3,
+        }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
             "mge_min_r": 1e-4,
@@ -324,7 +341,7 @@ class TestJAMWrapperBaseAxiSph(object):
             "mge_linear_solver": True,
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
-        kwargs_aperture = { # not used in this test
+        kwargs_aperture = {  # not used in this test
             "aperture_type": "slit",
             "length": 3,
             "width": 0.2,
@@ -367,7 +384,7 @@ class TestJAMWrapperBaseAxiSph(object):
             self.r_test,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
-            kwargs_anisotropy=self.kwargs_anisotropy
+            kwargs_anisotropy=self.kwargs_anisotropy,
         )
         sigma_v_galkin = np.sqrt(sigma2_IR_galkin / IR_galkin) / 1000
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
@@ -385,7 +402,7 @@ class TestJAMWrapperBaseAxiSph(object):
             self.r_test,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
-            kwargs_anisotropy=self.kwargs_anisotropy
+            kwargs_anisotropy=self.kwargs_anisotropy,
         )
         npt.assert_allclose(IR_jam, IR_galkin, rtol=5e-2)
 
@@ -408,19 +425,18 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
 
         self.r_test = np.logspace(-1.5, 1.5, 100)  # arcsec
 
-        kwargs_psf = {
-                "psf_type": "GAUSSIAN",
-                "fwhm": 0.5
-            }
+        kwargs_psf = {"psf_type": "GAUSSIAN", "fwhm": 0.5}
         kwargs_cosmo = {
-                'd_d': self.cosmo.dd, 'd_s': self.cosmo.ds, 'd_ds': self.cosmo.dds
-            }
+            "d_d": self.cosmo.dd,
+            "d_s": self.cosmo.ds,
+            "d_ds": self.cosmo.dds,
+        }
         kwargs_numerics_lenstronomy = {
-                "interpol_grid_num": 2000,
-                "log_integration": True,
-                "max_integrate": 1e3,
-                "min_integrate": 1e-3,
-            }
+            "interpol_grid_num": 2000,
+            "log_integration": True,
+            "max_integrate": 1e3,
+            "min_integrate": 1e-3,
+        }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
             "mge_min_r": 1e-4,
@@ -429,7 +445,7 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
             "mge_linear_solver": True,
         }
         kwargs_numeric_jam = kwargs_numerics_lenstronomy | kwargs_numerics_mge
-        kwargs_aperture = { # not used in this test
+        kwargs_aperture = {  # not used in this test
             "aperture_type": "slit",
             "length": 3,
             "width": 0.2,
@@ -472,7 +488,7 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
             self.r_test,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
-            kwargs_anisotropy=self.kwargs_anisotropy
+            kwargs_anisotropy=self.kwargs_anisotropy,
         )
         sigma_v_galkin = np.sqrt(sigma2_IR_galkin / IR_galkin) / 1000
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
@@ -490,7 +506,7 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
             self.r_test,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
-            kwargs_anisotropy=self.kwargs_anisotropy
+            kwargs_anisotropy=self.kwargs_anisotropy,
         )
         npt.assert_allclose(IR_jam, IR_galkin, rtol=5e-2)
 

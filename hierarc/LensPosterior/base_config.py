@@ -41,7 +41,6 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
         log_m2l_scaling=None,
         gamma_pl_scaling=None,
         q_intrinsic_scaling=None,
-
     ):
         """
 

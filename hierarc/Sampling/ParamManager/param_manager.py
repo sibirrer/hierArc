@@ -227,7 +227,14 @@ class ParamManager(object):
         kwargs_deprojection, i = self._deprojection_param.args2kwargs(args, i=i)
         kwargs_source, i = self._source_param.args2kwargs(args, i=i)
         kwargs_los, i = self._los_param.args2kwargs(args, i=i)
-        return kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
+        return (
+            kwargs_cosmo,
+            kwargs_lens,
+            kwargs_kin,
+            kwargs_deprojection,
+            kwargs_source,
+            kwargs_los,
+        )
 
     def kwargs2args(
         self,

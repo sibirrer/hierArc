@@ -46,7 +46,9 @@ class GeneralAperture(object):
 class Slit(GeneralAperture):
     """Slit aperture description."""
 
-    def __init__(self, length, width, center_ra=0, center_dec=0, angle=0, delta_pix=0.1):
+    def __init__(
+        self, length, width, center_ra=0, center_dec=0, angle=0, delta_pix=0.1
+    ):
         """
 
         :param length: length of slit
@@ -62,19 +64,13 @@ class Slit(GeneralAperture):
         self._angle = angle
 
         slit_grid_x, slit_grid_y = self._make_slit_grid(delta_pix)
-        super().__init__(slit_grid_x.flatten(), slit_grid_y.flatten(), delta_pix=delta_pix)
+        super().__init__(
+            slit_grid_x.flatten(), slit_grid_y.flatten(), delta_pix=delta_pix
+        )
 
     def _make_slit_grid(self, delta_pix):
-        slit_x = np.arange(
-            (-self._length + delta_pix) / 2,
-            self._length / 2,
-            delta_pix
-        )
-        slit_y = np.arange(
-            (-self._width + delta_pix) / 2,
-            self._width / 2,
-            delta_pix
-        )
+        slit_x = np.arange((-self._length + delta_pix) / 2, self._length / 2, delta_pix)
+        slit_y = np.arange((-self._width + delta_pix) / 2, self._width / 2, delta_pix)
         grid_x, grid_y = np.meshgrid(slit_x, slit_y)
         # rotate
         grid_x, grid_y = _rotate(grid_x, grid_y, angle=-self._angle)
@@ -99,7 +95,15 @@ class Frame(GeneralAperture):
     """Rectangular box with a hole in the middle (also rectangular), effectively a
     frame."""
 
-    def __init__(self, width_outer, width_inner, center_ra=0, center_dec=0, angle=0, delta_pix=0.1):
+    def __init__(
+        self,
+        width_outer,
+        width_inner,
+        center_ra=0,
+        center_dec=0,
+        angle=0,
+        delta_pix=0.1,
+    ):
         """
 
         :param width_outer: width of box to the outer parts
@@ -118,26 +122,19 @@ class Frame(GeneralAperture):
         super().__init__(x_grid, y_grid, delta_pix=delta_pix)
 
     def make_frame_grid(self, delta_pix):
-        """
-        make a grid of coordinates within the frame aperture
-        first create a grid for the outer box, then mask out the inner box
-        :return: x_grid, y_grid
-        """
+        """Make a grid of coordinates within the frame aperture first create a grid for
+        the outer box, then mask out the inner box :return: x_grid, y_grid."""
         x_outer = np.arange(
-            (-self._width_outer + delta_pix) / 2,
-            self._width_outer / 2,
-            delta_pix
+            (-self._width_outer + delta_pix) / 2, self._width_outer / 2, delta_pix
         )
         y_outer = np.arange(
-            (-self._width_outer + delta_pix) / 2,
-            self._width_outer / 2,
-            delta_pix
+            (-self._width_outer + delta_pix) / 2, self._width_outer / 2, delta_pix
         )
         x_outer_grid, y_outer_grid = np.meshgrid(x_outer, y_outer)
         # rotate
-        x_outer_grid, y_outer_grid = _rotate(x_outer_grid, y_outer_grid,
-                                             angle=-self._angle
-                                             )
+        x_outer_grid, y_outer_grid = _rotate(
+            x_outer_grid, y_outer_grid, angle=-self._angle
+        )
 
         # create inner box mask
         mask_inner = (np.abs(x_outer_grid) < self._width_inner / 2) & (
@@ -182,10 +179,8 @@ class Shell(GeneralAperture):
         super().__init__(shell_x, shell_y, delta_pix=delta_pix)
 
     def make_shell_grid(self, delta_pix):
-        """
-        make a grid of coordinates within the shell aperture
-        :return: x_grid, y_grid
-        """
+        """Make a grid of coordinates within the shell aperture :return: x_grid,
+        y_grid."""
         r_vals = np.arange(self._r_in, self._r_out, delta_pix)
         x_grid, y_grid = [], []
         for r in r_vals:
@@ -241,11 +236,15 @@ class IFUGrid(GeneralAperture):
         # padding in pixels
         self._padding = int(padding_arcsec / delta_pix_sup)
 
-        x_grid_supersampled, y_grid_supersampled = self.make_supersampled_grid(supersampling_factor, self._padding)
-        super().__init__(x_grid_supersampled, y_grid_supersampled, delta_pix=delta_pix_sup)
+        x_grid_supersampled, y_grid_supersampled = self.make_supersampled_grid(
+            supersampling_factor, self._padding
+        )
+        super().__init__(
+            x_grid_supersampled, y_grid_supersampled, delta_pix=delta_pix_sup
+        )
 
     def make_supersampled_grid(self, supersampling_factor, padding):
-        """Creates a new grid, supersampled and with padding for PSF convolution"""
+        """Creates a new grid, supersampled and with padding for PSF convolution."""
 
         delta_x, delta_y = self.delta_pix_xy
         x_grid = self._x_grid
@@ -274,13 +273,15 @@ class IFUGrid(GeneralAperture):
     def aperture_downsample(self, high_res_map):
         """Downsample a high-resolution map to the IFU grid by averaging over the
         supersampling factor.
+
         :param high_res_map: 2D array of high-resolution map to be downsampled
         :return: 2D array of downsampled map
         """
         num_pix_y, num_pix_x = self.grid_shape
         high_res_map = _unpad_map(high_res_map, self._padding)
-        return high_res_map.reshape(num_pix_y, self._supersampling_factor,
-                                    num_pix_x, self._supersampling_factor).mean(axis=(1, 3))
+        return high_res_map.reshape(
+            num_pix_y, self._supersampling_factor, num_pix_x, self._supersampling_factor
+        ).mean(axis=(1, 3))
 
     @property
     def num_segments(self):
@@ -317,8 +318,7 @@ class IFUGrid(GeneralAperture):
 
     @property
     def delta_pix_xy(self):
-        """Get the pixel scale of the grid.
-        """
+        """Get the pixel scale of the grid."""
         delta_x = self._x_grid[0, 1] - self._x_grid[0, 0]
         delta_y = self._y_grid[1, 0] - self._y_grid[0, 0]
         return delta_x, delta_y
@@ -328,7 +328,9 @@ class IFUShells(IFUGrid):
     """Class for an Integral Field Unit spectrograph with azimuthal shells where the
     kinematics are measured."""
 
-    def __init__(self, r_bins, center_ra=0, center_dec=0, ifu_grid_kwargs=None, delta_pix=None):
+    def __init__(
+        self, r_bins, center_ra=0, center_dec=0, ifu_grid_kwargs=None, delta_pix=None
+    ):
         """
 
         :param r_bins: array of radial bins to average the dispersion spectra in ascending order.
@@ -353,10 +355,10 @@ class IFUShells(IFUGrid):
             )
             ifu_x_grid, ifu_y_grid = np.meshgrid(ifu_x, ifu_y)
             ifu_grid_kwargs = {
-                'x_grid': ifu_x_grid,
-                'y_grid': ifu_y_grid,
-                'supersampling_factor': 1,
-                'padding_arcsec': 0,
+                "x_grid": ifu_x_grid,
+                "y_grid": ifu_y_grid,
+                "supersampling_factor": 1,
+                "padding_arcsec": 0,
             }
         super().__init__(**ifu_grid_kwargs)
 
@@ -365,7 +367,7 @@ class IFUShells(IFUGrid):
         x_grid, y_grid = self.aperture_sample()
         x_grid -= self._center_ra
         y_grid -= self._center_dec
-        r_grid = np.sqrt(x_grid ** 2 + y_grid ** 2)
+        r_grid = np.sqrt(x_grid**2 + y_grid**2)
         r_bins = self._r_bins
         # iterate over bin edges and average masked values
         for i in range(self.num_segments):
@@ -439,16 +441,15 @@ def _unpad_map(padded_map, padding):
     else:
         return padded_map
 
+
 def downsample_cords_to_bins(vrms_grid, bins, supersampling_factor=1, padding=0):
     # remove padding from the grid
     vrms_grid = _unpad_map(vrms_grid, padding)
     n_bins = int(np.max(bins)) + 1
-    supersampled_bins = bins.repeat(
-        supersampling_factor, axis=0
-    ).repeat(supersampling_factor, axis=1)
+    supersampled_bins = bins.repeat(supersampling_factor, axis=0).repeat(
+        supersampling_factor, axis=1
+    )
     vrms = np.zeros(n_bins)
     for n in range(n_bins):
-        vrms[n] = np.mean(
-            vrms_grid[supersampled_bins == n]
-        )
+        vrms[n] = np.mean(vrms_grid[supersampled_bins == n])
     return vrms

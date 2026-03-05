@@ -21,7 +21,7 @@ class DeprojectionParam(object):
         """
         self._deprojection_sampling = deprojection_sampling
         self._distribution_function = distribution_function
-        self._distribution_parameterization = 'q_intrinsic'
+        self._distribution_parameterization = "q_intrinsic"
         if kwargs_fixed is None:
             kwargs_fixed = {}
         self._kwargs_fixed = kwargs_fixed
@@ -37,9 +37,7 @@ class DeprojectionParam(object):
         list = []
         if self._deprojection_sampling is True:
             if latex_style is True:
-                list.append(
-                    r"$\langle q_{\rm int} \rangle$"
-                )
+                list.append(r"$\langle q_{\rm int} \rangle$")
             else:
                 list.append("q_intrinsic")
             if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
@@ -69,7 +67,9 @@ class DeprojectionParam(object):
                 i += 1
             if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                 if "q_intrinsic_sigma" in self._kwargs_fixed:
-                    kwargs["q_intrinsic_sigma"] = self._kwargs_fixed["q_intrinsic_sigma"]
+                    kwargs["q_intrinsic_sigma"] = self._kwargs_fixed[
+                        "q_intrinsic_sigma"
+                    ]
                 else:
                     if self._log_scatter is True:
                         kwargs["q_intrinsic_sigma"] = 10 ** (args[i])

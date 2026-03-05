@@ -32,7 +32,7 @@ class JAMTDCosmography(JAMKinematicsAPI):
         kwargs_seeing=None,
         kwargs_aperture=None,
         anisotropy_model=None,
-        axial_symmetry='axi_sph',
+        axial_symmetry="axi_sph",
         multi_observations=False,
         multi_light_profile=False,
         kwargs_numerics_jam=None,

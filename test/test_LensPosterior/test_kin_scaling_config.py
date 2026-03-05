@@ -39,9 +39,11 @@ class TestKinScalingConfig(object):
             gamma_pl_scaling=np.linspace(1.5, 2.5, 5),
             q_intrinsic_scaling=np.linspace(0.5, 1.0, 6),
         )
-        assert kin_scaling.num_scaling_dim == 4  # gamma_pl, q_intrinsic, a_ani, beta_inf
-        assert kin_scaling.kwargs_axisymmetry_base['q_intrinsic'] == 0.75
+        assert (
+            kin_scaling.num_scaling_dim == 4
+        )  # gamma_pl, q_intrinsic, a_ani, beta_inf
+        assert kin_scaling.kwargs_axisymmetry_base["q_intrinsic"] == 0.75
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

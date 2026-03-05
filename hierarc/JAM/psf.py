@@ -28,8 +28,7 @@ class PSF(object):
             raise ValueError("psf_type %s not supported for convolution!" % psf_type)
 
     def convolution_kernel(self, *args, **kwargs):
-        """Normalized convolution kernel.
-        """
+        """Normalized convolution kernel."""
         return self._psf.convolution_kernel(*args, **kwargs)
 
     def convolve(self, data):
@@ -142,8 +141,9 @@ class PSFMultiGaussian(object):
         """Retrieve supersampling factor if stored as a private variable."""
         return 1
 
+
 class PSFPixel(object):
-    """pixelated PSF model over a supersampled grid"""
+    """Pixelated PSF model over a supersampled grid."""
 
     def __init__(self, fwhm, kernel, supersampling_factor):
         self._fwhm = fwhm

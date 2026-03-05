@@ -372,7 +372,9 @@ class KinConstraintsComposite(KinConstraints):
         )
         return j_kin
 
-    def j_kin_draw_composite_m2l(self, kwargs_anisotropy, gamma_in, q_intrinsic=1.0, no_error=False):
+    def j_kin_draw_composite_m2l(
+        self, kwargs_anisotropy, gamma_in, q_intrinsic=1.0, no_error=False
+    ):
         """Similar function to j_kin_draw_composite, but now drawing from log_m2l
         distribution.
 
@@ -535,7 +537,11 @@ class KinConstraintsComposite(KinConstraints):
                                     a_ani=a_ani, beta_inf=beta_inf
                                 )
                                 j_kin_ani = self.j_kin_draw_composite(
-                                    kwargs_anisotropy, g_in, log_m2l, q_int, no_error=True
+                                    kwargs_anisotropy,
+                                    g_in,
+                                    log_m2l,
+                                    q_int,
+                                    no_error=True,
                                 )
 
                                 for m, j_kin in enumerate(j_kin_ani):
@@ -564,7 +570,9 @@ class KinConstraintsComposite(KinConstraints):
                                 kwargs_anisotropy, g_in, log_m2l, q_int, no_error=True
                             )
                             for m, j_kin in enumerate(j_kin_ani):
-                                ani_scaling_grid_list[m][i, k, l, q] = j_kin / j_ani_0[m]
+                                ani_scaling_grid_list[m][i, k, l, q] = (
+                                    j_kin / j_ani_0[m]
+                                )
         else:
             raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
         return ani_scaling_grid_list
@@ -603,7 +611,9 @@ class KinConstraintsComposite(KinConstraints):
                             )
 
                             for m, j_kin in enumerate(j_kin_ani):
-                                ani_scaling_grid_list[m][i, j, k, q] = j_kin / j_ani_0[m]
+                                ani_scaling_grid_list[m][i, j, k, q] = (
+                                    j_kin / j_ani_0[m]
+                                )
                                 # perhaps change the order
         elif self._anisotropy_model in ["OM", "const"]:
             ani_scaling_grid_list = [

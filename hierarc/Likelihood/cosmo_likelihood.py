@@ -145,9 +145,14 @@ class CosmoLikelihood(object):
                     )
                 return -np.inf
 
-        kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los = (
-            self.param.args2kwargs(args)
-        )
+        (
+            kwargs_cosmo,
+            kwargs_lens,
+            kwargs_kin,
+            kwargs_deprojection,
+            kwargs_source,
+            kwargs_los,
+        ) = self.param.args2kwargs(args)
         if self._cosmology == "oLCDM":
             # assert we are not in a crazy cosmological situation that prevents computing the angular distance integral
             h0, ok, om = kwargs_cosmo["h0"], kwargs_cosmo["ok"], kwargs_cosmo["om"]
@@ -201,7 +206,12 @@ class CosmoLikelihood(object):
             log_l += self._bao_likelihood.log_likelihood(cosmo=cosmo, rd=rd)
         if self._prior_add is True:
             log_l += self._custom_prior(
-                kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
+                kwargs_cosmo,
+                kwargs_lens,
+                kwargs_kin,
+                kwargs_deprojection,
+                kwargs_source,
+                kwargs_los,
             )
         return log_l
 

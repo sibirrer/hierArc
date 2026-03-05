@@ -336,11 +336,16 @@ class TestKinScalingParamManagerAxi(object):
 
     def test_(self):
         kin_param_manager = KinScalingParamManager(
-            j_kin_scaling_param_name_list=["gamma_pl", "a_ani", "beta_inf", "q_intrinsic"]
+            j_kin_scaling_param_name_list=[
+                "gamma_pl",
+                "a_ani",
+                "beta_inf",
+                "q_intrinsic",
+            ]
         )
         param_array = [1, 2, 3, 4]
-        kwargs_anisotropy, kwargs_deflector, kwargs_axisymmetry = kin_param_manager.param_array2kwargs(
-            param_array=param_array
+        kwargs_anisotropy, kwargs_deflector, kwargs_axisymmetry = (
+            kin_param_manager.param_array2kwargs(param_array=param_array)
         )
         assert kwargs_axisymmetry["q_intrinsic"] == param_array[3]
 

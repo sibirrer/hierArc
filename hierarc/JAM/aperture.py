@@ -1,7 +1,15 @@
 __author__ = "sibirrer,furcelay"
 
-from hierarc.JAM.aperture_types import GeneralAperture, Shell, Slit, IFUShells, Frame, IFUGrid, IFUBinned, \
-    downsample_cords_to_bins
+from hierarc.JAM.aperture_types import (
+    GeneralAperture,
+    Shell,
+    Slit,
+    IFUShells,
+    Frame,
+    IFUGrid,
+    IFUBinned,
+    downsample_cords_to_bins,
+)
 
 __all__ = ["Aperture", "downsample_cords_to_bins"]
 """Class that defines the aperture of the measurement (e.g. slit, integral field

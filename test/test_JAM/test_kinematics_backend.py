@@ -36,12 +36,28 @@ class TestKinematicsBackend(object):
         e1, e2 = phi_q2_ellipticity(0, q_observed)
 
         self.kwargs_lens = [
-            {"theta_E": self.theta_E, "gamma": self.gamma, "center_x": 0, "center_y": 0, "e1": e1, "e2": e2}
+            {
+                "theta_E": self.theta_E,
+                "gamma": self.gamma,
+                "center_x": 0,
+                "center_y": 0,
+                "e1": e1,
+                "e2": e2,
+            }
         ]
-        self.kwargs_lens_light = [{"Rs": self.r_eff * 0.551, "amp": 1.0, "center_x": 0, "center_y": 0, "e1": e1, "e2": e2}]
+        self.kwargs_lens_light = [
+            {
+                "Rs": self.r_eff * 0.551,
+                "amp": 1.0,
+                "center_x": 0,
+                "center_y": 0,
+                "e1": e1,
+                "e2": e2,
+            }
+        ]
         self.kwargs_anisotropy = {"beta": self.anisotropy_beta}
 
-        kwargs_aperture ={
+        kwargs_aperture = {
             "aperture_type": "shell",
             "r_in": 0,
             "r_out": 3 / 2.0,
@@ -97,12 +113,14 @@ class TestKinematicsBackend(object):
         assert self.galkin.axial_symmetry == "spherical"
         assert self.jampy.axial_symmetry == "axi_sph"
 
-        models, kwargs_prof, kwargs_light = self.galkin._kinematics_backend.galkin_settings(
-            self.kwargs_lens,
-            self.kwargs_lens_light,
-            self.r_eff,
-            self.theta_E,
-            self.gamma,
+        models, kwargs_prof, kwargs_light = (
+            self.galkin._kinematics_backend.galkin_settings(
+                self.kwargs_lens,
+                self.kwargs_lens_light,
+                self.r_eff,
+                self.theta_E,
+                self.gamma,
+            )
         )
         assert isinstance(models[0], Galkin)
 
@@ -153,7 +171,7 @@ class TestKinematicsBackend(object):
                 self.kwargs_model,
                 axial_symmetry="axi_sph",
                 backend="jampy",
-                analytic_kinematics=True
+                analytic_kinematics=True,
             )
 
     def test_warning(self):
@@ -165,7 +183,7 @@ class TestKinematicsBackend(object):
                 self.kwargs_model,
                 axial_symmetry="spherical",
                 backend="jampy",
-                kwargs_numerics_galkin={}
+                kwargs_numerics_galkin={},
             )
             assert len(w) == 1
             assert issubclass(w[-1].category, DeprecationWarning)
@@ -179,7 +197,7 @@ class TestKinematicsBackend(object):
                 axial_symmetry="spherical",
                 backend="jampy",
                 kwargs_numerics_galkin={},
-                kwargs_numerics_jam={}
+                kwargs_numerics_jam={},
             )
             assert len(w) == 2
             assert issubclass(w[0].category, DeprecationWarning)

@@ -127,7 +127,6 @@ class TestDdtKinGaussConstraints(object):
         )
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
-
     def test_likelihoodconfiguration_om_axisymmetric(self):
         anisotropy_model = "OM"
         kwargs_aperture = {
@@ -202,9 +201,25 @@ class TestDdtKinGaussConstraints(object):
 
         # compute kinematics with fiducial cosmology
         kwargs_lens = [
-            {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0, "e1": e1, "e2": e2}
+            {
+                "theta_E": theta_E,
+                "gamma": gamma,
+                "center_x": 0,
+                "center_y": 0,
+                "e1": e1,
+                "e2": e2,
+            }
         ]
-        kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0, "center_x": 0, "center_y": 0, "e1": e1, "e2": e2}]
+        kwargs_lens_light = [
+            {
+                "Rs": r_eff * 0.551,
+                "amp": 1.0,
+                "center_x": 0,
+                "center_y": 0,
+                "e1": e1,
+                "e2": e2,
+            }
+        ]
         kwargs_anisotropy = {"r_ani": r_ani}
         sigma_v = kin_api.velocity_dispersion(
             kwargs_lens,
@@ -253,9 +268,13 @@ class TestDdtKinGaussConstraints(object):
         kwargs_deprojection = {"q_intrinsic": q_intrinsic, "q_intrinsic_sigma": 0.01}
         np.random.seed(41)
         ln_likelihood = ln_class.lens_log_likelihood(
-            cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin, kwargs_deprojection=kwargs_deprojection
+            cosmo,
+            kwargs_lens={},
+            kwargs_kin=kwargs_kin,
+            kwargs_deprojection=kwargs_deprojection,
         )
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
+
 
 if __name__ == "__main__":
     pytest.main()

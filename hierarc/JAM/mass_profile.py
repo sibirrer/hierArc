@@ -6,31 +6,25 @@ from copy import deepcopy
 
 
 class MassProfile:
-    """
-    Computes radial 3D density for a list of lenstronomy mass profiles.
+    """Computes radial 3D density for a list of lenstronomy mass profiles.
+
     Assumes that all the profiles share the same geometry.
     """
 
-    def __init__(
-        self,
-        profile_list
-    ):
+    def __init__(self, profile_list):
         # exclude convergence and shear profiles as they do not have 3D density or Einstein radius
-        profile_list = [p for p in profile_list if p not in ['CONVERGENCE', 'SHEAR']]
+        profile_list = [p for p in profile_list if p not in ["CONVERGENCE", "SHEAR"]]
         # we only need the radial profile, so no ellipticity is considered
-        profile_list = [p.replace('_ELLIPSE', '') for p in profile_list]
-        profile_list = [p.replace('_CSE', '') for p in profile_list]
+        profile_list = [p.replace("_ELLIPSE", "") for p in profile_list]
+        profile_list = [p.replace("_CSE", "") for p in profile_list]
         self.profile_list = profile_list
         self.mass_model = SinglePlane(profile_list)
 
     def radial_density(self, r, kwargs_list):
-        """
-        3D density at radius r
-        :param r: 3D radius in angular units
-        :param kwargs_list: list of keyword arguments of lens model parameters matching the
-            lens model classes
-        :return: mass density at radius r (in angular units, modulo epsilon_crit)
-        """
+        """3D density at radius r :param r: 3D radius in angular units :param
+        kwargs_list: list of keyword arguments of lens model parameters matching the
+        lens model classes :return: mass density at radius r (in angular units, modulo
+        epsilon_crit)"""
         kwargs_list = self._circularize_kwargs(kwargs_list)
         density = np.zeros_like(r)
         for i, func in enumerate(self.mass_model.func_list):
@@ -47,14 +41,14 @@ class MassProfile:
         return density
 
     def einstein_radius(self, kwargs_list):
-        if (len(self.profile_list) == 1) and ('theta_E' in kwargs_list[0]):
-            return kwargs_list[0]['theta_E']
+        if (len(self.profile_list) == 1) and ("theta_E" in kwargs_list[0]):
+            return kwargs_list[0]["theta_E"]
         else:
             analysis = LensProfileAnalysis(LensModel(self.profile_list))
             kwargs_list = self._circularize_kwargs(kwargs_list)
-            if 'center_x' not in kwargs_list[0]:
-                kwargs_list[0]['center_x'] = 0.0
-                kwargs_list[0]['center_y'] = 0.0
+            if "center_x" not in kwargs_list[0]:
+                kwargs_list[0]["center_x"] = 0.0
+                kwargs_list[0]["center_y"] = 0.0
             return analysis.effective_einstein_radius(kwargs_list)
 
     def _circularize_kwargs(self, kwargs_list):
@@ -76,11 +70,7 @@ class MassProfile:
                 else:
                     kwargs.pop("e2")
             kwargs_list_new.append(
-                {
-                    k: v
-                    for k, v in kwargs.items()
-                    if k not in ["center_x", "center_y"]
-                }
+                {k: v for k, v in kwargs.items() if k not in ["center_x", "center_y"]}
             )
         return kwargs_list_new
 

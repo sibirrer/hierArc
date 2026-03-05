@@ -5,7 +5,8 @@ _PARAMETERIZATION = ["q_intrinsic"]
 
 
 class DeprojectionDistribution(object):
-    """Class to draw axisymmetric deprojection parameters (inclination/q_intrinsic) from hyperparameter distributions."""
+    """Class to draw axisymmetric deprojection parameters (inclination/q_intrinsic) from
+    hyperparameter distributions."""
 
     def __init__(
         self,
@@ -48,9 +49,7 @@ class DeprojectionDistribution(object):
             "q_intrinsic", 0.0
         ), self._kwargs_max.get("q_intrinsic", 1.0)
 
-    def draw_deprojection(
-        self, q_intrinsic=None, q_intrinsic_sigma=0
-    ):
+    def draw_deprojection(self, q_intrinsic=None, q_intrinsic_sigma=0):
         """Draw Gaussian distribution and re-sample if outside bounds.
 
         :param q_intrinsic: mean of the distribution
@@ -79,9 +78,7 @@ class DeprojectionDistribution(object):
                     % self._distribution_function
                 )
             if q_draw <= self._q_min or q_draw > self._q_max:
-                return self.draw_deprojection(
-                    q_intrinsic, q_intrinsic_sigma
-                )
+                return self.draw_deprojection(q_intrinsic, q_intrinsic_sigma)
             kwargs_return["q_intrinsic"] = q_draw
         else:
             kwargs_return["q_intrinsic"] = q

@@ -10,9 +10,7 @@ from lenstronomy.GalKin.galkin_shells import GalkinShells
 
 
 class TestJAMWrapperSpherical(object):
-    """
-    Test JAMWrapper against Lenstronomy Galkin module for spherical symmetry
-    """
+    """Test JAMWrapper against Lenstronomy Galkin module for spherical symmetry."""
 
     def setup_method(self):
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
@@ -20,24 +18,28 @@ class TestJAMWrapperSpherical(object):
 
         center_x = 0.0
         center_y = 0.0
-        self.kwargs_light = [{"Rs": 1.0, "amp": 1.0, "center_x": center_x, "center_y": center_y}]
+        self.kwargs_light = [
+            {"Rs": 1.0, "amp": 1.0, "center_x": center_x, "center_y": center_y}
+        ]
         self.kwargs_lens_mass = [
             {"theta_E": 1.5, "gamma": 2.1, "center_x": center_x, "center_y": center_y}
         ]
         self.kwargs_anisotropy = {"beta": 0.3}
         kwargs_psf = {
-                "psf_type": "GAUSSIAN",
-                "fwhm": 0.5,
-            }
+            "psf_type": "GAUSSIAN",
+            "fwhm": 0.5,
+        }
         kwargs_cosmo = {
-                'd_d': lens_cosmo.dd, 'd_s': lens_cosmo.ds, 'd_ds': lens_cosmo.dds
-            }
+            "d_d": lens_cosmo.dd,
+            "d_s": lens_cosmo.ds,
+            "d_ds": lens_cosmo.dds,
+        }
         kwargs_numerics_lenstronomy = {
-                "interpol_grid_num": 2000,
-                "log_integration": True,
-                "max_integrate": 1e3,
-                "min_integrate": 1e-5,
-            }
+            "interpol_grid_num": 2000,
+            "log_integration": True,
+            "max_integrate": 1e3,
+            "min_integrate": 1e-5,
+        }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
             "mge_min_r": 1e-4,
@@ -127,7 +129,7 @@ class TestJAMWrapperSpherical(object):
             "fwhm": 0.5,
             "sigmas": np.arange(1, 6),
             "amplitudes": np.arange(1, 6) / np.sum(np.arange(1, 6)),
-            }
+        }
         self.jam_spherical_grid_multi_gaussian = JAMWrapper(
             kwargs_model=kwargs_model | {"symmetry": "spherical"},
             kwargs_aperture=kwargs_aperture_grid,
@@ -184,7 +186,7 @@ class TestJAMWrapperSpherical(object):
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
     def test_spherical_dispersion_shells(self):
-        sigma_v_jam = self.jam_spherical_shells.dispersion( # self.jam_spherical_shells.dispersion(
+        sigma_v_jam = self.jam_spherical_shells.dispersion(  # self.jam_spherical_shells.dispersion(
             self.kwargs_lens_mass,
             self.kwargs_light,
             self.kwargs_anisotropy,
@@ -221,33 +223,43 @@ class TestJAMWrapperSpherical(object):
 
 
 class TestJAMWrapperAxiSph(object):
-    """
-    Test JAMWrapper with axisymmetric-spherical symmetry but in the spherical limit
-    q=1, against Lenstronomy Galkin module for spherical symmetry
-    """
+    """Test JAMWrapper with axisymmetric-spherical symmetry but in the spherical limit
+    q=1, against Lenstronomy Galkin module for spherical symmetry."""
 
     def setup_method(self):
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         lens_cosmo = LensCosmo(0.5, 1.2, cosmo=cosmo)
 
         self.ellipticities = {"e1": 0.0, "e2": 0.0}
-        self.kwargs_light_spherical = {"Rs": 1.0, "amp": 1.0, "center_x": 0.0, "center_y": 0.0}
-        self.kwargs_lens_mass_spherical = {"theta_E": 1.5, "gamma": 2.1, "center_x": 0.0, "center_y": 0.0}
+        self.kwargs_light_spherical = {
+            "Rs": 1.0,
+            "amp": 1.0,
+            "center_x": 0.0,
+            "center_y": 0.0,
+        }
+        self.kwargs_lens_mass_spherical = {
+            "theta_E": 1.5,
+            "gamma": 2.1,
+            "center_x": 0.0,
+            "center_y": 0.0,
+        }
         self.kwargs_anisotropy = {"beta": 0.3}
         self.inclination = 80.0
         kwargs_psf = {
-                "psf_type": "GAUSSIAN",
-                "fwhm": 0.5,
-            }
+            "psf_type": "GAUSSIAN",
+            "fwhm": 0.5,
+        }
         kwargs_cosmo = {
-                'd_d': lens_cosmo.dd, 'd_s': lens_cosmo.ds, 'd_ds': lens_cosmo.dds
-            }
+            "d_d": lens_cosmo.dd,
+            "d_s": lens_cosmo.ds,
+            "d_ds": lens_cosmo.dds,
+        }
         kwargs_numerics_lenstronomy = {
-                "interpol_grid_num": 2000,
-                "log_integration": True,
-                "max_integrate": 1e3,
-                "min_integrate": 1e-3,
-            }
+            "interpol_grid_num": 2000,
+            "log_integration": True,
+            "max_integrate": 1e3,
+            "min_integrate": 1e-3,
+        }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
             "mge_min_r": 1e-4,
@@ -343,7 +355,7 @@ class TestJAMWrapperAxiSph(object):
             [self.kwargs_lens_mass_spherical],
             [self.kwargs_light_spherical],
             self.kwargs_anisotropy,
-            supersampling_factor=5
+            supersampling_factor=5,
         )
         npt.assert_allclose(sigma_v_jam, sigma_v_galkin, rtol=1e-2)
 
@@ -382,33 +394,44 @@ class TestJAMWrapperAxiSph(object):
 
 
 class TestJAMWrapperAxiCylIso(object):
-    """
-    Test JAMWrapper with axisymmetric-cylindrical symmetry but in the spherical and
-    isotropic limit q=1, beta=0, against Lenstronomy Galkin module for spherical symmetry
-    """
+    """Test JAMWrapper with axisymmetric-cylindrical symmetry but in the spherical and
+    isotropic limit q=1, beta=0, against Lenstronomy Galkin module for spherical
+    symmetry."""
 
     def setup_method(self):
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         lens_cosmo = LensCosmo(0.5, 1.2, cosmo=cosmo)
 
         self.ellipticities = {"e1": 0.0, "e2": 0.0}
-        self.kwargs_light_spherical = {"Rs": 1.0, "amp": 1.0, "center_x": 0.0, "center_y": 0.0}
-        self.kwargs_lens_mass_spherical = {"theta_E": 1.5, "gamma": 2.1, "center_x": 0.0, "center_y": 0.0}
+        self.kwargs_light_spherical = {
+            "Rs": 1.0,
+            "amp": 1.0,
+            "center_x": 0.0,
+            "center_y": 0.0,
+        }
+        self.kwargs_lens_mass_spherical = {
+            "theta_E": 1.5,
+            "gamma": 2.1,
+            "center_x": 0.0,
+            "center_y": 0.0,
+        }
         self.kwargs_anisotropy = {}
         self.inclination = 80.0
         kwargs_psf = {
-                "psf_type": "GAUSSIAN",
-                "fwhm": 0.5,
-            }
+            "psf_type": "GAUSSIAN",
+            "fwhm": 0.5,
+        }
         kwargs_cosmo = {
-                'd_d': lens_cosmo.dd, 'd_s': lens_cosmo.ds, 'd_ds': lens_cosmo.dds
-            }
+            "d_d": lens_cosmo.dd,
+            "d_s": lens_cosmo.ds,
+            "d_ds": lens_cosmo.dds,
+        }
         kwargs_numerics_lenstronomy = {
-                "interpol_grid_num": 2000,
-                "log_integration": True,
-                "max_integrate": 1e3,
-                "min_integrate": 1e-3,
-            }
+            "interpol_grid_num": 2000,
+            "log_integration": True,
+            "max_integrate": 1e3,
+            "min_integrate": 1e-3,
+        }
         kwargs_numerics_mge = {
             "mge_n_gauss": 50,
             "mge_min_r": 1e-4,
@@ -498,7 +521,7 @@ class TestJAMWrapperAxiCylIso(object):
             [self.kwargs_lens_mass_spherical | self.ellipticities],
             [self.kwargs_light_spherical | self.ellipticities],
             self.kwargs_anisotropy,
-            convolved=True
+            convolved=True,
         )
         sigma_v_galkin = self.galkin_grid.dispersion_map_grid_convolved(
             [self.kwargs_lens_mass_spherical],

@@ -10,19 +10,19 @@ import mgefit as mge
 import jampy as jam
 import numpy as np
 
-
 __all__ = ["JAMWrapperBase"]
 
 
 class JAMWrapperBase(object):
-    """
-    Wrapper class to use jampy JAM functionality similar to lenstronomy's Galkin class.
+    """Wrapper class to use jampy JAM functionality similar to lenstronomy's Galkin
+    class.
 
     :param kwargs_model: keyword arguments describing the model components
-    :param kwargs_cosmo: keyword arguments that define the cosmology in terms of the angular diameter distances
-     involved
+    :param kwargs_cosmo: keyword arguments that define the cosmology in terms of the
+        angular diameter distances involved
     :param kwargs_numerics: numerics keyword arguments
     """
+
     def __init__(
         self,
         kwargs_model,
@@ -37,40 +37,49 @@ class JAMWrapperBase(object):
         self._anisotropy = JAMAnisotropy(anisotropy_model)
         self.cosmo = Cosmo(**kwargs_cosmo)
 
-        self.symmetry = kwargs_model.get("symmetry", "spherical")  # 'spherical', 'axi_sph', 'axi_cyl'
+        self.symmetry = kwargs_model.get(
+            "symmetry", "spherical"
+        )  # 'spherical', 'axi_sph', 'axi_cyl'
         self.align = None
         self.axisymmetric = False
-        if self.symmetry == 'spherical':
-            self.align = 'sph'
+        if self.symmetry == "spherical":
+            self.align = "sph"
             self.axisymmetric = False
-        elif self.symmetry == 'axi_sph':
+        elif self.symmetry == "axi_sph":
             self.axisymmetric = True
-            self.align = 'sph'
-        elif self.symmetry == 'axi_cyl':
+            self.align = "sph"
+        elif self.symmetry == "axi_cyl":
             self.axisymmetric = True
-            self.align = 'cyl'
+            self.align = "cyl"
         else:
-            msg = (f"Invalid symmetry type '{self.symmetry}' for JAMWrapper, "
-                   f"options are 'spherical', 'axi_sph' or 'axi_cyl'.")
+            msg = (
+                f"Invalid symmetry type '{self.symmetry}' for JAMWrapper, "
+                f"options are 'spherical', 'axi_sph' or 'axi_cyl'."
+            )
             raise ValueError(msg)
 
         self.cosmo = Cosmo(**kwargs_cosmo)
 
         if kwargs_numerics is None:
-            kwargs_numerics = {
-            }
+            kwargs_numerics = {}
 
         mge_n_gauss = kwargs_numerics.get("mge_n_gauss", 20)
         self._mge_n_gauss_mass = kwargs_numerics.get("mge_n_gauss_light", mge_n_gauss)
         self._mge_n_gauss_light = kwargs_numerics.get("mge_n_gauss_mass", mge_n_gauss)
 
         mge_min_r = kwargs_numerics.get("mge_min_r", 1e-4)  # TODO: check if this is ok
-        mge_max_r = kwargs_numerics.get("mge_max_r", 300)   # TODO: check if this is ok
-        mge_n_radial = kwargs_numerics.get("mge_n_radial", 500)  # TODO: check if this is ok
-        mge_min_r_mass = kwargs_numerics.get("mge_min_r_mass", mge_min_r)  # relative to theta_E
+        mge_max_r = kwargs_numerics.get("mge_max_r", 300)  # TODO: check if this is ok
+        mge_n_radial = kwargs_numerics.get(
+            "mge_n_radial", 500
+        )  # TODO: check if this is ok
+        mge_min_r_mass = kwargs_numerics.get(
+            "mge_min_r_mass", mge_min_r
+        )  # relative to theta_E
         mge_max_r_mass = kwargs_numerics.get("mge_max_r_mass", mge_max_r)
         mge_n_radial_mass = kwargs_numerics.get("mge_n_radial_mass", mge_n_radial)
-        mge_min_r_light = kwargs_numerics.get("mge_min_r_light", mge_min_r)  # relative to r_eff
+        mge_min_r_light = kwargs_numerics.get(
+            "mge_min_r_light", mge_min_r
+        )  # relative to r_eff
         mge_max_r_light = kwargs_numerics.get("mge_max_r_light", mge_max_r)
         mge_n_radial_light = kwargs_numerics.get("mge_n_radial_light", mge_n_radial)
         self._mge_radial_points_mass = np.logspace(  # this must be in logspace
@@ -83,10 +92,13 @@ class JAMWrapperBase(object):
             np.log10(mge_max_r_light),
             mge_n_radial_light,
         )
-        self._mge_linear_solver = kwargs_numerics.get("mge_linear_solver", True)  # use linear solver for MGE fit speed
+        self._mge_linear_solver = kwargs_numerics.get(
+            "mge_linear_solver", True
+        )  # use linear solver for MGE fit speed
         self._mge_kwargs_lum = kwargs_numerics.get("mge_kwargs_lum", {})
-        self._mge_kwargs_mass = kwargs_numerics.get("mge_kwargs_mass", {"outer_slope": 2})
-
+        self._mge_kwargs_mass = kwargs_numerics.get(
+            "mge_kwargs_mass", {"outer_slope": 2}
+        )
 
     def dispersion_points(
         self,
@@ -102,8 +114,9 @@ class JAMWrapperBase(object):
         delta_pix=0,
         black_hole_mass=0,
         jam_kwargs=None,
-        ):
+    ):
         """Computes the LOS velocity dispersion at given points (not convolved).
+
         :param x: array of x positions where to compute the dispersion [arcsec]
         :param y: array of y positions where to compute the dispersion [arcsec]
         :param kwargs_mass: mass model parameters (following lenstronomy lens model
@@ -137,8 +150,12 @@ class JAMWrapperBase(object):
             delta_pix = 0.0
 
         vrms, surf_bright = self.call_jampy(
-            surf_lum, sigma_lum, surf_mass, sigma_mass,
-            x=x, y=y,
+            surf_lum,
+            sigma_lum,
+            surf_mass,
+            sigma_mass,
+            x=x,
+            y=y,
             q_lum=q_lum * np.ones_like(surf_lum),
             q_mass=q_mass * np.ones_like(surf_mass),
             inclination=inclination,
@@ -154,9 +171,11 @@ class JAMWrapperBase(object):
     def mge_lum_tracer(self, kwargs_light):
         # TODO: cache the MGE fit for repeated calls with same kwargs_light
         profs = self._light_profile.profile_list
-        if (len(profs) == 1) and (profs[0] in ['MULTI_GAUSSIAN', 'MULTI_GAUSSIAN_ELLIPSE']):
-            sigma_lum = np.asarray(kwargs_light[0]['sigma'])
-            surf_lum = np.asarray(kwargs_light[0]['amp']) / (2 * np.pi * sigma_lum**2)
+        if (len(profs) == 1) and (
+            profs[0] in ["MULTI_GAUSSIAN", "MULTI_GAUSSIAN_ELLIPSE"]
+        ):
+            sigma_lum = np.asarray(kwargs_light[0]["sigma"])
+            surf_lum = np.asarray(kwargs_light[0]["amp"]) / (2 * np.pi * sigma_lum**2)
             # clean zero amplitudes as Jampy doesn't like them
             zero_surf = surf_lum == 0
             surf_lum = surf_lum[~zero_surf]
@@ -164,15 +183,15 @@ class JAMWrapperBase(object):
         else:
             r_eff = self._light_profile.effective_radius(kwargs_light)
             light_1d = self._light_profile.radial_surface_brightness(
-                self._mge_radial_points_light * r_eff,
-                kwargs_light
+                self._mge_radial_points_light * r_eff, kwargs_light
             )
             mge_lum = mge.fit_1d(
                 self._mge_radial_points_light * r_eff,
                 light_1d,
                 ngauss=self._mge_n_gauss_light,
                 linear=self._mge_linear_solver,
-                plot=False, quiet=True,
+                plot=False,
+                quiet=True,
                 **self._mge_kwargs_lum,
             )
             sigma_lum = mge_lum.sol[1]  # in arcsec
@@ -182,9 +201,9 @@ class JAMWrapperBase(object):
 
     def mge_mass(self, kwargs_mass):
         # TODO: cache the MGE fit for repeated calls with same kwargs_mass
-        if self._mass_profile.profile_list == ['MULTI_GAUSSIAN']:
-            sigma_mass = np.asarray(kwargs_mass[0]['sigma'])
-            surf_mass = np.asarray(kwargs_mass[0]['amp']) / (2 * np.pi * sigma_mass)
+        if self._mass_profile.profile_list == ["MULTI_GAUSSIAN"]:
+            sigma_mass = np.asarray(kwargs_mass[0]["sigma"])
+            surf_mass = np.asarray(kwargs_mass[0]["amp"]) / (2 * np.pi * sigma_mass)
             # clean zero amplitudes as Jampy doesn't like them
             zero_surf = surf_mass == 0
             surf_mass = surf_mass[~zero_surf]
@@ -192,18 +211,18 @@ class JAMWrapperBase(object):
         else:
             theta_E = self._mass_profile.einstein_radius(kwargs_mass)
             radial_density = self._mass_profile.radial_density(
-                self._mge_radial_points_mass * theta_E,
-                kwargs_mass
+                self._mge_radial_points_mass * theta_E, kwargs_mass
             )
             mge_mass = mge.fit_1d(
                 self._mge_radial_points_mass * theta_E,
                 radial_density,
                 ngauss=self._mge_n_gauss_mass,
                 linear=self._mge_linear_solver,
-                plot=False, quiet=True,
+                plot=False,
+                quiet=True,
                 **self._mge_kwargs_mass,
             )
-            surf_mass = mge_mass.sol[0]   # mass convergence
+            surf_mass = mge_mass.sol[0]  # mass convergence
             sigma_mass = mge_mass.sol[1]  # in arcsec
         return surf_mass, sigma_mass
 
@@ -237,19 +256,38 @@ class JAMWrapperBase(object):
         if (not self.axisymmetric) or (inclination is None):
             # spherical modeling
             # TODO: evaluate at fixed radius and then interpolate for speed
-            r = np.sqrt(x ** 2 + y ** 2)
+            r = np.sqrt(x**2 + y**2)
             vrms, surf_bright = self.call_jampy_sph(
-                surf_lum, sigma_lum, surf_mass, sigma_mass,
-                r, beta, sigma_psf, norm_psf, pix_size,
-                black_hole_mass, jam_kwargs
+                surf_lum,
+                sigma_lum,
+                surf_mass,
+                sigma_mass,
+                r,
+                beta,
+                sigma_psf,
+                norm_psf,
+                pix_size,
+                black_hole_mass,
+                jam_kwargs,
             )
         else:
             # axisymmetric modeling
             vrms, surf_bright = self.call_jampy_axi(
-                surf_lum, sigma_lum, surf_mass, sigma_mass,
-                x, y, q_lum, q_mass, inclination, beta,
-                sigma_psf, norm_psf, pix_size,
-                black_hole_mass, jam_kwargs
+                surf_lum,
+                sigma_lum,
+                surf_mass,
+                sigma_mass,
+                x,
+                y,
+                q_lum,
+                q_mass,
+                inclination,
+                beta,
+                sigma_psf,
+                norm_psf,
+                pix_size,
+                black_hole_mass,
+                jam_kwargs,
             )
         vrms = vrms.reshape(x_shape)
         surf_bright = surf_bright.reshape(x_shape)
@@ -318,26 +356,25 @@ class JAMWrapperBase(object):
         if jam_kwargs is None:
             jam_kwargs = {}
         jam_model = jam.sph.proj(
-                surf_lum,
-                sigma_lum,
-                surf_mass,
-                sigma_mass,
-                rad=r,
-                distance=self.cosmo.dd,
-                beta=beta,
-                logistic=self._anisotropy.use_logistic,
-                mbh=black_hole_mass,
-                sigmapsf=sigma_psf,
-                normpsf=norm_psf,
-                pixsize=pix_size,
-                quiet=True,
-                plot=False,
-                **jam_kwargs,
-            )
+            surf_lum,
+            sigma_lum,
+            surf_mass,
+            sigma_mass,
+            rad=r,
+            distance=self.cosmo.dd,
+            beta=beta,
+            logistic=self._anisotropy.use_logistic,
+            mbh=black_hole_mass,
+            sigmapsf=sigma_psf,
+            normpsf=norm_psf,
+            pixsize=pix_size,
+            quiet=True,
+            plot=False,
+            **jam_kwargs,
+        )
         vrms = jam_model.model
         surf_bright = jam_model.flux
         return vrms, surf_bright
-
 
     @staticmethod
     def _extract_center(kwargs):

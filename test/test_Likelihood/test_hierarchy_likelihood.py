@@ -37,8 +37,8 @@ class TestLensLikelihood(object):
         log_m2l_distribution = ("NONE",)
 
         vel_disp_scaling = np.random.normal(loc=1, scale=0.1, size=1000)
-        pdf_array_axisymmetric_correction, bin_edges_axisymmetric_correction = np.histogram(
-            vel_disp_scaling
+        pdf_array_axisymmetric_correction, bin_edges_axisymmetric_correction = (
+            np.histogram(vel_disp_scaling)
         )
 
         self.likelihood = LensLikelihood(
@@ -373,9 +373,9 @@ class TestLensLikelihood(object):
         # axisymmetric q_intrinsic test
         kwargs_lens = {
             "lambda_mst": 1,
-            "lambda_mst_sigma": 0.,
+            "lambda_mst_sigma": 0.0,
             "lambda_ifu": 1,
-            "lambda_ifu_sigma": 0.,
+            "lambda_ifu_sigma": 0.0,
         }
         kwargs_kin = {"a_ani": 1}
         kwargs_los = [{"mean": 0, "sigma": 0.03}]
