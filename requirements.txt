@@ -1,6 +1,5 @@
 numpy<2
 astropy<7
-
 scipy<1.14
 emcee
 mpmath
@@ -10,3 +9,5 @@ pandas
 lenstronomy>=1.13.1
 scikit-learn>=0.22
 pandas
+jampy
+mgefit
