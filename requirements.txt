@@ -1,5 +1,6 @@
-numpy<2
-astropy<7
+numpy
+astropy
+
 scipy<1.14
 emcee
 mpmath
