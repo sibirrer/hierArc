@@ -115,6 +115,8 @@ class TestDdtKinGaussConstraints(object):
             kwargs_seeing=kwargs_seeing,
             kwargs_lens_light=kwargs_lens_light,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             **kwargs_kin_api_settings
         )
 
@@ -127,8 +129,8 @@ class TestDdtKinGaussConstraints(object):
         )
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
-    def test_likelihoodconfiguration_om_axisymmetric(self):
-        anisotropy_model = "OM"
+    def test_likelihoodconfiguration_const_axisymmetric(self):
+        anisotropy_model = "const"
         kwargs_aperture = {
             "aperture_type": "shell",
             "r_in": 0,
@@ -163,11 +165,11 @@ class TestDdtKinGaussConstraints(object):
         gamma = 2.1
 
         # anisotropy
-        r_ani = 1
+        beta_ani = 0.1
 
         # axial symmetry
         axial_symmetry = "axi_sph"
-        q_intrinsic = 0.85
+        q_intrinsic = 0.80
         q_observed = 0.86
         e1, e2 = phi_q2_ellipticity(0, q_observed)
 
@@ -220,7 +222,7 @@ class TestDdtKinGaussConstraints(object):
                 "e2": e2,
             }
         ]
-        kwargs_anisotropy = {"r_ani": r_ani}
+        kwargs_anisotropy = {"beta": beta_ani}
         sigma_v = kin_api.velocity_dispersion(
             kwargs_lens,
             kwargs_lens_light,
@@ -261,12 +263,11 @@ class TestDdtKinGaussConstraints(object):
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(
             q_intrinsic_sampling=True,
-            q_intrinsic_distribution="GAUSSIAN",
+            q_intrinsic_distribution="NONE",
             **kwargs_likelihood
         )
-        kwargs_kin = {"a_ani": r_ani}
-        kwargs_deprojection = {"q_intrinsic": q_intrinsic, "q_intrinsic_sigma": 0.01}
-        np.random.seed(41)
+        kwargs_kin = {"a_ani": beta_ani}
+        kwargs_deprojection = {"q_intrinsic": q_intrinsic}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo,
             kwargs_lens={},

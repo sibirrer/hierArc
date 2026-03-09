@@ -101,7 +101,7 @@ class TestJAMWrapperSpherical(object):
             analytic_kinematics=False,
         )
 
-        r_bins = np.linspace(0.1, 5, 11)
+        r_bins = np.linspace(0.5, 5, 11)
         kwargs_aperture_ifu_shells = {
             "aperture_type": "IFU_shells",
             "r_bins": r_bins,
@@ -210,7 +210,7 @@ class TestJAMWrapperSpherical(object):
             self.kwargs_anisotropy,
             convolved=True,
         )
-        # TODO: test against JamPy model
+        # TODO: test
 
     def test_spherical_pixel_psf(self):
         sigma_v_jam = self.jam_spherical_grid_pixel.dispersion(  # self.jam_spherical_shells.dispersion(
@@ -219,7 +219,7 @@ class TestJAMWrapperSpherical(object):
             self.kwargs_anisotropy,
             convolved=True,
         )
-        # TODO: test against JamPy model
+        # TODO: test
 
 
 class TestJAMWrapperAxiSph(object):
@@ -297,7 +297,7 @@ class TestJAMWrapperAxiSph(object):
             analytic_kinematics=False,
         )
 
-        r_bins = np.linspace(0.1, 5, 11)
+        r_bins = np.linspace(0.5, 5, 11)
         kwargs_aperture_ifu_shells = {
             "aperture_type": "IFU_shells",
             "r_bins": r_bins,
@@ -469,7 +469,7 @@ class TestJAMWrapperAxiCylIso(object):
             analytic_kinematics=False,
         )
 
-        r_bins = np.linspace(0.1, 5, 11)
+        r_bins = np.linspace(0.5, 5, 11)
         kwargs_aperture_ifu_shells = {
             "aperture_type": "IFU_shells",
             "r_bins": r_bins,

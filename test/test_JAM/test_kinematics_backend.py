@@ -128,8 +128,6 @@ class TestKinematicsBackend(object):
             self.kwargs_lens,
             self.kwargs_lens_light,
             self.r_eff,
-            self.theta_E,
-            self.gamma,
         )
         assert isinstance(models[0], JAMWrapper)
         assert models[0].axisymmetric == True

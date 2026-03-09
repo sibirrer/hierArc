@@ -39,9 +39,10 @@ class TestTDCosmography(object):
 
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3, Ob0=0.05)
         self.td_cosmo = TDCosmography(
-            z_lens,
-            z_source,
-            kwargs_model,
+            z_lens=z_lens,
+            z_source=z_source,
+            axial_symmetry="spherical",
+            kwargs_model=kwargs_model,
             cosmo_fiducial=cosmo,
             lens_model_kinematics_bool=None,
             kwargs_aperture=kwargs_aperture,
@@ -106,23 +107,13 @@ class TestTDCosmography(object):
         )
         npt.assert_almost_equal(D_dt_infered, D_dt, decimal=5)
         r_eff = 0.5
-        kwargs_lens_light = [{"Rs": r_eff * 0.551, "center_x": 0, "center_y": 0}]
+        kwargs_lens_light = [{"amp": 1, "Rs": r_eff * 0.551, "center_x": 0, "center_y": 0}]
         kwargs_anisotropy = {"r_ani": 1}
 
         anisotropy_model = "OM"
-        kwargs_numerics_galkin = {
-            "interpol_grid_num": 500,
-            "log_integration": True,
-            "max_integrate": 10,
-            "min_integrate": 0.001,
-        }
         self.td_cosmo.kinematics_modeling_settings(
             anisotropy_model,
-            kwargs_numerics_galkin,
-            analytic_kinematics=True,
             Hernquist_approx=False,
-            MGE_light=False,
-            MGE_mass=False,
         )
 
         J = self.td_cosmo.velocity_dispersion_dimension_less(

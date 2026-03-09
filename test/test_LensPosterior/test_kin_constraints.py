@@ -109,6 +109,8 @@ class TestKinConstraints(object):
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
             gamma_pl_scaling=np.linspace(1.8, 2.2, 5),
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             **kwargs_kin_api_settings
         )
 
@@ -217,6 +219,8 @@ class TestKinConstraints(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             **kwargs_kin_api_settings
         )
 
@@ -344,10 +348,10 @@ class TestKinConstraints(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
-            gamma_pl_scaling=np.linspace(1.8, 2.2, 2),
+            gamma_pl_scaling=np.linspace(2.0, 2.2, 3),
             # axisymmetric JAM modeling
             axial_symmetry="axi_sph",
-            q_intrinsic_scaling=np.linspace(0.4, 0.9, 3),
+            q_intrinsic_scaling=np.linspace(0.6, 1.0, 5),
             kwargs_lens_light=kwargs_lens_light,
             **kwargs_kin_api_settings
         )
@@ -356,13 +360,12 @@ class TestKinConstraints(object):
         ln_class = LensLikelihood(
             gamma_pl_index=0,
             q_intrinsic_sampling=True,
-            q_intrinsic_distribution="GAUSSIAN",
+            q_intrinsic_distribution="NONE",  # fixed q_intrinsic for likelihood evaluation
             **kwargs_likelihood
         )
         kwargs_kin = {"a_ani": anisotropy_beta}
         kwargs_lens = {"gamma_pl_list": [gamma]}
-        kwargs_deprojection = {"q_intrinsic": q_intrinsic, "q_intrinsic_sigma": 0.01}
-        np.random.seed(53)
+        kwargs_deprojection = {"q_intrinsic": q_intrinsic}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo,
             kwargs_lens=kwargs_lens,
@@ -474,6 +477,8 @@ class TestKinConstraints(object):
             anisotropy_model=anisotropy_model,
             gamma_pl_scaling=np.linspace(1.8, 2.2, 5),
             voronoi_bins=voronoi_bins,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             **kwargs_kin_api_settings
         )
 

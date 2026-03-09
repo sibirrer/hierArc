@@ -344,13 +344,13 @@ class TestKinScalingParamManagerAxi(object):
             ]
         )
         param_array = [1, 2, 3, 4]
-        kwargs_anisotropy, kwargs_deflector, kwargs_axisymmetry = (
+        kwargs_anisotropy, kwargs_deflector, kwargs_deprojection = (
             kin_param_manager.param_array2kwargs(param_array=param_array)
         )
-        assert kwargs_axisymmetry["q_intrinsic"] == param_array[3]
+        assert kwargs_deprojection["q_intrinsic"] == param_array[3]
 
         param_array_new = kin_param_manager.kwargs2param_array(
-            kwargs={**kwargs_anisotropy, **kwargs_deflector, **kwargs_axisymmetry}
+            kwargs={**kwargs_anisotropy, **kwargs_deflector, **kwargs_deprojection}
         )
         for i, param in enumerate(param_array_new):
             assert param == param_array[i]

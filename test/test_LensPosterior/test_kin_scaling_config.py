@@ -42,7 +42,7 @@ class TestKinScalingConfig(object):
         assert (
             kin_scaling.num_scaling_dim == 4
         )  # gamma_pl, q_intrinsic, a_ani, beta_inf
-        assert kin_scaling.kwargs_axisymmetry_base["q_intrinsic"] == 0.75
+        assert kin_scaling.kwargs_deprojection_base["q_intrinsic"] == 0.75
 
 
 if __name__ == "__main__":
