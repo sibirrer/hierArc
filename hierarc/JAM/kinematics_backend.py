@@ -121,6 +121,7 @@ class KinematicsBackend:
         self.axial_symmetry = axial_symmetry
         self.multi_observations = multi_observations
         self.multi_light_profile = multi_light_profile
+        self.lensCosmo = kinematics_backend.lensCosmo
 
     def time_delays(
         self, kwargs_lens, kwargs_ps, kappa_ext=0, original_ps_position=False

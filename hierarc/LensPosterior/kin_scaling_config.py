@@ -115,7 +115,7 @@ class KinScalingConfig(KinScalingParamManager):
         return kwargs_base
 
     @property
-    def kwargs_axisymmetry_base(self):
+    def kwargs_deprojection_base(self):
         """
 
         :return: keyword arguments of axisymmetric JAM parameters that are getting interpolated

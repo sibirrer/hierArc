@@ -14,6 +14,8 @@ from hierarc.Sampling.Distributions.lens_distribution import LensDistribution
 import numpy as np
 import copy
 
+from local.notebooks.axi_jam_simulated_test import q_intrinsic_sigma
+
 
 class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
     """Master class containing the likelihood definitions of different analysis for a
@@ -337,7 +339,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         sigma_v_sys_error = kwargs_kin_copy.pop("sigma_v_sys_error", None)
 
         if self.check_dist(
-            kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
+            kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
         ):  # sharp distributions
             return self.log_likelihood_single(
                 ddt,
@@ -501,12 +503,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         delta_lum_dist = lum_dists - lum_dist_anchor
         return delta_lum_dist
 
-    def check_dist(self, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los):
+    def check_dist(self, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los):
         """Checks if the provided keyword arguments describe a distribution function of
         hyperparameters or are single values.
 
         :param kwargs_lens: lens model hyperparameter keywords
         :param kwargs_kin: kinematic model hyperparameter keywords
+        :param kwargs_deprojection: deprojection model hyperparameter keywords
         :param kwargs_source: source brightness hyperparameter keywords
         :param kwargs_los: list of dictionaries for line of sight hyperparameters
         :return: bool, True if delta function, else False
@@ -515,12 +518,14 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         draw_kappa_bool = self._los.draw_bool(kwargs_los)
         a_ani_sigma = kwargs_kin.get("a_ani_sigma", 0)
         beta_inf_sigma = kwargs_kin.get("beta_inf_sigma", 0)
+        q_intrinsic_sigma = kwargs_deprojection.get("q_intrinsic_sigma", 0)
         sne_sigma = kwargs_source.get("sigma_sne", 0)
         gamma_pl_sigma = kwargs_lens.get("gamma_pl_sigma", 0)
         if (
             a_ani_sigma == 0
             and lambda_mst_sigma == 0
             and beta_inf_sigma == 0
+            and q_intrinsic_sigma == 0
             and sne_sigma == 0
             and gamma_pl_sigma == 0
             and not draw_kappa_bool

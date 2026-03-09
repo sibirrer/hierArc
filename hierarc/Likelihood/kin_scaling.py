@@ -52,17 +52,17 @@ class KinScalingParamManager(object):
         dictionary split in anisotropy and lens models.
 
         :param param_array:
-        :return: kwargs_anisotropy, kwargs_lens, kwargs_axisymmetry
+        :return: kwargs_anisotropy, kwargs_lens, kwargs_deprojection
         """
-        kwargs_anisotropy, kwargs_lens, kwargs_axisymmetry = {}, {}, {}
+        kwargs_anisotropy, kwargs_lens, kwargs_deprojection = {}, {}, {}
         for i, param in enumerate(self._param_list):
             if param in ["gamma_in", "gamma_pl", "log_m2l"]:
                 kwargs_lens[param] = param_array[i]
             elif param in ["q_intrinsic"]:
-                kwargs_axisymmetry[param] = param_array[i]
+                kwargs_deprojection[param] = param_array[i]
             else:
                 kwargs_anisotropy[param] = param_array[i]
-        return kwargs_anisotropy, kwargs_lens, kwargs_axisymmetry
+        return kwargs_anisotropy, kwargs_lens, kwargs_deprojection
 
 
 class ParameterScalingSingleMeasurement(object):

@@ -41,6 +41,8 @@ class MassProfile:
         return density
 
     def einstein_radius(self, kwargs_list):
+        """Einstein radius of the mass profile, used to scale the radial range where the
+        MGE is fitted."""
         if (len(self.profile_list) == 1) and ("theta_E" in kwargs_list[0]):
             return kwargs_list[0]["theta_E"]
         else:
