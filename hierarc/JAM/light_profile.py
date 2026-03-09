@@ -20,8 +20,8 @@ class LightProfile:
         return self.light_model.surface_brightness(x=r, y=0, kwargs_list=kwargs_list)
 
     def effective_radius(self, kwargs_list):
-        """Half-light radius of the light profile, used to scale the radial range where the
-        MGE is fitted."""
+        """Half-light radius of the light profile, used to scale the radial range where
+        the MGE is fitted."""
         if len(self.profile_list) == 1:
             if self.profile_list[0] == "SERSIC":
                 return kwargs_list[0]["R_sersic"]
