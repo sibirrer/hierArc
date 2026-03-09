@@ -23,7 +23,7 @@ class DdtKinConstraints(KinConstraints):
         anisotropy_model,
         kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
-        axial_symmetry="axi_sph",
+        axial_symmetry="spherical",
         kinematics_backend="jampy",
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,

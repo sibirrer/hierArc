@@ -23,7 +23,7 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
         anisotropy_model,
         kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,  # deprecated
-        axial_symmetry="axi_sph",
+        axial_symmetry="spherical",
         kinematics_backend="jampy",
         lens_model_list=None,
         kwargs_lens_light=None,

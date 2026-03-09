@@ -31,7 +31,7 @@ class KinConstraintsComposite(KinConstraints):
         anisotropy_model,
         kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
-        axial_symmetry="axi_sph",
+        axial_symmetry="spherical",
         kinematics_backend="jampy",
         gamma_in_prior_mean=None,
         gamma_in_prior_std=None,
