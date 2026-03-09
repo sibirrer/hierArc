@@ -107,7 +107,9 @@ class TestTDCosmography(object):
         )
         npt.assert_almost_equal(D_dt_infered, D_dt, decimal=5)
         r_eff = 0.5
-        kwargs_lens_light = [{"amp": 1, "Rs": r_eff * 0.551, "center_x": 0, "center_y": 0}]
+        kwargs_lens_light = [
+            {"amp": 1, "Rs": r_eff * 0.551, "center_x": 0, "center_y": 0}
+        ]
         kwargs_anisotropy = {"r_ani": 1}
 
         anisotropy_model = "OM"
