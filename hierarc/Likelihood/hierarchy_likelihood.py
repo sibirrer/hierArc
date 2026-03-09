@@ -14,8 +14,6 @@ from hierarc.Sampling.Distributions.lens_distribution import LensDistribution
 import numpy as np
 import copy
 
-from local.notebooks.axi_jam_simulated_test import q_intrinsic_sigma
-
 
 class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
     """Master class containing the likelihood definitions of different analysis for a
