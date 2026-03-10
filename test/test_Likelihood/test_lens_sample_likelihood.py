@@ -62,7 +62,7 @@ class TestLensLikelihood(object):
 
         self.likelihood = LensSampleLikelihood(
             kwargs_lens_list=self.kwargs_lens_list,
-            kwargs_global_model=kwargs_global_model
+            kwargs_global_model=kwargs_global_model,
         )
 
     def test_log_likelihood(self):
@@ -70,11 +70,17 @@ class TestLensLikelihood(object):
         kwargs_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1}
         kwargs_deprojection = {"q_intrinsic": 0.8, "q_intrinsic_sigma": 0.1}
         logl = self.likelihood.log_likelihood(
-            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_deprojection=kwargs_deprojection
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_deprojection=kwargs_deprojection,
         )
         cosmo = FlatLambdaCDM(H0=self.H0_true * 0.99, Om0=self.omega_m_true, Ob0=0.05)
         logl_sigma = self.likelihood.log_likelihood(
-            cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin, kwargs_deprojection=kwargs_deprojection
+            cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_deprojection=kwargs_deprojection,
         )
         npt.assert_almost_equal(logl - logl_sigma, 0.12, decimal=2)
 

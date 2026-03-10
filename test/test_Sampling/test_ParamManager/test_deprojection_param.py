@@ -14,11 +14,16 @@ class TestDeprojectionParam:
         )
 
         self.param_gauss = DeprojectionParam(
-            deprojection_sampling=True, distribution_function="GAUSSIAN", kwargs_fixed={}
+            deprojection_sampling=True,
+            distribution_function="GAUSSIAN",
+            kwargs_fixed={},
         )
 
         self.param_gauss_log = DeprojectionParam(
-            deprojection_sampling=True, distribution_function="GAUSSIAN", log_scatter=True, kwargs_fixed={}
+            deprojection_sampling=True,
+            distribution_function="GAUSSIAN",
+            log_scatter=True,
+            kwargs_fixed={},
         )
 
         self.param_fixed_both = DeprojectionParam(
@@ -54,7 +59,10 @@ class TestDeprojectionParam:
 
         # GAUSSIAN with log scatter -> latex shows log sigma label
         plglog_tex = self.param_gauss_log.param_list(latex_style=True)
-        assert plglog_tex == [r"$\langle q_{\rm int} \rangle$", r"$\log_{10}\sigma(q_{\rm int})$"]
+        assert plglog_tex == [
+            r"$\langle q_{\rm int} \rangle$",
+            r"$\log_{10}\sigma(q_{\rm int})$",
+        ]
 
         # fixed both -> no free params
         assert self.param_fixed_both.param_list(latex_style=False) == []
@@ -68,7 +76,15 @@ class TestDeprojectionParam:
         # Standard gaussian case (linear scatter)
         args = self.param_gauss.kwargs2args(self.sample_kwargs)
         # should produce [q_intrinsic, q_intrinsic_sigma]
-        npt.assert_almost_equal(np.array(args), np.array([self.sample_kwargs["q_intrinsic"], self.sample_kwargs["q_intrinsic_sigma"]]))
+        npt.assert_almost_equal(
+            np.array(args),
+            np.array(
+                [
+                    self.sample_kwargs["q_intrinsic"],
+                    self.sample_kwargs["q_intrinsic_sigma"],
+                ]
+            ),
+        )
 
         kwargs_new, i = self.param_gauss.args2kwargs(args, i=0)
         # args2kwargs returns kwargs and next index
@@ -80,13 +96,18 @@ class TestDeprojectionParam:
     def test_log_scatter_conversion(self):
         # when log_scatter True, kwargs2args should return log10(sigma)
         args = self.param_gauss_log.kwargs2args(self.sample_kwargs)
-        expected_args = [self.sample_kwargs["q_intrinsic"], np.log10(self.sample_kwargs["q_intrinsic_sigma"])]
+        expected_args = [
+            self.sample_kwargs["q_intrinsic"],
+            np.log10(self.sample_kwargs["q_intrinsic_sigma"]),
+        ]
         npt.assert_almost_equal(np.array(args), np.array(expected_args))
 
         # args2kwargs should invert: exponentiate base-10 for sigma
         kwargs_new, next_i = self.param_gauss_log.args2kwargs(args, i=0)
         assert next_i == 2
-        npt.assert_almost_equal(kwargs_new["q_intrinsic"], self.sample_kwargs["q_intrinsic"])
+        npt.assert_almost_equal(
+            kwargs_new["q_intrinsic"], self.sample_kwargs["q_intrinsic"]
+        )
         npt.assert_almost_equal(kwargs_new["q_intrinsic_sigma"], 10 ** expected_args[1])
 
     def test_args2kwargs_with_fixed_values(self):
@@ -115,6 +136,7 @@ class TestDeprojectionParam:
         # when both fixed -> no args
         args2 = self.param_fixed_both.kwargs2args(kw)
         assert args2 == []
+
 
 if __name__ == "__main__":
     pytest.main()
