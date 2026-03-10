@@ -254,19 +254,26 @@ class TestJAMWrapperSpherical(object):
             convolved=True,
         )
         sigma_v_unconv, surf_bright_unconv = self.jam_spherical_grid.dispersion_points(
-            self.x_grid, self.y_grid,
+            self.x_grid,
+            self.y_grid,
             self.kwargs_lens_mass,
             self.kwargs_light,
             self.kwargs_anisotropy,
             convolved=False,
         )
-        multi_gaussian_kernel = self.jam_spherical_grid_multi_gaussian.convolution_kernel(
-            delta_pix=self.jam_spherical_grid.delta_pix,
-            num_pix=31,
+        multi_gaussian_kernel = (
+            self.jam_spherical_grid_multi_gaussian.convolution_kernel(
+                delta_pix=self.jam_spherical_grid.delta_pix,
+                num_pix=31,
+            )
         )
         sigma2_lum_weighted_unconv = sigma_v_unconv**2 * surf_bright_unconv
-        sigma2_lum_weighted_conv = convolve2d(sigma2_lum_weighted_unconv, multi_gaussian_kernel, mode="same")
-        surf_bright_conv = convolve2d(surf_bright_unconv, multi_gaussian_kernel, mode="same")
+        sigma2_lum_weighted_conv = convolve2d(
+            sigma2_lum_weighted_unconv, multi_gaussian_kernel, mode="same"
+        )
+        surf_bright_conv = convolve2d(
+            surf_bright_unconv, multi_gaussian_kernel, mode="same"
+        )
         sigma_v_conv = np.sqrt(sigma2_lum_weighted_conv / surf_bright_conv)
 
         npt.assert_allclose(sigma_v_multi, sigma_v_conv, rtol=0.1)
@@ -606,7 +613,7 @@ class TestRaiseWarnings(object):
             "psf_type": "GAUSSIAN",
             "fwhm": 0.5,
         }
-        y, x = np.mgrid[:10,:10]
+        y, x = np.mgrid[:10, :10]
         kwargs_aperture = {
             "aperture_type": "IFU_grid",
             "x_grid": x,
@@ -628,27 +635,41 @@ class TestRaiseWarnings(object):
             )
 
     def test_inclination_warning(self):
-        obs_kwargs = {'e1': 0.0, 'e2': 0.0}
+        obs_kwargs = {"e1": 0.0, "e2": 0.0}
         q_intrinisc = 0.5
 
         with pytest.warns(UserWarning, match="Cannot determine inclination angle"):
             self.jam_grid._get_inclination_angle(obs_kwargs, q_intrinisc)
 
     def test_voronoi_deprecation_warning(self):
-        with pytest.warns(DeprecationWarning, match="The voronoi bins keyword argument will be deprecated"):
+        with pytest.warns(
+            DeprecationWarning,
+            match="The voronoi bins keyword argument will be deprecated",
+        ):
             self.jam_grid.dispersion(
-                kwargs_mass=[{"theta_E": 1.5, "gamma": 2.1, "center_x": 0.0, "center_y": 0.0}],
-                kwargs_light=[{"Rs": 1.0, "amp": 1.0, "center_x": 0.0, "center_y": 0.0}],
+                kwargs_mass=[
+                    {"theta_E": 1.5, "gamma": 2.1, "center_x": 0.0, "center_y": 0.0}
+                ],
+                kwargs_light=[
+                    {"Rs": 1.0, "amp": 1.0, "center_x": 0.0, "center_y": 0.0}
+                ],
                 kwargs_anisotropy={"beta": 0.3},
                 convolved=True,
                 voronoi_bins=np.random.randint(0, 5, size=(10, 10)),
             )
 
     def test_voronoi_error(self):
-        with pytest.raises(ValueError, match="Voronoi binning is only applicable for IFU_grid aperture type."):
+        with pytest.raises(
+            ValueError,
+            match="Voronoi binning is only applicable for IFU_grid aperture type.",
+        ):
             self.jam_shell.dispersion(
-                kwargs_mass=[{"theta_E": 1.5, "gamma": 2.1, "center_x": 0.0, "center_y": 0.0}],
-                kwargs_light=[{"Rs": 1.0, "amp": 1.0, "center_x": 0.0, "center_y": 0.0}],
+                kwargs_mass=[
+                    {"theta_E": 1.5, "gamma": 2.1, "center_x": 0.0, "center_y": 0.0}
+                ],
+                kwargs_light=[
+                    {"Rs": 1.0, "amp": 1.0, "center_x": 0.0, "center_y": 0.0}
+                ],
                 kwargs_anisotropy={"beta": 0.3},
                 convolved=True,
                 voronoi_bins=np.random.randint(0, 5, size=(10, 10)),
