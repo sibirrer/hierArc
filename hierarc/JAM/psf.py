@@ -1,4 +1,4 @@
-from lenstronomy.Util import kernel_util
+from lenstronomy.LightModel.Profiles.gaussian import Gaussian
 import lenstronomy.Util.util as util
 from scipy.signal import convolve2d
 import numpy as np
@@ -68,7 +68,7 @@ class PSFGaussian(object):
         :param num_pix: number of pixels per axis of the kernel
         :return: 2d numpy array of kernel
         """
-        kernel = kernel_util.kernel_gaussian(num_pix, delta_pix, self._fwhm)
+        kernel = _make_gaussian_psf_kernel(self.fwhm, delta_pix, num_pix, normalize=True)
         return kernel
 
     @property
@@ -116,7 +116,8 @@ class PSFMultiGaussian(object):
         fwhms = util.sigma2fwhm(self.sigmas)
         kernel = np.zeros((num_pix, num_pix))
         for amp, fwhm in zip(self._amplitudes, fwhms):
-            kernel += amp * kernel_util.kernel_gaussian(num_pix, delta_pix, self._fwhm)
+            kernel += amp * _make_gaussian_psf_kernel(fwhm, delta_pix, num_pix, normalize=False)
+        kernel /= np.sum(kernel)
         return kernel
 
     @property
@@ -171,3 +172,17 @@ class PSFPixel(object):
     def supersampling_factor(self):
         """Retrieve supersampling factor if stored as a private variable."""
         return self._supersampling_factor
+
+
+def _make_gaussian_psf_kernel(fwhm, delta_pix, num_pix=21, normalize=True):
+    """Helper function to make a Gaussian PSF kernel."""
+    x_grid, y_grid = util.make_grid(num_pix, delta_pix)
+    sigma = util.fwhm2sigma(fwhm)
+    gaussian = Gaussian()
+    kernel = gaussian.function(
+        x_grid, y_grid, amp=1.0, sigma=sigma, center_x=0, center_y=0
+    )
+    kernel = util.array2image(kernel)
+    if normalize:
+        kernel /= np.sum(kernel)
+    return kernel

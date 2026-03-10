@@ -148,6 +148,7 @@ class JAMWrapperBase(object):
         if not convolved:
             psf_sigmas = 0.0
             delta_pix = 0.0
+            psf_amplitudes = 1.0
 
         vrms, surf_bright = self.call_jampy(
             surf_lum,

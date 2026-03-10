@@ -48,11 +48,20 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
 
         if kwargs_aperture["aperture_type"] == "IFU_grid":
             kwargs_aperture = kwargs_aperture.copy()
+            if "supersampling_factor" in kwargs_aperture:
+                if kwargs_aperture["supersampling_factor"] != self.psf_supersampling_factor:
+                    warnings.warn(
+                        f"Supersampling factor in kwargs_aperture ({kwargs_aperture['supersampling_factor']}) "
+                        f"does not match the one set by the PSF kwargs ({self.psf_supersampling_factor}). "
+                        f"The one from the PSF kwargs will be used.",
+                        UserWarning
+                    )
             kwargs_aperture["supersampling_factor"] = self.psf_supersampling_factor
-            # add a padding of 3 times the PSF sigma for convolution
-            kwargs_aperture["padding_arcsec"] = (
-                gaussian_fwhm_to_sigma * self.psf_fwhm * 3
-            )
+            if "padding_arcsec" not in kwargs_aperture:
+                # add a padding of 3 times the PSF sigma for convolution
+                kwargs_aperture["padding_arcsec"] = (
+                    gaussian_fwhm_to_sigma * self.psf_fwhm * 3
+                )
             Aperture.__init__(self, **kwargs_aperture)
             self.convolution_padding = self._aperture.padding
         else:
@@ -122,7 +131,14 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
             sigma2_lum_weighted_sup = vrms_sup**2 * surf_bright_sup
 
         if voronoi_bins is not None:
+            if self.aperture_type != "IFU_grid":
+                raise ValueError("Voronoi binning is only applicable for IFU_grid aperture type.")
             # this would be deprecated and replaced by IFU_binned aperture
+            warnings.warn(
+                "The voronoi bins keyword argument will be deprecated, "
+                "use the IFU_binned aperture type instead.",
+                DeprecationWarning
+            )
             sigma2_lum_weighted = downsample_cords_to_bins(
                 sigma2_lum_weighted_sup,
                 voronoi_bins,
@@ -161,7 +177,8 @@ class JAMWrapper(JAMWrapperBase, PSF, Aperture):
         if q_obs == 1.0:
             warnings.warn(
                 "Cannot determine inclination angle for circular observed profile (q_obs=1.0)."
-                " Spherical symmetry will be assumed."
+                " Spherical symmetry will be assumed.",
+                UserWarning
             )
             return None
         cos_i_squared = (q_obs**2 - q_intrinsic**2) / (1 - q_intrinsic**2)
