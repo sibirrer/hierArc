@@ -454,5 +454,17 @@ class TestLensLikelihood(object):
         self.likelihood.info()
 
 
+class TestRaise:
+
+    def test_reaise_axisymmetric_correction(self):
+        with pytest.raises(ValueError):
+            LensLikelihood(
+                z_lens=0.5,
+                z_source=1.5,
+                q_intrinsic_sampling=True,
+                axisymmetric_correction_distributions=np.random.random(size=3),
+            )
+
+
 if __name__ == "__main__":
     pytest.main()
