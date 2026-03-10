@@ -398,12 +398,6 @@ class JAMKinematicsAPI(object):
             if model_kinematics_bool[i] is True:
                 light_profile_list.append(light_model)
                 kwargs_light_i = kwargs_lens_light[i].copy()
-                # if "center_x" not in kwargs_light_i:
-                #     kwargs_light_i["center_x"] = 0.0
-                #     kwargs_light_i["center_y"] = 0.0
-                # if "e1" not in kwargs_light_i:
-                #     kwargs_light_i["e1"] = 0.0
-                #     kwargs_light_i["e2"] = 0.0
                 kwargs_light.append(kwargs_light_i)
 
         return light_profile_list, kwargs_light

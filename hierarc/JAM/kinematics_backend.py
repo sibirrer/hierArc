@@ -77,7 +77,7 @@ class KinematicsBackend:
                 warnings.warn(
                     "MGE_light and MGE_mass are ignored as MGE decomposition "
                     "is internally managed by the JamPy backend.",
-                    DeprecationWarning,
+                    UserWarning,
                 )
             if Hernquist_approx is True:
                 warnings.warn(
@@ -557,7 +557,7 @@ class KinematicsBackend:
                 warnings.warn(
                     "MGE_light and MGE_mass are ignored as MGE decomposition "
                     "is internally managed by the JamPy backend.",
-                    DeprecationWarning,
+                    UserWarning,
                 )
             if Hernquist_approx:
                 warnings.warn(

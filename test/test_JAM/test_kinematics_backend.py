@@ -200,6 +200,33 @@ class TestKinematicsBackend(object):
             assert len(w) == 2
             assert issubclass(w[0].category, DeprecationWarning)
             assert issubclass(w[-1].category, UserWarning)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            mge_with_jampy = KinematicsBackend(
+                self.z_lens,
+                self.z_source,
+                self.kwargs_model,
+                axial_symmetry="axi_sph",
+                backend="jampy",
+                kwargs_numerics_jam={},
+                MGE_mass=True,
+                MGE_light=True
+            )
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            hernquist_with_jampy = KinematicsBackend(
+                self.z_lens,
+                self.z_source,
+                self.kwargs_model,
+                axial_symmetry="axi_sph",
+                backend="jampy",
+                kwargs_numerics_jam={},
+                Hernquist_approx=True,
+            )
+            assert len(w) == 1
+            assert issubclass(w[-1].category, UserWarning)
 
 
 if __name__ == "__main__":

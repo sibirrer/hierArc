@@ -58,13 +58,17 @@ class Aperture(object):
                 "'general' 'slit', 'shell', 'IFU_grid', 'IFU_shells' 'IFU_binned'. "
                 % aperture_type
             )
-        self.aperture_type = aperture_type
+        self._aperture_type = aperture_type
 
     def aperture_sample(self):
         return self._aperture.aperture_sample()
 
     def aperture_downsample(self, hires_map):
         return self._aperture.aperture_downsample(hires_map)
+
+    @property
+    def aperture_type(self):
+        return self._aperture_type
 
     @property
     def num_segments(self):

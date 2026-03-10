@@ -24,10 +24,9 @@ class GeneralAperture(object):
         return self._x_cords, self._y_cords
 
     def aperture_downsample(self, high_res_map):
-        return downsample_cords_to_bins(
+        return _downsample_cords_to_bins_1d(
             high_res_map,
             self._bin_ids,
-            supersampling_factor=1,
         )
 
     @property
@@ -445,11 +444,14 @@ def _unpad_map(padded_map, padding):
 def downsample_cords_to_bins(vrms_grid, bins, supersampling_factor=1, padding=0):
     # remove padding from the grid
     vrms_grid = _unpad_map(vrms_grid, padding)
-    n_bins = int(np.max(bins)) + 1
     supersampled_bins = bins.repeat(supersampling_factor, axis=0).repeat(
         supersampling_factor, axis=1
     )
+    return _downsample_cords_to_bins_1d(vrms_grid, supersampled_bins)
+
+def _downsample_cords_to_bins_1d(vrms_grid, bins):
+    n_bins = int(np.max(bins)) + 1
     vrms = np.zeros(n_bins)
     for n in range(n_bins):
-        vrms[n] = np.mean(vrms_grid[supersampled_bins == n])
+        vrms[n] = np.mean(vrms_grid[bins == n])
     return vrms

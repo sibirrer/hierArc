@@ -1,8 +1,6 @@
 from lenstronomy.Util import kernel_util
 import lenstronomy.Util.util as util
 from scipy.signal import convolve2d
-
-
 import numpy as np
 
 
@@ -27,12 +25,12 @@ class PSF(object):
         else:
             raise ValueError("psf_type %s not supported for convolution!" % psf_type)
 
-    def convolution_kernel(self, *args, **kwargs):
+    def convolution_kernel(self, **kwargs):
         """Normalized convolution kernel."""
-        return self._psf.convolution_kernel(*args, **kwargs)
+        return self._psf.convolution_kernel(**kwargs)
 
-    def convolve(self, data):
-        kernel = self.convolution_kernel(data)
+    def convolve(self, data, **kernel_kwargs):
+        kernel = self.convolution_kernel(**kernel_kwargs)
         return convolve2d(data, kernel, mode="same")
 
     @property
@@ -151,7 +149,7 @@ class PSFPixel(object):
         self._kernel_size = kernel.shape[0]
         self._supersampling_factor = supersampling_factor
 
-    def convolution_kernel(self, *args, **kwargs):
+    def convolution_kernel(self, **kwargs):
         return self._kernel
 
     @property

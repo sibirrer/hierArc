@@ -115,7 +115,6 @@ class TestTDCosmography(object):
         anisotropy_model = "OM"
         self.td_cosmo.kinematics_modeling_settings(
             anisotropy_model,
-            Hernquist_approx=False,
         )
 
         J = self.td_cosmo.velocity_dispersion_dimension_less(
