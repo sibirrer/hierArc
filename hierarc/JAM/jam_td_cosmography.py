@@ -36,7 +36,6 @@ class JAMTDCosmography(JAMKinematicsAPI):
         multi_observations=False,
         multi_light_profile=False,
         kwargs_numerics_jam=None,
-        Hernquist_approx=False,
     ):
         """
 
@@ -60,9 +59,6 @@ class JAMTDCosmography(JAMKinematicsAPI):
         :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
             as a list for each individual observation condition.
         :param axial_symmetry: string, symmetry assumption for JAM modeling. Options are spherical, axi_sph and axi_cyl.
-        :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
-            to the half light radius of the deflector light profile to compute the
-            kinematics
         """
 
         if cosmo_fiducial is None:
@@ -98,7 +94,6 @@ class JAMTDCosmography(JAMKinematicsAPI):
             multi_observations=multi_observations,
             multi_light_profile=multi_light_profile,
             kwargs_numerics_jam=kwargs_numerics_jam,
-            Hernquist_approx=Hernquist_approx,
         )
 
     def time_delays(

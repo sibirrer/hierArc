@@ -31,7 +31,6 @@ class JAMKinematicsAPI(object):
         multi_observations=False,
         multi_light_profile=False,
         kwargs_numerics_jam=None,
-        Hernquist_approx=False,
     ):
         """Initialize the class with the lens model and cosmology.
 
@@ -63,9 +62,6 @@ class JAMKinematicsAPI(object):
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param axial_symmetry: string, symmetry assumption for JAM modeling. Options are
             spherical, axi_sph and axi_cyl.
-        :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
-            to the half light radius of the deflector light profile to compute the
-            kinematics routine
         """
         self.z_d = z_lens
         self.z_s = z_source
@@ -99,7 +95,6 @@ class JAMKinematicsAPI(object):
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
         self._axial_symmetry = axial_symmetry
-        self._Hernquist_approx = Hernquist_approx
         self._multi_observations = multi_observations
         self._multi_light_profile = multi_light_profile
 
@@ -245,7 +240,6 @@ class JAMKinematicsAPI(object):
             kwargs_lens_light,
             r_eff=r_eff,
             model_kinematics_bool=self._light_model_kinematics_bool,
-            Hernquist_approx=self._Hernquist_approx,
         )
 
         jam_models = []
@@ -334,7 +328,6 @@ class JAMKinematicsAPI(object):
         kwargs_lens_light,
         r_eff=None,
         model_kinematics_bool=None,
-        Hernquist_approx=False,
     ):
         """Setting up of the light profile to compute the kinematics in the JAMWrapper
         module. The requirement is that the profiles are centered at (0, 0) and that for
@@ -346,20 +339,8 @@ class JAMKinematicsAPI(object):
             done in this routine if required.
         :param model_kinematics_bool: list of booleans to indicate a subset of light
             profiles to be part of the physical deflector light.
-        :param Hernquist_approx: boolean, if True replaces the actual light profile(s)
-            with a Hernquist model with matched half-light radius.
         """
         light_profile_list = []
-        if Hernquist_approx is True:
-            if r_eff is None:
-                raise ValueError(
-                    "r_eff needs to be pre-computed and specified when using the "
-                    "Hernquist approximation"
-                )
-            light_profile_list = ["HERNQUIST"]
-            kwargs_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
-            self._multi_light_profile = False
-            return light_profile_list, kwargs_light
         if model_kinematics_bool is None:
             model_kinematics_bool = [True] * len(self._lens_light_model_list)
 
@@ -384,7 +365,6 @@ class JAMKinematicsAPI(object):
         anisotropy_model,
         axial_symmetry="axi_sph",
         kwargs_numerics_jam=None,
-        Hernquist_approx=False,
     ):
         """Return the settings for the kinematic modeling.
 
@@ -392,15 +372,11 @@ class JAMKinematicsAPI(object):
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param axial_symmetry: for axisymmetric JAM modeling :kwargs_numerics_jam:
             kwargs for JamWrapper MGE decomposition
-        :param Hernquist_approx: bool, if True, uses a Hernquist light profile matched
-            to the half light radius of the deflector light profile to compute the
-            kinematics
         :return: updated settings
         """
         self._kwargs_numerics_kin = kwargs_numerics_jam
         self._anisotropy_model = anisotropy_model
         self._axial_symmetry = axial_symmetry
-        self._Hernquist_approx = Hernquist_approx
 
     @staticmethod
     def transform_kappa_ext(sigma_v, kappa_ext=0):

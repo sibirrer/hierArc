@@ -73,6 +73,17 @@ class KinematicsBackend:
                 kwargs_numerics_jam = kwargs_numerics_galkin
 
         if backend == "jampy":
+            if MGE_light or MGE_mass:
+                warnings.warn(
+                    "MGE_light and MGE_mass are ignored as MGE decomposition "
+                    "is internally managed by the JamPy backend.",
+                    DeprecationWarning,
+                )
+            if Hernquist_approx is True:
+                warnings.warn(
+                    "Hernquist approximation not supported for the JamPy backend and will be ignored.",
+                    UserWarning,
+                )
             kinematics_backend = JAMTDCosmography(
                 z_lens,
                 z_source,
@@ -87,7 +98,6 @@ class KinematicsBackend:
                 kwargs_numerics_jam=kwargs_numerics_jam,
                 multi_observations=multi_observations,
                 multi_light_profile=multi_light_profile,
-                Hernquist_approx=Hernquist_approx,
             )
         elif backend == "galkin":
             kinematics_backend = TDCosmography(
@@ -549,8 +559,12 @@ class KinematicsBackend:
                     "is internally managed by the JamPy backend.",
                     DeprecationWarning,
                 )
+            if Hernquist_approx:
+                warnings.warn(
+                    "Hernquist approximation not supported for the JamPy backend and will be ignored.",
+                    UserWarning,
+                )
             self._kinematics_backend.kinematics_modeling_settings(
                 anisotropy_model,
                 kwargs_numerics_jam=kwargs_numerics_jam,
-                Hernquist_approx=Hernquist_approx,
             )
