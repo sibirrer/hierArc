@@ -11,7 +11,6 @@ class JAMAnisotropy:
         "Colin",
         "logistic",
     )
-
     """
     Manager for stellar velocity anisotropy parameterizations used by Jampy.
 
@@ -153,7 +152,6 @@ class JAMAnisotropy:
         :param beta_inf: float, asymptotic anisotropy value (beta at r
         :param r_ani: float, anisotropy radius (scale of transition)
         :param alpha: float, slope of the transition
-
         :return: list
         """
         return [r_ani, beta_0, beta_inf, alpha]
