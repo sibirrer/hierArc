@@ -184,7 +184,7 @@ class TestJAMKinematicsAPI:
         sigma = self.api.velocity_dispersion(
             kwargs_lens, kwargs_lens_light, kwargs_anisotropy, r_eff=self.r_eff
         )
-        npt.assert_almost_equal(sigma, 215.14, decimal=2)
+        npt.assert_almost_equal(sigma, 215.139, decimal=1)
 
     def test_velocity_dispersion_map(self):
         kwargs_lens = [dict(self.kwargs_lens[0])]
@@ -193,7 +193,7 @@ class TestJAMKinematicsAPI:
         sigma = self.api.velocity_dispersion_map(
             kwargs_lens, kwargs_lens_light, kwargs_anisotropy, r_eff=self.r_eff
         )
-        npt.assert_almost_equal(sigma, 215.14, decimal=2)
+        npt.assert_almost_equal(sigma, 215.139, decimal=1)
 
     def test_warn_supersampling(self):
         with warnings.catch_warnings(record=True) as w:

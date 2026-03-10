@@ -1,4 +1,4 @@
-__author__ = "sibirrer,furcelay"
+__author__ = "sibirrer", "furcelay"
 
 from hierarc.JAM.aperture_types import (
     GeneralAperture,

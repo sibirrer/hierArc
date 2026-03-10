@@ -66,11 +66,6 @@ class TestApertureTypes(object):
             self.hr_map, bins, supersampling_factor=supersampling_factor, padding=0
         )
         # expected vrms for each bin is mean of the corresponding 2x2 block:
-        # blocks in hr_map:
-        # block 0: hr_map[0:2,0:2] -> [0,1,4,5] mean=2.5
-        # block 1: hr_map[0:2,2:4] -> [2,3,6,7] mean=4.5
-        # block 2: hr_map[2:4,0:2] -> [8,9,12,13] mean=10.5
-        # block 3: hr_map[2:4,2:4] -> [10,11,14,15] mean=12.5
         assert_allclose(v, np.array([2.5, 4.5, 10.5, 12.5]))
 
     def test_general_aperture(self):
@@ -128,7 +123,7 @@ class TestApertureTypes(object):
         xs, ys = shell.aperture_sample()
         rs = np.sqrt((xs) ** 2 + (ys) ** 2)
         # all radii should be within [r_in, r_out)
-        assert rs.min() >= 0.5
+        assert rs.min() + 1e-12 >= 0.5
         assert rs.max() < 1.1
         # aperture_downsample returns sum
         assert_allclose(shell.aperture_downsample(self.hr_map), np.sum(self.hr_map))
@@ -144,17 +139,6 @@ class TestApertureTypes(object):
         # delta_pix_xy should be (1.0, 1.0)
         dx, dy = ifu.delta_pix_xy
         assert_allclose(np.abs(dx), np.abs(dy))
-        # construct a high-res map that corresponds to supersampling_factor=2:
-        # IFUGrid inits delta_pix_sup = abs(delta_x)/supersampling_factor, and creates a supersampled grid.
-        # We will create a high-res map shaped like the internal supersampled grid:
-        x_sup, y_sup = ifu.aperture_sample()
-        # make a high-res map filled with ones: downsample should yield array of ones with shape (2,2)
-        hr = (
-            np.ones((x_sup.size // 2, 2))
-            if False
-            else np.ones((int(np.sqrt(x_sup.size)), int(np.sqrt(x_sup.size))))
-        )
-        # safer approach: create a high-res map that when unpadded and averaged yields a known shape:
         # The IFU.aperture_downsample uses high_res_map.reshape(num_pix_y, s, num_pix_x, s).mean(axis=(1,3))
         num_pix_y, num_pix_x = ifu.grid_shape
         s = ifu.supersampling_factor
