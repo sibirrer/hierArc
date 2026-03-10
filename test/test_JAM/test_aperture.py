@@ -9,17 +9,58 @@ class TestAperture:
         self.y_coords = np.array([[0.0, 0.0], [1.0, 1.0]])
         self.bins = np.array([[0, 1], [2, -1]])
         self.aperture_kwargs = {
-            "general": {"x_cords": np.array([0.0, 1.0, 2.0]), "y_cords": np.array([0.0, 0.5, 1.0]), "bin_ids": np.array([0, 1, 1]), "delta_pix": 0.2},
-            "slit": {"length": 0.3, "width": 0.1, "center_ra": 0.0, "center_dec": 0.0, "angle": 0.0, "delta_pix": 0.1},
-            "shell": {"r_in": 0.5, "r_out": 1.0, "center_ra": 0.0, "center_dec": 0.0, "delta_pix": 0.1},
-            "frame": {"width_outer": 0.6, "width_inner": 0.2, "center_ra": 0.0, "center_dec": 0.0, "angle": 0.0, "delta_pix": 0.1},
-            "IFU_grid": {"x_grid": self.x_coords, "y_grid": self.y_coords, "supersampling_factor": 1, "padding_arcsec": 0.1},
-            "IFU_shells": {"r_bins": np.array([0.0, 0.5, 1.0]), "center_ra": 0.0, "center_dec": 0.0, "ifu_grid_kwargs": None, "delta_pix": 0.1},
-            "IFU_binned": {"x_grid": self.x_coords, "y_grid": self.y_coords, "bins": self.bins},
+            "general": {
+                "x_cords": np.array([0.0, 1.0, 2.0]),
+                "y_cords": np.array([0.0, 0.5, 1.0]),
+                "bin_ids": np.array([0, 1, 1]),
+                "delta_pix": 0.2,
+            },
+            "slit": {
+                "length": 0.3,
+                "width": 0.1,
+                "center_ra": 0.0,
+                "center_dec": 0.0,
+                "angle": 0.0,
+                "delta_pix": 0.1,
+            },
+            "shell": {
+                "r_in": 0.5,
+                "r_out": 1.0,
+                "center_ra": 0.0,
+                "center_dec": 0.0,
+                "delta_pix": 0.1,
+            },
+            "frame": {
+                "width_outer": 0.6,
+                "width_inner": 0.2,
+                "center_ra": 0.0,
+                "center_dec": 0.0,
+                "angle": 0.0,
+                "delta_pix": 0.1,
+            },
+            "IFU_grid": {
+                "x_grid": self.x_coords,
+                "y_grid": self.y_coords,
+                "supersampling_factor": 1,
+                "padding_arcsec": 0.1,
+            },
+            "IFU_shells": {
+                "r_bins": np.array([0.0, 0.5, 1.0]),
+                "center_ra": 0.0,
+                "center_dec": 0.0,
+                "ifu_grid_kwargs": None,
+                "delta_pix": 0.1,
+            },
+            "IFU_binned": {
+                "x_grid": self.x_coords,
+                "y_grid": self.y_coords,
+                "bins": self.bins,
+            },
         }
 
     def test_supported_types(self):
-        """Construct Aperture for each supported aperture_type string and check basic forwarding."""
+        """Construct Aperture for each supported aperture_type string and check basic
+        forwarding."""
         supported = [
             "general",
             "slit",

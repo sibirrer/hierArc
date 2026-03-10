@@ -62,7 +62,9 @@ class TestApertureTypes(object):
         bins = np.array([[0, 1], [2, 3]])
         # replicate to 4x4 by repeating each element 2x2
         supersampling_factor = 2
-        v = downsample_cords_to_bins(self.hr_map, bins, supersampling_factor=supersampling_factor, padding=0)
+        v = downsample_cords_to_bins(
+            self.hr_map, bins, supersampling_factor=supersampling_factor, padding=0
+        )
         # expected vrms for each bin is mean of the corresponding 2x2 block:
         # blocks in hr_map:
         # block 0: hr_map[0:2,0:2] -> [0,1,4,5] mean=2.5
@@ -88,7 +90,14 @@ class TestApertureTypes(object):
 
     def test_slit(self):
         # small slit length & width -> will create few points
-        slit = Slit(length=0.3, width=0.2, center_ra=0.1, center_dec=-0.1, angle=0.0, delta_pix=0.1)
+        slit = Slit(
+            length=0.3,
+            width=0.2,
+            center_ra=0.1,
+            center_dec=-0.1,
+            angle=0.0,
+            delta_pix=0.1,
+        )
         # slit aperture returns flattened grid coordinates
         xs, ys = slit.aperture_sample()
         assert xs.ndim == 1 and ys.ndim == 1
@@ -98,7 +107,14 @@ class TestApertureTypes(object):
         assert_allclose(slit.aperture_downsample(self.hr_map), np.sum(self.hr_map))
 
     def test_frame(self):
-        frame = Frame(width_outer=0.6, width_inner=0.2, center_ra=0.0, center_dec=0.0, angle=0.0, delta_pix=0.2)
+        frame = Frame(
+            width_outer=0.6,
+            width_inner=0.2,
+            center_ra=0.0,
+            center_dec=0.0,
+            angle=0.0,
+            delta_pix=0.2,
+        )
         xs, ys = frame.aperture_sample()
         # ensure inner box removed: no points with both |x|<width_inner/2 and |y|<width_inner/2
         inner_mask = (np.abs(xs) < 0.2 / 2) & (np.abs(ys) < 0.2 / 2)
@@ -110,7 +126,7 @@ class TestApertureTypes(object):
     def test_shell(self):
         shell = Shell(r_in=0.5, r_out=1.1, center_ra=0.0, center_dec=0.0, delta_pix=0.5)
         xs, ys = shell.aperture_sample()
-        rs = np.sqrt((xs)**2 + (ys)**2)
+        rs = np.sqrt((xs) ** 2 + (ys) ** 2)
         # all radii should be within [r_in, r_out)
         assert rs.min() >= 0.5
         assert rs.max() < 1.1
@@ -120,8 +136,8 @@ class TestApertureTypes(object):
 
     def test_ifu_grid(self):
         # create a simple IFU grid 2x2, centered grid with delta 1.0
-        xg = np.array([[ -0.5, 0.5], [-0.5, 0.5]])
-        yg = np.array([[ -0.5, -0.5], [0.5, 0.5]])
+        xg = np.array([[-0.5, 0.5], [-0.5, 0.5]])
+        yg = np.array([[-0.5, -0.5], [0.5, 0.5]])
         ifu = IFUGrid(xg, yg, supersampling_factor=2, padding_arcsec=0.0)
         # grid_shape property matches input
         assert ifu.grid_shape == xg.shape
@@ -133,13 +149,21 @@ class TestApertureTypes(object):
         # We will create a high-res map shaped like the internal supersampled grid:
         x_sup, y_sup = ifu.aperture_sample()
         # make a high-res map filled with ones: downsample should yield array of ones with shape (2,2)
-        hr = np.ones((x_sup.size // 2, 2)) if False else np.ones((int(np.sqrt(x_sup.size)), int(np.sqrt(x_sup.size))))
+        hr = (
+            np.ones((x_sup.size // 2, 2))
+            if False
+            else np.ones((int(np.sqrt(x_sup.size)), int(np.sqrt(x_sup.size))))
+        )
         # safer approach: create a high-res map that when unpadded and averaged yields a known shape:
         # The IFU.aperture_downsample uses high_res_map.reshape(num_pix_y, s, num_pix_x, s).mean(axis=(1,3))
         num_pix_y, num_pix_x = ifu.grid_shape
         s = ifu.supersampling_factor
         # create high_res_map with shape (num_pix_y*s, num_pix_x*s)
-        hr_map = np.arange(num_pix_y * s * num_pix_x * s).reshape(num_pix_y * s, num_pix_x * s).astype(float)
+        hr_map = (
+            np.arange(num_pix_y * s * num_pix_x * s)
+            .reshape(num_pix_y * s, num_pix_x * s)
+            .astype(float)
+        )
         down = ifu.aperture_downsample(hr_map)
         assert down.shape == (num_pix_y, num_pix_x)
         # verify the (0,0) entry equals mean of top-left sxs block
@@ -154,7 +178,7 @@ class TestApertureTypes(object):
         assert ifu_shells.num_segments == len(r_bins) - 1
         # create a high-res map with values equal to radius for simplicity
         x_sup, y_sup = ifu_shells.aperture_sample()
-        hr_vals = np.sqrt((x_sup)**2 + (y_sup)**2)
+        hr_vals = np.sqrt((x_sup) ** 2 + (y_sup) ** 2)
         # downsample: for each shell we expect mean radius to be between the bins; just check shape and finite values
         out = ifu_shells.aperture_downsample(hr_vals)
         assert out.shape == (ifu_shells.num_segments,)
@@ -184,6 +208,7 @@ class TestRaise(object):
         yg = np.array([[0.0, 0.0], [0.0, -0.5]])  # y size is 0.5
         with pytest.raises(ValueError):
             IFUGrid(xg, yg, supersampling_factor=1, padding_arcsec=0)
+
 
 if __name__ == "__main__":
     pytest.main()

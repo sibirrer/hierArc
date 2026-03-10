@@ -449,6 +449,7 @@ def downsample_cords_to_bins(vrms_grid, bins, supersampling_factor=1, padding=0)
     )
     return _downsample_cords_to_bins_1d(vrms_grid, supersampled_bins)
 
+
 def _downsample_cords_to_bins_1d(vrms_grid, bins):
     n_bins = int(np.max(bins)) + 1
     vrms = np.zeros(n_bins)

@@ -26,7 +26,7 @@ class TestMassProfile:
         kwargs_list = [dict(self.kw_sie), dict(self.kw_gauss)]
         r = np.array([0.1, 0.5, 1.0])
         dens = mp.radial_density(r, kwargs_list)
-        npt.assert_almost_equal(dens, np.array([16.4134,  0.9447,  0.2279]), decimal=4)
+        npt.assert_almost_equal(dens, np.array([16.4134, 0.9447, 0.2279]), decimal=4)
 
     def test_einstein_radius(self):
         mp = MassProfile(["SIE"])

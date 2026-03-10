@@ -13,7 +13,9 @@ class TestPSF:
         self.delta_pix = 0.05
         self.num_pix = 5
         self.data = np.arange(100).reshape(10, 10).astype(float)
-        self.gaussian_kernel = kernel_util.kernel_gaussian(self.num_pix, self.delta_pix, self.fwhm)
+        self.gaussian_kernel = kernel_util.kernel_gaussian(
+            self.num_pix, self.delta_pix, self.fwhm
+        )
 
     def test_psf_gaussian(self):
         g = PSF("GAUSSIAN", fwhm=self.fwhm)
@@ -40,7 +42,12 @@ class TestPSF:
     def test_psfpixel_kernel_passthrough_and_properties(self):
         # create a pixel PSF from an external kernel and supersampling factor
         ss = 3
-        pixel_psf = PSF("PIXEL", fwhm=self.fwhm, kernel=self.gaussian_kernel, supersampling_factor=ss)
+        pixel_psf = PSF(
+            "PIXEL",
+            fwhm=self.fwhm,
+            kernel=self.gaussian_kernel,
+            supersampling_factor=ss,
+        )
         assert pixel_psf._psf._kernel_size == self.gaussian_kernel.shape[0]
         k_ret = pixel_psf.convolution_kernel()
         assert_allclose(k_ret, self.gaussian_kernel)
@@ -57,6 +64,7 @@ class TestPSF:
         conv = psf.convolve(self.data, delta_pix=self.delta_pix, num_pix=self.num_pix)
         conv_ref = convolve2d(self.data, kernel, mode="same")
         assert_allclose(conv, conv_ref)
+
 
 class TestRaise:
     def test_invalid_psf_type_raises(self):
