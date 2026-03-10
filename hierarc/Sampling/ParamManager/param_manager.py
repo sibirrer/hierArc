@@ -209,9 +209,9 @@ class ParamManager(object):
         list_param += self._cosmo_param.param_list(latex_style=latex_style)
         list_param += self._lens_param.param_list(latex_style=latex_style)
         list_param += self._kin_param.param_list(latex_style=latex_style)
+        list_param += self._deprojection_param.param_list(latex_style=latex_style)
         list_param += self._source_param.param_list(latex_style=latex_style)
         list_param += self._los_param.param_list(latex_style=latex_style)
-        list_param += self._deprojection_param.param_list(latex_style=latex_style)
         return list_param
 
     def args2kwargs(self, args):

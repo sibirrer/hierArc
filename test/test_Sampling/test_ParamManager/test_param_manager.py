@@ -23,6 +23,7 @@ class TestParamManager(object):
         }
         kwargs_lower_los = [{"mean": -0.2, "sigma": 0.0}]
         kwargs_lower_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1}
+        kwargs_lower_deprojection = {"q_intrinsic": 0.1, "q_intrinsic_sigma": 0.01}
         kwargs_lower_source = {"mu_sne": 0, "sigma_sne": 0}
 
         kwargs_upper_cosmo = {
@@ -41,6 +42,7 @@ class TestParamManager(object):
         }
         kwargs_upper_los = [{"mean": 0.2, "sigma": 0.5}]
         kwargs_upper_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1}
+        kwargs_upper_deprojection = {"q_intrinsic": 1.0, "q_intrinsic_sigma": 0.2}
         kwargs_upper_source = {"mu_sne": 100, "sigma_sne": 10}
 
         kwargs_fixed_cosmo = {
@@ -59,6 +61,7 @@ class TestParamManager(object):
         }
         kwargs_fixed_los = [{"mean": 0, "sigma": 0.0}]
         kwargs_fixed_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1}
+        kwargs_fixed_deprojection = {"q_intrinsic": 0.5, "q_intrinsic_sigma": 0.1}
         kwargs_fixed_source = {"mu_sne": 1, "sigma_sne": 0.1}
 
         param_list = []
@@ -78,6 +81,8 @@ class TestParamManager(object):
                     los_distributions=["GAUSSIAN"],
                     sne_apparent_m_sampling=True,
                     sne_distribution="GAUSSIAN",
+                    q_intrinsic_sampling=True,
+                    q_intrinsic_distribution="GAUSSIAN",
                     kwargs_upper_cosmo=kwargs_upper_cosmo,
                     kwargs_fixed_cosmo=kwargs_fixed_cosmo,
                     kwargs_lower_lens=kwargs_lower_lens,
@@ -86,6 +91,9 @@ class TestParamManager(object):
                     kwargs_lower_kin=kwargs_lower_kin,
                     kwargs_upper_kin=kwargs_upper_kin,
                     kwargs_fixed_kin=kwargs_fixed_kin,
+                    kwargs_lower_deprojection=kwargs_lower_deprojection,
+                    kwargs_upper_deprojection=kwargs_upper_deprojection,
+                    kwargs_fixed_deprojection=kwargs_fixed_deprojection,
                     kwargs_fixed_source=kwargs_fixed_source,
                     kwargs_lower_source=kwargs_lower_source,
                     kwargs_upper_source=kwargs_upper_source,
@@ -109,6 +117,8 @@ class TestParamManager(object):
                     los_distributions=["GAUSSIAN"],
                     sne_apparent_m_sampling=True,
                     sne_distribution="GAUSSIAN",
+                    q_intrinsic_sampling=True,
+                    q_intrinsic_distribution="GAUSSIAN",
                     kwargs_lower_cosmo=kwargs_lower_cosmo,
                     kwargs_upper_cosmo=kwargs_upper_cosmo,
                     kwargs_fixed_cosmo=None,
@@ -118,6 +128,9 @@ class TestParamManager(object):
                     kwargs_lower_kin=kwargs_lower_kin,
                     kwargs_upper_kin=kwargs_upper_kin,
                     kwargs_fixed_kin=None,
+                    kwargs_lower_deprojection=kwargs_lower_deprojection,
+                    kwargs_upper_deprojection=kwargs_upper_deprojection,
+                    kwargs_fixed_deprojection=None,
                     kwargs_lower_source=kwargs_lower_source,
                     kwargs_upper_source=kwargs_upper_source,
                     kwargs_fixed_source=None,
@@ -132,7 +145,7 @@ class TestParamManager(object):
         list = self.param_list[0].param_list(latex_style=False)
         assert len(list) == 0
         num = self.param_list[1].num_param
-        assert num == 12
+        assert num == 14
         for param in self.param_list:
             list = param.param_list(latex_style=True)
             list = param.param_list(latex_style=False)
@@ -154,12 +167,14 @@ class TestParamManager(object):
         }
         kwargs_los = [{"mean": 0, "sigma": 0.05}]
         kwargs_kin = {"a_ani": 1, "a_ani_sigma": 0.3}
+        kwargs_deprojection = {"q_intrinsic": 0.5, "q_intrinsic_sigma": 0.1}
         kwargs_source = {"mu_sne": 2, "sigma_sne": 0.2}
         for param in self.param_list:
             args = param.kwargs2args(
                 kwargs_cosmo=kwargs_cosmo,
                 kwargs_lens=kwargs_lens,
                 kwargs_kin=kwargs_kin,
+                kwargs_deprojection=kwargs_deprojection,
                 kwargs_source=kwargs_source,
                 kwargs_los=kwargs_los,
             )
@@ -167,6 +182,7 @@ class TestParamManager(object):
                 kwargs_cosmo_new,
                 kwargs_lens_new,
                 kwargs_kin_new,
+                kwargs_deprojection_new,
                 kwargs_source_new,
                 kwargs_los_new,
             ) = param.args2kwargs(args)
@@ -174,6 +190,7 @@ class TestParamManager(object):
                 kwargs_cosmo_new,
                 kwargs_lens_new,
                 kwargs_kin_new,
+                kwargs_deprojection_new,
                 kwargs_source_new,
                 kwargs_los_new,
             )
@@ -199,7 +216,7 @@ class TestParamManager(object):
         assert len(lower_limit) == 0
         lower_limit, upper_limit = self.param_list[1].param_bounds
         print(self.param_list[1].param_list())
-        assert len(lower_limit) == 12
+        assert len(lower_limit) == 14
 
 
 class TestRaise(unittest.TestCase):

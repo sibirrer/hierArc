@@ -36,10 +36,11 @@ class DeprojectionParam(object):
         """
         list = []
         if self._deprojection_sampling is True:
-            if latex_style is True:
-                list.append(r"$\langle q_{\rm int} \rangle$")
-            else:
-                list.append("q_intrinsic")
+            if "q_intrinsic" not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$\langle q_{\rm int} \rangle$")
+                else:
+                    list.append("q_intrinsic")
             if self._distribution_function in ["GAUSSIAN", "GAUSSIAN_SCALED"]:
                 if "q_intrinsic_sigma" not in self._kwargs_fixed:
                     if latex_style is True:
