@@ -210,7 +210,7 @@ class TestKinematicsBackend(object):
                 backend="jampy",
                 kwargs_numerics_jam={},
                 MGE_mass=True,
-                MGE_light=True
+                MGE_light=True,
             )
             assert len(w) == 1
             assert issubclass(w[-1].category, UserWarning)
