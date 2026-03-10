@@ -68,7 +68,9 @@ class PSFGaussian(object):
         :param num_pix: number of pixels per axis of the kernel
         :return: 2d numpy array of kernel
         """
-        kernel = _make_gaussian_psf_kernel(self.fwhm, delta_pix, num_pix, normalize=True)
+        kernel = _make_gaussian_psf_kernel(
+            self.fwhm, delta_pix, num_pix, normalize=True
+        )
         return kernel
 
     @property
@@ -116,7 +118,9 @@ class PSFMultiGaussian(object):
         fwhms = util.sigma2fwhm(self.sigmas)
         kernel = np.zeros((num_pix, num_pix))
         for amp, fwhm in zip(self._amplitudes, fwhms):
-            kernel += amp * _make_gaussian_psf_kernel(fwhm, delta_pix, num_pix, normalize=False)
+            kernel += amp * _make_gaussian_psf_kernel(
+                fwhm, delta_pix, num_pix, normalize=False
+            )
         kernel /= np.sum(kernel)
         return kernel
 
