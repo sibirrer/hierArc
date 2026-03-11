@@ -11,8 +11,7 @@ class JAMAnisotropy:
         "Colin",
         "logistic",
     )
-    """
-    Manager for stellar velocity anisotropy parameterizations used by Jampy.
+    """Manager for stellar velocity anisotropy parameterizations used by Jampy.
 
     This class defines different radial anisotropy profiles beta(r) that can be passed
     to the Jampy code. Depending on the selected anisotropy type, the model may yield either:

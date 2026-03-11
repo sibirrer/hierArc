@@ -554,8 +554,10 @@ class TestJAMWrapperBaseMGE(object):
         surf_lum, sigma_lum = self.jam_spherical.mge_lum_tracer(self.kwargs_light)
         mge_surf_1d = self._mge(self.r_test, surf_lum, sigma_lum)
         expected_surf_1d = self._mge(
-            self.r_test, self.kwargs_light[0]["amp"] / (2 * np.pi * self.kwargs_light[0]["sigma"]**2),
-            self.kwargs_light[0]["sigma"]
+            self.r_test,
+            self.kwargs_light[0]["amp"]
+            / (2 * np.pi * self.kwargs_light[0]["sigma"] ** 2),
+            self.kwargs_light[0]["sigma"],
         )
         npt.assert_allclose(mge_surf_1d, expected_surf_1d, rtol=1e-2)
 
@@ -563,8 +565,10 @@ class TestJAMWrapperBaseMGE(object):
         surf_mass, sigma_mass = self.jam_spherical.mge_mass(self.kwargs_light)
         mge_surf_1d = self._mge(self.r_test, surf_mass, sigma_mass)
         expected_surf_1d = self._mge(
-            self.r_test, self.kwargs_lens_mass[0]["amp"] / (2 * np.pi * self.kwargs_lens_mass[0]["sigma"]**2),
-            self.kwargs_lens_mass[0]["sigma"]
+            self.r_test,
+            self.kwargs_lens_mass[0]["amp"]
+            / (2 * np.pi * self.kwargs_lens_mass[0]["sigma"] ** 2),
+            self.kwargs_lens_mass[0]["sigma"],
         )
         npt.assert_allclose(mge_surf_1d, expected_surf_1d, rtol=1e-2)
 

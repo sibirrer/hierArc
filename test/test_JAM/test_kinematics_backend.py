@@ -104,7 +104,10 @@ class TestKinematicsBackend(object):
         )
 
         self.lens = LensModel(
-            lens_model_list=lens_model_list, cosmo=cosmo, z_lens=self.z_lens, z_source=self.z_source
+            lens_model_list=lens_model_list,
+            cosmo=cosmo,
+            z_lens=self.z_lens,
+            z_source=self.z_source,
         )
         self.solver = LensEquationSolver(lensModel=self.lens)
         source_x, source_y = 0, 0.05
@@ -261,31 +264,58 @@ class TestKinematicsBackend(object):
     def test_fermat_potential(self):
         fp_g = self.galkin.fermat_potential(self.kwargs_lens, self.kwargs_ps)
         fp_j = self.jampy.fermat_potential(self.kwargs_lens, self.kwargs_ps)
-        fp_true = self.lens.fermat_potential(self.image_x, self.image_y, self.kwargs_lens)
+        fp_true = self.lens.fermat_potential(
+            self.image_x, self.image_y, self.kwargs_lens
+        )
         npt.assert_almost_equal(fp_g, fp_true, decimal=6)
         npt.assert_almost_equal(fp_j, fp_true, decimal=6)
 
     def test_dispersion(self):
-        sigma_g = self.galkin.velocity_dispersion(self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy)
-        sigma_j = self.jampy.velocity_dispersion(self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy)
+        sigma_g = self.galkin.velocity_dispersion(
+            self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy
+        )
+        sigma_j = self.jampy.velocity_dispersion(
+            self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy
+        )
         npt.assert_allclose(sigma_g, sigma_j, rtol=0.1)
 
-        sigma_g_map = self.galkin.velocity_dispersion_map(self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy, supersampling_factor=1)
-        sigma_j_map = self.jampy.velocity_dispersion_map(self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy, q_intrinsic=0.9, supersampling_factor=1)
+        sigma_g_map = self.galkin.velocity_dispersion_map(
+            self.kwargs_lens,
+            self.kwargs_lens_light,
+            self.kwargs_anisotropy,
+            supersampling_factor=1,
+        )
+        sigma_j_map = self.jampy.velocity_dispersion_map(
+            self.kwargs_lens,
+            self.kwargs_lens_light,
+            self.kwargs_anisotropy,
+            q_intrinsic=0.9,
+            supersampling_factor=1,
+        )
         npt.assert_allclose(sigma_g_map, sigma_j_map, rtol=0.1)
 
     def test_dimensionless_dispersion(self):
-        Jg = self.galkin.velocity_dispersion_dimension_less(self.kwargs_lens, self.kwargs_lens_light,
-                                                            self.kwargs_anisotropy)
-        Jj = self.jampy.velocity_dispersion_dimension_less(self.kwargs_lens, self.kwargs_lens_light,
-                                                           self.kwargs_anisotropy)
+        Jg = self.galkin.velocity_dispersion_dimension_less(
+            self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy
+        )
+        Jj = self.jampy.velocity_dispersion_dimension_less(
+            self.kwargs_lens, self.kwargs_lens_light, self.kwargs_anisotropy
+        )
         npt.assert_allclose(Jg, Jj, rtol=0.1)
 
-        Jg_map = self.galkin.velocity_dispersion_map_dimension_less(self.kwargs_lens, self.kwargs_lens_light,
-                                                                    self.kwargs_anisotropy, supersampling_factor=1)
-        Jj_map = self.jampy.velocity_dispersion_map_dimension_less(self.kwargs_lens, self.kwargs_lens_light,
-                                                                   self.kwargs_anisotropy, q_intrinsic=0.9,
-                                                                   supersampling_factor=1)
+        Jg_map = self.galkin.velocity_dispersion_map_dimension_less(
+            self.kwargs_lens,
+            self.kwargs_lens_light,
+            self.kwargs_anisotropy,
+            supersampling_factor=1,
+        )
+        Jj_map = self.jampy.velocity_dispersion_map_dimension_less(
+            self.kwargs_lens,
+            self.kwargs_lens_light,
+            self.kwargs_anisotropy,
+            q_intrinsic=0.9,
+            supersampling_factor=1,
+        )
         npt.assert_allclose(Jg_map, Jj_map, rtol=0.1)
 
     def test_velocity_dispersion_analytical(self):
@@ -310,14 +340,20 @@ class TestKinematicsBackend(object):
         npt.assert_almost_equal(dsdds_g, dsdds_j, decimal=6)
         npt.assert_almost_equal(ddt_dd_g, ddt_dd_j, decimal=6)
 
-
     def test_kinematics_modeling_settings(self):
         # galkin branch: calling with deprecated kwargs should emit DeprecationWarning
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            self.galkin.kinematics_modeling_settings("NEW_ANISO", kwargs_numerics_galkin={"a": 1}, analytic_kinematics=True)
+            self.galkin.kinematics_modeling_settings(
+                "NEW_ANISO", kwargs_numerics_galkin={"a": 1}, analytic_kinematics=True
+            )
             # at least one warning may be issued about deprecation depending on inputs
-            assert any(issubclass(x.category, (DeprecationWarning, UserWarning)) for x in w) or True
+            assert (
+                any(
+                    issubclass(x.category, (DeprecationWarning, UserWarning)) for x in w
+                )
+                or True
+            )
 
         # jampy branch: analytic_kinematics True raises ValueError
         with pytest.raises(ValueError):
@@ -326,7 +362,9 @@ class TestKinematicsBackend(object):
         # jampy branch: MGE flags and Hernquist_approx produce UserWarnings but do not raise
         with warnings.catch_warnings(record=True) as w:
             warnings.simplefilter("always")
-            self.jampy.kinematics_modeling_settings("ANISO", MGE_light=True, MGE_mass=True, Hernquist_approx=True)
+            self.jampy.kinematics_modeling_settings(
+                "ANISO", MGE_light=True, MGE_mass=True, Hernquist_approx=True
+            )
             assert any(issubclass(x.category, UserWarning) for x in w)
 
 

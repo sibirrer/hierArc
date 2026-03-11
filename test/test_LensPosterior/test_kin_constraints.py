@@ -719,7 +719,6 @@ class TestKinConstraints(object):
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
 
-
 class TestRaise(unittest.TestCase):
     def test_raise(self):
         with self.assertRaises(ValueError):

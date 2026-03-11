@@ -456,7 +456,10 @@ class TestLensLikelihood(object):
 class TestRaise:
 
     def test_reaise_axisymmetric_correction(self):
-        with pytest.raises(ValueError, match="Cannot have both axisymmetric correction and q_intrinsic_sampling"):
+        with pytest.raises(
+            ValueError,
+            match="Cannot have both axisymmetric correction and q_intrinsic_sampling",
+        ):
             LensLikelihood(
                 likelihood_type="DdtDdGaussian",
                 ddt_mean=1,
