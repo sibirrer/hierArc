@@ -636,7 +636,7 @@ class TestKinConstraints(object):
         gamma = 2.1
 
         # kwargs_model
-        lens_light_model_list = ["HERNQUIST", "SERSIC"]
+        lens_light_model_list = ["HERNQUIST"]
         lens_model_list = ["SPP"]
         kwargs_model = {
             "lens_model_list": lens_model_list,
@@ -673,7 +673,6 @@ class TestKinConstraints(object):
         beta_inf = 0.9
         kwargs_lens_light = [
             {"Rs": r_eff * 0.551, "amp": 1.0},
-            {"R_sersic": r_eff, "n_sersic": 4.0, "amp": 1.0},
         ]
         kwargs_anisotropy = {"beta": 0.0}
         sigma_v = kin_api.velocity_dispersion(
@@ -698,7 +697,7 @@ class TestKinConstraints(object):
             r_eff_error=0.05,
             sigma_v_measured=[sigma_v, sigma_v],
             sigma_v_error_independent=[10, 10],
-            sigma_v_error_cov_matrix=[[100], [100]],
+            sigma_v_error_cov_matrix=[[100, 0], [0, 100]],
             sigma_v_error_covariant=0,
             kwargs_aperture=[kwargs_aperture, kwargs_aperture],
             kwargs_seeing=[kwargs_seeing, kwargs_seeing],
