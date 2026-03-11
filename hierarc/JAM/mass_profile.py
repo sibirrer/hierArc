@@ -28,16 +28,7 @@ class MassProfile:
         kwargs_list = self._circularize_kwargs(kwargs_list)
         density = np.zeros_like(r)
         for i, func in enumerate(self.mass_model.func_list):
-            kwargs_i = {
-                k: v
-                for k, v in kwargs_list[i].items()
-                if k not in ["center_x", "center_y"]
-            }
-            try:
-                density_i = func.density_lens(r, **kwargs_i)
-            except ValueError:
-                density_i = func.density(r, **kwargs_i)
-            density += density_i
+            density += func.density_lens(r, **kwargs_list[i])
         return density
 
     def einstein_radius(self, kwargs_list):
@@ -75,6 +66,3 @@ class MassProfile:
                 {k: v for k, v in kwargs.items() if k not in ["center_x", "center_y"]}
             )
         return kwargs_list_new
-
-    def __repr__(self):
-        return f"MassProfile[{','.join(self.profile_list)}]"

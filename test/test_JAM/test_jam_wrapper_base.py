@@ -91,7 +91,7 @@ class TestJAMWrapperBase(object):
     def test_dispersion_points_unconvolved(self):
         sigma_v_jam, IR_jam = self.jam_spherical.dispersion_points(
             x=self.r_test,
-            y=np.zeros_like(self.r_test),
+            y=None,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
             kwargs_anisotropy=self.kwargs_anisotropy,
@@ -109,7 +109,7 @@ class TestJAMWrapperBase(object):
     def test_surface_brightness(self):
         sigma_v_jam, IR_jam = self.jam_spherical.dispersion_points(
             x=self.r_test,
-            y=np.zeros_like(self.r_test),
+            y=None,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
             kwargs_anisotropy=self.kwargs_anisotropy,
@@ -194,7 +194,7 @@ class TestJAMWrapperBaseOM(object):
     def test_dispersion_points_om(self):
         sigma_v_jam, IR_jam = self.jam_spherical.dispersion_points(
             x=self.r_test,
-            y=np.zeros_like(self.r_test),
+            y=None,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
             kwargs_anisotropy=self.kwargs_anisotropy,
@@ -374,7 +374,7 @@ class TestJAMWrapperBaseAxiSph(object):
     def test_dispersion_points_unconvolved(self):
         sigma_v_jam, IR_jam = self.jam_spherical.dispersion_points(
             x=self.r_test,
-            y=np.zeros_like(self.r_test),
+            y=None,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
             kwargs_anisotropy=self.kwargs_anisotropy,
@@ -392,7 +392,7 @@ class TestJAMWrapperBaseAxiSph(object):
     def test_surface_brightness(self):
         sigma_v_jam, IR_jam = self.jam_spherical.dispersion_points(
             x=self.r_test,
-            y=np.zeros_like(self.r_test),
+            y=None,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
             kwargs_anisotropy=self.kwargs_anisotropy,
@@ -478,7 +478,7 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
     def test_dispersion_points_unconvolved(self):
         sigma_v_jam, IR_jam = self.jam_spherical.dispersion_points(
             x=self.r_test,
-            y=np.zeros_like(self.r_test),
+            y=None,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
             kwargs_anisotropy=self.kwargs_anisotropy,
@@ -496,7 +496,7 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
     def test_surface_brightness(self):
         sigma_v_jam, IR_jam = self.jam_spherical.dispersion_points(
             x=self.r_test,
-            y=np.zeros_like(self.r_test),
+            y=None,
             kwargs_mass=self.kwargs_lens_mass,
             kwargs_light=self.kwargs_light,
             kwargs_anisotropy=self.kwargs_anisotropy,
@@ -509,6 +509,64 @@ class TestJAMWrapperBaseIsoAxiCyl(object):
             kwargs_anisotropy=self.kwargs_anisotropy,
         )
         npt.assert_allclose(IR_jam, IR_galkin, rtol=5e-2)
+
+    @staticmethod
+    def _gaussian(r, amp, sigma):
+        return amp * np.exp(-0.5 * (r / sigma) ** 2)
+
+    def _mge(self, r, amps, sigmas):
+        total = np.zeros_like(r)
+        for amp, sigma in zip(amps, sigmas):
+            total += self._gaussian(r, amp, sigma)
+        return total
+
+
+class TestJAMWrapperBaseMGE(object):
+
+    def setup_method(self):
+        cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
+        self.cosmo = LensCosmo(0.5, 1.2, cosmo=cosmo)
+
+        self.r_test = np.logspace(-1.5, 1.5, 100)  # arcsec
+
+        kwargs_cosmo = {
+            "d_d": self.cosmo.dd,
+            "d_s": self.cosmo.ds,
+            "d_ds": self.cosmo.dds,
+        }
+        kwargs_numeric_jam = {}
+        kwargs_model = {
+            "mass_profile_list": ["MULTI_GAUSSIAN"],
+            "light_profile_list": ["MULTI_GAUSSIAN"],
+            "anisotropy_model": "const",
+        }
+
+        self.jam_spherical = JAMWrapperBase(
+            kwargs_model=kwargs_model | {"symmetry": "spherical"},
+            kwargs_cosmo=kwargs_cosmo,
+            kwargs_numerics=kwargs_numeric_jam,
+        )
+        self.kwargs_light = [{"amp": np.arange(1, 6), "sigma": np.arange(1, 6)}]
+        self.kwargs_lens_mass = [{"amp": np.arange(1, 6), "sigma": np.arange(1, 6)}]
+        self.kwargs_anisotropy = {"beta": 0.3}
+
+    def test_mge_light(self):
+        surf_lum, sigma_lum = self.jam_spherical.mge_lum_tracer(self.kwargs_light)
+        mge_surf_1d = self._mge(self.r_test, surf_lum, sigma_lum)
+        expected_surf_1d = self._mge(
+            self.r_test, self.kwargs_light[0]["amp"] / (2 * np.pi * self.kwargs_light[0]["sigma"]**2),
+            self.kwargs_light[0]["sigma"]
+        )
+        npt.assert_allclose(mge_surf_1d, expected_surf_1d, rtol=1e-2)
+
+    def test_mge_mass(self):
+        surf_mass, sigma_mass = self.jam_spherical.mge_mass(self.kwargs_light)
+        mge_surf_1d = self._mge(self.r_test, surf_mass, sigma_mass)
+        expected_surf_1d = self._mge(
+            self.r_test, self.kwargs_lens_mass[0]["amp"] / (2 * np.pi * self.kwargs_lens_mass[0]["sigma"]**2),
+            self.kwargs_lens_mass[0]["sigma"]
+        )
+        npt.assert_allclose(mge_surf_1d, expected_surf_1d, rtol=1e-2)
 
     @staticmethod
     def _gaussian(r, amp, sigma):

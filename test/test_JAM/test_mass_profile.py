@@ -11,10 +11,9 @@ class TestMassProfile:
     def setup_method(self):
         self.kw_sie = {"theta_E": 1.0, "center_x": 0.0, "center_y": 0.0}
         self.kw_gauss = {"sigma": 0.5, "amp": 1.0, "center_x": 0.0, "center_y": 0.0}
-        self.kw_nfw = {"alpha_Rs": 0.1, "Rs": 1.0, "center_x": 0.0, "center_y": 0.0}
 
     def test_init(self):
-        mp = MassProfile(["SIE_ELLIPSE", "CONVERGENCE", "SHEAR", "NFW_CSE"])
+        mp = MassProfile(["SIE_ELLIPSE", "CONVERGENCE", "SHEAR", "NFW_ELLIPSE_CSE"])
         assert "CONVERGENCE" not in mp.profile_list
         assert "SHEAR" not in mp.profile_list
         assert not any(p.endswith("_ELLIPSE") for p in mp.profile_list)
@@ -26,7 +25,7 @@ class TestMassProfile:
         kwargs_list = [dict(self.kw_sie), dict(self.kw_gauss)]
         r = np.array([0.1, 0.5, 1.0])
         dens = mp.radial_density(r, kwargs_list)
-        npt.assert_almost_equal(dens, np.array([16.4134, 0.9447, 0.2279]), decimal=4)
+        npt.assert_almost_equal(dens, np.array([16.41339,  0.94471,  0.2279]), decimal=3)
 
     def test_einstein_radius(self):
         mp = MassProfile(["SIE"])

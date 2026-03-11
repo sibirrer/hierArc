@@ -23,7 +23,7 @@ class KinematicsBackend:
         kwargs_aperture=None,
         anisotropy_model=None,
         analytic_kinematics=False,
-        axial_symmetry="axi_sph",
+        axial_symmetry="spherical",
         backend=None,
         kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
@@ -352,7 +352,6 @@ class KinematicsBackend:
         gamma=None,
         kappa_ext=0,
         q_intrinsic=1.0,
-        voronoi_bins=None,
     ):
         """For any aperture (single or IFU), uses JamPy with axisymmetric JAM modeling.
 
@@ -378,7 +377,6 @@ class KinematicsBackend:
                 theta_E=theta_E,
                 gamma=gamma,
                 kappa_ext=kappa_ext,
-                voronoi_bins=voronoi_bins,
             )
         else:
             return self._kinematics_backend.velocity_dispersion(
@@ -390,7 +388,6 @@ class KinematicsBackend:
                 theta_E=theta_E,
                 gamma=gamma,
                 kappa_ext=kappa_ext,
-                voronoi_bins=voronoi_bins,
             )
 
     def velocity_dispersion_map(

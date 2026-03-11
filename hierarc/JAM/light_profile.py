@@ -61,6 +61,3 @@ class LightProfile:
                 {k: v for k, v in kwargs.items() if k not in ["center_x", "center_y"]}
             )
         return kwargs_list_new
-
-    def __repr__(self):
-        return f"LightProfile[{','.join(self.profile_list)}]"

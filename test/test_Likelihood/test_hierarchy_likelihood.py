@@ -320,7 +320,7 @@ class TestLensLikelihood(object):
         )
         npt.assert_almost_equal(ln_inf, 0.0, decimal=1)
 
-        ln_inf = self.likelihood_single.sigma_v_measured_vs_predict(
+        ln_inf = self.likelihood_vel_disp_pdf.sigma_v_measured_vs_predict(
             self.cosmo, kwargs_lens=None, kwargs_kin=None
         )
         assert np.all([x is None for x in ln_inf])
@@ -391,7 +391,6 @@ class TestLensLikelihood(object):
         npt.assert_almost_equal(ln_likelihood_q_int, -0.0, decimal=1)
 
     def test_lum_dist_likelihood(self):
-        "Mag"
         kwargs_model = {}
         z_lens, z_source = 0.2, 0.5
         mu_sne = 10
@@ -457,8 +456,13 @@ class TestLensLikelihood(object):
 class TestRaise:
 
     def test_reaise_axisymmetric_correction(self):
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="Cannot have both axisymmetric correction and q_intrinsic_sampling"):
             LensLikelihood(
+                likelihood_type="DdtDdGaussian",
+                ddt_mean=1,
+                ddt_sigma=0.1,
+                dd_mean=1,
+                dd_sigma=0.1,
                 z_lens=0.5,
                 z_source=1.5,
                 q_intrinsic_sampling=True,

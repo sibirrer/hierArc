@@ -27,7 +27,7 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
         kinematics_backend="jampy",
         lens_model_list=None,
         kwargs_lens_light=None,
-        lens_light_model_list=None,
+        lens_light_model_list=["HERNQUIST"],
         MGE_light=False,
         kwargs_mge_light=None,
         hernquist_approx=True,
@@ -82,8 +82,6 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
         :param q_intrinsic_scaling: array of intrinsic axis ratios to be interpolated (optional, otherwise None)
             this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
         """
-        if lens_light_model_list is None:
-            lens_light_model_list = ["HERNQUIST"]
         self._z_lens, self._z_source = z_lens, z_source
 
         if lens_model_list is None:

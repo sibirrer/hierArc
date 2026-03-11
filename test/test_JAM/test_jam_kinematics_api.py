@@ -14,8 +14,8 @@ class TestJAMKinematicsAPI:
         self.z_lens = 0.5
         self.z_source = 1.5
 
-        lens_light_model_list = ["HERNQUIST"]
-        lens_model_list = ["SPP"]
+        lens_light_model_list = ["HERNQUIST_ELLIPSE"]
+        lens_model_list = ["EPL"]
         self.kwargs_model = {
             "lens_model_list": lens_model_list,
             "lens_light_model_list": lens_light_model_list,
@@ -154,6 +154,12 @@ class TestJAMKinematicsAPI:
         assert isinstance(kwargs_light_m, list)
         assert len(kwargs_light_m) == 2
 
+        sigma = api_multi.velocity_dispersion(
+            self.kwargs_lens, kwargs_lens_light_multi, self.kwargs_anisotropy
+        )
+        assert len(sigma) == 2
+        npt.assert_almost_equal(sigma, 215.139, decimal=1)
+
     def test_kinematics_modeling_settings(self):
         api = JAMKinematicsAPI(
             z_lens=self.z_lens,
@@ -176,6 +182,18 @@ class TestJAMKinematicsAPI:
         assert api._anisotropy_model == "NEW_ANISO"
         assert api._axial_symmetry == "spherical"
         assert api._kwargs_numerics_kin == {"n": 1}
+
+    def test_jam_settings(self):
+        jam_models, kwargs_profile, kwargs_light = self.api.jam_settings(
+            kwargs_lens=self.kwargs_lens,
+            kwargs_lens_light=self.kwargs_lens_light,
+        )
+        assert isinstance(jam_models, list)
+        assert isinstance(kwargs_profile, list)
+        assert isinstance(kwargs_light, list)
+        assert len(jam_models) == 1
+        assert len(kwargs_profile) == 1
+        assert len(kwargs_light) == 1
 
     def test_velocity_dispersion(self):
         kwargs_lens = [dict(self.kwargs_lens[0])]

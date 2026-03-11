@@ -246,8 +246,8 @@ class IFUGrid(GeneralAperture):
         """Creates a new grid, supersampled and with padding for PSF convolution."""
 
         delta_x, delta_y = self.delta_pix_xy
-        x_grid = self._x_grid
-        y_grid = self._y_grid
+        x_grid = self.x_grid
+        y_grid = self.y_grid
 
         # New (supersampled) pixel size
         new_delta_x = delta_x / supersampling_factor

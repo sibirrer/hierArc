@@ -204,7 +204,7 @@ class JAMWrapperBase(object):
         # TODO: cache the MGE fit for repeated calls with same kwargs_mass
         if self._mass_profile.profile_list == ["MULTI_GAUSSIAN"]:
             sigma_mass = np.asarray(kwargs_mass[0]["sigma"])
-            surf_mass = np.asarray(kwargs_mass[0]["amp"]) / (2 * np.pi * sigma_mass)
+            surf_mass = np.asarray(kwargs_mass[0]["amp"]) / (2 * np.pi * sigma_mass**2)
             # clean zero amplitudes as Jampy doesn't like them
             zero_surf = surf_mass == 0
             surf_mass = surf_mass[~zero_surf]
@@ -252,8 +252,6 @@ class JAMWrapperBase(object):
         x_shape = x.shape
         x = x.flatten()
         y = y.flatten()
-        if jam_kwargs is None:
-            jam_kwargs = {}
         if (not self.axisymmetric) or (inclination is None):
             # spherical modeling
             # TODO: evaluate at fixed radius and then interpolate for speed
@@ -379,29 +377,19 @@ class JAMWrapperBase(object):
 
     @staticmethod
     def _extract_center(kwargs):
-        if not isinstance(kwargs, dict):
-            if "center_x" in kwargs[0]:
-                return kwargs[0]["center_x"], kwargs[0]["center_y"]
-            else:
-                return 0, 0
+        # assumes that the center parameters are the same for all components
+        if "center_x" in kwargs[0]:
+            return kwargs[0]["center_x"], kwargs[0]["center_y"]
         else:
-            if "center_x" in kwargs:
-                return kwargs["center_x"], kwargs["center_y"]
-            else:
-                return 0, 0
+            return 0, 0
 
     @staticmethod
     def _extract_ellipticity(kwargs):
-        if not isinstance(kwargs, dict):
-            if "e1" in kwargs[0]:
-                return kwargs[0]["e1"], kwargs[0]["e2"]
-            else:
-                return 0, 0
+        # assumes that the ellipticity parameters are the same for all components
+        if "e1" in kwargs[0]:
+            return kwargs[0]["e1"], kwargs[0]["e2"]
         else:
-            if "e1" in kwargs:
-                return kwargs["e1"], kwargs["e2"]
-            else:
-                return 0, 0
+            return 0, 0
 
     @staticmethod
     def _rotate_grid(x_grid, y_grid, phi):

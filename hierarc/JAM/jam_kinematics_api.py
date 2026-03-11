@@ -1,7 +1,6 @@
 __author__ = "sibirrer", "furcelay"
 
 import numpy as np
-import copy
 from hierarc.JAM.jam_wrapper import JAMWrapper
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 from lenstronomy.Util import class_creator
@@ -299,25 +298,7 @@ class JAMKinematicsAPI(object):
         for i, lens_model in enumerate(self._lens_model_list):
             if model_kinematics_bool[i] is True:
                 mass_profile_list.append(lens_model)
-                if lens_model in ["INTERPOL", "INTERPOL_SCLAED"]:
-                    center_x_i, center_y_i = self._lensMassProfile.convergence_peak(
-                        kwargs_lens,
-                        model_bool_list=i,
-                        grid_num=200,
-                        grid_spacing=0.01,
-                        center_x_init=0,
-                        center_y_init=0,
-                    )
-                    kwargs_lens_i = copy.deepcopy(kwargs_lens[i])
-                    kwargs_lens_i["grid_interp_x"] -= center_x_i
-                    kwargs_lens_i["grid_interp_y"] -= center_y_i
-                else:
-                    kwargs_lens_i = {
-                        k: v
-                        for k, v in kwargs_lens[i].items()
-                        if not k in ["center_x", "center_y"]
-                    }
-                kwargs_profile.append(kwargs_lens_i)
+                kwargs_profile.append(kwargs_lens[i].copy())
 
         kwargs_profile = self._copy_centers(kwargs_profile, kwargs_lens)
 

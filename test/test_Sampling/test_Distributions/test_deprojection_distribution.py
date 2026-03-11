@@ -72,6 +72,8 @@ class TestDeprojectionDistribution(object):
         )
         kwargs_drawn = no_dist_no_sampling.draw_deprojection()
         assert "q_intrinsic" not in kwargs_drawn
+        kwargs_drawn = no_dist_no_sampling.draw_deprojection(q_intrinsic=0.6)
+        assert kwargs_drawn["q_intrinsic"] == 0.6
 
         no_dist_sampling = DeprojectionDistribution(
             deprojection_sampling=True,

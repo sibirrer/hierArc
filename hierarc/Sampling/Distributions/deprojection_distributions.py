@@ -72,11 +72,6 @@ class DeprojectionDistribution(object):
                 q_draw = np.random.normal(q_intrinsic, q_intrinsic_sigma)
             elif self._distribution_function in ["GAUSSIAN_SCALED"]:
                 q_draw = np.random.normal(q_intrinsic, q_intrinsic_sigma * q_intrinsic)
-            else:
-                raise ValueError(
-                    "Distribution function %s not implemented"
-                    % self._distribution_function
-                )
             if q_draw <= self._q_min or q_draw > self._q_max:
                 return self.draw_deprojection(q_intrinsic, q_intrinsic_sigma)
             kwargs_return["q_intrinsic"] = q_draw
