@@ -83,13 +83,6 @@ class TestJAMKinematicsAPI:
             kwargs_numerics_jam=self.kwargs_numerics_jampy,
         )
 
-    def test_constructor_created_expected_attributes(self):
-        assert hasattr(self.api, "lensCosmo")
-        assert hasattr(self.api, "_lens_light_model_list")
-        assert hasattr(self.api, "_lens_model_list")
-        # cosmology distances present
-        assert set(self.api._kwargs_cosmo.keys()) == {"d_d", "d_s", "d_ds"}
-
     def test_transform_kappa_ext_numeric(self):
         sig = np.array([10.0, 20.0, 30.0])
         out = JAMKinematicsAPI.transform_kappa_ext(sig, kappa_ext=0.2)
@@ -125,40 +118,6 @@ class TestJAMKinematicsAPI:
         assert isinstance(light_list, list)
         # kwargs_light either list or dict depending on implementation; ensure non-empty
         assert kwargs_light is not None
-
-    def test_kinematic_multi_light_profile(self):
-        # multi-light-profile mode: create an API with multi_light_profile True and multi_observations True
-        api_multi = JAMKinematicsAPI(
-            z_lens=self.z_lens,
-            z_source=self.z_source,
-            kwargs_model=self.kwargs_model,
-            kwargs_aperture=[self.kwargs_aperture, self.kwargs_aperture],
-            kwargs_seeing=[self.kwargs_seeing, self.kwargs_seeing],
-            anisotropy_model="const",
-            axial_symmetry="axi_sph",
-            cosmo=FlatLambdaCDM(H0=70, Om0=0.3),
-            lens_model_kinematics_bool=None,
-            light_model_kinematics_bool=None,
-            multi_observations=True,
-            multi_light_profile=True,
-            kwargs_numerics_jam=self.kwargs_numerics_jampy,
-        )
-        kwargs_lens_light_multi = [
-            [dict(self.kwargs_lens_light[0])],
-            [dict(self.kwargs_lens_light[0])],
-        ]
-        light_list_m, kwargs_light_m = api_multi.kinematic_light_profile(
-            kwargs_lens_light_multi, r_eff=1.0, model_kinematics_bool=None
-        )
-        assert isinstance(light_list_m, list)
-        assert isinstance(kwargs_light_m, list)
-        assert len(kwargs_light_m) == 2
-
-        sigma = api_multi.velocity_dispersion(
-            self.kwargs_lens, kwargs_lens_light_multi, self.kwargs_anisotropy
-        )
-        assert len(sigma) == 2
-        npt.assert_almost_equal(sigma, 215.139, decimal=1)
 
     def test_kinematics_modeling_settings(self):
         api = JAMKinematicsAPI(
@@ -202,7 +161,7 @@ class TestJAMKinematicsAPI:
         sigma = self.api.velocity_dispersion(
             kwargs_lens, kwargs_lens_light, kwargs_anisotropy, r_eff=self.r_eff
         )
-        npt.assert_almost_equal(sigma, 215.139, decimal=1)
+        npt.assert_almost_equal(sigma, 215.416, decimal=1)
 
     def test_velocity_dispersion_map(self):
         kwargs_lens = [dict(self.kwargs_lens[0])]
@@ -211,7 +170,42 @@ class TestJAMKinematicsAPI:
         sigma = self.api.velocity_dispersion_map(
             kwargs_lens, kwargs_lens_light, kwargs_anisotropy, r_eff=self.r_eff
         )
-        npt.assert_almost_equal(sigma, 215.139, decimal=1)
+        npt.assert_almost_equal(sigma, 215.416, decimal=1)
+
+
+    def test_kinematic_multi_light_profile(self):
+        # multi-light-profile mode: create an API with multi_light_profile True and multi_observations True
+        api_multi = JAMKinematicsAPI(
+            z_lens=self.z_lens,
+            z_source=self.z_source,
+            kwargs_model=self.kwargs_model,
+            kwargs_aperture=[self.kwargs_aperture, self.kwargs_aperture],
+            kwargs_seeing=[self.kwargs_seeing, self.kwargs_seeing],
+            anisotropy_model="const",
+            axial_symmetry="axi_sph",
+            cosmo=FlatLambdaCDM(H0=70, Om0=0.3),
+            lens_model_kinematics_bool=None,
+            light_model_kinematics_bool=None,
+            multi_observations=True,
+            multi_light_profile=True,
+            kwargs_numerics_jam=self.kwargs_numerics_jampy,
+        )
+        kwargs_lens_light_multi = [
+            [dict(self.kwargs_lens_light[0])],
+            [dict(self.kwargs_lens_light[0])],
+        ]
+        light_list_m, kwargs_light_m = api_multi.kinematic_light_profile(
+            kwargs_lens_light_multi, r_eff=1.0, model_kinematics_bool=None
+        )
+        assert isinstance(light_list_m, list)
+        assert isinstance(kwargs_light_m, list)
+        assert len(kwargs_light_m) == 2
+
+        sigma = api_multi.velocity_dispersion(
+            self.kwargs_lens, kwargs_lens_light_multi, self.kwargs_anisotropy
+        )
+        assert len(sigma) == 2
+        npt.assert_almost_equal(sigma, 215.416, decimal=1)
 
     def test_warn_supersampling(self):
         with warnings.catch_warnings(record=True) as w:

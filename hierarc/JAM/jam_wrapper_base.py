@@ -6,7 +6,6 @@ from lenstronomy.Util.param_util import ellipticity2phi_q
 from hierarc.JAM.mass_profile import MassProfile
 from hierarc.JAM.light_profile import LightProfile
 from hierarc.JAM.jam_anisotropy import JAMAnisotropy
-import mgefit as mge
 import jampy as jam
 import numpy as np
 
@@ -136,8 +135,20 @@ class JAMWrapperBase(object):
         """
         # TODO: read light and mass mge parameters from cached values if available
 
-        surf_lum, sigma_lum = self.mge_lum_tracer(kwargs_light)
-        surf_mass, sigma_mass = self.mge_mass(kwargs_mass)
+        surf_lum, sigma_lum = self._light_profile.mge_lum_tracer(
+            self._mge_radial_points_light,
+            kwargs_light,
+            self._mge_n_gauss_light,
+            self._mge_linear_solver,
+            self._mge_kwargs_lum
+        )
+        surf_mass, sigma_mass = self._mass_profile.mge_mass(
+            self._mge_radial_points_mass,
+            kwargs_mass,
+            self._mge_n_gauss_mass,
+            self._mge_linear_solver,
+            self._mge_kwargs_mass
+        )
         # convert to units of M_sun / pc^2
         surf_mass *= self.cosmo.epsilon_crit * 1e-12
         beta = self._anisotropy.beta_params(kwargs_anisotropy)
@@ -168,64 +179,6 @@ class JAMWrapperBase(object):
             jam_kwargs=jam_kwargs,
         )
         return vrms, surf_bright
-
-    def mge_lum_tracer(self, kwargs_light):
-        # TODO: cache the MGE fit for repeated calls with same kwargs_light
-        profs = self._light_profile.profile_list
-        if (len(profs) == 1) and (
-            profs[0] in ["MULTI_GAUSSIAN", "MULTI_GAUSSIAN_ELLIPSE"]
-        ):
-            sigma_lum = np.asarray(kwargs_light[0]["sigma"])
-            surf_lum = np.asarray(kwargs_light[0]["amp"]) / (2 * np.pi * sigma_lum**2)
-            # clean zero amplitudes as Jampy doesn't like them
-            zero_surf = surf_lum == 0
-            surf_lum = surf_lum[~zero_surf]
-            sigma_lum = sigma_lum[~zero_surf]
-        else:
-            r_eff = self._light_profile.effective_radius(kwargs_light)
-            light_1d = self._light_profile.radial_surface_brightness(
-                self._mge_radial_points_light * r_eff, kwargs_light
-            )
-            mge_lum = mge.fit_1d(
-                self._mge_radial_points_light * r_eff,
-                light_1d,
-                ngauss=self._mge_n_gauss_light,
-                linear=self._mge_linear_solver,
-                plot=False,
-                quiet=True,
-                **self._mge_kwargs_lum,
-            )
-            sigma_lum = mge_lum.sol[1]  # in arcsec
-            # convert to surface brightness
-            surf_lum = mge_lum.sol[0] / (np.sqrt(2 * np.pi) * sigma_lum)
-        return surf_lum, sigma_lum
-
-    def mge_mass(self, kwargs_mass):
-        # TODO: cache the MGE fit for repeated calls with same kwargs_mass
-        if self._mass_profile.profile_list == ["MULTI_GAUSSIAN"]:
-            sigma_mass = np.asarray(kwargs_mass[0]["sigma"])
-            surf_mass = np.asarray(kwargs_mass[0]["amp"]) / (2 * np.pi * sigma_mass**2)
-            # clean zero amplitudes as Jampy doesn't like them
-            zero_surf = surf_mass == 0
-            surf_mass = surf_mass[~zero_surf]
-            sigma_mass = sigma_mass[~zero_surf]
-        else:
-            theta_E = self._mass_profile.einstein_radius(kwargs_mass)
-            radial_density = self._mass_profile.radial_density(
-                self._mge_radial_points_mass * theta_E, kwargs_mass
-            )
-            mge_mass = mge.fit_1d(
-                self._mge_radial_points_mass * theta_E,
-                radial_density,
-                ngauss=self._mge_n_gauss_mass,
-                linear=self._mge_linear_solver,
-                plot=False,
-                quiet=True,
-                **self._mge_kwargs_mass,
-            )
-            surf_mass = mge_mass.sol[0]  # mass convergence
-            sigma_mass = mge_mass.sol[1]  # in arcsec
-        return surf_mass, sigma_mass
 
     def call_jampy(
         self,

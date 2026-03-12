@@ -1,35 +1,35 @@
-import numpy as np
-from lenstronomy.LensModel.single_plane import SinglePlane
 from lenstronomy.LensModel.lens_model import LensModel
 from lenstronomy.Analysis.lens_profile import LensProfileAnalysis
+from lenstronomy.LensModel.Profiles.base_profile import LensProfileBase
+import numpy as np
+import mgefit as mge
 from copy import deepcopy
 
 
 class MassProfile:
-    """Computes radial 3D density for a list of lenstronomy mass profiles.
-
-    Assumes that all the profiles share the same geometry.
+    """Computes radial surface density for a list of lenstronomy mass profiles.
     """
 
     def __init__(self, profile_list):
-        # exclude convergence and shear profiles as they do not have 3D density or Einstein radius
-        profile_list = [p for p in profile_list if p not in ["CONVERGENCE", "SHEAR"]]
-        # we only need the radial profile, so no ellipticity is considered
-        profile_list = [p.replace("_ELLIPSE", "") for p in profile_list]
-        profile_list = [p.replace("_CSE", "") for p in profile_list]
         self.profile_list = profile_list
-        self.mass_model = SinglePlane(profile_list)
+        self.mass_model = LensModel(profile_list)
+        self.lens_analysis = LensProfileAnalysis(self.mass_model)
 
-    def radial_density(self, r, kwargs_list):
-        """3D density at radius r :param r: 3D radius in angular units :param
-        kwargs_list: list of keyword arguments of lens model parameters matching the
-        lens model classes :return: mass density at radius r (in angular units, modulo
-        epsilon_crit)"""
-        kwargs_list = self._circularize_kwargs(kwargs_list)
-        density = np.zeros_like(r)
-        for i, func in enumerate(self.mass_model.func_list):
-            density += func.density_lens(r, **kwargs_list[i])
-        return density
+    def radial_convergence(self, r, kwargs_list):
+        """
+        convergence radial profile
+        :param r: projected radius in angular units
+        :param kwargs_list: list of keyword arguments of lens model parameters matching the
+        lens model classes
+        :return: surface mass density at radius r (in angular units, modulo epsilon_crit)
+        """
+        kwargs_list = self._parse_kwargs(kwargs_list)
+        center_x = kwargs_list[0].get("center_x", 0.0)
+        center_y = kwargs_list[0].get("center_y", 0.0)
+        kappa = self.lens_analysis.radial_lens_profile(
+            r, kwargs_list, center_x, center_y
+        )
+        return np.asarray(kappa)
 
     def einstein_radius(self, kwargs_list):
         """Einstein radius of the mass profile, used to scale the radial range where the
@@ -37,32 +37,61 @@ class MassProfile:
         if (len(self.profile_list) == 1) and ("theta_E" in kwargs_list[0]):
             return kwargs_list[0]["theta_E"]
         else:
-            analysis = LensProfileAnalysis(LensModel(self.profile_list))
-            kwargs_list = self._circularize_kwargs(kwargs_list)
+            kwargs_list = self._parse_kwargs(kwargs_list)
             if "center_x" not in kwargs_list[0]:
                 kwargs_list[0]["center_x"] = 0.0
                 kwargs_list[0]["center_y"] = 0.0
-            return analysis.effective_einstein_radius(kwargs_list)
+            return self.lens_analysis.effective_einstein_radius(kwargs_list)
 
-    def _circularize_kwargs(self, kwargs_list):
+    def mge_mass(self, r_mge, kwargs_list, n_gauss, linear_solver=True, mge_kwargs=None):
+        # TODO: cache the MGE fit for repeated calls with same kwargs_list
+        if (len(self.profile_list) == 1) and (
+            self.profile_list[0] in ["MULTI_GAUSSIAN", "MULTI_GAUSSIAN_ELLIPSE_KAPPA"]
+        ):
+            sigma_mass = np.asarray(kwargs_list[0]["sigma"])
+            surf_mass = np.asarray(kwargs_list[0]["amp"]) / (2 * np.pi * sigma_mass**2)
+            # clean zero amplitudes as Jampy doesn't like them
+            zero_surf = surf_mass == 0
+            surf_mass = surf_mass[~zero_surf]
+            sigma_mass = sigma_mass[~zero_surf]
+        else:
+            if mge_kwargs is None:
+                mge_kwargs = {}
+            theta_E = self.einstein_radius(kwargs_list)
+            radial_density = self.radial_convergence(
+                r_mge * theta_E,
+                kwargs_list
+            )
+            mge_mass = mge.fit_1d(
+                r_mge * theta_E,
+                radial_density,
+                ngauss=n_gauss,
+                linear=linear_solver,
+                plot=False,
+                quiet=True,
+                **mge_kwargs,
+            )
+            sigma_mass = mge_mass.sol[1]  # in arcsec
+            surf_mass = mge_mass.sol[0] / (np.sqrt(2 * np.pi) * sigma_mass)
+        return surf_mass, sigma_mass
+
+    def _parse_kwargs(self, kwargs_list):
         """
+        removes e1 and e2 kwargs if not present in the profile
         :param kwargs_list: list of keyword arguments of light profiles (see LightModule)
-        :return: circularized arguments
+        :return: parsed arguments
         """
         kwargs_list_copy = deepcopy(kwargs_list)
         kwargs_list_new = []
-        for kwargs, profile in zip(kwargs_list_copy, self.mass_model.func_list):
-            if "e1" in kwargs:
-                if "e1" in profile.param_names:
-                    kwargs["e1"] = 0.0
-                else:
-                    kwargs.pop("e1")
-            if "e2" in kwargs:
-                if "e2" in profile.param_names:
-                    kwargs["e2"] = 0.0
-                else:
-                    kwargs.pop("e2")
-            kwargs_list_new.append(
-                {k: v for k, v in kwargs.items() if k not in ["center_x", "center_y"]}
-            )
+        profiles = self.mass_model.lens_model.func_list
+        for kwargs, profile in zip(kwargs_list_copy, profiles):
+            if ("e1" in kwargs) and ("e1" not in profile.param_names):
+                kwargs.pop("e1")
+            elif ("e1" not in kwargs) and ("e1" in profile.param_names):
+                kwargs['e1'] = 0.
+            if ("e2" in kwargs) and ("e2" not in profile.param_names):
+                kwargs.pop("e2")
+            elif ("e2" not in kwargs) and ("e2" in profile.param_names):
+                kwargs['e2'] = 0.
+            kwargs_list_new.append(kwargs)
         return kwargs_list_new
