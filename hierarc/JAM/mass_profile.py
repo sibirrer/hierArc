@@ -7,8 +7,7 @@ from copy import deepcopy
 
 
 class MassProfile:
-    """Computes radial surface density for a list of lenstronomy mass profiles.
-    """
+    """Computes radial surface density for a list of lenstronomy mass profiles."""
 
     def __init__(self, profile_list):
         self.profile_list = profile_list
@@ -16,13 +15,10 @@ class MassProfile:
         self.lens_analysis = LensProfileAnalysis(self.mass_model)
 
     def radial_convergence(self, r, kwargs_list):
-        """
-        convergence radial profile
-        :param r: projected radius in angular units
-        :param kwargs_list: list of keyword arguments of lens model parameters matching the
-        lens model classes
-        :return: surface mass density at radius r (in angular units, modulo epsilon_crit)
-        """
+        """Convergence radial profile :param r: projected radius in angular units :param
+        kwargs_list: list of keyword arguments of lens model parameters matching the
+        lens model classes :return: surface mass density at radius r (in angular units,
+        modulo epsilon_crit)"""
         kwargs_list = self._parse_kwargs(kwargs_list)
         center_x = kwargs_list[0].get("center_x", 0.0)
         center_y = kwargs_list[0].get("center_y", 0.0)
@@ -43,7 +39,9 @@ class MassProfile:
                 kwargs_list[0]["center_y"] = 0.0
             return self.lens_analysis.effective_einstein_radius(kwargs_list)
 
-    def mge_mass(self, r_mge, kwargs_list, n_gauss, linear_solver=True, mge_kwargs=None):
+    def mge_mass(
+        self, r_mge, kwargs_list, n_gauss, linear_solver=True, mge_kwargs=None
+    ):
         # TODO: cache the MGE fit for repeated calls with same kwargs_list
         if (len(self.profile_list) == 1) and (
             self.profile_list[0] in ["MULTI_GAUSSIAN", "MULTI_GAUSSIAN_ELLIPSE_KAPPA"]
@@ -58,10 +56,7 @@ class MassProfile:
             if mge_kwargs is None:
                 mge_kwargs = {}
             theta_E = self.einstein_radius(kwargs_list)
-            radial_density = self.radial_convergence(
-                r_mge * theta_E,
-                kwargs_list
-            )
+            radial_density = self.radial_convergence(r_mge * theta_E, kwargs_list)
             mge_mass = mge.fit_1d(
                 r_mge * theta_E,
                 radial_density,
@@ -76,11 +71,9 @@ class MassProfile:
         return surf_mass, sigma_mass
 
     def _parse_kwargs(self, kwargs_list):
-        """
-        removes e1 and e2 kwargs if not present in the profile
-        :param kwargs_list: list of keyword arguments of light profiles (see LightModule)
-        :return: parsed arguments
-        """
+        """Removes e1 and e2 kwargs if not present in the profile :param kwargs_list:
+        list of keyword arguments of light profiles (see LightModule) :return: parsed
+        arguments."""
         kwargs_list_copy = deepcopy(kwargs_list)
         kwargs_list_new = []
         profiles = self.mass_model.lens_model.func_list
@@ -88,10 +81,10 @@ class MassProfile:
             if ("e1" in kwargs) and ("e1" not in profile.param_names):
                 kwargs.pop("e1")
             elif ("e1" not in kwargs) and ("e1" in profile.param_names):
-                kwargs['e1'] = 0.
+                kwargs["e1"] = 0.0
             if ("e2" in kwargs) and ("e2" not in profile.param_names):
                 kwargs.pop("e2")
             elif ("e2" not in kwargs) and ("e2" in profile.param_names):
-                kwargs['e2'] = 0.
+                kwargs["e2"] = 0.0
             kwargs_list_new.append(kwargs)
         return kwargs_list_new

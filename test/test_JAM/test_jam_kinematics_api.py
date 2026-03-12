@@ -172,7 +172,6 @@ class TestJAMKinematicsAPI:
         )
         npt.assert_almost_equal(sigma, 215.416, decimal=1)
 
-
     def test_kinematic_multi_light_profile(self):
         # multi-light-profile mode: create an API with multi_light_profile True and multi_observations True
         api_multi = JAMKinematicsAPI(

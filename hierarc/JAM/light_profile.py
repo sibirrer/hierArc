@@ -45,7 +45,9 @@ class LightProfile:
             grid_num=200,
         )
 
-    def mge_lum_tracer(self, r_mge, kwargs_list, n_gauss, linear_solver=True, mge_kwargs=None):
+    def mge_lum_tracer(
+        self, r_mge, kwargs_list, n_gauss, linear_solver=True, mge_kwargs=None
+    ):
         # TODO: cache the MGE fit for repeated calls with same kwargs_list
         if (len(self.profile_list) == 1) and (
             self.profile_list[0] in ["MULTI_GAUSSIAN", "MULTI_GAUSSIAN_ELLIPSE"]
@@ -60,9 +62,7 @@ class LightProfile:
             if mge_kwargs is None:
                 mge_kwargs = {}
             r_eff = self.effective_radius(kwargs_list)
-            light_1d = self.radial_surface_brightness(
-                r_mge * r_eff, kwargs_list
-            )
+            light_1d = self.radial_surface_brightness(r_mge * r_eff, kwargs_list)
             mge_lum = mge.fit_1d(
                 r_mge * r_eff,
                 light_1d,
@@ -78,11 +78,9 @@ class LightProfile:
         return surf_lum, sigma_lum
 
     def _parse_kwargs(self, kwargs_list):
-        """
-        removes e1 and e2 kwargs if not present in the profile
-        :param kwargs_list: list of keyword arguments of light profiles (see LightModule)
-        :return: parsed arguments
-        """
+        """Removes e1 and e2 kwargs if not present in the profile :param kwargs_list:
+        list of keyword arguments of light profiles (see LightModule) :return: parsed
+        arguments."""
         kwargs_list_copy = deepcopy(kwargs_list)
         kwargs_list_new = []
         profiles = self.light_model.func_list
@@ -90,10 +88,10 @@ class LightProfile:
             if ("e1" in kwargs) and ("e1" not in profile.param_names):
                 kwargs.pop("e1")
             elif ("e1" not in kwargs) and ("e1" in profile.param_names):
-                kwargs['e1'] = 0.
+                kwargs["e1"] = 0.0
             if ("e2" in kwargs) and ("e2" not in profile.param_names):
                 kwargs.pop("e2")
             elif ("e2" not in kwargs) and ("e2" in profile.param_names):
-                kwargs['e2'] = 0.
+                kwargs["e2"] = 0.0
             kwargs_list_new.append(kwargs)
         return kwargs_list_new

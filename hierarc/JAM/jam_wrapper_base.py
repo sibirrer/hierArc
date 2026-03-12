@@ -140,14 +140,14 @@ class JAMWrapperBase(object):
             kwargs_light,
             self._mge_n_gauss_light,
             self._mge_linear_solver,
-            self._mge_kwargs_lum
+            self._mge_kwargs_lum,
         )
         surf_mass, sigma_mass = self._mass_profile.mge_mass(
             self._mge_radial_points_mass,
             kwargs_mass,
             self._mge_n_gauss_mass,
             self._mge_linear_solver,
-            self._mge_kwargs_mass
+            self._mge_kwargs_mass,
         )
         # convert to units of M_sun / pc^2
         surf_mass *= self.cosmo.epsilon_crit * 1e-12
