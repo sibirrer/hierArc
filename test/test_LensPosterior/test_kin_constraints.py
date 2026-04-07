@@ -2,10 +2,10 @@ from hierarc.LensPosterior.kin_constraints import KinConstraints
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from lenstronomy.Util.param_util import phi_q2_ellipticity
+from astropy.cosmology import FlatLambdaCDM
 import numpy.testing as npt
 import numpy as np
 import pytest
-import unittest
 
 
 class TestKinConstraints(object):
@@ -35,9 +35,6 @@ class TestKinConstraints(object):
         # redshift
         z_lens = 0.5
         z_source = 1.5
-
-        # lens model
-        from astropy.cosmology import FlatLambdaCDM
 
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
@@ -149,9 +146,6 @@ class TestKinConstraints(object):
         z_lens = 0.5
         z_source = 1.5
 
-        # lens model
-        from astropy.cosmology import FlatLambdaCDM
-
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
         r_eff = 1
@@ -261,8 +255,6 @@ class TestKinConstraints(object):
         z_source = 1.5
 
         # lens model
-        from astropy.cosmology import FlatLambdaCDM
-
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
         r_eff = 1
@@ -276,17 +268,6 @@ class TestKinConstraints(object):
             "lens_light_model_list": lens_light_model_list,
         }
 
-        # settings for kinematics calculation with KinematicsAPI of lenstronomy
-        kwargs_kin_api_settings = {
-            "multi_observations": False,
-            "kwargs_numerics_galkin": kwargs_numerics_galkin,
-            "MGE_light": False,
-            "kwargs_mge_light": None,
-            "sampling_number": 1000,
-            "num_kin_sampling": 1000,
-            "num_psf_sampling": 100,
-        }
-
         kin_api = KinematicsAPI(
             z_lens,
             z_source,
@@ -296,7 +277,6 @@ class TestKinConstraints(object):
             anisotropy_model=anisotropy_model,
             cosmo=cosmo,
             kinematics_backend="jampy",
-            **kwargs_kin_api_settings
         )
 
         # compute kinematics with fiducial cosmology
@@ -336,7 +316,6 @@ class TestKinConstraints(object):
             lens_model_list=lens_model_list,
             lens_light_model_list=lens_light_model_list,
             kwargs_lens_light=kwargs_lens_light,
-            **kwargs_kin_api_settings
         )
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
@@ -359,18 +338,11 @@ class TestKinConstraints(object):
         }
         kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
 
-        kwargs_numeric_jam = {
-            "mge_n_gauss_light": 20,
-            "mge_n_gauss_mass": 20,
-        }
-
         # redshift
         z_lens = 0.5
         z_source = 1.5
 
         # lens model
-        from astropy.cosmology import FlatLambdaCDM
-
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
         r_eff = 1
@@ -397,14 +369,6 @@ class TestKinConstraints(object):
             "lens_light_model_list": lens_light_model_list,
         }
 
-        # settings for kinematics calculation with KinematicsAPI of lenstronomy
-        kwargs_kin_api_settings = {
-            "multi_observations": False,
-            "kwargs_numerics_jam": kwargs_numeric_jam,
-            "MGE_light": False,
-            "kwargs_mge_light": None,
-        }
-
         kin_api = KinematicsAPI(
             z_lens,
             z_source,
@@ -413,8 +377,8 @@ class TestKinConstraints(object):
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
             axial_symmetry=axial_symmetry,
+            kinematics_backend="jampy",
             cosmo=cosmo,
-            **kwargs_kin_api_settings
         )
 
         # compute kinematics with fiducial cosmology
@@ -469,9 +433,9 @@ class TestKinConstraints(object):
             gamma_pl_scaling=np.linspace(2.0, 2.2, 3),
             # axisymmetric JAM modeling
             axial_symmetry=axial_symmetry,
+            kinematics_backend="jampy",
             q_intrinsic_scaling=np.linspace(0.6, 1.0, 5),
             kwargs_lens_light=kwargs_lens_light,
-            **kwargs_kin_api_settings
         )
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
@@ -522,8 +486,6 @@ class TestKinConstraints(object):
         z_source = 1.5
 
         # lens model
-        from astropy.cosmology import FlatLambdaCDM
-
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
         r_eff = 1
@@ -616,21 +578,9 @@ class TestKinConstraints(object):
         }
         kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
 
-        # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
-        kwargs_numerics_galkin = {
-            "interpol_grid_num": 1000,  # numerical interpolation, should converge -> infinity
-            "log_integration": True,
-            # log or linear interpolation of surface brightness and mass models
-            "max_integrate": 100,
-            "min_integrate": 0.001,
-        }  # lower/upper bound of numerical integrals
-
         # redshift
         z_lens = 0.5
         z_source = 1.5
-
-        # lens model
-        from astropy.cosmology import FlatLambdaCDM
 
         cosmo = FlatLambdaCDM(H0=70, Om0=0.3)
         theta_E = 1.0
@@ -648,12 +598,6 @@ class TestKinConstraints(object):
         # settings for kinematics calculation with KinematicsAPI of lenstronomy
         kwargs_kin_api_settings = {
             "multi_observations": True,
-            "kwargs_numerics_galkin": kwargs_numerics_galkin,
-            "MGE_light": False,
-            "kwargs_mge_light": None,
-            "sampling_number": 1000,
-            "num_kin_sampling": 1000,
-            "num_psf_sampling": 100,
         }
 
         kin_api = KinematicsAPI(
@@ -720,9 +664,9 @@ class TestKinConstraints(object):
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
 
-class TestRaise(unittest.TestCase):
+class TestRaise(object):
     def test_raise(self):
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError):
             anisotropy_model = "GOM"
             kwargs_aperture = {
                 "aperture_type": "shell",
@@ -774,10 +718,67 @@ class TestRaise(unittest.TestCase):
                 kwargs_aperture=kwargs_aperture,
                 kwargs_seeing=kwargs_seeing,
                 anisotropy_model=anisotropy_model,
+                kinematics_backend="galkin",
                 **kwargs_kin_api_settings
             )
             kin_constraints._anisotropy_model = "BAD"
             kin_constraints._anisotropy_scaling_relative(j_ani_0=1)
+
+    def test_kwargs_lens_light(self):
+        with pytest.raises(ValueError, match="kwargs_lens_light"):
+            # redshift
+            z_lens = 0.5
+            z_source = 1.5
+            theta_E = 1.0
+            r_eff = 1
+            gamma = 2.1
+            KinConstraints(
+                z_lens=z_lens,
+                z_source=z_source,
+                theta_E=theta_E,
+                theta_E_error=0.01,
+                gamma=gamma,
+                gamma_error=0.02,
+                r_eff=r_eff,
+                r_eff_error=0.05,
+                sigma_v_measured=[200],
+                sigma_v_error_independent=[10],
+                sigma_v_error_covariant=0,
+                kwargs_aperture={},
+                kwargs_seeing={},
+                anisotropy_model="const",
+                kinematics_backend="jampy",
+                axial_symmetry="axi_sph",
+                kwargs_lens_light=None # this should be provided
+            )
+
+    def test_kwargs_lens_ellip(self):
+        with pytest.raises(ValueError, match="ellipticities"):
+            # redshift
+            z_lens = 0.5
+            z_source = 1.5
+            theta_E = 1.0
+            r_eff = 1
+            gamma = 2.1
+            KinConstraints(
+                z_lens=z_lens,
+                z_source=z_source,
+                theta_E=theta_E,
+                theta_E_error=0.01,
+                gamma=gamma,
+                gamma_error=0.02,
+                r_eff=r_eff,
+                r_eff_error=0.05,
+                sigma_v_measured=[200],
+                sigma_v_error_independent=[10],
+                sigma_v_error_covariant=0,
+                kwargs_aperture={},
+                kwargs_seeing={},
+                anisotropy_model="const",
+                kinematics_backend="jampy",
+                axial_symmetry="axi_sph",
+                kwargs_lens_light=[{}] # does not have e1, e2
+            )
 
 
 if __name__ == "__main__":

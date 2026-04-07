@@ -34,7 +34,6 @@ class DdtGaussKinConstraints(KinConstraints):
         MGE_mass=None,
         kwargs_mge_light=None,
         kwargs_mge_mass=None,
-        hernquist_approx=False,
         kappa_ext=0,
         kappa_ext_sigma=0,
         sampling_number=1000,
@@ -71,7 +70,6 @@ class DdtGaussKinConstraints(KinConstraints):
         :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
-        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         :param kappa_ext: mean of the external convergence from which the ddt constraints are coming from
         :param kappa_ext_sigma: 1-sigma distribution uncertainty from which the ddt constraints are coming from
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
@@ -108,7 +106,6 @@ class DdtGaussKinConstraints(KinConstraints):
             MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,
             kwargs_mge_mass=kwargs_mge_mass,
-            hernquist_approx=hernquist_approx,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,

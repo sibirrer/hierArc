@@ -165,7 +165,6 @@ class KinConstraintsComposite(KinConstraints):
             MGE_mass=MGE_mass,
             kwargs_mge_light=None,
             kwargs_mge_mass=kwargs_mge_mass,
-            hernquist_approx=False,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
@@ -364,7 +363,7 @@ class KinConstraintsComposite(KinConstraints):
             },
             kwargs_lens_stars,
         ]
-
+        inclination = self._get_inclination_angle(self._q_light, q_intrinsic)
         j_kin = self.velocity_dispersion_map_dimension_less(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_light,
@@ -372,7 +371,7 @@ class KinConstraintsComposite(KinConstraints):
             r_eff=r_eff_draw,
             theta_E=self._theta_E,  # send this to avoid unnecessary recomputation
             gamma=self._gamma,  # send this to avoid unnecessary recomputation
-            q_intrinsic=q_intrinsic,
+            inclination=inclination,
         )
         return j_kin
 
@@ -427,7 +426,7 @@ class KinConstraintsComposite(KinConstraints):
             },
             kwargs_lens_stars,
         ]
-
+        inclination = self._get_inclination_angle(self._q_light, q_intrinsic)
         j_kin = self.velocity_dispersion_map_dimension_less(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_light,
@@ -435,7 +434,7 @@ class KinConstraintsComposite(KinConstraints):
             r_eff=r_eff_draw,
             theta_E=self._theta_E,  # send this to avoid unnecessary recomputation
             gamma=self._gamma,  # send this to avoid unnecessary recomputation
-            q_intrinsic=q_intrinsic,
+            inclination=inclination,
         )
         return j_kin
 

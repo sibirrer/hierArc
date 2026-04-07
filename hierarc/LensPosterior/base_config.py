@@ -31,7 +31,6 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
         MGE_mass=None,
         kwargs_mge_light=None,
         kwargs_mge_mass=None,
-        hernquist_approx=False,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
@@ -76,8 +75,6 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             routine
         :param kwargs_mge_mass: keyword arguments that go into the MGE decomposition
             routine
-        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
-            light profile
         :param cosmo_fiducial: astropy.cosmology instance, if None,
             uses astropy's default cosmology
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
@@ -115,7 +112,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             anisotropy_model=anisotropy_model,
             kwargs_numerics_galkin=kwargs_numerics_galkin,
             analytic_kinematics=False,
-            Hernquist_approx=hernquist_approx,
+            Hernquist_approx=False,
             MGE_light=MGE_light,
             MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,

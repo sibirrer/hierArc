@@ -40,7 +40,6 @@ class KinConstraints(BaseLensConfig):
         MGE_mass=None,
         kwargs_mge_light=None,
         kwargs_mge_mass=None,
-        hernquist_approx=False,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
@@ -92,8 +91,6 @@ class KinConstraints(BaseLensConfig):
         :param lens_light_model_list: list of lens light model types (optional, default is HERNQUIST)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
-        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
-            light profile
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
         :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
@@ -113,38 +110,6 @@ class KinConstraints(BaseLensConfig):
         self._sigma_v_error_covariant = sigma_v_error_covariant
         self._sigma_v_error_cov_matrix = sigma_v_error_cov_matrix
         self._anisotropy_model = anisotropy_model
-
-        self._kwargs_lens_light = kwargs_lens_light
-
-        if self._kwargs_lens_light is not None:
-            if self._multi_observations:
-                kwargs_light_0 = self._kwargs_lens_light[0][0]
-            else:
-                kwargs_light_0 = self._kwargs_lens_light[0]
-            light_e1 = kwargs_light_0.get("e1", 0.0)
-            light_e2 = kwargs_light_0.get("e2", 0.0)
-            self._lens_phi, self._q_light = ellipticity2phi_q(light_e1, light_e2)
-            if q_total_mass is None:
-                self._q_mass = self._q_light
-            else:
-                self._q_mass = q_total_mass
-            mass_e1, mass_e2 = phi_q2_ellipticity(self._lens_phi, self._q_mass)
-            self._kwargs_mass_geometry = {
-                "center_x": kwargs_light_0.get("center_x", 0.0),
-                "center_y": kwargs_light_0.get("center_y", 0.0),
-                "e1": mass_e1,
-                "e2": mass_e2,
-            }
-        else:
-            if self.axial_symmetry != "spherical":
-                raise ValueError("kwargs_lens_light must be provided for axisymmetric modeling.")
-            self._kwargs_mass_geometry = {}
-            self._lens_phi = 0.0
-            self._q_light = 1.0
-            if q_total_mass is None:
-                self._q_mass = self._q_light
-            else:
-                self._q_mass = q_total_mass
 
         BaseLensConfig.__init__(
             self,
@@ -169,7 +134,6 @@ class KinConstraints(BaseLensConfig):
             MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,
             kwargs_mge_mass=kwargs_mge_mass,
-            hernquist_approx=hernquist_approx,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
@@ -181,6 +145,41 @@ class KinConstraints(BaseLensConfig):
             gamma_pl_scaling=gamma_pl_scaling,
             q_intrinsic_scaling=q_intrinsic_scaling,
         )
+
+        if self._kwargs_lens_light is not None:
+            if self._multi_observations:
+                kwargs_light_0 = self._kwargs_lens_light[0][0]
+            else:
+                kwargs_light_0 = self._kwargs_lens_light[0]
+            if "e1" not in kwargs_lens_light:
+                raise ValueError(
+                    "light ellipticities must be provided in 'kwargs_lens_light' for axisymmetric modeling."
+                )
+            self._lens_phi, self._q_light = ellipticity2phi_q(
+                kwargs_light_0['e1'],
+                kwargs_light_0['e2'],
+            )
+            if q_total_mass is None:
+                self._q_mass = self._q_light
+            else:
+                self._q_mass = q_total_mass
+            mass_e1, mass_e2 = phi_q2_ellipticity(self._lens_phi, self._q_mass)
+            self._kwargs_mass_geometry = {
+                "center_x": kwargs_light_0.get("center_x", 0.0),
+                "center_y": kwargs_light_0.get("center_y", 0.0),
+                "e1": mass_e1,
+                "e2": mass_e2,
+            }
+        else:
+            if self.axial_symmetry != "spherical":
+                raise ValueError("'kwargs_lens_light' must be provided for axisymmetric modeling.")
+            self._kwargs_mass_geometry = {}
+            self._lens_phi = 0.0
+            self._q_light = 1.0
+            if q_total_mass is None:
+                self._q_mass = self._q_light
+            else:
+                self._q_mass = q_total_mass
 
     def j_kin_draw(
         self, kwargs_anisotropy, gamma_pl=None, q_intrinsic=1.0, no_error=False
@@ -211,13 +210,16 @@ class KinConstraints(BaseLensConfig):
                             kwargs["Rs"] *= delta_r_eff
                         if "R_sersic" in kwargs:
                             kwargs["R_sersic"] *= delta_r_eff
+                        if "sigma" in kwargs:
+                            kwargs["sigma"] *= delta_r_eff
             else:
                 for kwargs in kwargs_light:
                     if "Rs" in kwargs:
                         kwargs["Rs"] *= delta_r_eff
                     if "R_sersic" in kwargs:
                         kwargs["R_sersic"] *= delta_r_eff
-            # TODO: for now assumes that mass and light share the same geometry
+                    if "sigma" in kwargs:
+                        kwargs["sigma"] *= delta_r_eff
         kwargs_lens = [
             # add geometry for axisymmetric modeling
             {"theta_E": theta_E_draw, "gamma": gamma_draw} | self._kwargs_mass_geometry
