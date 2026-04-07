@@ -356,7 +356,7 @@ class TestKinConstraints(object):
         axial_symmetry = "axi_sph"
         q_intrinsic = 0.80
         q_observed = 0.86
-        cos_i_squared = (q_observed ** 2 - q_intrinsic ** 2) / (1 - q_intrinsic ** 2)
+        cos_i_squared = (q_observed**2 - q_intrinsic**2) / (1 - q_intrinsic**2)
         cos_i_squared = np.clip(cos_i_squared, 0, 1)
         inclination = np.rad2deg(np.arccos(np.sqrt(cos_i_squared)))
         e1, e2 = phi_q2_ellipticity(0, q_observed)
@@ -749,7 +749,7 @@ class TestRaise(object):
                 anisotropy_model="const",
                 kinematics_backend="jampy",
                 axial_symmetry="axi_sph",
-                kwargs_lens_light=None # this should be provided
+                kwargs_lens_light=None,  # this should be provided
             )
 
     def test_kwargs_lens_ellip(self):
@@ -777,7 +777,7 @@ class TestRaise(object):
                 anisotropy_model="const",
                 kinematics_backend="jampy",
                 axial_symmetry="axi_sph",
-                kwargs_lens_light=[{}] # does not have e1, e2
+                kwargs_lens_light=[{}],  # does not have e1, e2
             )
 
 

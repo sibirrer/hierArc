@@ -156,8 +156,8 @@ class KinConstraints(BaseLensConfig):
                     "light ellipticities must be provided in 'kwargs_lens_light' for axisymmetric modeling."
                 )
             self._lens_phi, self._q_light = ellipticity2phi_q(
-                kwargs_light_0['e1'],
-                kwargs_light_0['e2'],
+                kwargs_light_0["e1"],
+                kwargs_light_0["e2"],
             )
             if q_total_mass is None:
                 self._q_mass = self._q_light
@@ -172,7 +172,9 @@ class KinConstraints(BaseLensConfig):
             }
         else:
             if self.axial_symmetry != "spherical":
-                raise ValueError("'kwargs_lens_light' must be provided for axisymmetric modeling.")
+                raise ValueError(
+                    "'kwargs_lens_light' must be provided for axisymmetric modeling."
+                )
             self._kwargs_mass_geometry = {}
             self._lens_phi = 0.0
             self._q_light = 1.0
@@ -222,10 +224,13 @@ class KinConstraints(BaseLensConfig):
                         kwargs["sigma"] *= delta_r_eff
         kwargs_lens = [
             # add geometry for axisymmetric modeling
-            {"theta_E": theta_E_draw, "gamma": gamma_draw} | self._kwargs_mass_geometry
+            {"theta_E": theta_E_draw, "gamma": gamma_draw}
+            | self._kwargs_mass_geometry
         ]
         # get the inclination angle from the light axial ratio
-        inclination = self._get_inclination_angle(q_obs=self._q_light, q_intrinsic=q_intrinsic)
+        inclination = self._get_inclination_angle(
+            q_obs=self._q_light, q_intrinsic=q_intrinsic
+        )
         j_kin = self.velocity_dispersion_map_dimension_less(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_light,
@@ -440,7 +445,7 @@ class KinConstraints(BaseLensConfig):
         :param q_intrinsic: intrinsic axis ratio
         :return: inclination angle in degrees
         """
-        if (self.axial_symmetry == 'spherical') or (q_intrinsic == 1.0):
+        if (self.axial_symmetry == "spherical") or (q_intrinsic == 1.0):
             return 90.0  # spherical case
         if q_obs == 1.0:
             warnings.warn(
