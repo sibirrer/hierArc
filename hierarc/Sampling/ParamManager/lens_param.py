@@ -23,6 +23,8 @@ class LensParam(object):
         gamma_pl_global_dist="NONE",
         kwargs_fixed=None,
         log_scatter=False,
+        Ddt_sampling_num=0,
+        Dd_sampling_num=0,
     ):
         """
 
@@ -55,6 +57,8 @@ class LensParam(object):
         :param log_scatter: boolean, if True, samples the Gaussian scatter amplitude in log space (and thus flat prior
          in log)
         :param kwargs_fixed: keyword arguments that are held fixed through the sampling
+        :param Ddt_sampling_num: int, number of time-delay distances to be sampled (to be assigned to individual lenses)
+        :param Dd_sampling_num: int, number of angular diameter distances to be sampled (to be assigned to individual lenses)
         """
         self._lambda_mst_sampling = lambda_mst_sampling
         self._lambda_mst_distribution = lambda_mst_distribution
@@ -71,6 +75,8 @@ class LensParam(object):
         self._gamma_pl_num = gamma_pl_num
         self._gamma_pl_global_sampling = gamma_pl_global_sampling
         self._gamma_pl_global_dist = gamma_pl_global_dist
+        self._Ddt_sampling_num = Ddt_sampling_num
+        self._Dd_sampling_num = Dd_sampling_num
 
         self._log_scatter = log_scatter
         if kwargs_fixed is None:
@@ -185,6 +191,18 @@ class LensParam(object):
                         list.append(r"$\sigma(\gamma_{\rm pl, global})$")
                     else:
                         list.append("gamma_pl_sigma")
+        for i in range(self._Ddt_sampling_num):
+            if "Ddt_%i" % i not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$D_{\Delta t, %i}$" % i)
+                else:
+                    list.append("Ddt_%i" % i)
+        for i in range(self._Dd_sampling_num):
+            if "Dd_%i" % i not in self._kwargs_fixed:
+                if latex_style is True:
+                    list.append(r"$D_{\rm d, %i}$" % i)
+                else:
+                    list.append("Dd_%i" % i)
         return list
 
     def args2kwargs(self, args, i=0):
@@ -284,6 +302,19 @@ class LensParam(object):
                 gamma_pl_list.append(args[i])
                 i += 1
             kwargs["gamma_pl_list"] = gamma_pl_list
+        if self._Ddt_sampling_num > 0:
+            Ddt_list = []
+            for k in range(self._Ddt_sampling_num):
+                Ddt_list.append(args[i])
+                i += 1
+            kwargs["Ddt_list"] = Ddt_list
+        if self._Dd_sampling_num > 0:
+            Dd_list = []
+            for k in range(self._Dd_sampling_num):
+                Dd_list.append(args[i])
+                i += 1
+            kwargs["Dd_list"] = Dd_list
+
         if self._gamma_pl_global_sampling is True:
             if "gamma_pl_mean" in self._kwargs_fixed:
                 kwargs["gamma_pl_mean"] = self._kwargs_fixed["gamma_pl_mean"]
@@ -357,6 +388,12 @@ class LensParam(object):
         if self._gamma_pl_num > 0:
             for i in range(self._gamma_pl_num):
                 args.append(kwargs["gamma_pl_list"][i])
+        if self._Ddt_sampling_num > 0:
+            for i in range(self._Ddt_sampling_num):
+                args.append(kwargs["Ddt_list"][i])
+        if self._Dd_sampling_num > 0:
+            for i in range(self._Dd_sampling_num):
+                args.append(kwargs["Dd_list"][i])
         if self._gamma_pl_global_sampling is True:
             if "gamma_pl_mean" not in self._kwargs_fixed:
                 args.append(kwargs["gamma_pl_mean"])

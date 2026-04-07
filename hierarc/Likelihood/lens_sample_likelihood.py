@@ -21,7 +21,11 @@ class LensSampleLikelihood(object):
             kwargs_global_model = {}
         self._lens_list = []
         self._gamma_pl_num = 0
+        self._Ddt_num = 0
+        self._Dd_num = 0
         gamma_pl_index = 0
+        Ddt_index = 0
+        Dd_index = 0
 
         gamma_pl_global_sampling = kwargs_global_model.get(
             "gamma_pl_global_sampling", False
@@ -29,18 +33,34 @@ class LensSampleLikelihood(object):
 
         for kwargs_lens in kwargs_lens_list:
             gamma_pl_index_ = None
+            Dd_sampling_index_ = None
+            Ddt_sampling_index_ = None
             if "kin_scaling_param_list" in kwargs_lens and not gamma_pl_global_sampling:
                 kin_scaling_param_list = kwargs_lens["kin_scaling_param_list"]
                 if "gamma_pl" in kin_scaling_param_list:
                     self._gamma_pl_num += 1
                     gamma_pl_index_ = copy.deepcopy(gamma_pl_index)
                     gamma_pl_index += 1
+
+            if kwargs_lens.get("distance_sampling", False):
+                if kwargs_lens["distance_sampling"].get("Ddt_sampling", False):
+                    self._Ddt_num += 1
+                    Ddt_sampling_index_ = copy.deepcopy(Ddt_index)
+                    Ddt_index += 1
+                if kwargs_lens["distance_sampling"].get("Dd_sampling", False):
+                    self._Dd_num += 1
+                    Dd_sampling_index_ = copy.deepcopy(Dd_index)
+                    Dd_index += 1
+
             kwargs_lens_ = self._merge_global2local_settings(
                 kwargs_global_model=kwargs_global_model, kwargs_lens=kwargs_lens
             )
+
             self._lens_list.append(
                 LensLikelihood(
                     gamma_pl_index=gamma_pl_index_,
+                    Ddt_sampling_index=Ddt_sampling_index_,
+                    Dd_sampling_index=Ddt_sampling_index_,
                     normalized=normalized,
                     **kwargs_lens_
                 )
@@ -107,6 +127,25 @@ class LensSampleLikelihood(object):
             individual lenses
         """
         return self._gamma_pl_num
+
+    @property
+    def Ddt_sampling_num(self):
+        """Number of time-delay distance parameters being sampled on individual lenses.
+
+        :return: number of time-delay distance parameters being sampled on individual
+            lenses
+        """
+        return self._Ddt_num
+
+    @property
+    def Dd_sampling_num(self):
+        """Number of angular diameter distance to the deflector parameters being sampled
+        on individual lenses.
+
+        :return: number of angular diameter distance to the deflector parameters being
+            sampled on individual lenses
+        """
+        return self._Dd_num
 
     @staticmethod
     def _merge_global2local_settings(kwargs_global_model, kwargs_lens):

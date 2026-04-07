@@ -48,6 +48,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         gamma_pl_index=None,
         gamma_pl_global_sampling=False,
         gamma_pl_global_dist="NONE",
+        Ddt_sampling_index=None,
+        Dd_sampling_index=None,
         # kinematic model quantities
         kin_scaling_param_list=None,
         j_kin_scaling_param_axes=None,
@@ -112,6 +114,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
         :type gamma_pl_global_sampling: bool
         :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
+        :param Ddt_sampling_index: index of Ddt parameter associated with this lens (this used if cosmology='FREE', else None)
+        :param Dd_sampling_index: index of Dd parameter associated with this lens (this used if cosmology='FREE', else None)
         :param normalized: bool, if True, returns the normalized likelihood, if False, separates the constant prefactor
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
@@ -204,6 +208,9 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         else:
             self._inclination_sampling = False
 
+        self._Ddt_sampling_index = Ddt_sampling_index
+        self._Dd_sampling_index = Dd_sampling_index
+
     def info(self):
         """Information about the lens.
 
@@ -242,7 +249,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         # here we compute the unperturbed angular diameter distances of the lens system given the cosmology
         # Note: Distances are in physical units of Mpc. Make sure the posteriors to evaluate this likelihood is in the
         # same units
-        ddt, dd = self.angular_diameter_distances(cosmo)
+        if cosmo is None:
+            ddt, dd = (
+                kwargs_lens["Ddt_list"][self._Ddt_sampling_index],
+                kwargs_lens["Dd_list"][self._Dd_sampling_index],
+            )
+        else:
+            ddt, dd = self.angular_diameter_distances(cosmo)
         beta_dsp = self.beta_dsp(cosmo)
         kwargs_source = self._kwargs_init(kwargs_source)
         z_apparent_m_anchor = kwargs_source.get("z_apparent_m_anchor", 0.1)

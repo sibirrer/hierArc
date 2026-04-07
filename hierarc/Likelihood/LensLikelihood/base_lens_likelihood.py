@@ -34,6 +34,7 @@ class LensLikelihoodBase(object):
         name="name",
         normalized=False,
         kwargs_lens_properties=None,
+        distance_sampling=None,
         **kwargs_likelihood
     ):
         """
@@ -47,6 +48,7 @@ class LensLikelihoodBase(object):
          (in case of a Gaussian 1/(sigma sqrt(2 pi)) ) to compute the reduced chi2 statistics
         :param kwargs_lens_properties: keyword arguments of the lens properties
         :param kwargs_likelihood: keyword arguments specifying the likelihood function,
+        :param distance_sampling: dictionary specifying which distances are sampled for this lens (Used only if cosmology='FREE')
         see individual classes for their use
         """
         self.name = name
