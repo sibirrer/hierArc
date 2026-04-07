@@ -29,10 +29,10 @@ class KinConstraintsComposite(KinConstraints):
         kwargs_aperture,
         kwargs_seeing,
         anisotropy_model,
-        kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
         axial_symmetry="spherical",
         kinematics_backend="jampy",
+        q_total_mass=None,
         gamma_in_prior_mean=None,
         gamma_in_prior_std=None,
         q_intrinsic_array=None,
@@ -41,7 +41,9 @@ class KinConstraintsComposite(KinConstraints):
         sigma_v_error_cov_matrix=None,
         kwargs_lens_light=None,
         lens_light_model_list=None,
+        MGE_mass=None,
         kwargs_mge_light=None,
+        kwargs_mge_mass=None,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
@@ -84,12 +86,12 @@ class KinConstraintsComposite(KinConstraints):
             to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
-        :param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
         :param kwargs_numerics_galkin: numerical settings for the integrated
-            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_jam)
+            line-of-sight velocity dispersion
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
+        :param q_total_mass: float between 0 and 1, axial ratio for the total mass (stars + dark matter).
+            If None, the total q is set to the same as the light profile q.
         :param gamma_in_prior_mean: prior mean for inner power-law slope of the NFW profile, if available
         :param gamma_in_prior_std: standard deviation of the Gaussian prior for `gamma_in`
         :param q_intrinsic_array: array of intrinsic axis ratio values (optional, otherwise None)
@@ -149,18 +151,20 @@ class KinConstraintsComposite(KinConstraints):
             kwargs_aperture,
             kwargs_seeing,
             anisotropy_model,
-            kwargs_numerics_jam=kwargs_numerics_jam,
             kwargs_numerics_galkin=kwargs_numerics_galkin,
             axial_symmetry=axial_symmetry,
             kinematics_backend=kinematics_backend,
+            q_total_mass=q_total_mass,
             sigma_v_error_independent=sigma_v_error_independent,
             sigma_v_error_covariant=sigma_v_error_covariant,
             sigma_v_error_cov_matrix=sigma_v_error_cov_matrix,
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             lens_model_list=lens_model_list,
-            MGE_light=False,  # set False, as MGE is already done as default
+            MGE_light=False,
+            MGE_mass=MGE_mass,
             kwargs_mge_light=None,
+            kwargs_mge_mass=kwargs_mge_mass,
             hernquist_approx=False,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,

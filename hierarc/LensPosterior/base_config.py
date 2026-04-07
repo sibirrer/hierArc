@@ -1,9 +1,9 @@
-from hierarc.JAM.kinematics_backend import KinematicsBackend
+from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
 from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
 
 
-class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
+class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
     """This class contains and manages the base configurations of the lens posteriors
     and makes sure that they are universally applied consistently through the different
     likelihood definitions."""
@@ -21,16 +21,17 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
         kwargs_aperture,
         kwargs_seeing,
         anisotropy_model,
-        kwargs_numerics_jam=None,
-        kwargs_numerics_galkin=None,  # deprecated
+        kwargs_numerics_galkin=None,
         axial_symmetry="spherical",
         kinematics_backend="jampy",
         lens_model_list=None,
         kwargs_lens_light=None,
         lens_light_model_list=["HERNQUIST"],
-        MGE_light=False,
+        MGE_light=None,
+        MGE_mass=None,
         kwargs_mge_light=None,
-        hernquist_approx=True,
+        kwargs_mge_mass=None,
+        hernquist_approx=False,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
@@ -53,24 +54,27 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
         :param kwargs_aperture: spectroscopic aperture keyword arguments, see
-        lenstronomy.Galkin.aperture for options
+            lenstronomy.Galkin.aperture for options
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
             to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
-        param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
         :param kwargs_numerics_galkin: numerical settings for the integrated
-            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_jam)
+            line-of-sight velocity dispersion
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
         :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
          as a list for each individual observation condition.
         :param lens_model_list: keyword argument list of lens model (optional)
-        :param kwargs_lens_light: keyword argument list of lens light model (optional)
+        :param kwargs_lens_light: keyword argument list of lens light model (optional).
+            These kwargs should be provided for axisymmetric modeling to specify the light ellipticity.
         :param lens_light_model_list: list of lens light model profiles (optional, default HERNQUIST)
+        :param MGE_light: bool, if True, uses MGE decomposition for the light profile
+        :param MGE_mass: bool, if True, uses MGE decomposition for the mass profile
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
+            routine
+        :param kwargs_mge_mass: keyword arguments that go into the MGE decomposition
             routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
             light profile
@@ -94,12 +98,12 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
                 "lens_model_list": lens_model_list,
                 "lens_light_model_list": lens_light_model_list,
             }
-        KinematicsBackend.__init__(
+        TDCosmography.__init__(
             self,
             z_lens,
             z_source,
             kwargs_model,
-            backend=kinematics_backend,
+            kinematics_backend=kinematics_backend,
             axial_symmetry=axial_symmetry,
             cosmo_fiducial=cosmo_fiducial,
             lens_model_kinematics_bool=None,
@@ -109,13 +113,13 @@ class BaseLensConfig(KinematicsBackend, ImageModelPosterior, KinScalingConfig):
             multi_observations=multi_observations,
             multi_light_profile=multi_light_profile,
             anisotropy_model=anisotropy_model,
-            kwargs_numerics_jam=kwargs_numerics_jam,
             kwargs_numerics_galkin=kwargs_numerics_galkin,
             analytic_kinematics=False,
             Hernquist_approx=hernquist_approx,
             MGE_light=MGE_light,
-            MGE_mass=False,
+            MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,
+            kwargs_mge_mass=kwargs_mge_mass,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,

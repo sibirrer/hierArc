@@ -1,7 +1,8 @@
 import copy
-
 import numpy as np
 from hierarc.LensPosterior.base_config import BaseLensConfig
+from lenstronomy.Util.param_util import ellipticity2phi_q, phi_q2_ellipticity
+import warnings
 
 
 class KinConstraints(BaseLensConfig):
@@ -25,18 +26,20 @@ class KinConstraints(BaseLensConfig):
         kwargs_aperture,
         kwargs_seeing,
         anisotropy_model,
-        kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
         axial_symmetry="spherical",
         kinematics_backend="jampy",
+        q_total_mass=None,
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
         kwargs_lens_light=None,
         lens_light_model_list=None,
         lens_model_list=None,
-        MGE_light=False,
+        MGE_light=None,
+        MGE_mass=None,
         kwargs_mge_light=None,
+        kwargs_mge_mass=None,
         hernquist_approx=False,
         sampling_number=1000,
         num_psf_sampling=100,
@@ -48,7 +51,6 @@ class KinConstraints(BaseLensConfig):
         log_m2l_scaling=None,
         gamma_pl_scaling=None,
         q_intrinsic_scaling=None,
-        voronoi_bins=None,
     ):
         """
 
@@ -78,14 +80,15 @@ class KinConstraints(BaseLensConfig):
          module specified in lenstronomy.GalKin.psf
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
-        :param kwargs_numerics_jam: numerical settings for the integrated
-            line-of-sight velocity dispersion
         :param kwargs_numerics_galkin: numerical settings for the integrated
-            line-of-sight velocity dispersion (deprecated, use kwargs_numerics_jam)
+            line-of-sight velocity dispersion
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
+        :param q_total_mass: float between 0 and 1, axial ratio for the total mass (stars + dark matter).
+            If None, the total q is set to the same as the light profile q.
         :param lens_model_list: keyword argument list of lens model (optional)
-        :param kwargs_lens_light: keyword argument list of lens light model (optional)
+        :param kwargs_lens_light: keyword argument list of lens light model.
+            These kwargs should be provided for axisymmetric modeling to specify the light ellipticity.
         :param lens_light_model_list: list of lens light model types (optional, default is HERNQUIST)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
@@ -102,8 +105,6 @@ class KinConstraints(BaseLensConfig):
         :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
         :param q_intrinsic_scaling: array of intrinsic axis ratio values (optional, otherwise None)
             this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
-        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
-            bin indices should start from 0, -1 values for pixels not binned
         """
         if lens_light_model_list is None:
             lens_light_model_list = ["HERNQUIST"]
@@ -111,11 +112,39 @@ class KinConstraints(BaseLensConfig):
         self._sigma_v_error_independent = np.array(sigma_v_error_independent)
         self._sigma_v_error_covariant = sigma_v_error_covariant
         self._sigma_v_error_cov_matrix = sigma_v_error_cov_matrix
-
-        self._kwargs_lens_light = kwargs_lens_light
         self._anisotropy_model = anisotropy_model
 
-        self._voronoi_bins = voronoi_bins
+        self._kwargs_lens_light = kwargs_lens_light
+
+        if self._kwargs_lens_light is not None:
+            if self._multi_observations:
+                kwargs_light_0 = self._kwargs_lens_light[0][0]
+            else:
+                kwargs_light_0 = self._kwargs_lens_light[0]
+            light_e1 = kwargs_light_0.get("e1", 0.0)
+            light_e2 = kwargs_light_0.get("e2", 0.0)
+            self._lens_phi, self._q_light = ellipticity2phi_q(light_e1, light_e2)
+            if q_total_mass is None:
+                self._q_mass = self._q_light
+            else:
+                self._q_mass = q_total_mass
+            mass_e1, mass_e2 = phi_q2_ellipticity(self._lens_phi, self._q_mass)
+            self._kwargs_mass_geometry = {
+                "center_x": kwargs_light_0.get("center_x", 0.0),
+                "center_y": kwargs_light_0.get("center_y", 0.0),
+                "e1": mass_e1,
+                "e2": mass_e2,
+            }
+        else:
+            if self.axial_symmetry != "spherical":
+                raise ValueError("kwargs_lens_light must be provided for axisymmetric modeling.")
+            self._kwargs_mass_geometry = {}
+            self._lens_phi = 0.0
+            self._q_light = 1.0
+            if q_total_mass is None:
+                self._q_mass = self._q_light
+            else:
+                self._q_mass = q_total_mass
 
         BaseLensConfig.__init__(
             self,
@@ -130,7 +159,6 @@ class KinConstraints(BaseLensConfig):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
-            kwargs_numerics_jam=kwargs_numerics_jam,
             kwargs_numerics_galkin=kwargs_numerics_galkin,
             axial_symmetry=axial_symmetry,
             kinematics_backend=kinematics_backend,
@@ -138,7 +166,9 @@ class KinConstraints(BaseLensConfig):
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             MGE_light=MGE_light,
+            MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,
+            kwargs_mge_mass=kwargs_mge_mass,
             hernquist_approx=hernquist_approx,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
@@ -170,13 +200,11 @@ class KinConstraints(BaseLensConfig):
         theta_E_draw, gamma_draw, r_eff_draw, delta_r_eff = self.draw_lens(
             gamma_pl=gamma_pl, no_error=no_error
         )
-        kwargs_lens_geometry = {}
         if self._kwargs_lens_light is None:
             kwargs_light = [{"Rs": r_eff_draw * 0.551, "amp": 1.0}]
         else:
             kwargs_light = copy.deepcopy(self._kwargs_lens_light)
-            if self.multi_observations:
-                kwargs_light_0 = self._kwargs_lens_light[0][0]
+            if self._multi_observations:
                 for kwargs_obs in kwargs_light:
                     for kwargs in kwargs_obs:
                         if "Rs" in kwargs:
@@ -184,32 +212,26 @@ class KinConstraints(BaseLensConfig):
                         if "R_sersic" in kwargs:
                             kwargs["R_sersic"] *= delta_r_eff
             else:
-                kwargs_light_0 = self._kwargs_lens_light[0]
                 for kwargs in kwargs_light:
                     if "Rs" in kwargs:
                         kwargs["Rs"] *= delta_r_eff
                     if "R_sersic" in kwargs:
                         kwargs["R_sersic"] *= delta_r_eff
             # TODO: for now assumes that mass and light share the same geometry
-            if self.axial_symmetry in ["axi_sph", "axi_cyl"]:
-                kwargs_lens_geometry = {
-                    "center_x": kwargs_light_0.get("center_x", 0.0),
-                    "center_y": kwargs_light_0.get("center_y", 0.0),
-                    "e1": kwargs_light_0.get("e1", 0.0),
-                    "e2": kwargs_light_0.get("e2", 0.0),
-                }
         kwargs_lens = [
-            {"theta_E": theta_E_draw, "gamma": gamma_draw} | kwargs_lens_geometry
+            # add geometry for axisymmetric modeling
+            {"theta_E": theta_E_draw, "gamma": gamma_draw} | self._kwargs_mass_geometry
         ]
+        # get the inclination angle from the light axial ratio
+        inclination = self._get_inclination_angle(q_obs=self._q_light, q_intrinsic=q_intrinsic)
         j_kin = self.velocity_dispersion_map_dimension_less(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_light,
             kwargs_anisotropy=kwargs_anisotropy,
-            q_intrinsic=q_intrinsic,
+            inclination=inclination,
             r_eff=r_eff_draw,
             theta_E=theta_E_draw,
             gamma=gamma_draw,
-            voronoi_bins=self._voronoi_bins,
         )
         return j_kin
 
@@ -408,3 +430,24 @@ class KinConstraints(BaseLensConfig):
             )
 
         return ani_scaling_array_list
+
+    def _get_inclination_angle(self, q_obs, q_intrinsic):
+        """Compute inclination angle from observed ellipticity and intrinsic axis ratio.
+
+        :param q_obs: observed axis ratio
+        :param q_intrinsic: intrinsic axis ratio
+        :return: inclination angle in degrees
+        """
+        if (self.axial_symmetry == 'spherical') or (q_intrinsic == 1.0):
+            return 90.0  # spherical case
+        if q_obs == 1.0:
+            warnings.warn(
+                "Cannot determine inclination angle for circular observed profile (q_obs=1.0)."
+                " Spherical symmetry will be assumed.",
+                UserWarning,
+            )
+            return None
+        cos_i_squared = (q_obs**2 - q_intrinsic**2) / (1 - q_intrinsic**2)
+        cos_i_squared = np.clip(cos_i_squared, 0, 1)
+        inclination_angle = np.arccos(np.sqrt(cos_i_squared))
+        return np.rad2deg(inclination_angle)

@@ -21,17 +21,19 @@ class DdtKinConstraints(KinConstraints):
         kwargs_aperture,
         kwargs_seeing,
         anisotropy_model,
-        kwargs_numerics_jam=None,
         kwargs_numerics_galkin=None,
         axial_symmetry="spherical",
         kinematics_backend="jampy",
+        q_total_mass=None,
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
         kwargs_lens_light=None,
         lens_light_model_list=["HERNQUIST"],
-        MGE_light=False,
+        MGE_light=None,
+        MGE_mass=None,
         kwargs_mge_light=None,
+        kwargs_mge_mass=None,
         hernquist_approx=False,
         kappa_ext=0,
         kappa_ext_sigma=0,
@@ -42,7 +44,6 @@ class DdtKinConstraints(KinConstraints):
         multi_light_profile=False,
         gamma_pl_scaling=None,
         q_intrinsic_scaling=None,
-        voronoi_bins=None,
     ):
         """
 
@@ -65,12 +66,14 @@ class DdtKinConstraints(KinConstraints):
         :param gamma_error: 1-sigma uncertainty on power-law slope
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
-        :param kwargs_numerics_jam: numerical settings for the integrated line-of-sight velocity dispersion
-        :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion (deprecated, use kwargs_numerics_jam)
+        :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
         :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
-        :param kwargs_lens_light: keyword argument list of lens light model (optional)
+        :param q_total_mass: float between 0 and 1, axial ratio for the total mass (stars + dark matter).
+            If None, the total q is set to the same as the light profile q.
+        :param kwargs_lens_light: keyword argument list of lens light model.
+            These kwargs should be provided for axisymmetric modeling to specify the light ellipticity.
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
         :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         :param kappa_ext: mean of the external convergence from which the ddt constraints are coming from
@@ -99,10 +102,10 @@ class DdtKinConstraints(KinConstraints):
             sigma_v_measured=sigma_v_measured,
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
-            kwargs_numerics_jam=kwargs_numerics_jam,
             kwargs_numerics_galkin=kwargs_numerics_galkin,
             axial_symmetry=axial_symmetry,
             kinematics_backend=kinematics_backend,
+            q_total_mass=q_total_mass,
             anisotropy_model=anisotropy_model,
             sigma_v_error_independent=sigma_v_error_independent,
             sigma_v_error_covariant=sigma_v_error_covariant,
@@ -110,7 +113,9 @@ class DdtKinConstraints(KinConstraints):
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             MGE_light=MGE_light,
+            MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,
+            kwargs_mge_mass=kwargs_mge_mass,
             hernquist_approx=hernquist_approx,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
@@ -119,7 +124,6 @@ class DdtKinConstraints(KinConstraints):
             multi_light_profile=multi_light_profile,
             gamma_pl_scaling=gamma_pl_scaling,
             q_intrinsic_scaling=q_intrinsic_scaling,
-            voronoi_bins=voronoi_bins,
         )
 
     def hierarchy_configuration(self, num_sample_model=20):

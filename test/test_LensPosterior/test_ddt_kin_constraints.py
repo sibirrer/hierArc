@@ -1,7 +1,6 @@
 from hierarc.LensPosterior.ddt_kin_constraints import DdtKinConstraints
-from hierarc.JAM.kinematics_backend import KinematicsBackend
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
-from lenstronomy.Util.param_util import phi_q2_ellipticity
+from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 import numpy as np
 import numpy.testing as npt
@@ -69,14 +68,15 @@ class TestDdtKinGaussConstraints(object):
             "num_psf_sampling": 100,
         }
 
-        kin_api = KinematicsBackend(
+        kin_api = KinematicsAPI(
             z_lens,
             z_source,
             kwargs_model,
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
-            cosmo_fiducial=cosmo,
+            kinematics_backend="galkin",
+            cosmo=cosmo,
             **kwargs_kin_api_settings
         )
 

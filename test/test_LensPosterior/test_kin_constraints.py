@@ -1,6 +1,6 @@
 from hierarc.LensPosterior.kin_constraints import KinConstraints
-from hierarc.JAM.kinematics_backend import KinematicsBackend
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
+from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from lenstronomy.Util.param_util import phi_q2_ellipticity
 import numpy.testing as npt
 import numpy as np
@@ -63,15 +63,15 @@ class TestKinConstraints(object):
             "num_psf_sampling": 100,
         }
 
-        kin_api = KinematicsBackend(
+        kin_api = KinematicsAPI(
             z_lens,
             z_source,
             kwargs_model,
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
-            cosmo_fiducial=cosmo,
-            backend="galkin",
+            cosmo=cosmo,
+            kinematics_backend="galkin",
             **kwargs_kin_api_settings
         )
 
@@ -176,15 +176,15 @@ class TestKinConstraints(object):
             "num_psf_sampling": 100,
         }
 
-        kin_api = KinematicsBackend(
+        kin_api = KinematicsAPI(
             z_lens,
             z_source,
             kwargs_model,
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
-            cosmo_fiducial=cosmo,
-            backend="galkin",
+            cosmo=cosmo,
+            kinematics_backend="galkin",
             **kwargs_kin_api_settings
         )
 
@@ -287,15 +287,15 @@ class TestKinConstraints(object):
             "num_psf_sampling": 100,
         }
 
-        kin_api = KinematicsBackend(
+        kin_api = KinematicsAPI(
             z_lens,
             z_source,
             kwargs_model,
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
-            cosmo_fiducial=cosmo,
-            backend="jampy",
+            cosmo=cosmo,
+            kinematics_backend="jampy",
             **kwargs_kin_api_settings
         )
 
@@ -384,6 +384,9 @@ class TestKinConstraints(object):
         axial_symmetry = "axi_sph"
         q_intrinsic = 0.80
         q_observed = 0.86
+        cos_i_squared = (q_observed ** 2 - q_intrinsic ** 2) / (1 - q_intrinsic ** 2)
+        cos_i_squared = np.clip(cos_i_squared, 0, 1)
+        inclination = np.rad2deg(np.arccos(np.sqrt(cos_i_squared)))
         e1, e2 = phi_q2_ellipticity(0, q_observed)
 
         # kwargs_model
@@ -402,7 +405,7 @@ class TestKinConstraints(object):
             "kwargs_mge_light": None,
         }
 
-        kin_api = KinematicsBackend(
+        kin_api = KinematicsAPI(
             z_lens,
             z_source,
             kwargs_model,
@@ -410,7 +413,7 @@ class TestKinConstraints(object):
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
             axial_symmetry=axial_symmetry,
-            cosmo_fiducial=cosmo,
+            cosmo=cosmo,
             **kwargs_kin_api_settings
         )
 
@@ -439,7 +442,7 @@ class TestKinConstraints(object):
             kwargs_lens,
             kwargs_lens_light,
             kwargs_anisotropy,
-            q_intrinsic=q_intrinsic,
+            inclination=inclination,
             r_eff=r_eff,
             theta_E=theta_E,
             gamma=gamma,
@@ -493,15 +496,16 @@ class TestKinConstraints(object):
         anisotropy_model = "const"
         x = y = np.linspace(-5, 5, 20)
         x_grid, y_grid = np.meshgrid(x, y)
-        kwargs_aperture = {
-            "aperture_type": "IFU_grid",
-            "x_grid": x_grid,
-            "y_grid": y_grid,
-        }
         voronoi_bins = np.ones_like(x_grid) * -1
         voronoi_bins[3:-2, 3:-2] = np.kron(
             np.arange(25).reshape(5, 5), np.ones((3, 3))
         ).astype(int)
+        kwargs_aperture = {
+            "aperture_type": "IFU_binned",
+            "x_grid": x_grid,
+            "y_grid": y_grid,
+            "bins": voronoi_bins,
+        }
         kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
 
         # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
@@ -544,15 +548,15 @@ class TestKinConstraints(object):
             "num_psf_sampling": 100,
         }
 
-        kin_api = KinematicsBackend(
+        kin_api = KinematicsAPI(
             z_lens,
             z_source,
             kwargs_model,
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
-            cosmo_fiducial=cosmo,
-            backend="galkin",
+            cosmo=cosmo,
+            kinematics_backend="galkin",
             **kwargs_kin_api_settings
         )
 
@@ -571,7 +575,6 @@ class TestKinConstraints(object):
             theta_E=theta_E,
             gamma=gamma,
             kappa_ext=0,
-            voronoi_bins=voronoi_bins,
         )
 
         # compute likelihood
@@ -592,7 +595,6 @@ class TestKinConstraints(object):
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
             gamma_pl_scaling=np.linspace(1.8, 2.2, 5),
-            voronoi_bins=voronoi_bins,
             kinematics_backend="galkin",
             axial_symmetry="spherical",
             **kwargs_kin_api_settings
@@ -654,15 +656,15 @@ class TestKinConstraints(object):
             "num_psf_sampling": 100,
         }
 
-        kin_api = KinematicsBackend(
+        kin_api = KinematicsAPI(
             z_lens,
             z_source,
             kwargs_model,
             kwargs_aperture=[kwargs_aperture, kwargs_aperture],
             kwargs_seeing=[kwargs_seeing, kwargs_seeing],
             anisotropy_model=anisotropy_model,
-            cosmo_fiducial=cosmo,
-            backend="jampy",
+            cosmo=cosmo,
+            kinematics_backend="jampy",
             **kwargs_kin_api_settings
         )
 
