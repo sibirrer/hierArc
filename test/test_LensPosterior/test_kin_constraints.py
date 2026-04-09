@@ -261,8 +261,8 @@ class TestKinConstraints(object):
         gamma = 2.1
 
         # kwargs_model
-        lens_light_model_list = ["SERSIC"]
-        lens_model_list = ["SPP"]
+        lens_light_model_list = ["SERSIC_ELLIPSE"]
+        lens_model_list = ["EPL"]
         kwargs_model = {
             "lens_model_list": lens_model_list,
             "lens_light_model_list": lens_light_model_list,
@@ -283,7 +283,8 @@ class TestKinConstraints(object):
         kwargs_lens = [
             {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
         ]
-        kwargs_lens_light = [{"R_sersic": r_eff, "n_sersic": 4.0, "amp": 1.0}]
+        kwargs_lens_light = [{"R_sersic": r_eff, "n_sersic": 4.0, "amp": 1.0,
+                              "e1": 0, "e2": 0}]
         kwargs_anisotropy = {"beta": 0.0}
         sigma_v = kin_api.velocity_dispersion(
             kwargs_lens,
@@ -616,7 +617,6 @@ class TestKinConstraints(object):
         kwargs_lens = [
             {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
         ]
-        beta_inf = 0.9
         kwargs_lens_light = [
             {"Rs": r_eff * 0.551, "amp": 1.0},
         ]
