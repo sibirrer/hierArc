@@ -283,8 +283,9 @@ class TestKinConstraints(object):
         kwargs_lens = [
             {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
         ]
-        kwargs_lens_light = [{"R_sersic": r_eff, "n_sersic": 4.0, "amp": 1.0,
-                              "e1": 0, "e2": 0}]
+        kwargs_lens_light = [
+            {"R_sersic": r_eff, "n_sersic": 4.0, "amp": 1.0, "e1": 0, "e2": 0}
+        ]
         kwargs_anisotropy = {"beta": 0.0}
         sigma_v = kin_api.velocity_dispersion(
             kwargs_lens,
