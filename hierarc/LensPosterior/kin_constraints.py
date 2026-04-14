@@ -154,38 +154,31 @@ class KinConstraints(BaseLensConfig):
         else:
             self._q_mass = q_total_mass
 
-        if self._kwargs_lens_light is not None:
+        if (self._kwargs_lens_light is not None) and (axial_symmetry != "spherical"):
             if self._multi_observations:
                 kwargs_light_0 = self._kwargs_lens_light[0][0]
             else:
                 kwargs_light_0 = self._kwargs_lens_light[0]
+            if "e1" not in kwargs_light_0:
+                raise ValueError(
+                    "light ellipticities must be provided in 'kwargs_lens_light' for axisymmetric modeling."
+                )
+            self._lens_phi, self._q_light = ellipticity2phi_q(
+                kwargs_light_0["e1"],
+                kwargs_light_0["e2"],
+            )
+            if q_total_mass is None:
+                self._q_mass = self._q_light
+            else:
+                self._q_mass = q_total_mass
+            mass_e1, mass_e2 = phi_q2_ellipticity(self._lens_phi, self._q_mass)
             self._kwargs_mass_geometry.update(
                 {
-                    "center_x": kwargs_light_0.get("center_x", 0.0),
-                    "center_y": kwargs_light_0.get("center_y", 0.0),
+                    "e1": mass_e1,
+                    "e2": mass_e2,
                 }
             )
-            if axial_symmetry != "spherical":
-                if "e1" not in kwargs_light_0:
-                    raise ValueError(
-                        "light ellipticities must be provided in 'kwargs_lens_light' for axisymmetric modeling."
-                    )
-                self._lens_phi, self._q_light = ellipticity2phi_q(
-                    kwargs_light_0["e1"],
-                    kwargs_light_0["e2"],
-                )
-                if q_total_mass is None:
-                    self._q_mass = self._q_light
-                else:
-                    self._q_mass = q_total_mass
-                mass_e1, mass_e2 = phi_q2_ellipticity(self._lens_phi, self._q_mass)
-                self._kwargs_mass_geometry.update(
-                    {
-                        "e1": mass_e1,
-                        "e2": mass_e2,
-                    }
-                )
-        elif self.axial_symmetry != "spherical":
+        elif (self._kwargs_lens_light is None) and (axial_symmetry != "spherical"):
             raise ValueError(
                 "'kwargs_lens_light' must be provided for axisymmetric modeling."
             )
