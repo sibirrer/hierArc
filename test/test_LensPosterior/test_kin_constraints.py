@@ -13,7 +13,7 @@ class TestKinConstraints(object):
         pass
 
     def test_likelihoodconfiguration_om(self):
-        anisotropy_model = "GOM"
+        anisotropy_model = "OM"
         kwargs_aperture = {
             "aperture_type": "shell",
             "r_in": 0,
@@ -78,7 +78,7 @@ class TestKinConstraints(object):
         ]
         beta_inf = 0.9
         kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
-        kwargs_anisotropy = {"r_ani": r_eff, "beta_inf": beta_inf}
+        kwargs_anisotropy = {"r_ani": r_eff}
         sigma_v = kin_api.velocity_dispersion(
             kwargs_lens,
             kwargs_lens_light,
@@ -115,7 +115,7 @@ class TestKinConstraints(object):
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(gamma_pl_index=0, **kwargs_likelihood)
-        kwargs_kin = {"a_ani": 1, "beta_inf": beta_inf}
+        kwargs_kin = {"a_ani": 1}
         kwargs_lens = {"gamma_pl_list": [gamma]}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
@@ -330,7 +330,7 @@ class TestKinConstraints(object):
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
     def test_likelihoodconfiguration_const_axisymmetric(self):
-        anisotropy_model = "GOM"
+        anisotropy_model = "const"
         kwargs_aperture = {
             "aperture_type": "shell",
             "r_in": 0,
@@ -351,8 +351,8 @@ class TestKinConstraints(object):
         gamma = 2.1
 
         # anisotropy
-        beta_inf = 0.5
-        kwargs_anisotropy = {"r_ani": r_eff, "beta_inf": beta_inf}
+        beta = 0.1
+        kwargs_anisotropy = {"beta": beta}
 
         # axial symmetry
         axial_symmetry = "axi_sph"
@@ -447,7 +447,7 @@ class TestKinConstraints(object):
             q_intrinsic_distribution="NONE",  # fixed q_intrinsic for likelihood evaluation
             **kwargs_likelihood
         )
-        kwargs_kin = {"a_ani": 1, "beta_inf": beta_inf}
+        kwargs_kin = {"a_ani": beta,}
         kwargs_lens = {"gamma_pl_list": [gamma]}
         kwargs_deprojection = {"q_intrinsic": q_intrinsic}
         ln_likelihood = ln_class.lens_log_likelihood(
@@ -474,15 +474,6 @@ class TestKinConstraints(object):
         }
         kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
 
-        # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
-        kwargs_numerics_galkin = {
-            "interpol_grid_num": 1000,  # numerical interpolation, should converge -> infinity
-            "log_integration": True,
-            # log or linear interpolation of surface brightness and mass models
-            "max_integrate": 100,
-            "min_integrate": 0.001,
-        }  # lower/upper bound of numerical integrals
-
         # redshift
         z_lens = 0.5
         z_source = 1.5
@@ -501,17 +492,6 @@ class TestKinConstraints(object):
             "lens_light_model_list": lens_light_model_list,
         }
 
-        # settings for kinematics calculation with KinematicsAPI of lenstronomy
-        kwargs_kin_api_settings = {
-            "multi_observations": False,
-            "kwargs_numerics_galkin": kwargs_numerics_galkin,
-            "MGE_light": False,
-            "kwargs_mge_light": None,
-            "sampling_number": 1000,
-            "num_kin_sampling": 1000,
-            "num_psf_sampling": 100,
-        }
-
         kin_api = KinematicsAPI(
             z_lens,
             z_source,
@@ -520,8 +500,7 @@ class TestKinConstraints(object):
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
             cosmo=cosmo,
-            kinematics_backend="galkin",
-            **kwargs_kin_api_settings
+            kinematics_backend="jampy",
         )
 
         # compute kinematics with fiducial cosmology
@@ -559,9 +538,8 @@ class TestKinConstraints(object):
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
             gamma_pl_scaling=np.linspace(1.8, 2.2, 5),
-            kinematics_backend="galkin",
+            kinematics_backend="jampy",
             axial_symmetry="spherical",
-            **kwargs_kin_api_settings
         )
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
