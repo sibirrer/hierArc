@@ -1,6 +1,5 @@
 numpy
 astropy
-
 scipy<1.14
 emcee
 mpmath
@@ -12,3 +11,4 @@ scikit-learn>=0.22
 pandas
 jampy
 mgefit
+tqdm

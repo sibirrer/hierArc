@@ -2,6 +2,8 @@ import copy
 import numpy as np
 from hierarc.LensPosterior.base_config import BaseLensConfig
 from lenstronomy.Util.param_util import ellipticity2phi_q, phi_q2_ellipticity
+from itertools import product
+from tqdm import tqdm, trange
 import warnings
 
 
@@ -306,7 +308,7 @@ class KinConstraints(BaseLensConfig):
         j_kin_matrix = np.zeros(
             (num_sample_model, num_data)
         )  # matrix that contains the sampled J() distribution
-        for i in range(num_sample_model):
+        for i in trange(num_sample_model, desc="Kinematics model marginalization"):
             j_kin = self.j_kin_draw(
                 self.kwargs_anisotropy_base,
                 no_error=False,
@@ -363,90 +365,37 @@ class KinConstraints(BaseLensConfig):
         return self._anisotropy_scaling_relative(j_ani_0)
 
     def _anisotropy_scaling_relative(self, j_ani_0):
-        """Anisotropy scaling relative to a default J prediction.
-
-        :param j_ani_0: default J() prediction for default anisotropy
-        :return: list of arrays (for the number of measurements) according to anisotropy
-            scaling
-        """
+        """Anisotropy scaling relative to a default J prediction."""
         num_data = len(self._sigma_v_measured)
-        len_list = [len(a) for a in self.kin_scaling_param_array]
-        ani_scaling_array_list = [np.zeros(len_list) for _ in range(num_data)]
-        num = self.num_scaling_dim
-        if num == 1:
-            for i, param in enumerate(self.kin_scaling_param_array[0]):
-                param_array = [param]
-                kwargs_ani, kwargs_lens, kwargs_deprojection = self.param_array2kwargs(
-                    param_array=param_array
-                )
-                kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
-                j_kin_ani = self.j_kin_draw(
-                    kwargs_anisotropy,
-                    no_error=True,
-                    **kwargs_lens,
-                    **kwargs_deprojection
-                )
-                for s, j_kin in enumerate(j_kin_ani):
-                    ani_scaling_array_list[s][i] = j_kin / j_ani_0[s]
-        elif num == 2:
-            for i, param_i in enumerate(self.kin_scaling_param_array[0]):
-                for j, param_j in enumerate(self.kin_scaling_param_array[1]):
-                    param_array = [param_i, param_j]
-                    kwargs_ani, kwargs_lens, kwargs_deprojection = (
-                        self.param_array2kwargs(param_array=param_array)
-                    )
-                    kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
-                    j_kin_ani = self.j_kin_draw(
-                        kwargs_anisotropy,
-                        no_error=True,
-                        **kwargs_lens,
-                        **kwargs_deprojection
-                    )
-                    # loop over IFU bins
-                    for s, j_kin in enumerate(j_kin_ani):
-                        ani_scaling_array_list[s][i, j] = j_kin / j_ani_0[s]
-        elif num == 3:
-            for i, param_i in enumerate(self.kin_scaling_param_array[0]):
-                for j, param_j in enumerate(self.kin_scaling_param_array[1]):
-                    for k, param_k in enumerate(self.kin_scaling_param_array[2]):
-                        param_array = [param_i, param_j, param_k]
-                        kwargs_ani, kwargs_lens, kwargs_deprojection = (
-                            self.param_array2kwargs(param_array=param_array)
-                        )
-                        kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
-                        j_kin_ani = self.j_kin_draw(
-                            kwargs_anisotropy,
-                            no_error=True,
-                            **kwargs_lens,
-                            **kwargs_deprojection
-                        )
-                        for s, j_kin in enumerate(j_kin_ani):
-                            ani_scaling_array_list[s][i, j, k] = j_kin / j_ani_0[s]
-        elif num == 4:
-            for i, param_i in enumerate(self.kin_scaling_param_array[0]):
-                for j, param_j in enumerate(self.kin_scaling_param_array[1]):
-                    for k, param_k in enumerate(self.kin_scaling_param_array[2]):
-                        for l, param_l in enumerate(self.kin_scaling_param_array[3]):
-                            param_array = [param_i, param_j, param_k, param_l]
-                            kwargs_ani, kwargs_lens, kwargs_deprojection = (
-                                self.param_array2kwargs(param_array=param_array)
-                            )
-                            kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
-                            j_kin_ani = self.j_kin_draw(
-                                kwargs_anisotropy,
-                                no_error=True,
-                                **kwargs_lens,
-                                **kwargs_deprojection
-                            )
-                            for s, j_kin in enumerate(j_kin_ani):
-                                ani_scaling_array_list[s][i, j, k, l] = (
-                                    j_kin / j_ani_0[s]
-                                )
-        else:
-            ValueError(
-                "Kin scaling with parameter dimension %s not supported, chose between 1-4."
-                % num
+        shapes = [len(a) for a in self.kin_scaling_param_array]
+        ani_scaling_array_list = [np.zeros(shapes) for _ in range(num_data)]
+
+        def compute_for_params(param_array, idx):
+            kwargs_ani, kwargs_lens, kwargs_deprojection = self.param_array2kwargs(
+                param_array=param_array
             )
+            kwargs_anisotropy = self.anisotropy_kwargs(**kwargs_ani)
+            j_kin_ani = self.j_kin_draw(
+                kwargs_anisotropy,
+                no_error=True,
+                **kwargs_lens,
+                **kwargs_deprojection,
+            )
+            for s, j_kin in enumerate(j_kin_ani):
+                ani_scaling_array_list[s][idx] = j_kin / j_ani_0[s]
+
+        if not 1 <= self.num_scaling_dim <= 4:
+            raise ValueError(
+                f"Kin scaling with parameter dimension {self.num_scaling_dim} "
+                "not supported, choose between 1 and 4."
+            )
+
+        # total number of iterations
+        total = np.prod(shapes)
+        iterator = product(*[range(n) for n in shapes])
+        for idx in tqdm(iterator, total=total, desc="Computing kinematics model grid"):
+            param_array = [self.kin_scaling_param_array[d][i] for d, i in enumerate(idx)]
+            compute_for_params(param_array, idx if len(idx) > 1 else idx[0])
 
         return ani_scaling_array_list
 
