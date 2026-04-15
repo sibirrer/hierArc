@@ -178,6 +178,18 @@ class KinConstraints(BaseLensConfig):
                     "e2": mass_e2,
                 }
             )
+        elif (self._kwargs_lens_light is not None) and (axial_symmetry == "spherical"):
+            if self._multi_observations:
+                for kwargs_obs in self._kwargs_lens_light:
+                    for kwargs in kwargs_obs:
+                        if "e1" in kwargs:
+                            kwargs.pop("e1")
+                            kwargs.pop("e2")
+            else:
+                for kwargs in self._kwargs_lens_light:
+                    if "e1" in kwargs:
+                        kwargs.pop("e1")
+                        kwargs.pop("e2")
         elif (self._kwargs_lens_light is None) and (axial_symmetry != "spherical"):
             raise ValueError(
                 "'kwargs_lens_light' must be provided for axisymmetric modeling."

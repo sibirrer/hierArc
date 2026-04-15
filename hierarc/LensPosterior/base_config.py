@@ -1,6 +1,7 @@
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
 from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
+from copy import deepcopy
 
 
 class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
@@ -122,7 +123,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             num_kin_sampling=num_kin_sampling,
         )
 
-        self._kwargs_lens_light = kwargs_lens_light
+        self._kwargs_lens_light = deepcopy(kwargs_lens_light)
         ImageModelPosterior.__init__(
             self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error
         )
