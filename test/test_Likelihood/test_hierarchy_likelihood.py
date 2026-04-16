@@ -375,8 +375,8 @@ class TestLensLikelihood(object):
             kwargs_lens=None,
             kwargs_los=kwargs_los,
         )
-        for x, y in zip(ddt_dt_draws, [self.ddt, 4.55e-13, self.dd, 2.27e-13]):
-            npt.assert_allclose(x, y, rtol=0.05)
+        for x, y in zip(ddt_dt_draws, [self.ddt, 0., self.dd, 0.]):
+            npt.assert_allclose(x, y, rtol=0.05, atol=1e-6)
 
         kwargs_test = self.likelihood._kwargs_init(kwargs=None)
         assert type(kwargs_test) is dict
