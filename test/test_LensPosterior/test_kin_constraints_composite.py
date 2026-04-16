@@ -730,11 +730,10 @@ class TestKinConstraintsCompositeAxi(object):
         r_eff = 1
         gamma = 2.1
 
-
         kwargs_lens_light = [
             {
-                "amp": np.array([1., 0.5]),
-                "sigma": np.array([1., 2.]),
+                "amp": np.array([1.0, 0.5]),
+                "sigma": np.array([1.0, 2.0]),
                 "center_x": 0,
                 "center_y": 0,
                 "e1": 0.04,
@@ -774,17 +773,18 @@ class TestKinConstraintsCompositeAxi(object):
             axial_symmetry="axi_sph",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
-            q_intrinsic_scaling=[0.7]
+            q_intrinsic_scaling=[0.7],
         )
 
         j_kin = kin_constraints.j_kin_draw_composite(
-            kwargs_anisotropy={'beta': 0.},
+            kwargs_anisotropy={"beta": 0.0},
             gamma_in=2.1,
             log_m2l=0.3,
             q_intrinsic=0.7,
-            no_error=True
+            no_error=True,
         )
         np.testing.assert_allclose(j_kin, 4.48e-6, rtol=0.01)
+
 
 class TestRaise(unittest.TestCase):
     def test_raise(self):

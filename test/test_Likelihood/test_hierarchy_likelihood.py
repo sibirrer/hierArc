@@ -17,7 +17,7 @@ class TestLensLikelihood(object):
         dds = self.cosmo.angular_diameter_distance_z1z2(z1=z_lens, z2=z_source).value
         ddt = (1.0 + z_lens) * dd * ds / dds
         self.dd, self.ddt = dd, ddt
-        v2_to_j = dds /ds / const.c ** 2 * 1e6
+        v2_to_j = dds / ds / const.c**2 * 1e6
 
         ani_param_array = np.linspace(start=0, stop=5, num=10)
         ani_scaling_array = ani_param_array
@@ -35,7 +35,7 @@ class TestLensLikelihood(object):
         kwargs_sigma_v = {
             "sigma_v_measurement": np.array([200]),
             "error_cov_measurement": np.diag(np.array([10]) ** 2),
-            "j_model": np.array([200])**2 * v2_to_j,
+            "j_model": np.array([200]) ** 2 * v2_to_j,
             "error_cov_j_sqrt": np.diag(np.array([0.1]) ** 2),
         }
 
@@ -72,7 +72,7 @@ class TestLensLikelihood(object):
             kwargs_los_individual=None,
             mst_ifu=True,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
         self.likelihood_vel_disp_pdf = LensLikelihood(
@@ -92,7 +92,7 @@ class TestLensLikelihood(object):
             kwargs_los_individual=None,
             mst_ifu=True,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
         self.likelihood_vel_disp_pdf_ddt_gauss_kin = LensLikelihood(
@@ -130,7 +130,7 @@ class TestLensLikelihood(object):
             kwargs_los_individual=None,
             mst_ifu=True,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
         self.likelihood_single = LensLikelihood(
@@ -148,7 +148,7 @@ class TestLensLikelihood(object):
             kwargs_los_individual=None,
             mst_ifu=False,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
         self.likelihood_zero_dist = LensLikelihood(
             z_lens,
@@ -165,7 +165,7 @@ class TestLensLikelihood(object):
             kwargs_los_individual=None,
             mst_ifu=True,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
         kappa_posterior = np.random.normal(loc=0, scale=0.03, size=100000)
@@ -188,7 +188,7 @@ class TestLensLikelihood(object):
             },
             mst_ifu=False,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
         gamma_in_array = np.linspace(start=0.1, stop=2.9, num=5)
@@ -213,7 +213,7 @@ class TestLensLikelihood(object):
             log_m2l_sampling=True,
             log_m2l_distribution="GAUSSIAN",
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
         param_scaling_array = np.outer(
@@ -237,7 +237,7 @@ class TestLensLikelihood(object):
             log_m2l_sampling=True,
             log_m2l_distribution="GAUSSIAN",
             **kwargs_likelihood,
-            **kwargs_model  # TODO: remove anisotropy sampling in that scenario?
+            **kwargs_model,  # TODO: remove anisotropy sampling in that scenario?
         )
 
         self.likelihood_gamma_in_fail_case = LensLikelihood(
@@ -252,7 +252,7 @@ class TestLensLikelihood(object):
             mst_ifu=False,
             lambda_scaling_property=100,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
         # axisymmetric q_intrinsic case
@@ -274,7 +274,7 @@ class TestLensLikelihood(object):
             q_intrinsic_sampling=True,
             q_intrinsic_distribution="GAUSSIAN",
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
 
     def test_lens_log_likelihood(self):
@@ -497,7 +497,7 @@ class TestLensLikelihood(object):
             likelihood_type="Mag",
             num_distribution_draws=100,
             **kwargs_likelihood,
-            **kwargs_model
+            **kwargs_model,
         )
         log_l = likelihood.lens_log_likelihood(cosmo=cosmo, kwargs_source=kwargs_source)
         npt.assert_almost_equal(log_l, -24, decimal=0)

@@ -310,7 +310,7 @@ class KinConstraints(BaseLensConfig):
                 self.kwargs_anisotropy_base,
                 no_error=False,
                 **self.kwargs_lens_base,
-                **self.kwargs_deprojection_base
+                **self.kwargs_deprojection_base,
             )
             j_kin_matrix[i, :] = j_kin
 
@@ -357,7 +357,7 @@ class KinConstraints(BaseLensConfig):
             self.kwargs_anisotropy_base,
             no_error=True,
             **self.kwargs_lens_base,
-            **self.kwargs_deprojection_base
+            **self.kwargs_deprojection_base,
         )
         return self._anisotropy_scaling_relative(j_ani_0)
 
@@ -391,7 +391,9 @@ class KinConstraints(BaseLensConfig):
         total = np.prod(shapes)
         iterator = product(*[range(n) for n in shapes])
         for idx in tqdm(iterator, total=total, desc="Computing kinematics model grid"):
-            param_array = [self.kin_scaling_param_array[d][i] for d, i in enumerate(idx)]
+            param_array = [
+                self.kin_scaling_param_array[d][i] for d, i in enumerate(idx)
+            ]
             compute_for_params(param_array, idx if len(idx) > 1 else idx[0])
 
         return ani_scaling_array_list

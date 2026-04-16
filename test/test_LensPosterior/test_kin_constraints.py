@@ -291,8 +291,8 @@ class TestKinConstraints(object):
             gamma=gamma,
             kappa_ext=0,
         )
-        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c ** 2 * 1e6
-        j_target = sigma_v ** 2 * v2_to_j
+        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c**2 * 1e6
+        j_target = sigma_v**2 * v2_to_j
 
         # compute likelihood
         kin_constraints = KinConstraints(
@@ -316,7 +316,9 @@ class TestKinConstraints(object):
             lens_light_model_list=lens_light_model_list,
             kwargs_lens_light=kwargs_lens_light,
         )
-        j_kin = kin_constraints.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        j_kin = kin_constraints.j_kin_draw(
+            kwargs_anisotropy, gamma_pl=gamma, no_error=True
+        )
         npt.assert_allclose(j_kin, j_target, rtol=1e-3)
 
     def test_likelihoodconfiguration_const_axisymmetric(self):
@@ -373,7 +375,7 @@ class TestKinConstraints(object):
             kinematics_backend="jampy",
             cosmo=cosmo,
         )
-        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c ** 2 * 1e6
+        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c**2 * 1e6
 
         # compute kinematics with fiducial cosmology
         kwargs_lens_sph = [
@@ -434,10 +436,14 @@ class TestKinConstraints(object):
             q_intrinsic_scaling=np.linspace(0.6, 1.0, 5),
             kwargs_lens_light=kwargs_lens_light,
         )
-        j_kin = kin_constraints_sph_mass.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        j_kin = kin_constraints_sph_mass.j_kin_draw(
+            kwargs_anisotropy, gamma_pl=gamma, no_error=True
+        )
         npt.assert_allclose(j_kin, j_sph_mass, rtol=1e-3)
 
-        kwargs_likelihood = kin_constraints_sph_mass.hierarchy_configuration(num_sample_model=5)
+        kwargs_likelihood = kin_constraints_sph_mass.hierarchy_configuration(
+            num_sample_model=5
+        )
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(
             gamma_pl_index=0,
@@ -445,7 +451,9 @@ class TestKinConstraints(object):
             q_intrinsic_distribution="NONE",  # fixed q_intrinsic for likelihood evaluation
             **kwargs_likelihood
         )
-        kwargs_kin = {"a_ani": beta,}
+        kwargs_kin = {
+            "a_ani": beta,
+        }
         kwargs_lens = {"gamma_pl_list": [gamma]}
         kwargs_deprojection = {"q_intrinsic": q_intrinsic}
         ln_likelihood = ln_class.lens_log_likelihood(
@@ -504,10 +512,14 @@ class TestKinConstraints(object):
             q_intrinsic_scaling=np.linspace(0.6, 1.0, 5),
             kwargs_lens_light=kwargs_lens_light,
         )
-        j_kin = kin_constraints_ell_mass.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        j_kin = kin_constraints_ell_mass.j_kin_draw(
+            kwargs_anisotropy, gamma_pl=gamma, no_error=True
+        )
         npt.assert_allclose(j_kin, j_ell_mass, rtol=1e-3)
 
-        kwargs_likelihood = kin_constraints_ell_mass.hierarchy_configuration(num_sample_model=5)
+        kwargs_likelihood = kin_constraints_ell_mass.hierarchy_configuration(
+            num_sample_model=5
+        )
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(
             gamma_pl_index=0,
@@ -515,7 +527,9 @@ class TestKinConstraints(object):
             q_intrinsic_distribution="NONE",  # fixed q_intrinsic for likelihood evaluation
             **kwargs_likelihood
         )
-        kwargs_kin = {"a_ani": beta, }
+        kwargs_kin = {
+            "a_ani": beta,
+        }
         kwargs_lens = {"gamma_pl_list": [gamma]}
         kwargs_deprojection = {"q_intrinsic": q_intrinsic}
         ln_likelihood = ln_class.lens_log_likelihood(
@@ -570,7 +584,7 @@ class TestKinConstraints(object):
             cosmo=cosmo,
             kinematics_backend="jampy",
         )
-        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c ** 2 * 1e6
+        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c**2 * 1e6
 
         # compute kinematics with fiducial cosmology
         kwargs_lens = [
@@ -615,7 +629,9 @@ class TestKinConstraints(object):
         assert len(kwargs_likelihood["j_kin_scaling_grid_list"]) == len(
             np.unique(voronoi_bins[voronoi_bins > -1])
         )
-        j_map_kin = kin_constraints.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        j_map_kin = kin_constraints.j_kin_draw(
+            kwargs_anisotropy, gamma_pl=gamma, no_error=True
+        )
         npt.assert_allclose(j_map_kin, j_map_voronoi, rtol=1e-3)
 
     def test_likelihoodconfiguration_multiobs(self):
@@ -846,10 +862,9 @@ class TestRaise(object):
             theta_E = 1.0
             r_eff = 1
             gamma = 2.1
-            kwargs_lens_light = [{
-                "amp": 1.0, "Rs": 1.0,
-                "e1": 0, "e2": 0
-            }]  # circular light -> inclination is not defined
+            kwargs_lens_light = [
+                {"amp": 1.0, "Rs": 1.0, "e1": 0, "e2": 0}
+            ]  # circular light -> inclination is not defined
 
             kwargs_aperture = {
                 "aperture_type": "shell",
@@ -877,10 +892,13 @@ class TestRaise(object):
                 anisotropy_model="const",
                 kinematics_backend="jampy",
                 axial_symmetry="axi_sph",
-                kwargs_lens_light=kwargs_lens_light
+                kwargs_lens_light=kwargs_lens_light,
             )
             kin_constraints.j_kin_draw(
-                kwargs_anisotropy={"beta": 0.0}, gamma_pl=gamma, q_intrinsic=0.7, no_error=True
+                kwargs_anisotropy={"beta": 0.0},
+                gamma_pl=gamma,
+                q_intrinsic=0.7,
+                no_error=True,
             )
 
     def test_wrong_num_param(self):
@@ -913,6 +931,7 @@ class TestRaise(object):
             )
             kin_constraints._num_param = 5
             kin_constraints._anisotropy_scaling_relative(j_ani_0=1)
+
 
 if __name__ == "__main__":
     pytest.main()
