@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 import numpy.testing as npt
 from lenstronomy.Util.data_util import magnitude2cps
+from lenstronomy.Util import constants as const
 
 
 class TestLensLikelihood(object):
@@ -15,16 +16,29 @@ class TestLensLikelihood(object):
         ds = self.cosmo.angular_diameter_distance(z=z_source).value
         dds = self.cosmo.angular_diameter_distance_z1z2(z1=z_lens, z2=z_source).value
         ddt = (1.0 + z_lens) * dd * ds / dds
+        self.dd, self.ddt = dd, ddt
+        v2_to_j = dds /ds / const.c ** 2 * 1e6
 
         ani_param_array = np.linspace(start=0, stop=5, num=10)
         ani_scaling_array = ani_param_array
 
-        kwargs_likelihood = {
+        kwargs_likelihood_ddt = {
             "ddt_mean": ddt,
             "ddt_sigma": ddt / 20,
+        }
+        kwargs_likelihood_dd = {
             "dd_mean": dd,
             "dd_sigma": dd / 10,
         }
+        kwargs_likelihood = kwargs_likelihood_ddt | kwargs_likelihood_dd
+
+        kwargs_sigma_v = {
+            "sigma_v_measurement": np.array([200]),
+            "error_cov_measurement": np.diag(np.array([10]) ** 2),
+            "j_model": np.array([200])**2 * v2_to_j,
+            "error_cov_j_sqrt": np.diag(np.array([0.1]) ** 2),
+        }
+
         kwargs_model = {
             "anisotropy_model": "OM",
             "anisotropy_sampling": True,
@@ -79,6 +93,23 @@ class TestLensLikelihood(object):
             mst_ifu=True,
             **kwargs_likelihood,
             **kwargs_model
+        )
+
+        self.likelihood_vel_disp_pdf_ddt_gauss_kin = LensLikelihood(
+            z_lens,
+            z_source,
+            name="name",
+            likelihood_type="DdtGaussKin",
+            bin_edges_axisymmetric_correction=bin_edges_axisymmetric_correction,
+            pdf_array_axisymmetric_correction=pdf_array_axisymmetric_correction,
+            num_distribution_draws=200,
+            los_distributions=["GAUSSIAN"],
+            global_los_distribution=0,
+            los_distribution_individual=None,
+            kwargs_los_individual=None,
+            mst_ifu=True,
+            **kwargs_likelihood_ddt,
+            **kwargs_sigma_v,
         )
 
         self.likelihood_vel_disp_dist = LensLikelihood(
@@ -273,13 +304,21 @@ class TestLensLikelihood(object):
         )
         npt.assert_almost_equal(ln_likelihood, -1.1, decimal=1)
 
+        ln_likelihood = self.likelihood_vel_disp_pdf_ddt_gauss_kin.lens_log_likelihood(
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_los=kwargs_los,
+        )
+        npt.assert_almost_equal(ln_likelihood, -11.621, decimal=1)
+
         ln_likelihood = self.likelihood_vel_disp_dist.lens_log_likelihood(
             self.cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
             kwargs_los=kwargs_los,
         )
-        npt.assert_almost_equal(ln_likelihood, -1.17, decimal=1)
+        npt.assert_almost_equal(ln_likelihood, -1.07, decimal=1)
 
         ln_likelihood_zero = self.likelihood_zero_dist.lens_log_likelihood(
             self.cosmo,
@@ -324,6 +363,20 @@ class TestLensLikelihood(object):
             self.cosmo, kwargs_lens=None, kwargs_kin=None
         )
         assert np.all([x is None for x in ln_inf])
+
+        ln_inf = self.likelihood_vel_disp_pdf_ddt_gauss_kin.sigma_v_measured_vs_predict(
+            self.cosmo, kwargs_lens=None, kwargs_kin=None, kwargs_los=kwargs_los
+        )
+        for x, y in zip(ln_inf, [[200], [[100]], [199.7], [[1.60e9]]]):
+            npt.assert_allclose(x, y, rtol=0.05)
+
+        ddt_dt_draws = self.likelihood.ddt_dd_model_prediction(
+            self.cosmo,
+            kwargs_lens=None,
+            kwargs_los=kwargs_los,
+        )
+        for x, y in zip(ddt_dt_draws, [self.ddt, 4.55e-13, self.dd, 2.27e-13]):
+            npt.assert_allclose(x, y, rtol=0.05)
 
         kwargs_test = self.likelihood._kwargs_init(kwargs=None)
         assert type(kwargs_test) is dict

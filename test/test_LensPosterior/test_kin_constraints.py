@@ -2,6 +2,7 @@ from hierarc.LensPosterior.kin_constraints import KinConstraints
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
 from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from lenstronomy.Util.param_util import phi_q2_ellipticity
+from lenstronomy.Util import constants as const
 from astropy.cosmology import FlatLambdaCDM
 import numpy.testing as npt
 import numpy as np
@@ -229,7 +230,7 @@ class TestKinConstraints(object):
         )
         npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
 
-    def test_likelihoodconfiguration_sersic(self):
+    def test_likelihoodconfiguration_delta_r_eff(self):
         # sersic must be with jampy backend
         anisotropy_model = "const"
         kwargs_aperture = {
@@ -240,15 +241,6 @@ class TestKinConstraints(object):
             "center_dec": 0,
         }
         kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
-
-        # numerical settings (not needed if power-law profiles with Hernquist light distribution is computed)
-        kwargs_numerics_galkin = {
-            "interpol_grid_num": 1000,  # numerical interpolation, should converge -> infinity
-            "log_integration": True,
-            # log or linear interpolation of surface brightness and mass models
-            "max_integrate": 100,
-            "min_integrate": 0.001,
-        }  # lower/upper bound of numerical integrals
 
         # redshift
         z_lens = 0.5
@@ -261,7 +253,7 @@ class TestKinConstraints(object):
         gamma = 2.1
 
         # kwargs_model
-        lens_light_model_list = ["SERSIC_ELLIPSE"]
+        lens_light_model_list = ["SERSIC_ELLIPSE", "HERNQUIST", "GAUSSIAN"]
         lens_model_list = ["EPL"]
         kwargs_model = {
             "lens_model_list": lens_model_list,
@@ -284,7 +276,10 @@ class TestKinConstraints(object):
             {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
         ]
         kwargs_lens_light = [
-            {"R_sersic": r_eff, "n_sersic": 4.0, "amp": 1.0, "e1": 0, "e2": 0}
+            # to test every radius case
+            {"R_sersic": r_eff, "n_sersic": 4.0, "amp": 1.0, "e1": 0, "e2": 0},
+            {"Rs": r_eff * 0.551, "amp": 1.0, "e1": 0, "e2": 0},
+            {"sigma": r_eff, "amp": 1.0, "e1": 0, "e2": 0},
         ]
         kwargs_anisotropy = {"beta": 0.0}
         sigma_v = kin_api.velocity_dispersion(
@@ -296,6 +291,8 @@ class TestKinConstraints(object):
             gamma=gamma,
             kappa_ext=0,
         )
+        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c ** 2 * 1e6
+        j_target = sigma_v ** 2 * v2_to_j
 
         # compute likelihood
         kin_constraints = KinConstraints(
@@ -319,17 +316,11 @@ class TestKinConstraints(object):
             lens_light_model_list=lens_light_model_list,
             kwargs_lens_light=kwargs_lens_light,
         )
-
-        kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
-        kwargs_likelihood["normalized"] = False
-        ln_class = LensLikelihood(**kwargs_likelihood)
-        kwargs_kin = {"a_ani": 0.0}
-        ln_likelihood = ln_class.lens_log_likelihood(
-            cosmo, kwargs_lens={}, kwargs_kin=kwargs_kin
-        )
-        npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
+        j_kin = kin_constraints.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        npt.assert_allclose(j_kin, j_target, rtol=1e-3)
 
     def test_likelihoodconfiguration_const_axisymmetric(self):
+        np.random.seed(3)
         anisotropy_model = "const"
         kwargs_aperture = {
             "aperture_type": "shell",
@@ -357,11 +348,11 @@ class TestKinConstraints(object):
         # axial symmetry
         axial_symmetry = "axi_sph"
         q_intrinsic = 0.80
-        q_observed = 0.86
-        cos_i_squared = (q_observed**2 - q_intrinsic**2) / (1 - q_intrinsic**2)
+        q_observed_light = 0.86
+        cos_i_squared = (q_observed_light**2 - q_intrinsic**2) / (1 - q_intrinsic**2)
         cos_i_squared = np.clip(cos_i_squared, 0, 1)
         inclination = np.rad2deg(np.arccos(np.sqrt(cos_i_squared)))
-        e1, e2 = phi_q2_ellipticity(0, q_observed)
+        e1, e2 = phi_q2_ellipticity(0, q_observed_light)
 
         # kwargs_model
         lens_light_model_list = ["HERNQUIST"]
@@ -382,16 +373,17 @@ class TestKinConstraints(object):
             kinematics_backend="jampy",
             cosmo=cosmo,
         )
+        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c ** 2 * 1e6
 
         # compute kinematics with fiducial cosmology
-        kwargs_lens = [
+        kwargs_lens_sph = [
             {
                 "theta_E": theta_E,
                 "gamma": gamma,
                 "center_x": 0,
                 "center_y": 0,
-                "e1": e1,
-                "e2": e2,
+                "e1": 0,
+                "e2": 0,
             }
         ]
         kwargs_lens_light = [
@@ -404,8 +396,10 @@ class TestKinConstraints(object):
                 "e2": e2,
             }
         ]
-        sigma_v = kin_api.velocity_dispersion(
-            kwargs_lens,
+        #########
+        # q_light = 0.86 but q_mass = 1.0
+        sigma_v_sph_mass = kin_api.velocity_dispersion(
+            kwargs_lens_sph,
             kwargs_lens_light,
             kwargs_anisotropy,
             inclination=inclination,
@@ -414,9 +408,9 @@ class TestKinConstraints(object):
             gamma=gamma,
             kappa_ext=0,
         )
-
+        j_sph_mass = sigma_v_sph_mass**2 * v2_to_j
         # compute likelihood
-        kin_constraints = KinConstraints(
+        kin_constraints_sph_mass = KinConstraints(
             z_lens=z_lens,
             z_source=z_source,
             theta_E=theta_E,
@@ -425,7 +419,8 @@ class TestKinConstraints(object):
             gamma_error=0.02,
             r_eff=r_eff,
             r_eff_error=0.05,
-            sigma_v_measured=[sigma_v],
+            q_total_mass=1.0,  # spherical mass (but elliptical light)
+            sigma_v_measured=[sigma_v_sph_mass],
             sigma_v_error_independent=[10],
             sigma_v_error_cov_matrix=[[100]],
             sigma_v_error_covariant=0,
@@ -439,7 +434,10 @@ class TestKinConstraints(object):
             q_intrinsic_scaling=np.linspace(0.6, 1.0, 5),
             kwargs_lens_light=kwargs_lens_light,
         )
-        kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
+        j_kin = kin_constraints_sph_mass.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        npt.assert_allclose(j_kin, j_sph_mass, rtol=1e-3)
+
+        kwargs_likelihood = kin_constraints_sph_mass.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
         ln_class = LensLikelihood(
             gamma_pl_index=0,
@@ -456,7 +454,77 @@ class TestKinConstraints(object):
             kwargs_kin=kwargs_kin,
             kwargs_deprojection=kwargs_deprojection,
         )
-        npt.assert_almost_equal(ln_likelihood, 0, decimal=1)
+        npt.assert_almost_equal(ln_likelihood, 0, decimal=3)
+
+        ##########
+        # q_mass = q_light
+        kwargs_lens_ell = [
+            {
+                "theta_E": theta_E,
+                "gamma": gamma,
+                "center_x": 0,
+                "center_y": 0,
+                "e1": e1,
+                "e2": e1,
+            }
+        ]
+        sigma_v_ell_mass = kin_api.velocity_dispersion(
+            kwargs_lens_ell,
+            kwargs_lens_light,
+            kwargs_anisotropy,
+            inclination=inclination,
+            r_eff=r_eff,
+            theta_E=theta_E,
+            gamma=gamma,
+            kappa_ext=0,
+        )
+        j_ell_mass = sigma_v_ell_mass**2 * v2_to_j
+        # compute likelihood
+        kin_constraints_ell_mass = KinConstraints(
+            z_lens=z_lens,
+            z_source=z_source,
+            theta_E=theta_E,
+            theta_E_error=0.01,
+            gamma=gamma,
+            gamma_error=0.02,
+            r_eff=r_eff,
+            r_eff_error=0.05,
+            q_total_mass=None,  # follow q_light
+            sigma_v_measured=[sigma_v_ell_mass],
+            sigma_v_error_independent=[10],
+            sigma_v_error_cov_matrix=[[100]],
+            sigma_v_error_covariant=0,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            gamma_pl_scaling=np.linspace(2.0, 2.2, 3),
+            # axisymmetric JAM modeling
+            axial_symmetry=axial_symmetry,
+            kinematics_backend="jampy",
+            q_intrinsic_scaling=np.linspace(0.6, 1.0, 5),
+            kwargs_lens_light=kwargs_lens_light,
+        )
+        j_kin = kin_constraints_ell_mass.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        npt.assert_allclose(j_kin, j_ell_mass, rtol=1e-3)
+
+        kwargs_likelihood = kin_constraints_ell_mass.hierarchy_configuration(num_sample_model=5)
+        kwargs_likelihood["normalized"] = False
+        ln_class = LensLikelihood(
+            gamma_pl_index=0,
+            q_intrinsic_sampling=True,
+            q_intrinsic_distribution="NONE",  # fixed q_intrinsic for likelihood evaluation
+            **kwargs_likelihood
+        )
+        kwargs_kin = {"a_ani": beta, }
+        kwargs_lens = {"gamma_pl_list": [gamma]}
+        kwargs_deprojection = {"q_intrinsic": q_intrinsic}
+        ln_likelihood = ln_class.lens_log_likelihood(
+            cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
+            kwargs_deprojection=kwargs_deprojection,
+        )
+        npt.assert_almost_equal(ln_likelihood, 0, decimal=3)
 
     def test_likelihoodconfiguration_voronoi_bins(self):
         anisotropy_model = "const"
@@ -502,12 +570,12 @@ class TestKinConstraints(object):
             cosmo=cosmo,
             kinematics_backend="jampy",
         )
+        v2_to_j = kin_api.lensCosmo.dds / kin_api.lensCosmo.ds / const.c ** 2 * 1e6
 
         # compute kinematics with fiducial cosmology
         kwargs_lens = [
             {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
         ]
-        beta_inf = 0.9
         kwargs_lens_light = [{"Rs": r_eff * 0.551, "amp": 1.0}]
         kwargs_anisotropy = {"beta": 0.0}
         sigma_v_map_voronoi = kin_api.velocity_dispersion_map(
@@ -519,6 +587,7 @@ class TestKinConstraints(object):
             gamma=gamma,
             kappa_ext=0,
         )
+        j_map_voronoi = sigma_v_map_voronoi**2 * v2_to_j
 
         # compute likelihood
         kin_constraints = KinConstraints(
@@ -546,6 +615,8 @@ class TestKinConstraints(object):
         assert len(kwargs_likelihood["j_kin_scaling_grid_list"]) == len(
             np.unique(voronoi_bins[voronoi_bins > -1])
         )
+        j_map_kin = kin_constraints.j_kin_draw(kwargs_anisotropy, gamma_pl=gamma, no_error=True)
+        npt.assert_allclose(j_map_kin, j_map_voronoi, rtol=1e-3)
 
     def test_likelihoodconfiguration_multiobs(self):
         anisotropy_model = "const"
@@ -568,7 +639,8 @@ class TestKinConstraints(object):
         gamma = 2.1
 
         # kwargs_model
-        lens_light_model_list = ["HERNQUIST"]
+        # to test every profile at once
+        lens_light_model_list = ["HERNQUIST", "SERSIC", "GAUSSIAN"]
         lens_model_list = ["SPP"]
         kwargs_model = {
             "lens_model_list": lens_model_list,
@@ -578,6 +650,7 @@ class TestKinConstraints(object):
         # settings for kinematics calculation with KinematicsAPI of lenstronomy
         kwargs_kin_api_settings = {
             "multi_observations": True,
+            "multi_light_profile": True,
         }
 
         kin_api = KinematicsAPI(
@@ -597,12 +670,14 @@ class TestKinConstraints(object):
             {"theta_E": theta_E, "gamma": gamma, "center_x": 0, "center_y": 0}
         ]
         kwargs_lens_light = [
-            {"Rs": r_eff * 0.551, "amp": 1.0},
+            {"Rs": r_eff * 0.551, "amp": 1.0, "e1": 0, "e2": 0},
+            {"R_sersic": r_eff, "amp": 1.0, "n_sersic": 4.0, "e1": 0, "e2": 0},
+            {"sigma": r_eff, "amp": 1.0, "e1": 0, "e2": 0},
         ]
         kwargs_anisotropy = {"beta": 0.0}
         sigma_v = kin_api.velocity_dispersion(
             kwargs_lens,
-            kwargs_lens_light,
+            [kwargs_lens_light, kwargs_lens_light],
             kwargs_anisotropy,
             r_eff=r_eff,
             theta_E=theta_E,
@@ -620,17 +695,20 @@ class TestKinConstraints(object):
             gamma_error=0.02,
             r_eff=r_eff,
             r_eff_error=0.05,
-            sigma_v_measured=[sigma_v, sigma_v],
+            sigma_v_measured=sigma_v,
             sigma_v_error_independent=[10, 10],
             sigma_v_error_cov_matrix=[[100, 0], [0, 100]],
             sigma_v_error_covariant=0,
             kwargs_aperture=[kwargs_aperture, kwargs_aperture],
             kwargs_seeing=[kwargs_seeing, kwargs_seeing],
             anisotropy_model=anisotropy_model,
+            kwargs_lens_light=[kwargs_lens_light, kwargs_lens_light],
             kinematics_backend="jampy",
             axial_symmetry="spherical",
             **kwargs_kin_api_settings
         )
+        assert kin_constraints._multi_observations is True
+        assert kin_constraints._multi_light_profile is True
 
         kwargs_likelihood = kin_constraints.hierarchy_configuration(num_sample_model=5)
         kwargs_likelihood["normalized"] = False
@@ -759,6 +837,82 @@ class TestRaise(object):
                 kwargs_lens_light=[{}],  # does not have e1, e2
             )
 
+    def test_warn_inclination(self):
+        with pytest.warns(UserWarning, match="inclination"):
+            # redshift
+            z_lens = 0.5
+            z_source = 1.5
+
+            theta_E = 1.0
+            r_eff = 1
+            gamma = 2.1
+            kwargs_lens_light = [{
+                "amp": 1.0, "Rs": 1.0,
+                "e1": 0, "e2": 0
+            }]  # circular light -> inclination is not defined
+
+            kwargs_aperture = {
+                "aperture_type": "shell",
+                "r_in": 0,
+                "r_out": 3 / 2.0,
+                "center_ra": 0.0,
+                "center_dec": 0,
+            }
+            kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
+
+            kin_constraints = KinConstraints(
+                z_lens=z_lens,
+                z_source=z_source,
+                theta_E=theta_E,
+                theta_E_error=0.01,
+                gamma=gamma,
+                gamma_error=0.02,
+                r_eff=r_eff,
+                r_eff_error=0.05,
+                sigma_v_measured=[200],
+                sigma_v_error_independent=[10],
+                sigma_v_error_covariant=0,
+                kwargs_aperture=kwargs_aperture,
+                kwargs_seeing=kwargs_seeing,
+                anisotropy_model="const",
+                kinematics_backend="jampy",
+                axial_symmetry="axi_sph",
+                kwargs_lens_light=kwargs_lens_light
+            )
+            kin_constraints.j_kin_draw(
+                kwargs_anisotropy={"beta": 0.0}, gamma_pl=gamma, q_intrinsic=0.7, no_error=True
+            )
+
+    def test_wrong_num_param(self):
+        with pytest.raises(ValueError, match="Kin scaling with parameter dimension"):
+            # redshift
+            z_lens = 0.5
+            z_source = 1.5
+
+            theta_E = 1.0
+            r_eff = 1
+            gamma = 2.1
+
+            kin_constraints = KinConstraints(
+                z_lens=z_lens,
+                z_source=z_source,
+                theta_E=theta_E,
+                theta_E_error=0.01,
+                gamma=gamma,
+                gamma_error=0.02,
+                r_eff=r_eff,
+                r_eff_error=0.05,
+                sigma_v_measured=[200],
+                sigma_v_error_independent=[10],
+                sigma_v_error_covariant=0,
+                kwargs_aperture={},
+                kwargs_seeing={},
+                anisotropy_model="const",
+                kinematics_backend="jampy",
+                axial_symmetry="spherical",
+            )
+            kin_constraints._num_param = 5
+            kin_constraints._anisotropy_scaling_relative(j_ani_0=1)
 
 if __name__ == "__main__":
     pytest.main()

@@ -151,10 +151,7 @@ class KinConstraints(BaseLensConfig):
         self._kwargs_mass_geometry = {}
         self._lens_phi = 0.0
         self._q_light = 1.0
-        if q_total_mass is None:
-            self._q_mass = self._q_light
-        else:
-            self._q_mass = q_total_mass
+        self._q_mass = 1.0
 
         if (self._kwargs_lens_light is not None) and (axial_symmetry != "spherical"):
             if self._multi_observations:
