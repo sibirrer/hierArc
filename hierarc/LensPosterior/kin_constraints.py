@@ -362,7 +362,12 @@ class KinConstraints(BaseLensConfig):
         return self._anisotropy_scaling_relative(j_ani_0)
 
     def _anisotropy_scaling_relative(self, j_ani_0):
-        """Anisotropy scaling relative to a default J prediction."""
+        """Anisotropy scaling relative to a default J prediction.
+
+        :param j_ani_0: default J() prediction for default anisotropy
+        :return: list of arrays (for the number of measurements) according to anisotropy
+            scaling
+        """
         num_data = len(self._sigma_v_measured)
         shapes = [len(a) for a in self.kin_scaling_param_array]
         ani_scaling_array_list = [np.zeros(shapes) for _ in range(num_data)]
