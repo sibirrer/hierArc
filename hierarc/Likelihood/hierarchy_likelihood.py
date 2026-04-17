@@ -462,8 +462,8 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         """
         if self.likelihood_type in ["DSPL"]:
             return 0, 0  # just returns some random numbers as not being used
-        dd = cosmo.angular_diameter_distance(z=self.z_lens).value
-        ds = cosmo.angular_diameter_distance(z=self.z_source).value
+        dd = cosmo.angular_diameter_distance(self.z_lens).value
+        ds = cosmo.angular_diameter_distance(self.z_source).value
         dds = cosmo.angular_diameter_distance_z1z2(
             z1=self.z_lens, z2=self.z_source
         ).value

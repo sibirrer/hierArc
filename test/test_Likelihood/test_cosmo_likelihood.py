@@ -201,11 +201,11 @@ class TestCosmoLikelihood(object):
         cosmo_interp_input = cosmoL.cosmo_instance(kwargs_cosmo_interp)
 
         z = 1
-        dd_astropy = cosmo_astropy.angular_diameter_distance(z=z).value
-        dd_interp = cosmo_interp.angular_diameter_distance(z=z).value
-        dd_interp_input = cosmo_interp_input.angular_diameter_distance(z=z).value
-        dd_fixed = cosmo_fixed.angular_diameter_distance(z=z).value
-        dd_fixed_interp = cosmo_fixed_interp.angular_diameter_distance(z=z).value
+        dd_astropy = cosmo_astropy.angular_diameter_distance(z).value
+        dd_interp = cosmo_interp.angular_diameter_distance(z).value
+        dd_interp_input = cosmo_interp_input.angular_diameter_distance(z).value
+        dd_fixed = cosmo_fixed.angular_diameter_distance(z).value
+        dd_fixed_interp = cosmo_fixed_interp.angular_diameter_distance(z).value
 
         npt.assert_almost_equal(dd_astropy, dd_interp, decimal=1)
         npt.assert_almost_equal(dd_astropy, dd_interp_input, decimal=1)
