@@ -149,7 +149,6 @@ class CosmoLikelihood(object):
             kwargs_cosmo,
             kwargs_lens,
             kwargs_kin,
-            kwargs_deprojection,
             kwargs_source,
             kwargs_los,
         ) = self.param.args2kwargs(args)
@@ -178,7 +177,6 @@ class CosmoLikelihood(object):
             cosmo=cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
-            kwargs_deprojection=kwargs_deprojection,
             kwargs_source=kwargs_source,
             kwargs_los=kwargs_los,
             verbose=verbose,
@@ -209,7 +207,6 @@ class CosmoLikelihood(object):
                 kwargs_cosmo,
                 kwargs_lens,
                 kwargs_kin,
-                kwargs_deprojection,
                 kwargs_source,
                 kwargs_los,
             )

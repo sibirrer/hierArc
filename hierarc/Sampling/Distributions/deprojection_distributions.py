@@ -8,6 +8,8 @@ class DeprojectionDistribution(object):
     """Class to draw axisymmetric deprojection parameters (inclination/q_intrinsic) from
     hyperparameter distributions."""
 
+    param_names = ["q_intrinsic", "q_intrinsic_sigma"]
+
     def __init__(
         self,
         deprojection_sampling,

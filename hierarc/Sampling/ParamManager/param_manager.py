@@ -57,9 +57,6 @@ class ParamManager(object):
         kwargs_lower_los=None,
         kwargs_upper_los=None,
         kwargs_fixed_los=None,
-        kwargs_upper_deprojection=None,
-        kwargs_lower_deprojection=None,
-        kwargs_fixed_deprojection=None,
     ):
         """
 
@@ -111,10 +108,14 @@ class ParamManager(object):
         :param anisotropy_parameterization: model of parameterization (currently for constant anisotropy),
          ["beta" or "TAN_RAD"] supported
         :type anisotropy_parameterization: str
-        :param kwargs_lower_deprojection: lower bounds of deprojection distribution q_intrinsic, q_intrinsic_sigma
-        :param kwargs_upper_deprojection: upper bounds of deprojection distribution q_intrinsic, q_intrinsic_sigma
-        :param kwargs_fixed_deprojection: fixed values for deprojection distribution q_intrinsic, q_intrinsic_sigma
         """
+        if kwargs_fixed_kin is not None:
+            kwargs_fixed_deprojection = {}
+            for param in DeprojectionParam.param_names:
+                if param in kwargs_fixed_kin:
+                    kwargs_fixed_deprojection[param] = kwargs_fixed_kin.pop(param)
+        else:
+            kwargs_fixed_deprojection = None
         self._kin_param = KinParam(
             anisotropy_sampling=anisotropy_sampling,
             anisotropy_model=anisotropy_model,
@@ -186,10 +187,6 @@ class ParamManager(object):
             kwargs_upper_los,
             kwargs_lower_los,
         )
-        self._kwargs_lower_deprojection, self._kwargs_upper_deprojection = (
-            kwargs_lower_deprojection,
-            kwargs_upper_deprojection,
-        )
 
     @property
     def num_param(self):
@@ -225,13 +222,14 @@ class ParamManager(object):
         kwargs_lens, i = self._lens_param.args2kwargs(args, i=i)
         kwargs_kin, i = self._kin_param.args2kwargs(args, i=i)
         kwargs_deprojection, i = self._deprojection_param.args2kwargs(args, i=i)
+        # kwargs_kin includes kwargs_deprojection at the high level
+        kwargs_kin.update(kwargs_deprojection)
         kwargs_source, i = self._source_param.args2kwargs(args, i=i)
         kwargs_los, i = self._los_param.args2kwargs(args, i=i)
         return (
             kwargs_cosmo,
             kwargs_lens,
             kwargs_kin,
-            kwargs_deprojection,
             kwargs_source,
             kwargs_los,
         )
@@ -241,7 +239,6 @@ class ParamManager(object):
         kwargs_cosmo=None,
         kwargs_lens=None,
         kwargs_kin=None,
-        kwargs_deprojection=None,
         kwargs_source=None,
         kwargs_los=None,
     ):
@@ -250,7 +247,6 @@ class ParamManager(object):
         :param kwargs_cosmo: keyword argument list of parameters for cosmology sampling
         :param kwargs_lens: keyword argument list of parameters for lens model sampling
         :param kwargs_kin: keyword argument list of parameters for kinematic sampling
-        :param kwargs_deprojection: keyword arguments of parameters of deprojection
         :param kwargs_source: keyword arguments of parameters of source brightness
         :param kwargs_los: keyword arguments of parameters of the line of sight
         :return: sampling argument list in specified order
@@ -259,7 +255,7 @@ class ParamManager(object):
         args += self._cosmo_param.kwargs2args(kwargs_cosmo)
         args += self._lens_param.kwargs2args(kwargs_lens)
         args += self._kin_param.kwargs2args(kwargs_kin)
-        args += self._deprojection_param.kwargs2args(kwargs_deprojection)
+        args += self._deprojection_param.kwargs2args(kwargs_kin)
         args += self._source_param.kwargs2args(kwargs_source)
         args += self._los_param.kwargs2args(kwargs_los)
         return args
@@ -283,7 +279,6 @@ class ParamManager(object):
             kwargs_cosmo=self._kwargs_lower_cosmo,
             kwargs_lens=self._kwargs_lower_lens,
             kwargs_kin=self._kwargs_lower_kin,
-            kwargs_deprojection=self._kwargs_lower_deprojection,
             kwargs_source=self._kwargs_lower_source,
             kwargs_los=self._kwargs_lower_los,
         )
@@ -291,7 +286,6 @@ class ParamManager(object):
             kwargs_cosmo=self._kwargs_upper_cosmo,
             kwargs_lens=self._kwargs_upper_lens,
             kwargs_kin=self._kwargs_upper_kin,
-            kwargs_deprojection=self._kwargs_upper_deprojection,
             kwargs_source=self._kwargs_upper_source,
             kwargs_los=self._kwargs_upper_los,
         )

@@ -94,7 +94,6 @@ class TestCosmoLikelihood(object):
             kwargs_cosmo,
             kwargs_lens,
             kwargs_kin,
-            kwargs_deprojection,
             kwargs_source,
             kwargs_los,
         ):

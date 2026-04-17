@@ -249,7 +249,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         cosmo,
         kwargs_lens=None,
         kwargs_kin=None,
-        kwargs_deprojection=None,
         kwargs_source=None,
         kwargs_los=None,
         verbose=False,
@@ -260,9 +259,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection
-            distribution: deprojection_param and deprojection_param_sigma for
-            q_intrinsic/inclination
+            these include the anisotropy and deprojection parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
@@ -288,7 +285,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             beta_dsp=beta_dsp,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
-            kwargs_deprojection=kwargs_deprojection,
             kwargs_source=kwargs_source,
             kwargs_los=kwargs_los,
             cosmo=cosmo,
@@ -305,7 +301,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         beta_dsp=None,
         kwargs_lens=None,
         kwargs_kin=None,
-        kwargs_deprojection=None,
         kwargs_source=None,
         kwargs_los=None,
         cosmo=None,
@@ -320,8 +315,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection
-            distribution: mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: list of keyword arguments of global line of sight
             distributions
@@ -331,13 +324,12 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         """
         kwargs_lens = self._kwargs_init(kwargs_lens)
         kwargs_kin = self._kwargs_init(kwargs_kin)
-        kwargs_deprojection = self._kwargs_init(kwargs_deprojection)
         kwargs_source = self._kwargs_init(kwargs_source)
         kwargs_kin_copy = copy.deepcopy(kwargs_kin)
         sigma_v_sys_error = kwargs_kin_copy.pop("sigma_v_sys_error", None)
 
         if self.check_dist(
-            kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
+            kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
         ):  # sharp distributions
             return self.log_likelihood_single(
                 ddt,
@@ -346,7 +338,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                 beta_dsp=beta_dsp,
                 kwargs_lens=kwargs_lens,
                 kwargs_kin=kwargs_kin_copy,
-                kwargs_deprojection=kwargs_deprojection,
                 kwargs_source=kwargs_source,
                 kwargs_los=kwargs_los,
                 sigma_v_sys_error=sigma_v_sys_error,
@@ -361,7 +352,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
                     beta_dsp=beta_dsp,
                     kwargs_lens=kwargs_lens,
                     kwargs_kin=kwargs_kin_copy,
-                    kwargs_deprojection=kwargs_deprojection,
                     kwargs_source=kwargs_source,
                     kwargs_los=kwargs_los,
                     sigma_v_sys_error=sigma_v_sys_error,
@@ -381,7 +371,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         beta_dsp,
         kwargs_lens,
         kwargs_kin,
-        kwargs_deprojection,
         kwargs_source,
         kwargs_los=None,
         sigma_v_sys_error=None,
@@ -396,8 +385,6 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             theta_E_2
         :param kwargs_lens: keywords of the hyperparameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
-        :param kwargs_deprojection: keyword arguments of axisymmetric deprojection
-            distribution: mean and scale for q_intrinsic/inclination
         :param kwargs_source: keyword arguments of source brightness
         :param kwargs_los: line of sight list of dictionaries
         :param sigma_v_sys_error: unaccounted uncertainty in the velocity dispersion
@@ -426,15 +413,25 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             gamma_pl=gamma_pl,
         )
 
-        kwargs_kin_draw = self._aniso_distribution.draw_anisotropy(**kwargs_kin)
+        kwargs_anisotropy = {}
+        for param in AnisotropyDistribution.param_names:
+            if param in kwargs_kin:
+                kwargs_anisotropy[param] = kwargs_kin[param]
+        kwargs_anisotropy_draw = self._aniso_distribution.draw_anisotropy(
+            **kwargs_anisotropy
+        )
 
+        kwargs_deprojection = {}
+        for param in DeprojectionDistribution.param_names:
+            if param in kwargs_kin:
+                kwargs_deprojection[param] = kwargs_kin[param]
         kwargs_deprojection_draw = self._deprojection_distribution.draw_deprojection(
             **kwargs_deprojection
         )
 
         kwargs_param = {
             **kwargs_lens_draw,
-            **kwargs_kin_draw,
+            **kwargs_anisotropy_draw,
             **kwargs_deprojection_draw,
         }
         kin_scaling = self.kin_scaling(kwargs_param)
@@ -502,14 +499,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         return delta_lum_dist
 
     def check_dist(
-        self, kwargs_lens, kwargs_kin, kwargs_deprojection, kwargs_source, kwargs_los
+        self, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
     ):
         """Checks if the provided keyword arguments describe a distribution function of
         hyperparameters or are single values.
 
         :param kwargs_lens: lens model hyperparameter keywords
         :param kwargs_kin: kinematic model hyperparameter keywords
-        :param kwargs_deprojection: deprojection model hyperparameter keywords
         :param kwargs_source: source brightness hyperparameter keywords
         :param kwargs_los: list of dictionaries for line of sight hyperparameters
         :return: bool, True if delta function, else False
@@ -518,7 +514,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         draw_kappa_bool = self._los.draw_bool(kwargs_los)
         a_ani_sigma = kwargs_kin.get("a_ani_sigma", 0)
         beta_inf_sigma = kwargs_kin.get("beta_inf_sigma", 0)
-        q_intrinsic_sigma = kwargs_deprojection.get("q_intrinsic_sigma", 0)
+        q_intrinsic_sigma = kwargs_kin.get("q_intrinsic_sigma", 0)
         sne_sigma = kwargs_source.get("sigma_sne", 0)
         gamma_pl_sigma = kwargs_lens.get("gamma_pl_sigma", 0)
         if (

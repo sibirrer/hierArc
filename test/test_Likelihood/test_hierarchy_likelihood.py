@@ -430,16 +430,14 @@ class TestLensLikelihood(object):
             "lambda_ifu": 1,
             "lambda_ifu_sigma": 0.0,
         }
-        kwargs_kin = {"a_ani": 1}
+        kwargs_kin = {"a_ani": 1, "q_intrinsic": 1, "q_intrinsic_sigma": 0.1}
         kwargs_los = [{"mean": 0, "sigma": 0.03}]
-        kwargs_deprojection = {"q_intrinsic": 1, "q_intrinsic_sigma": 0.1}
 
         ln_likelihood_q_int = self.likelihood_q_intrinsic.lens_log_likelihood(
             self.cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
-            kwargs_los=kwargs_los,
-            kwargs_deprojection=kwargs_deprojection,
+            kwargs_los=kwargs_los
         )
         npt.assert_almost_equal(ln_likelihood_q_int, -0.0, decimal=1)
 

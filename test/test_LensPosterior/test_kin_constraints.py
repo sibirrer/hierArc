@@ -453,14 +453,13 @@ class TestKinConstraints(object):
         )
         kwargs_kin = {
             "a_ani": beta,
+            "q_intrinsic": q_intrinsic
         }
         kwargs_lens = {"gamma_pl_list": [gamma]}
-        kwargs_deprojection = {"q_intrinsic": q_intrinsic}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
-            kwargs_deprojection=kwargs_deprojection,
         )
         npt.assert_almost_equal(ln_likelihood, 0, decimal=3)
 
@@ -529,14 +528,13 @@ class TestKinConstraints(object):
         )
         kwargs_kin = {
             "a_ani": beta,
+            "q_intrinsic": q_intrinsic
         }
         kwargs_lens = {"gamma_pl_list": [gamma]}
-        kwargs_deprojection = {"q_intrinsic": q_intrinsic}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
-            kwargs_deprojection=kwargs_deprojection,
         )
         npt.assert_almost_equal(ln_likelihood, 0, decimal=3)
 

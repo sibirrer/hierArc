@@ -4,6 +4,8 @@ import numpy as np
 class DeprojectionParam(object):
     """Manager for the kinematics deprojection parameters (q_intrinsic)."""
 
+    param_names = ("q_intrinsic", "q_intrinsic_sigma")
+
     def __init__(
         self,
         deprojection_sampling=False,

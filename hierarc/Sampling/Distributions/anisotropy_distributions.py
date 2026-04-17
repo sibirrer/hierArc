@@ -8,6 +8,8 @@ _PARAMETERIZATION = ["beta", "TAN_RAD"]
 class AnisotropyDistribution(object):
     """Class to draw anisotropy parameters from hyperparameter distributions."""
 
+    param_names = ["a_ani", "a_ani_sigma", "beta_inf", "beta_inf_sigma"]
+
     def __init__(
         self,
         anisotropy_model,
