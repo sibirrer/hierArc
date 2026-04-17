@@ -22,7 +22,12 @@ class TestParamManager(object):
             "lambda_mst_sigma": 0.1,
         }
         kwargs_lower_los = [{"mean": -0.2, "sigma": 0.0}]
-        kwargs_lower_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1, "q_intrinsic": 0.1, "q_intrinsic_sigma": 0.01}
+        kwargs_lower_kin = {
+            "a_ani": 0.1,
+            "a_ani_sigma": 0.1,
+            "q_intrinsic": 0.1,
+            "q_intrinsic_sigma": 0.01,
+        }
         kwargs_lower_source = {"mu_sne": 0, "sigma_sne": 0}
 
         kwargs_upper_cosmo = {
@@ -40,7 +45,12 @@ class TestParamManager(object):
             "lambda_mst_sigma": 0.1,
         }
         kwargs_upper_los = [{"mean": 0.2, "sigma": 0.5}]
-        kwargs_upper_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1, "q_intrinsic": 1.0, "q_intrinsic_sigma": 0.2}
+        kwargs_upper_kin = {
+            "a_ani": 0.1,
+            "a_ani_sigma": 0.1,
+            "q_intrinsic": 1.0,
+            "q_intrinsic_sigma": 0.2,
+        }
         kwargs_upper_source = {"mu_sne": 100, "sigma_sne": 10}
 
         kwargs_fixed_cosmo = {
@@ -58,7 +68,12 @@ class TestParamManager(object):
             "lambda_mst_sigma": 0.1,
         }
         kwargs_fixed_los = [{"mean": 0, "sigma": 0.0}]
-        kwargs_fixed_kin = {"a_ani": 0.1, "a_ani_sigma": 0.1, "q_intrinsic": 0.5, "q_intrinsic_sigma": 0.1}
+        kwargs_fixed_kin = {
+            "a_ani": 0.1,
+            "a_ani_sigma": 0.1,
+            "q_intrinsic": 0.5,
+            "q_intrinsic_sigma": 0.1,
+        }
         kwargs_fixed_source = {"mu_sne": 1, "sigma_sne": 0.1}
 
         param_list = []
@@ -157,7 +172,12 @@ class TestParamManager(object):
             "lambda_mst_sigma": 0,
         }
         kwargs_los = [{"mean": 0, "sigma": 0.05}]
-        kwargs_kin = {"a_ani": 1, "a_ani_sigma": 0.3, "q_intrinsic": 0.5, "q_intrinsic_sigma": 0.1}
+        kwargs_kin = {
+            "a_ani": 1,
+            "a_ani_sigma": 0.3,
+            "q_intrinsic": 0.5,
+            "q_intrinsic_sigma": 0.1,
+        }
         kwargs_source = {"mu_sne": 2, "sigma_sne": 0.2}
         for param in self.param_list:
             args = param.kwargs2args(

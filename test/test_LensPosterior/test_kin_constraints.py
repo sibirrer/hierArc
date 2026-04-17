@@ -451,10 +451,7 @@ class TestKinConstraints(object):
             q_intrinsic_distribution="NONE",  # fixed q_intrinsic for likelihood evaluation
             **kwargs_likelihood
         )
-        kwargs_kin = {
-            "a_ani": beta,
-            "q_intrinsic": q_intrinsic
-        }
+        kwargs_kin = {"a_ani": beta, "q_intrinsic": q_intrinsic}
         kwargs_lens = {"gamma_pl_list": [gamma]}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo,
@@ -526,10 +523,7 @@ class TestKinConstraints(object):
             q_intrinsic_distribution="NONE",  # fixed q_intrinsic for likelihood evaluation
             **kwargs_likelihood
         )
-        kwargs_kin = {
-            "a_ani": beta,
-            "q_intrinsic": q_intrinsic
-        }
+        kwargs_kin = {"a_ani": beta, "q_intrinsic": q_intrinsic}
         kwargs_lens = {"gamma_pl_list": [gamma]}
         ln_likelihood = ln_class.lens_log_likelihood(
             cosmo,

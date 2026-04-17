@@ -437,7 +437,7 @@ class TestLensLikelihood(object):
             self.cosmo,
             kwargs_lens=kwargs_lens,
             kwargs_kin=kwargs_kin,
-            kwargs_los=kwargs_los
+            kwargs_los=kwargs_los,
         )
         npt.assert_almost_equal(ln_likelihood_q_int, -0.0, decimal=1)
 

@@ -498,9 +498,7 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
         delta_lum_dist = lum_dists - lum_dist_anchor
         return delta_lum_dist
 
-    def check_dist(
-        self, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
-    ):
+    def check_dist(self, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los):
         """Checks if the provided keyword arguments describe a distribution function of
         hyperparameters or are single values.
 
