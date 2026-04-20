@@ -28,16 +28,22 @@ class KinConstraintsComposite(KinConstraints):
         sigma_v_measured,
         kwargs_aperture,
         kwargs_seeing,
-        kwargs_numerics_galkin,
         anisotropy_model,
+        kwargs_numerics_galkin=None,
+        axial_symmetry="spherical",
+        kinematics_backend="jampy",
+        q_total_mass=None,
         gamma_in_prior_mean=None,
         gamma_in_prior_std=None,
+        q_intrinsic_scaling=None,
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
         kwargs_lens_light=None,
-        lens_light_model_list=["HERNQUIST"],
+        lens_light_model_list=None,
+        MGE_mass=None,
         kwargs_mge_light=None,
+        kwargs_mge_mass=None,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
@@ -46,7 +52,6 @@ class KinConstraintsComposite(KinConstraints):
         kappa_s_array=None,
         r_s_array=None,
         is_m2l_population_level=True,
-        voronoi_bins=None,
     ):
         """
 
@@ -79,12 +84,18 @@ class KinConstraintsComposite(KinConstraints):
             lenstronomy.Galkin.aperture for options
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
             to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
-        :param kwargs_numerics_galkin: numerical settings for the integrated
-            line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
+        :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
+        :param q_total_mass: float between 0 and 1, axial ratio for the total mass (stars + dark matter).
+            If None, the total q is set to the same as the light profile q.
         :param gamma_in_prior_mean: prior mean for inner power-law slope of the NFW profile, if available
         :param gamma_in_prior_std: standard deviation of the Gaussian prior for `gamma_in`
+        :param q_intrinsic_scaling: array of intrinsic axis ratio values (optional, otherwise None)
+            this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
@@ -93,10 +104,10 @@ class KinConstraintsComposite(KinConstraints):
         :param rho0_array: array of halo mass normalizations in M_sun / Mpc^3
         :param kappa_s_array: array of generalized NFW profile's convergence normalization at the scale radius
         :param r_s_array: array of halo scale radii in Mpc
-        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
-            bin indices should start from 0, -1 values for pixels not binned
         """
 
+        if lens_light_model_list is None:
+            lens_light_model_list = ["HERNQUIST"]
         if (
             len(lens_light_model_list) == 1
             and lens_light_model_list[0] == "MULTI_GAUSSIAN"
@@ -139,24 +150,28 @@ class KinConstraintsComposite(KinConstraints):
             sigma_v_measured,
             kwargs_aperture,
             kwargs_seeing,
-            kwargs_numerics_galkin,
             anisotropy_model,
+            kwargs_numerics_galkin=kwargs_numerics_galkin,
+            axial_symmetry=axial_symmetry,
+            kinematics_backend=kinematics_backend,
+            q_total_mass=q_total_mass,
             sigma_v_error_independent=sigma_v_error_independent,
             sigma_v_error_covariant=sigma_v_error_covariant,
             sigma_v_error_cov_matrix=sigma_v_error_cov_matrix,
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             lens_model_list=lens_model_list,
-            MGE_light=False,  # set False, as MGE is already done as default
+            MGE_light=False,
+            MGE_mass=MGE_mass,
             kwargs_mge_light=None,
-            hernquist_approx=False,
+            kwargs_mge_mass=kwargs_mge_mass,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
             gamma_in_scaling=gamma_in_array,
             log_m2l_scaling=log_m2l_scaling,
-            voronoi_bins=voronoi_bins,
+            q_intrinsic_scaling=q_intrinsic_scaling,
         )
 
         if self._check_arrays(alpha_Rs_array, r_s_angle_array):
@@ -181,6 +196,11 @@ class KinConstraintsComposite(KinConstraints):
         self.gamma_in_array = gamma_in_array
         self.log_m2l_array = log_m2l_array
         self._is_m2l_population_level = is_m2l_population_level
+
+        if q_intrinsic_scaling is None:
+            self.q_intrinsic_scaling = np.array([1.0])
+        else:
+            self.q_intrinsic_scaling = q_intrinsic_scaling
 
         self._gamma_in_prior_mean = gamma_in_prior_mean
         self._gamma_in_prior_std = gamma_in_prior_std
@@ -280,12 +300,14 @@ class KinConstraintsComposite(KinConstraints):
                     self.kwargs_anisotropy_base,
                     np.mean(self.gamma_in_array),
                     np.mean(self.log_m2l_array),
+                    np.mean(self.q_intrinsic_scaling),
                     no_error=False,
                 )
             else:
                 j_kin = self.j_kin_draw_composite_m2l(
                     self.kwargs_anisotropy_base,
                     np.mean(self.gamma_in_array),
+                    np.mean(self.q_intrinsic_scaling),
                     no_error=False,
                 )
             j_kin_matrix[i, :] = j_kin
@@ -295,13 +317,15 @@ class KinConstraintsComposite(KinConstraints):
         return j_model_list, error_cov_j_sqrt
 
     def j_kin_draw_composite(
-        self, kwargs_anisotropy, gamma_in, log_m2l, no_error=False
+        self, kwargs_anisotropy, gamma_in, log_m2l, q_intrinsic=1.0, no_error=False
     ):
         """One simple sampling realization of the dimensionless kinematics of the model.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param gamma_in: power-law slope of the mass model
         :param log_m2l: log10(mass-to-light ratio) of the stellar component
+        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the
+            inclination angle
         :param no_error: bool, if True, does not render from the uncertainty but uses
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
@@ -339,7 +363,7 @@ class KinConstraintsComposite(KinConstraints):
             },
             kwargs_lens_stars,
         ]
-
+        inclination = self._get_inclination_angle(self._q_light, q_intrinsic)
         j_kin = self.velocity_dispersion_map_dimension_less(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_light,
@@ -347,15 +371,20 @@ class KinConstraintsComposite(KinConstraints):
             r_eff=r_eff_draw,
             theta_E=self._theta_E,  # send this to avoid unnecessary recomputation
             gamma=self._gamma,  # send this to avoid unnecessary recomputation
+            inclination=inclination,
         )
         return j_kin
 
-    def j_kin_draw_composite_m2l(self, kwargs_anisotropy, gamma_in, no_error=False):
+    def j_kin_draw_composite_m2l(
+        self, kwargs_anisotropy, gamma_in, q_intrinsic=1.0, no_error=False
+    ):
         """Similar function to j_kin_draw_composite, but now drawing from log_m2l
         distribution.
 
         :param kwargs_anisotropy: keyword argument of anisotropy setting
         :param gamma_in: power-law slope of the mass model
+        :param q_intrinsic: intrinsic axis ratio of the light profile to compute the
+            inclination angle
         :param no_error: bool, if True, does not render from the uncertainty but uses
             the mean values instead
         :return: dimensionless kinematic component J() Birrer et al. 2016, 2019
@@ -397,7 +426,7 @@ class KinConstraintsComposite(KinConstraints):
             },
             kwargs_lens_stars,
         ]
-
+        inclination = self._get_inclination_angle(self._q_light, q_intrinsic)
         j_kin = self.velocity_dispersion_map_dimension_less(
             kwargs_lens=kwargs_lens,
             kwargs_lens_light=kwargs_light,
@@ -405,6 +434,7 @@ class KinConstraintsComposite(KinConstraints):
             r_eff=r_eff_draw,
             theta_E=self._theta_E,  # send this to avoid unnecessary recomputation
             gamma=self._gamma,  # send this to avoid unnecessary recomputation
+            inclination=inclination,
         )
         return j_kin
 
@@ -466,6 +496,7 @@ class KinConstraintsComposite(KinConstraints):
                 self.kwargs_anisotropy_base,
                 np.mean(self.gamma_in_array),
                 np.mean(self.log_m2l_array),
+                np.mean(self.q_intrinsic_scaling),
                 no_error=True,
             )
             return self._anisotropy_scaling_relative(j_ani_0)
@@ -473,6 +504,7 @@ class KinConstraintsComposite(KinConstraints):
             j_ani_0 = self.j_kin_draw_composite_m2l(
                 self.kwargs_anisotropy_base,
                 np.mean(self.gamma_in_array),
+                np.mean(self.q_intrinsic_scaling),
                 no_error=True,
             )
             return self._anisotropy_scaling_relative_m2l(j_ani_0)
@@ -494,6 +526,7 @@ class KinConstraintsComposite(KinConstraints):
                         len(self.kin_scaling_param_array[1]),
                         len(self.gamma_in_array),
                         len(self.log_m2l_array),
+                        len(self.q_intrinsic_scaling),
                     )
                 )
                 for _ in range(num_data)
@@ -502,18 +535,23 @@ class KinConstraintsComposite(KinConstraints):
                 for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
                     for k, g_in in enumerate(self.gamma_in_array):
                         for l, log_m2l in enumerate(self.log_m2l_array):
-                            kwargs_anisotropy = self.anisotropy_kwargs(
-                                a_ani=a_ani, beta_inf=beta_inf
-                            )
-                            j_kin_ani = self.j_kin_draw_composite(
-                                kwargs_anisotropy, g_in, log_m2l, no_error=True
-                            )
-
-                            for m, j_kin in enumerate(j_kin_ani):
-                                ani_scaling_grid_list[m][i, j, k, l] = (
-                                    j_kin / j_ani_0[m]
+                            for q, q_int in enumerate(self.q_intrinsic_scaling):
+                                kwargs_anisotropy = self.anisotropy_kwargs(
+                                    a_ani=a_ani, beta_inf=beta_inf
                                 )
-                                # perhaps change the order
+                                j_kin_ani = self.j_kin_draw_composite(
+                                    kwargs_anisotropy,
+                                    g_in,
+                                    log_m2l,
+                                    q_int,
+                                    no_error=True,
+                                )
+
+                                for m, j_kin in enumerate(j_kin_ani):
+                                    ani_scaling_grid_list[m][i, j, k, l, q] = (
+                                        j_kin / j_ani_0[m]
+                                    )
+                                    # perhaps change the order
         elif self._anisotropy_model in ["OM", "const"]:
             ani_scaling_grid_list = [
                 np.zeros(
@@ -521,6 +559,7 @@ class KinConstraintsComposite(KinConstraints):
                         len(self.kin_scaling_param_array[0]),
                         len(self.gamma_in_array),
                         len(self.log_m2l_array),
+                        len(self.q_intrinsic_scaling),
                     )
                 )
                 for _ in range(num_data)
@@ -528,12 +567,15 @@ class KinConstraintsComposite(KinConstraints):
             for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
                 for k, g_in in enumerate(self.gamma_in_array):
                     for l, log_m2l in enumerate(self.log_m2l_array):
-                        kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
-                        j_kin_ani = self.j_kin_draw_composite(
-                            kwargs_anisotropy, g_in, log_m2l, no_error=True
-                        )
-                        for m, j_kin in enumerate(j_kin_ani):
-                            ani_scaling_grid_list[m][i, k, l] = j_kin / j_ani_0[m]
+                        for q, q_int in enumerate(self.q_intrinsic_scaling):
+                            kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
+                            j_kin_ani = self.j_kin_draw_composite(
+                                kwargs_anisotropy, g_in, log_m2l, q_int, no_error=True
+                            )
+                            for m, j_kin in enumerate(j_kin_ani):
+                                ani_scaling_grid_list[m][i, k, l, q] = (
+                                    j_kin / j_ani_0[m]
+                                )
         else:
             raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
         return ani_scaling_grid_list
@@ -555,6 +597,7 @@ class KinConstraintsComposite(KinConstraints):
                         len(self.kin_scaling_param_array[0]),
                         len(self.kin_scaling_param_array[1]),
                         len(self.gamma_in_array),
+                        len(self.q_intrinsic_scaling),
                     )
                 )
                 for _ in range(num_data)
@@ -562,34 +605,39 @@ class KinConstraintsComposite(KinConstraints):
             for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
                 for j, beta_inf in enumerate(self.kin_scaling_param_array[1]):
                     for k, g_in in enumerate(self.gamma_in_array):
-                        kwargs_anisotropy = self.anisotropy_kwargs(
-                            a_ani=a_ani, beta_inf=beta_inf
-                        )
-                        j_kin_ani = self.j_kin_draw_composite_m2l(
-                            kwargs_anisotropy, g_in, no_error=True
-                        )
+                        for q, q_int in enumerate(self.q_intrinsic_scaling):
+                            kwargs_anisotropy = self.anisotropy_kwargs(
+                                a_ani=a_ani, beta_inf=beta_inf
+                            )
+                            j_kin_ani = self.j_kin_draw_composite_m2l(
+                                kwargs_anisotropy, g_in, q_int, no_error=True
+                            )
 
-                        for m, j_kin in enumerate(j_kin_ani):
-                            ani_scaling_grid_list[m][i, j, k] = j_kin / j_ani_0[m]
-                            # perhaps change the order
+                            for m, j_kin in enumerate(j_kin_ani):
+                                ani_scaling_grid_list[m][i, j, k, q] = (
+                                    j_kin / j_ani_0[m]
+                                )
+                                # perhaps change the order
         elif self._anisotropy_model in ["OM", "const"]:
             ani_scaling_grid_list = [
                 np.zeros(
                     (
                         len(self.kin_scaling_param_array[0]),
                         len(self.gamma_in_array),
+                        len(self.q_intrinsic_scaling),
                     )
                 )
                 for _ in range(num_data)
             ]
             for i, a_ani in enumerate(self.kin_scaling_param_array[0]):
                 for k, g_in in enumerate(self.gamma_in_array):
-                    kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
-                    j_kin_ani = self.j_kin_draw_composite_m2l(
-                        kwargs_anisotropy, g_in, no_error=True
-                    )
-                    for m, j_kin in enumerate(j_kin_ani):
-                        ani_scaling_grid_list[m][i, k] = j_kin / j_ani_0[m]
+                    for q, q_int in enumerate(self.q_intrinsic_scaling):
+                        kwargs_anisotropy = self.anisotropy_kwargs(a_ani)
+                        j_kin_ani = self.j_kin_draw_composite_m2l(
+                            kwargs_anisotropy, g_in, q_int, no_error=True
+                        )
+                        for m, j_kin in enumerate(j_kin_ani):
+                            ani_scaling_grid_list[m][i, k, q] = j_kin / j_ani_0[m]
         else:
             raise ValueError("anisotropy model %s not valid." % self._anisotropy_model)
         return ani_scaling_grid_list

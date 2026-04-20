@@ -52,19 +52,37 @@ class TestLensLikelihood(object):
                 "j_kin_scaling_grid_list": [ani_scaling_array],
             },
         ]
-        kwargs_global_model = {"anisotropy_sampling": True}
+        kwargs_global_model = {
+            "anisotropy_model": "const",
+            "anisotropy_sampling": True,
+            "anisotropy_distribution": "GAUSSIAN",
+            "q_intrinsic_sampling": True,
+            "q_intrinsic_distribution": "GAUSSIAN",
+        }
 
-        self.likelihood = LensSampleLikelihood(kwargs_lens_list=self.kwargs_lens_list)
+        self.likelihood = LensSampleLikelihood(
+            kwargs_lens_list=self.kwargs_lens_list,
+            kwargs_global_model=kwargs_global_model,
+        )
 
     def test_log_likelihood(self):
         kwargs_lens = {"gamma_ppn": 1, "gamma_pl_list": [2]}
-        kwargs_kin = {"a_ani": 1}
+        kwargs_kin = {
+            "a_ani": 0.1,
+            "a_ani_sigma": 0.1,
+            "q_intrinsic": 0.8,
+            "q_intrinsic_sigma": 0.1,
+        }
         logl = self.likelihood.log_likelihood(
-            self.cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+            self.cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
         )
         cosmo = FlatLambdaCDM(H0=self.H0_true * 0.99, Om0=self.omega_m_true, Ob0=0.05)
         logl_sigma = self.likelihood.log_likelihood(
-            cosmo, kwargs_lens=kwargs_lens, kwargs_kin=kwargs_kin
+            cosmo,
+            kwargs_lens=kwargs_lens,
+            kwargs_kin=kwargs_kin,
         )
         npt.assert_almost_equal(logl - logl_sigma, 0.12, decimal=2)
 

@@ -52,15 +52,17 @@ class KinScalingParamManager(object):
         dictionary split in anisotropy and lens models.
 
         :param param_array:
-        :return: kwargs_anisotropy, kwargs_lens
+        :return: kwargs_anisotropy, kwargs_lens, kwargs_deprojection
         """
-        kwargs_anisotropy, kwargs_lens = {}, {}
+        kwargs_anisotropy, kwargs_lens, kwargs_deprojection = {}, {}, {}
         for i, param in enumerate(self._param_list):
             if param in ["gamma_in", "gamma_pl", "log_m2l"]:
                 kwargs_lens[param] = param_array[i]
+            elif param in ["q_intrinsic"]:
+                kwargs_deprojection[param] = param_array[i]
             else:
                 kwargs_anisotropy[param] = param_array[i]
-        return kwargs_anisotropy, kwargs_lens
+        return kwargs_anisotropy, kwargs_lens, kwargs_deprojection
 
 
 class ParameterScalingSingleMeasurement(object):
@@ -91,7 +93,11 @@ class ParameterScalingSingleMeasurement(object):
                 )
             elif self._dim_scaling == 2:
                 self._f_ani = r = RectBivariateSpline(
-                    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid
+                    param_grid_axes[0],
+                    param_grid_axes[1],
+                    j_kin_scaling_grid,
+                    kx=min(len(param_grid_axes[0]) - 1, 3),
+                    ky=min(len(param_grid_axes[1]) - 1, 3),
                 )
                 # self._f_ani = interp2d(
                 #    param_grid_axes[0], param_grid_axes[1], j_kin_scaling_grid.T

@@ -297,13 +297,60 @@ class TestKinScalingParamManager(object):
             j_kin_scaling_param_name_list=["gamma_pl", "a_ani", "beta_inf"]
         )
         param_array = [1, 2, 3]
-        kwargs_anisotropy, kwargs_deflector = kin_param_manager.param_array2kwargs(
+        kwargs_anisotropy, kwargs_deflector, _ = kin_param_manager.param_array2kwargs(
             param_array=param_array
         )
         assert kwargs_deflector["gamma_pl"] == param_array[0]
 
         param_array_new = kin_param_manager.kwargs2param_array(
             kwargs={**kwargs_anisotropy, **kwargs_deflector}
+        )
+        for i, param in enumerate(param_array_new):
+            assert param == param_array[i]
+
+
+class TestParameterScalingIFUAxi(object):
+    def setup_method(self):
+        ani_param_array = np.linspace(start=-0.6, stop=1.0, num=10)
+        gamma_pl_array = np.linspace(start=1.5, stop=2.6, num=8)
+        q_intrinsic = np.linspace(start=0.4, stop=1.0, num=10)
+        param_arrays = [ani_param_array, gamma_pl_array, q_intrinsic]
+        param_scaling_array = np.multiply.outer(
+            ani_param_array,
+            np.outer(gamma_pl_array, q_intrinsic),
+        )
+        self.scaling_axisymmetric = KinScaling(
+            j_kin_scaling_param_axes=param_arrays,
+            j_kin_scaling_grid_list=[param_scaling_array],
+            j_kin_scaling_param_name_list=["beta", "gamma_pl", "q_intrinsic"],
+        )
+
+    def test_kin_scaling(self):
+
+        kwargs_param = {"beta": 0.5, "gamma_pl": 2.0, "q_intrinsic": 0.8}
+        scaling = self.scaling_axisymmetric.kin_scaling(kwargs_param=kwargs_param)
+        assert scaling[0] == 0.5 * 2.0 * 0.8
+
+
+class TestKinScalingParamManagerAxi(object):
+
+    def test_(self):
+        kin_param_manager = KinScalingParamManager(
+            j_kin_scaling_param_name_list=[
+                "gamma_pl",
+                "a_ani",
+                "beta_inf",
+                "q_intrinsic",
+            ]
+        )
+        param_array = [1, 2, 3, 4]
+        kwargs_anisotropy, kwargs_deflector, kwargs_deprojection = (
+            kin_param_manager.param_array2kwargs(param_array=param_array)
+        )
+        assert kwargs_deprojection["q_intrinsic"] == param_array[3]
+
+        param_array_new = kin_param_manager.kwargs2param_array(
+            kwargs={**kwargs_anisotropy, **kwargs_deflector, **kwargs_deprojection}
         )
         for i, param in enumerate(param_array_new):
             assert param == param_array[i]

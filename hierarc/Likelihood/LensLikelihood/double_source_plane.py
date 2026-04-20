@@ -59,9 +59,9 @@ def beta_double_source_plane(z_lens, z_source_1, z_source_2, cosmo):
     :param cosmo: ~astropy.cosmology instance
     :return: beta
     """
-    ds1 = cosmo.angular_diameter_distance(z=z_source_1).value
+    ds1 = cosmo.angular_diameter_distance(z_source_1).value
     dds1 = cosmo.angular_diameter_distance_z1z2(z1=z_lens, z2=z_source_1).value
-    ds2 = cosmo.angular_diameter_distance(z=z_source_2).value
+    ds2 = cosmo.angular_diameter_distance(z_source_2).value
     dds2 = cosmo.angular_diameter_distance_z1z2(z1=z_lens, z2=z_source_2).value
     beta = dds1 / ds1 * ds2 / dds2
     return beta

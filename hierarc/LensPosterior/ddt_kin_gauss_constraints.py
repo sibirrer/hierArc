@@ -20,23 +20,28 @@ class DdtGaussKinConstraints(KinConstraints):
         sigma_v_measured,
         kwargs_aperture,
         kwargs_seeing,
-        kwargs_numerics_galkin,
         anisotropy_model,
+        kwargs_numerics_galkin=None,
+        axial_symmetry="spherical",
+        kinematics_backend="jampy",
+        q_total_mass=None,
         sigma_v_error_independent=None,
         sigma_v_error_covariant=None,
         sigma_v_error_cov_matrix=None,
         kwargs_lens_light=None,
         lens_light_model_list=["HERNQUIST"],
-        MGE_light=False,
+        MGE_light=None,
+        MGE_mass=None,
         kwargs_mge_light=None,
-        hernquist_approx=True,
+        kwargs_mge_mass=None,
         kappa_ext=0,
         kappa_ext_sigma=0,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
         multi_observations=False,
-        voronoi_bins=None,
+        gamma_pl_scaling=None,
+        q_intrinsic_scaling=None,
     ):
         """
 
@@ -58,47 +63,55 @@ class DdtGaussKinConstraints(KinConstraints):
         :param gamma_error: 1-sigma uncertainty on power-law slope
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
-        :param kwargs_numerics_galkin: numerical settings for the integrated line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
+        :param kinematics_backend: backend to compute the JAM kinematics, either 'jampy' or 'galkin'
         :param kwargs_lens_light: keyword argument list of lens light model (optional)
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition routine
-        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the light profile
         :param kappa_ext: mean of the external convergence from which the ddt constraints are coming from
         :param kappa_ext_sigma: 1-sigma distribution uncertainty from which the ddt constraints are coming from
         :param multi_observations: bool, if True, interprets kwargs_aperture and kwargs_seeing as lists of multiple
          observations
-        :param voronoi_bins: list of voronoi bins for IFU_grid aperture (optional, otherwise None),
-            bin indices should start from 0, -1 values for pixels not binned
+        :param gamma_pl_scaling: array of mass density profile power-law slope values (optional, otherwise None)
+        :param q_intrinsic_scaling: array of intrinsic axis ratio values (optional, otherwise None)
+            this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
         """
         self._ddt_mean, self._ddt_sigma = ddt_mean, ddt_sigma
         self._kappa_ext_mean, self._kappa_ext_sigma = kappa_ext, kappa_ext_sigma
         super(DdtGaussKinConstraints, self).__init__(
-            z_lens,
-            z_source,
-            theta_E,
-            theta_E_error,
-            gamma,
-            gamma_error,
-            r_eff,
-            r_eff_error,
-            sigma_v_measured,
-            kwargs_aperture,
-            kwargs_seeing,
-            kwargs_numerics_galkin,
-            anisotropy_model,
+            z_lens=z_lens,
+            z_source=z_source,
+            theta_E=theta_E,
+            theta_E_error=theta_E_error,
+            gamma=gamma,
+            gamma_error=gamma_error,
+            r_eff=r_eff,
+            r_eff_error=r_eff_error,
+            sigma_v_measured=sigma_v_measured,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            kwargs_numerics_galkin=kwargs_numerics_galkin,
+            axial_symmetry=axial_symmetry,
+            kinematics_backend=kinematics_backend,
+            q_total_mass=q_total_mass,
             sigma_v_error_independent=sigma_v_error_independent,
             sigma_v_error_covariant=sigma_v_error_covariant,
             sigma_v_error_cov_matrix=sigma_v_error_cov_matrix,
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             MGE_light=MGE_light,
+            MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,
-            hernquist_approx=hernquist_approx,
+            kwargs_mge_mass=kwargs_mge_mass,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
             multi_observations=multi_observations,
-            voronoi_bins=voronoi_bins,
+            gamma_pl_scaling=gamma_pl_scaling,
+            q_intrinsic_scaling=q_intrinsic_scaling,
         )
 
     def hierarchy_configuration(self, num_sample_model=20):

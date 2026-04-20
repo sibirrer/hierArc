@@ -1,6 +1,7 @@
 from lenstronomy.Analysis.td_cosmography import TDCosmography
 from hierarc.LensPosterior.imaging_constraints import ImageModelPosterior
 from hierarc.LensPosterior.kin_scaling_config import KinScalingConfig
+from copy import deepcopy
 
 
 class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
@@ -20,14 +21,17 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
         r_eff_error,
         kwargs_aperture,
         kwargs_seeing,
-        kwargs_numerics_galkin,
         anisotropy_model,
+        kwargs_numerics_galkin=None,
+        axial_symmetry="spherical",
+        kinematics_backend="jampy",
         lens_model_list=None,
         kwargs_lens_light=None,
         lens_light_model_list=["HERNQUIST"],
-        MGE_light=False,
+        MGE_light=None,
+        MGE_mass=None,
         kwargs_mge_light=None,
-        hernquist_approx=True,
+        kwargs_mge_mass=None,
         sampling_number=1000,
         num_psf_sampling=100,
         num_kin_sampling=1000,
@@ -37,6 +41,7 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
         gamma_in_scaling=None,
         log_m2l_scaling=None,
         gamma_pl_scaling=None,
+        q_intrinsic_scaling=None,
     ):
         """
 
@@ -49,28 +54,35 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
         :param r_eff: half-light radius of the deflector (arc seconds)
         :param r_eff_error: uncertainty on half-light radius
         :param kwargs_aperture: spectroscopic aperture keyword arguments, see
-        lenstronomy.Galkin.aperture for options
+            lenstronomy.Galkin.aperture for options
         :param kwargs_seeing: seeing condition of spectroscopic observation, corresponds
             to kwargs_psf in the GalKin module specified in lenstronomy.GalKin.psf
-        :param kwargs_numerics_galkin: numerical settings for the integrated
-            line-of-sight velocity dispersion
         :param anisotropy_model: type of stellar anisotropy model. See details in
             MamonLokasAnisotropy() class of lenstronomy.GalKin.anisotropy
+        :param kwargs_numerics_galkin: numerical settings for the integrated
+            line-of-sight velocity dispersion
+        :param axial_symmetry: axial symmetry assumption for JAM modeling, either 'spherical', 'axi_sph' or 'axi_cyl'.
         :param multi_observations: bool, if True, interprets kwargs_aperture and
             kwargs_seeing as lists of multiple observations
         :param multi_light_profile: bool, if True (and if multi_observation=True) then treats the light profile input
          as a list for each individual observation condition.
         :param lens_model_list: keyword argument list of lens model (optional)
-        :param kwargs_lens_light: keyword argument list of lens light model (optional)
+        :param kwargs_lens_light: keyword argument list of lens light model (optional).
+            These kwargs should be provided for axisymmetric modeling to specify the light ellipticity.
+        :param lens_light_model_list: list of lens light model profiles (optional, default HERNQUIST)
+        :param MGE_light: bool, if True, uses MGE decomposition for the light profile
+        :param MGE_mass: bool, if True, uses MGE decomposition for the mass profile
         :param kwargs_mge_light: keyword arguments that go into the MGE decomposition
             routine
-        :param hernquist_approx: bool, if True, uses the Hernquist approximation for the
-            light profile
+        :param kwargs_mge_mass: keyword arguments that go into the MGE decomposition
+            routine
         :param cosmo_fiducial: astropy.cosmology instance, if None,
             uses astropy's default cosmology
         :param gamma_in_scaling: array of gamma_in parameter to be interpolated (optional, otherwise None)
         :param log_m2l_scaling: array of log_m2l parameter to be interpolated (optional, otherwise None)
         :param gamma_pl_scaling: array of power-law density profile slopes to be interpolated (optional, otherwise None)
+        :param q_intrinsic_scaling: array of intrinsic axis ratios to be interpolated (optional, otherwise None)
+            this is used for axisymmetric JAM models to get the inclination angle from the observed axis ratio
         """
         self._z_lens, self._z_source = z_lens, z_source
 
@@ -89,6 +101,8 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             z_lens,
             z_source,
             kwargs_model,
+            kinematics_backend=kinematics_backend,
+            axial_symmetry=axial_symmetry,
             cosmo_fiducial=cosmo_fiducial,
             lens_model_kinematics_bool=None,
             light_model_kinematics_bool=None,
@@ -96,22 +110,20 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             kwargs_aperture=kwargs_aperture,
             multi_observations=multi_observations,
             multi_light_profile=multi_light_profile,
-        )
-
-        analytic_kinematics = False
-        self.kinematics_modeling_settings(
-            anisotropy_model,
-            kwargs_numerics_galkin,
-            analytic_kinematics=analytic_kinematics,
-            Hernquist_approx=hernquist_approx,
+            anisotropy_model=anisotropy_model,
+            kwargs_numerics_galkin=kwargs_numerics_galkin,
+            analytic_kinematics=False,
+            Hernquist_approx=False,
             MGE_light=MGE_light,
-            MGE_mass=False,
+            MGE_mass=MGE_mass,
             kwargs_mge_light=kwargs_mge_light,
+            kwargs_mge_mass=kwargs_mge_mass,
             sampling_number=sampling_number,
             num_psf_sampling=num_psf_sampling,
             num_kin_sampling=num_kin_sampling,
         )
-        self._kwargs_lens_light = kwargs_lens_light
+
+        self._kwargs_lens_light = deepcopy(kwargs_lens_light)
         ImageModelPosterior.__init__(
             self, theta_E, theta_E_error, gamma, gamma_error, r_eff, r_eff_error
         )
@@ -123,4 +135,5 @@ class BaseLensConfig(TDCosmography, ImageModelPosterior, KinScalingConfig):
             log_m2l_scaling=log_m2l_scaling,
             gamma_pl_scaling=gamma_pl_scaling,
             gamma_pl_mean=gamma,
+            q_intrinsic_scaling=q_intrinsic_scaling,
         )

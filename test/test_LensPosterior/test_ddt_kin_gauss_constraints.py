@@ -1,6 +1,6 @@
 from hierarc.LensPosterior.ddt_kin_gauss_constraints import DdtGaussKinConstraints
-from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
+from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from lenstronomy.Cosmo.lens_cosmo import LensCosmo
 import numpy.testing as npt
 import numpy as np
@@ -71,9 +71,10 @@ class TestDdtKinGaussConstraints(object):
             z_lens,
             z_source,
             kwargs_model,
-            kwargs_aperture,
-            kwargs_seeing,
-            anisotropy_model,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
             cosmo=cosmo,
             **kwargs_kin_api_settings
         )
@@ -112,6 +113,8 @@ class TestDdtKinGaussConstraints(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             **kwargs_kin_api_settings
         )
 

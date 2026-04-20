@@ -87,6 +87,76 @@ class TestAnisotropyDistribution(object):
         for i in range(100):
             kwargs_drawn = self._ani_dist.draw_anisotropy(**kwargs_anisotropy)
 
+    def test_get_deprojection_parameters(self):
+        kwargs_kin = {
+            "a_ani": 1,
+            "beta_inf": 0.8,
+            "a_ani_sigma": 0.1,
+            "beta_inf_sigma": 0.2,
+            "q_intrinsic": 0.6,
+            "q_intrinsic_sigma": 0.1,
+        }
+
+        ani_dist = AnisotropyDistribution(
+            anisotropy_model="GOM",
+            anisotropy_sampling=True,
+            distribution_function="GAUSSIAN",
+            kwargs_anisotropy_min=None,
+            kwargs_anisotropy_max=None,
+        )
+        kwargs_ani = ani_dist.get_ani_sampling_params(kwargs_kin)
+        assert "q_intrinsic" not in kwargs_ani
+        assert "q_intrinsic_sigma" not in kwargs_ani
+        assert "a_ani" in kwargs_ani
+        assert "a_ani_sigma" in kwargs_ani
+        assert "beta_inf" in kwargs_ani
+        assert "beta_inf_sigma" in kwargs_ani
+
+        ani_dist = AnisotropyDistribution(
+            anisotropy_model="const",
+            anisotropy_sampling=False,
+            distribution_function="NONE",
+            kwargs_anisotropy_min=None,
+            kwargs_anisotropy_max=None,
+        )
+        kwargs_ani = ani_dist.get_ani_sampling_params(kwargs_kin)
+        assert "q_intrinsic" not in kwargs_ani
+        assert "q_intrinsic_sigma" not in kwargs_ani
+        assert "a_ani" in kwargs_ani
+        assert "a_ani_sigma" not in kwargs_ani
+        assert "beta_inf" not in kwargs_ani
+        assert "beta_inf_sigma" not in kwargs_ani
+
+        ani_dist = AnisotropyDistribution(
+            anisotropy_model="const",
+            anisotropy_sampling=True,
+            distribution_function="GAUSSIAN",
+            kwargs_anisotropy_min=None,
+            kwargs_anisotropy_max=None,
+        )
+        kwargs_ani = ani_dist.get_ani_sampling_params(kwargs_kin)
+        assert "q_intrinsic" not in kwargs_ani
+        assert "q_intrinsic_sigma" not in kwargs_ani
+        assert "a_ani" in kwargs_ani
+        assert "a_ani_sigma" in kwargs_ani
+        assert "beta_inf" not in kwargs_ani
+        assert "beta_inf_sigma" not in kwargs_ani
+
+        ani_dist = AnisotropyDistribution(
+            anisotropy_model="NONE",
+            anisotropy_sampling=False,
+            distribution_function="NONE",
+            kwargs_anisotropy_min=None,
+            kwargs_anisotropy_max=None,
+        )
+        kwargs_ani = ani_dist.get_ani_sampling_params(kwargs_kin)
+        assert "q_intrinsic" not in kwargs_ani
+        assert "q_intrinsic_sigma" not in kwargs_ani
+        assert "a_ani" not in kwargs_ani
+        assert "a_ani_sigma" not in kwargs_ani
+        assert "beta_inf" not in kwargs_ani
+        assert "beta_inf_sigma" not in kwargs_ani
+
     def test_raises(self):
 
         with npt.assert_raises(ValueError):

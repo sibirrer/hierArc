@@ -1,7 +1,7 @@
 import numpy as np
 
 _SUPPORTED_DISTRIBUTIONS = ["GAUSSIAN", "GAUSSIAN_SCALED", "NONE"]
-_SUPPORTED_MODELS = ["OM", "GOM", "const", "const", "NONE"]
+_SUPPORTED_MODELS = ["OM", "GOM", "const", "NONE"]
 _PARAMETERIZATION = ["beta", "TAN_RAD"]
 
 
@@ -127,3 +127,23 @@ class AnisotropyDistribution(object):
                 )
             kwargs_return["beta_inf"] = beta_inf_draw
         return kwargs_return
+
+    def get_ani_sampling_params(self, kwargs_kin):
+        """Gets the anisotropy distribution parameters from a larger dictionary.
+
+        :param kwargs_kin: Dictionary of kinematic parameters
+        :return: Dictionary of anisotropy parameters
+        """
+        ani_params = {}
+        if (self._anisotropy_model in ["const", "OM", "GOM"]) and (
+            "a_ani" in kwargs_kin
+        ):
+            ani_params["a_ani"] = kwargs_kin["a_ani"]
+        if (self._anisotropy_model == "GOM") and ("beta_inf" in kwargs_kin):
+            ani_params["beta_inf"] = kwargs_kin["beta_inf"]
+        if self._anisotropy_sampling:
+            if "a_ani_sigma" in kwargs_kin:
+                ani_params["a_ani_sigma"] = kwargs_kin["a_ani_sigma"]
+            if self._anisotropy_model == "GOM" and ("beta_inf_sigma" in kwargs_kin):
+                ani_params["beta_inf_sigma"] = kwargs_kin["beta_inf_sigma"]
+        return ani_params

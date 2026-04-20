@@ -3,6 +3,7 @@ from hierarc.Sampling.ParamManager.cosmo_param import CosmoParam
 from hierarc.Sampling.ParamManager.lens_param import LensParam
 from hierarc.Sampling.ParamManager.source_param import SourceParam
 from hierarc.Sampling.ParamManager.los_param import LOSParam
+from hierarc.Sampling.ParamManager.deprojection_param import DeprojectionParam
 
 
 class ParamManager(object):
@@ -29,6 +30,8 @@ class ParamManager(object):
         beta_lambda_sampling=False,
         alpha_gamma_in_sampling=False,
         alpha_log_m2l_sampling=False,
+        q_intrinsic_sampling=False,
+        q_intrinsic_distribution="NONE",
         gamma_pl_num=0,
         gamma_pl_global_sampling=False,
         gamma_pl_global_dist="NONE",
@@ -80,10 +83,14 @@ class ParamManager(object):
             according to a predefined quantity of the lens
         :param alpha_log_m2l_sampling: bool, if True samples a parameter alpha_log_m2l, which scales log_m2l linearly
             according to a predefined quantity of the lens
+        :param q_intrinsic_sampling: bool, if True samples q_intrinsic parameter for axisymmetric deprojection
+        :param q_intrinsic_distribution: string, distribution function of the q_intrinsic parameter
+            ("GAUSSIAN", "GAUSSIAN_SCALED" or "NONE")
         :param gamma_pl_num: int, number of power-law density slopes being sampled (to be assigned to individual lenses)
         :param gamma_pl_global_sampling: if sampling a global power-law density slope distribution
         :type gamma_pl_global_sampling: bool
         :param gamma_pl_global_dist: distribution of global gamma_pl distribution ("GAUSSIAN" or "NONE")
+        :type gamma_pl_global_dist: str
         :param sne_apparent_m_sampling: boolean, if True, samples/queries SNe unlensed magnitude distribution
          (not intrinsic magnitudes but apparent!)
         :param sne_distribution: string, apparent non-lensed brightness distribution (in linear space).
@@ -102,6 +109,13 @@ class ParamManager(object):
          ["beta" or "TAN_RAD"] supported
         :type anisotropy_parameterization: str
         """
+        if kwargs_fixed_kin is not None:
+            kwargs_fixed_deprojection = {}
+            for param in DeprojectionParam.param_names:
+                if param in kwargs_fixed_kin:
+                    kwargs_fixed_deprojection[param] = kwargs_fixed_kin.pop(param)
+        else:
+            kwargs_fixed_deprojection = None
         self._kin_param = KinParam(
             anisotropy_sampling=anisotropy_sampling,
             anisotropy_model=anisotropy_model,
@@ -147,6 +161,12 @@ class ParamManager(object):
             los_distributions=los_distributions,
             kwargs_fixed=kwargs_fixed_los,
         )
+        self._deprojection_param = DeprojectionParam(
+            deprojection_sampling=q_intrinsic_sampling,
+            distribution_function=q_intrinsic_distribution,
+            kwargs_fixed=kwargs_fixed_deprojection,
+            log_scatter=log_scatter,
+        )
         self._kwargs_upper_cosmo, self._kwargs_lower_cosmo = (
             kwargs_upper_cosmo,
             kwargs_lower_cosmo,
@@ -186,6 +206,7 @@ class ParamManager(object):
         list_param += self._cosmo_param.param_list(latex_style=latex_style)
         list_param += self._lens_param.param_list(latex_style=latex_style)
         list_param += self._kin_param.param_list(latex_style=latex_style)
+        list_param += self._deprojection_param.param_list(latex_style=latex_style)
         list_param += self._source_param.param_list(latex_style=latex_style)
         list_param += self._los_param.param_list(latex_style=latex_style)
         return list_param
@@ -200,9 +221,18 @@ class ParamManager(object):
         kwargs_cosmo, i = self._cosmo_param.args2kwargs(args, i=i)
         kwargs_lens, i = self._lens_param.args2kwargs(args, i=i)
         kwargs_kin, i = self._kin_param.args2kwargs(args, i=i)
+        kwargs_deprojection, i = self._deprojection_param.args2kwargs(args, i=i)
+        # kwargs_kin includes kwargs_deprojection at the high level
+        kwargs_kin.update(kwargs_deprojection)
         kwargs_source, i = self._source_param.args2kwargs(args, i=i)
         kwargs_los, i = self._los_param.args2kwargs(args, i=i)
-        return kwargs_cosmo, kwargs_lens, kwargs_kin, kwargs_source, kwargs_los
+        return (
+            kwargs_cosmo,
+            kwargs_lens,
+            kwargs_kin,
+            kwargs_source,
+            kwargs_los,
+        )
 
     def kwargs2args(
         self,
@@ -225,6 +255,7 @@ class ParamManager(object):
         args += self._cosmo_param.kwargs2args(kwargs_cosmo)
         args += self._lens_param.kwargs2args(kwargs_lens)
         args += self._kin_param.kwargs2args(kwargs_kin)
+        args += self._deprojection_param.kwargs2args(kwargs_kin)
         args += self._source_param.kwargs2args(kwargs_source)
         args += self._los_param.kwargs2args(kwargs_los)
         return args

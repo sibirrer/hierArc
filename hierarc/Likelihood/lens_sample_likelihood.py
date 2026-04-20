@@ -60,6 +60,8 @@ class LensSampleLikelihood(object):
         :param cosmo: astropy.cosmology instance
         :param kwargs_lens: keywords of the parameters of the lens model
         :param kwargs_kin: keyword arguments of the kinematic model
+        :param kwargs_kin: keyword arguments of the kinematic model hyperparameters
+            these include the anisotropy and deprojection parameters
         :param kwargs_source: keyword argument of the source model (such as SNe)
         :param kwargs_los: line of sight keyword argument list
         :param verbose: If true, prints intermediate outputs of likelihood calculation
@@ -144,4 +146,6 @@ _input_param_list = [
     "gamma_pl_global_sampling",
     "gamma_pl_global_dist",
     "log_scatter",
+    "q_intrinsic_sampling",
+    "q_intrinsic_distribution",
 ]

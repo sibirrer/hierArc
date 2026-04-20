@@ -1,7 +1,5 @@
 from hierarc.LensPosterior.kin_constraints_composite import KinConstraintsComposite
-from lenstronomy.Analysis.kinematics_api import KinematicsAPI
 from hierarc.Likelihood.hierarchy_likelihood import LensLikelihood
-import numpy.testing as npt
 import numpy as np
 import pytest
 import unittest
@@ -96,6 +94,8 @@ class TestKinConstraintsComposite(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             **kwargs_kin_api_settings
@@ -136,6 +136,8 @@ class TestKinConstraintsComposite(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light_test,
             lens_light_model_list=lens_light_model_list_test,
             **kwargs_kin_api_settings
@@ -164,6 +166,8 @@ class TestKinConstraintsComposite(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             rho0_array=kappa_s_array,
@@ -255,6 +259,8 @@ class TestKinConstraintsComposite(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             gamma_in_prior_mean=2,
@@ -361,6 +367,8 @@ class TestKinConstraintsCompositeM2l(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             is_m2l_population_level=False,
@@ -465,6 +473,8 @@ class TestKinConstraintsCompositeM2l(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             is_m2l_population_level=False,
@@ -568,6 +578,8 @@ class TestKinConstraintsCompositeAlphaRs(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             **kwargs_kin_api_settings
@@ -674,6 +686,8 @@ class TestKinConstraintsCompositeAlphaRsM2l(object):
             kwargs_aperture=kwargs_aperture,
             kwargs_seeing=kwargs_seeing,
             anisotropy_model=anisotropy_model,
+            kinematics_backend="galkin",
+            axial_symmetry="spherical",
             kwargs_lens_light=kwargs_lens_light,
             lens_light_model_list=lens_light_model_list,
             is_m2l_population_level=False,
@@ -693,6 +707,83 @@ class TestKinConstraintsCompositeAlphaRsM2l(object):
         ln_class.lens_log_likelihood(
             cosmo, kwargs_lens={"gamma_in": 2, "log_m2l": 0}, kwargs_kin=kwargs_kin
         )
+
+
+class TestKinConstraintsCompositeAxi(object):
+
+    def test_likelihoodconfiguration_axi_const(self):
+        anisotropy_model = "const"
+        kwargs_aperture = {
+            "aperture_type": "shell",
+            "r_in": 0,
+            "r_out": 3 / 2.0,
+            "center_ra": 0.0,
+            "center_dec": 0,
+        }
+        kwargs_seeing = {"psf_type": "GAUSSIAN", "fwhm": 1.4}
+
+        # redshift
+        z_lens = 0.5
+        z_source = 1.5
+
+        theta_E = 1.0
+        r_eff = 1
+        gamma = 2.1
+
+        kwargs_lens_light = [
+            {
+                "amp": np.array([1.0, 0.5]),
+                "sigma": np.array([1.0, 2.0]),
+                "center_x": 0,
+                "center_y": 0,
+                "e1": 0.04,
+                "e2": -0.01,
+            }
+        ]
+        lens_light_model_list = ["MULTI_GAUSSIAN"]
+
+        gamma_in_array = np.linspace(0.1, 2.9, 5)
+        log_m2l_array = np.linspace(0.1, 1, 5)
+
+        rho0_array = 10 ** np.random.normal(8, 0, 100) / 1e6
+        r_s_array = np.random.normal(0.1, 0, 100)
+
+        # compute likelihood
+        kin_constraints = KinConstraintsComposite(
+            z_lens=z_lens,
+            z_source=z_source,
+            gamma_in_array=gamma_in_array,
+            log_m2l_array=log_m2l_array,
+            alpha_Rs_array=[],
+            kappa_s_array=rho0_array,
+            r_s_angle_array=r_s_array,
+            theta_E=theta_E,
+            theta_E_error=0.01,
+            gamma=gamma,
+            gamma_error=0.02,
+            r_eff=r_eff,
+            r_eff_error=0.05,
+            sigma_v_measured=[200],
+            sigma_v_error_independent=[10],
+            sigma_v_error_covariant=0,
+            kwargs_aperture=kwargs_aperture,
+            kwargs_seeing=kwargs_seeing,
+            anisotropy_model=anisotropy_model,
+            kinematics_backend="jampy",
+            axial_symmetry="axi_sph",
+            kwargs_lens_light=kwargs_lens_light,
+            lens_light_model_list=lens_light_model_list,
+            q_intrinsic_scaling=[0.7],
+        )
+
+        j_kin = kin_constraints.j_kin_draw_composite(
+            kwargs_anisotropy={"beta": 0.0},
+            gamma_in=2.1,
+            log_m2l=0.3,
+            q_intrinsic=0.7,
+            no_error=True,
+        )
+        np.testing.assert_allclose(j_kin, 4.48e-6, rtol=0.01)
 
 
 class TestRaise(unittest.TestCase):
@@ -768,6 +859,8 @@ class TestRaise(unittest.TestCase):
                 kwargs_aperture=kwargs_aperture,
                 kwargs_seeing=kwargs_seeing,
                 anisotropy_model=anisotropy_model,
+                kinematics_backend="galkin",
+                axial_symmetry="spherical",
                 kwargs_lens_light=kwargs_lens_light,
                 **kwargs_kin_api_settings
             )
@@ -846,6 +939,8 @@ class TestRaise(unittest.TestCase):
                 kwargs_aperture=kwargs_aperture,
                 kwargs_seeing=kwargs_seeing,
                 anisotropy_model=anisotropy_model,
+                kinematics_backend="galkin",
+                axial_symmetry="spherical",
                 kwargs_lens_light=kwargs_lens_light,
                 **kwargs_kin_api_settings
             )
@@ -921,6 +1016,8 @@ class TestRaise(unittest.TestCase):
                 kwargs_aperture=kwargs_aperture,
                 kwargs_seeing=kwargs_seeing,
                 anisotropy_model=anisotropy_model,
+                kinematics_backend="galkin",
+                axial_symmetry="spherical",
                 kwargs_lens_light=kwargs_lens_light,
                 rho0_array=kappa_s_array,
                 r_s_array=r_s_angle_array,
@@ -999,6 +1096,8 @@ class TestRaise(unittest.TestCase):
                 kwargs_aperture=kwargs_aperture,
                 kwargs_seeing=kwargs_seeing,
                 anisotropy_model=anisotropy_model,
+                kinematics_backend="galkin",
+                axial_symmetry="spherical",
                 kwargs_lens_light=kwargs_lens_light,
                 is_m2l_population_level=False,
                 **kwargs_kin_api_settings
@@ -1078,6 +1177,8 @@ class TestRaise(unittest.TestCase):
                 kwargs_aperture=kwargs_aperture,
                 kwargs_seeing=kwargs_seeing,
                 anisotropy_model=anisotropy_model,
+                kinematics_backend="galkin",
+                axial_symmetry="spherical",
                 kwargs_lens_light=kwargs_lens_light,
                 is_m2l_population_level=False,
                 **kwargs_kin_api_settings
@@ -1154,6 +1255,8 @@ class TestRaise(unittest.TestCase):
                 kwargs_aperture=kwargs_aperture,
                 kwargs_seeing=kwargs_seeing,
                 anisotropy_model=anisotropy_model,
+                kinematics_backend="galkin",
+                axial_symmetry="spherical",
                 kwargs_lens_light=kwargs_lens_light,
                 is_m2l_population_level=False,
                 **kwargs_kin_api_settings

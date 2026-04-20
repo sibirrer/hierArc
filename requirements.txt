@@ -1,12 +1,14 @@
 numpy
 astropy
-
 scipy<1.14
 emcee
 mpmath
 h5py
 matplotlib
 pandas
-lenstronomy>=1.13.1
+lenstronomy>=1.14.0
 scikit-learn>=0.22
 pandas
+jampy
+mgefit
+tqdm
