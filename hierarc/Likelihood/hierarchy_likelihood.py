@@ -413,15 +413,13 @@ class LensLikelihood(TransformedCosmography, LensLikelihoodBase, KinScaling):
             gamma_pl=gamma_pl,
         )
 
-        kwargs_anisotropy = self._aniso_distribution.get_ani_sampling_params(
-            kwargs_kin
-        )
+        kwargs_anisotropy = self._aniso_distribution.get_ani_sampling_params(kwargs_kin)
         kwargs_anisotropy_draw = self._aniso_distribution.draw_anisotropy(
             **kwargs_anisotropy
         )
 
-        kwargs_deprojection = self._deprojection_distribution.get_deprojection_sampling_params(
-            kwargs_kin
+        kwargs_deprojection = (
+            self._deprojection_distribution.get_deprojection_sampling_params(kwargs_kin)
         )
         kwargs_deprojection_draw = self._deprojection_distribution.draw_deprojection(
             **kwargs_deprojection

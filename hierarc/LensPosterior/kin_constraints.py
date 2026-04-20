@@ -218,9 +218,9 @@ class KinConstraints(BaseLensConfig):
             if self._multi_observations:
                 kwargs_light = []
                 for kwargs_obs in self._kwargs_lens_light:
-                    kwargs_light.append(self._scale_light_radius(
-                        kwargs_obs, delta_r_eff
-                    ))
+                    kwargs_light.append(
+                        self._scale_light_radius(kwargs_obs, delta_r_eff)
+                    )
             else:
                 kwargs_light = self._scale_light_radius(
                     self._kwargs_lens_light, delta_r_eff
@@ -365,8 +365,8 @@ class KinConstraints(BaseLensConfig):
         ani_scaling_array_list = [np.zeros(shapes) for _ in range(num_data)]
 
         def compute_for_params(param_array, idx):
-            """Computes one model for a given set of parameters in the anisotropy scaling
-            grid and stores the scaling relative to the default J prediction.
+            """Computes one model for a given set of parameters in the anisotropy
+            scaling grid and stores the scaling relative to the default J prediction.
             The output is stored in ani_scaling_array_list at position idx.
 
             :param param_array: a single set of arguments to evaluate

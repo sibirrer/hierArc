@@ -135,7 +135,9 @@ class AnisotropyDistribution(object):
         :return: Dictionary of anisotropy parameters
         """
         ani_params = {}
-        if (self._anisotropy_model in ["const", "OM", "GOM"]) and ("a_ani" in kwargs_kin):
+        if (self._anisotropy_model in ["const", "OM", "GOM"]) and (
+            "a_ani" in kwargs_kin
+        ):
             ani_params["a_ani"] = kwargs_kin["a_ani"]
         if (self._anisotropy_model == "GOM") and ("beta_inf" in kwargs_kin):
             ani_params["beta_inf"] = kwargs_kin["beta_inf"]

@@ -90,19 +90,21 @@ class TestDeprojectionDistribution(object):
             )
 
     def test_get_deprojection_parameters(self):
-        kwargs_deprojection = self._q_intrinsic_gaussian.get_deprojection_sampling_params(
-            {"a_ani": 0.1, "q_intrinsic": 0.6, "q_intrinsic_sigma": 0.1}
+        kwargs_deprojection = (
+            self._q_intrinsic_gaussian.get_deprojection_sampling_params(
+                {"a_ani": 0.1, "q_intrinsic": 0.6, "q_intrinsic_sigma": 0.1}
+            )
         )
         assert "q_intrinsic" in kwargs_deprojection
         assert "q_intrinsic_sigma" in kwargs_deprojection
         assert "a_ani" not in kwargs_deprojection
 
         no_sampling = DeprojectionDistribution(
-                deprojection_sampling=False,
-                distribution_function="NONE",
-                kwargs_deprojection_min=None,
-                kwargs_deprojection_max=None,
-            )
+            deprojection_sampling=False,
+            distribution_function="NONE",
+            kwargs_deprojection_min=None,
+            kwargs_deprojection_max=None,
+        )
         kwargs_deprojection = no_sampling.get_deprojection_sampling_params(
             {"a_ani": 0.1, "q_intrinsic": 0.6, "q_intrinsic_sigma": 0.1}
         )
@@ -110,9 +112,7 @@ class TestDeprojectionDistribution(object):
         assert "q_intrinsic_sigma" not in kwargs_deprojection
         assert "a_ani" not in kwargs_deprojection
 
-        kwargs_drawn = no_sampling.get_deprojection_sampling_params(
-            {"a_ani": 0.1}
-        )
+        kwargs_drawn = no_sampling.get_deprojection_sampling_params({"a_ani": 0.1})
         assert "q_intrinsic" not in kwargs_drawn
         assert "q_intrinsic_sigma" not in kwargs_deprojection
         assert "a_ani" not in kwargs_deprojection

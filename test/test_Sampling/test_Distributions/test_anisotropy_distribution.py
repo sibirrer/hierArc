@@ -94,7 +94,7 @@ class TestAnisotropyDistribution(object):
             "a_ani_sigma": 0.1,
             "beta_inf_sigma": 0.2,
             "q_intrinsic": 0.6,
-            "q_intrinsic_sigma": 0.1
+            "q_intrinsic_sigma": 0.1,
         }
 
         ani_dist = AnisotropyDistribution(
