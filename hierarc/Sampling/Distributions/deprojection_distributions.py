@@ -80,3 +80,16 @@ class DeprojectionDistribution(object):
         else:
             kwargs_return["q_intrinsic"] = q
         return kwargs_return
+
+    def get_deprojection_sampling_params(self, kwargs_kin):
+        """Gets the deprojection distribution parameters from a larger dictionary.
+
+        :param kwargs_kin: Dictionary of kinematic parameters
+        :return: Dictionary of deprojection parameters
+        """
+        deprojection_params = {}
+        if "q_intrinsic" in kwargs_kin:
+            deprojection_params["q_intrinsic"] = kwargs_kin["q_intrinsic"]
+        if self._deprojection_sampling and ("q_intrinsic_sigma" in kwargs_kin):
+            deprojection_params["q_intrinsic_sigma"] = kwargs_kin["q_intrinsic_sigma"]
+        return deprojection_params
