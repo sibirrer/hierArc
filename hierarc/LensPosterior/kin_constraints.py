@@ -215,24 +215,16 @@ class KinConstraints(BaseLensConfig):
         if self._kwargs_lens_light is None:
             kwargs_light = [{"Rs": r_eff_draw * 0.551, "amp": 1.0}]
         else:
-            kwargs_light = copy.deepcopy(self._kwargs_lens_light)
             if self._multi_observations:
-                for kwargs_obs in kwargs_light:
-                    for kwargs in kwargs_obs:
-                        if "Rs" in kwargs:
-                            kwargs["Rs"] *= delta_r_eff
-                        if "R_sersic" in kwargs:
-                            kwargs["R_sersic"] *= delta_r_eff
-                        if "sigma" in kwargs:
-                            kwargs["sigma"] *= delta_r_eff
+                kwargs_light = []
+                for kwargs_obs in self._kwargs_lens_light:
+                    kwargs_light.append(self._scale_light_radius(
+                        kwargs_obs, delta_r_eff
+                    ))
             else:
-                for kwargs in kwargs_light:
-                    if "Rs" in kwargs:
-                        kwargs["Rs"] *= delta_r_eff
-                    if "R_sersic" in kwargs:
-                        kwargs["R_sersic"] *= delta_r_eff
-                    if "sigma" in kwargs:
-                        kwargs["sigma"] *= delta_r_eff
+                kwargs_light = self._scale_light_radius(
+                    self._kwargs_lens_light, delta_r_eff
+                )
         kwargs_lens = [
             # add geometry for axisymmetric modeling
             {"theta_E": theta_E_draw, "gamma": gamma_draw}
@@ -373,6 +365,14 @@ class KinConstraints(BaseLensConfig):
         ani_scaling_array_list = [np.zeros(shapes) for _ in range(num_data)]
 
         def compute_for_params(param_array, idx):
+            """Computes one model for a given set of parameters in the anisotropy scaling
+            grid and stores the scaling relative to the default J prediction.
+            The output is stored in ani_scaling_array_list at position idx.
+
+            :param param_array: a single set of arguments to evaluate
+            :param idx: position of the model within the grid
+            :return: Scaling of the dimensionless kinematic component J_i/J_0
+            """
             kwargs_ani, kwargs_lens, kwargs_deprojection = self.param_array2kwargs(
                 param_array=param_array
             )
@@ -423,3 +423,21 @@ class KinConstraints(BaseLensConfig):
         cos_i_squared = np.clip(cos_i_squared, 0, 1)
         inclination_angle = np.arccos(np.sqrt(cos_i_squared))
         return np.rad2deg(inclination_angle)
+
+    @staticmethod
+    def _scale_light_radius(kwargs_light, delta_r_eff):
+        """Scale the radius of the light profile by a factor delta_r_eff.
+
+        :param kwargs_light: list of keyword arguments for the light profile
+        :param delta_r_eff: scaling factor for the effective radius
+        :return: scaled kwargs_light
+        """
+        kwargs_light = copy.deepcopy(kwargs_light)
+        for kwargs in kwargs_light:
+            if "Rs" in kwargs:
+                kwargs["Rs"] *= delta_r_eff
+            if "R_sersic" in kwargs:
+                kwargs["R_sersic"] *= delta_r_eff
+            if "sigma" in kwargs:
+                kwargs["sigma"] *= delta_r_eff
+        return kwargs_light
